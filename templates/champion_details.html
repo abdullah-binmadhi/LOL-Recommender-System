@@ -1,0 +1,400 @@
+{% extends "base.html" %}
+
+{% block title %}{{ champion.name }} - Champion Details - LoL Champion Recommender{% endblock %}
+
+{% block description %}Detailed information about {{ champion.name }}, {{ champion.title }}. Learn abilities, tips, builds, and strategies for League of Legends.{% endblock %}
+
+{% block content %}
+<div class="recommendation-container">
+    <!-- Champion Header -->
+    <div class="card champion-header-card mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center mb-3 mb-md-0">
+                    <div class="champion-image-container position-relative" style="margin: 0 auto; width: 150px; height: 150px;">
+                        <div class="champion-image-placeholder bg-primary text-white d-flex align-items-center justify-content-center rounded position-relative" 
+                             style="width: 150px; height: 150px; overflow: hidden;">
+                            <i class="fas fa-crown fa-4x" style="color: var(--accent-gold);"></i>
+                            <div class="champion-border-animation"></div>
+                        </div>
+                        <div class="difficulty-badge position-absolute" style="bottom: -10px; right: -10px;">
+                            <div class="badge bg-{{ 'success' if champion.difficulty <= 3 else 'warning' if champion.difficulty <= 6 else 'danger' }} rounded-pill px-3 py-2">
+                                {{ champion.difficulty }}/10
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="d-flex align-items-center mb-2">
+                        <h1 class="champion-name mb-0 me-3" style="color: var(--accent-gold); font-weight: 700; font-size: 3rem;">
+                            {{ champion.name }}
+                        </h1>
+                        <button class="btn btn-outline-secondary btn-sm copy-btn" data-copy="{{ champion.name }}" 
+                                data-bs-toggle="tooltip" title="Copy champion name">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <p class="h4 mb-3" style="color: var(--text-secondary); font-style: italic;">
+                        {{ champion.title }}
+                    </p>
+                    
+                    <!-- Quick Stats -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-2 col-4">
+                            <div class="stat-card p-2 text-center rounded" style="background: rgba(37, 43, 61, 0.5);">
+                                <div class="text-warning fw-bold">{{ champion.role }}</div>
+                                <small class="text-muted">Role</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-4">
+                            <div class="stat-card p-2 text-center rounded" style="background: rgba(37, 43, 61, 0.5);">
+                                <div class="text-warning fw-bold">{{ details.basic_info.range_type }}</div>
+                                <small class="text-muted">Range</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-4">
+                            <div class="stat-card p-2 text-center rounded" style="background: rgba(37, 43, 61, 0.5);">
+                                <div class="text-warning fw-bold">{{ details.basic_info.resource_type }}</div>
+                                <small class="text-muted">Resource</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-4">
+                            <div class="stat-card p-2 text-center rounded" style="background: rgba(37, 43, 61, 0.5);">
+                                <div class="text-warning fw-bold">{{ details.basic_info.damage_type }}</div>
+                                <small class="text-muted">Damage</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-4">
+                            <div class="stat-card p-2 text-center rounded" style="background: rgba(37, 43, 61, 0.5);">
+                                <div class="text-warning fw-bold">{{ details.statistics.skill_floor }}</div>
+                                <small class="text-muted">Skill Floor</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-4">
+                            <div class="stat-card p-2 text-center rounded" style="background: rgba(37, 43, 61, 0.5);">
+                                <div class="text-warning fw-bold">{{ details.statistics.skill_ceiling }}</div>
+                                <small class="text-muted">Skill Ceiling</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lore Snippet -->
+                    <p class="text-muted mb-0">{{ details.lore_snippet }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs mb-4" id="championTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="abilities-tab" data-bs-toggle="tab" data-bs-target="#abilities" type="button" role="tab">
+                <i class="fas fa-magic me-2"></i>Abilities
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tips-tab" data-bs-toggle="tab" data-bs-target="#tips" type="button" role="tab">
+                <i class="fas fa-lightbulb me-2"></i>Tips & Strategy
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="builds-tab" data-bs-toggle="tab" data-bs-target="#builds" type="button" role="tab">
+                <i class="fas fa-hammer me-2"></i>Builds
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="matchups-tab" data-bs-toggle="tab" data-bs-target="#matchups" type="button" role="tab">
+                <i class="fas fa-sword me-2"></i>Matchups
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="resources-tab" data-bs-toggle="tab" data-bs-target="#resources" type="button" role="tab">
+                <i class="fas fa-book me-2"></i>Resources
+            </button>
+        </li>
+    </ul>
+    
+    <!-- Tab Content -->
+    <div class="tab-content" id="championTabContent">
+        <!-- Abilities Tab -->
+        <div class="tab-pane fade show active" id="abilities" role="tabpanel">
+            <div class="row">
+                <!-- Abilities List -->
+                <div class="col-lg-8">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-magic me-2" style="color: var(--accent-gold);"></i>
+                                Champion Abilities
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% for ability_key, ability in [
+                                ('passive', details.abilities.passive),
+                                ('q_ability', details.abilities.q_ability),
+                                ('w_ability', details.abilities.w_ability),
+                                ('e_ability', details.abilities.e_ability),
+                                ('ultimate', details.abilities.ultimate)
+                            ] %}
+                                {% if ability %}
+                                <div class="ability-item mb-4 p-3 rounded" style="background: rgba(37, 43, 61, 0.3); border-left: 4px solid var(--accent-gold);">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="ability-icon me-3">
+                                            <div class="bg-primary text-white rounded d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                <strong>{{ ability.type.upper() }}</strong>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0" style="color: var(--accent-gold);">{{ ability.name }}</h6>
+                                            <small class="text-muted">{{ ability.type.title() }} Ability</small>
+                                        </div>
+                                    </div>
+                                    <p class="mb-0">{{ ability.description }}</p>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Ability Tips -->
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-tips me-2" style="color: var(--accent-blue);"></i>
+                                Ability Tips
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% for tip in details.abilities.ability_tips %}
+                            <div class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                <small>{{ tip }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tips & Strategy Tab -->
+        <div class="tab-pane fade" id="tips" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-lightbulb me-2" style="color: var(--accent-gold);"></i>
+                                Playstyle Tips
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% for tip in details.playstyle_tips %}
+                            <div class="tip-item mb-3 p-3 rounded" style="background: rgba(37, 43, 61, 0.2);">
+                                <i class="fas fa-star text-warning me-2"></i>
+                                {{ tip }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-bar me-2" style="color: var(--accent-blue);"></i>
+                                Champion Statistics
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% for stat_name, stat_value in [
+                                ('Damage', details.statistics.damage_rating),
+                                ('Toughness', details.statistics.toughness_rating),
+                                ('Control', details.statistics.control_rating),
+                                ('Mobility', details.statistics.mobility_rating),
+                                ('Utility', details.statistics.utility_rating)
+                            ] %}
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-bold">{{ stat_name }}</span>
+                                    <span class="badge bg-secondary">{{ "%.1f"|format(stat_value) }}/10</span>
+                                </div>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar progress-bar-animated" 
+                                         style="width: {{ (stat_value / 10 * 100) }}%; background: linear-gradient(90deg, var(--accent-gold), var(--accent-blue));" 
+                                         role="progressbar" aria-valuenow="{{ stat_value }}" aria-valuemin="0" aria-valuemax="10"></div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Builds Tab -->
+        <div class="tab-pane fade" id="builds" role="tabpanel">
+            <div class="row">
+                {% for build_type, items in details.build_recommendations.items() %}
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-{{ 'play' if build_type == 'starter_items' else 'star' if build_type == 'core_items' else 'cog' if build_type == 'situational_items' else 'running' }} me-2"></i>
+                                {{ build_type.replace('_', ' ').title() }}
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% for item in items %}
+                            <div class="item-badge mb-2 me-2 d-inline-block">
+                                <span class="badge bg-primary">{{ item }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Matchups Tab -->
+        <div class="tab-pane fade" id="matchups" role="tabpanel">
+            <div class="row">
+                {% for matchup_type, champions in details.matchup_info.items() %}
+                <div class="col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-{{ 'thumbs-up' if 'strong' in matchup_type else 'thumbs-down' if 'weak' in matchup_type else 'handshake' }} me-2"></i>
+                                {{ matchup_type.replace('_', ' ').title() }}
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% for champion_or_type in champions %}
+                            <div class="matchup-item mb-2">
+                                <i class="fas fa-{{ 'check' if 'strong' in matchup_type else 'times' if 'weak' in matchup_type else 'plus' }} 
+                                   text-{{ 'success' if 'strong' in matchup_type else 'danger' if 'weak' in matchup_type else 'info' }} me-2"></i>
+                                {{ champion_or_type }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Resources Tab -->
+        <div class="tab-pane fade" id="resources" role="tabpanel">
+            <div class="row">
+                {% for resource_type, resources in details.learning_resources.items() %}
+                {% if resources %}
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-{{ 'book' if resource_type == 'guides' else 'video' if resource_type == 'videos' else 'chart-line' if resource_type == 'pro_builds' else 'users' }} me-2"></i>
+                                {{ resource_type.replace('_', ' ').title() }}
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% for resource in resources %}
+                            <div class="resource-item mb-3 p-3 rounded" style="background: rgba(37, 43, 61, 0.2);">
+                                <h6 class="mb-1">
+                                    <a href="{{ resource.url }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none">
+                                        {{ resource.title }}
+                                        <i class="fas fa-external-link-alt ms-1 small"></i>
+                                    </a>
+                                </h6>
+                                <p class="text-muted small mb-0">{{ resource.description }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="text-center mt-4">
+        <a href="{{ url_for('recommendation') }}" class="btn btn-outline-primary me-3">
+            <i class="fas fa-arrow-left me-2"></i>Back to Recommendation
+        </a>
+        <a href="{{ url_for('alternatives') }}" class="btn btn-success me-3">
+            <i class="fas fa-users me-2"></i>View Alternatives
+        </a>
+        <a href="{{ url_for('retake') }}" class="btn btn-secondary">
+            <i class="fas fa-sync-alt me-2"></i>New Search
+        </a>
+    </div>
+</div>
+
+<style>
+.champion-header-card {
+    background: linear-gradient(135deg, rgba(37, 43, 61, 0.9), rgba(26, 31, 46, 0.9));
+    border: 1px solid var(--accent-gold);
+}
+
+.stat-card {
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.stat-card:hover {
+    border-color: var(--accent-gold);
+    transform: translateY(-2px);
+}
+
+.ability-item {
+    transition: all 0.3s ease;
+}
+
+.ability-item:hover {
+    transform: translateX(5px);
+    border-left-color: var(--accent-blue) !important;
+}
+
+.tip-item {
+    transition: all 0.3s ease;
+    border-left: 3px solid var(--accent-gold);
+}
+
+.tip-item:hover {
+    background: rgba(37, 43, 61, 0.4) !important;
+    transform: translateX(3px);
+}
+
+.resource-item {
+    transition: all 0.3s ease;
+    border-left: 3px solid var(--accent-blue);
+}
+
+.resource-item:hover {
+    background: rgba(37, 43, 61, 0.4) !important;
+    transform: translateY(-2px);
+}
+
+.nav-tabs .nav-link {
+    color: var(--text-secondary);
+    border: none;
+    background: transparent;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--accent-gold);
+    background: rgba(37, 43, 61, 0.5);
+    border-bottom: 3px solid var(--accent-gold);
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--accent-gold);
+    background: rgba(37, 43, 61, 0.3);
+}
+</style>
+{% endblock %}

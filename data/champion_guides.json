@@ -1,0 +1,34 @@
+{
+  "aatrox": {
+    "guides": [
+      {
+        "title": "Aatrox Top Lane Guide",
+        "url": "https://www.mobafire.com/league-of-legends/aatrox-guide",
+        "description": "Complete guide to playing Aatrox in the top lane"
+      }
+    ],
+    "videos": [
+      {
+        "title": "Aatrox Combos and Mechanics",
+        "url": "https://youtube.com/watch?v=aatrox-guide",
+        "description": "Learn advanced Aatrox combos and mechanics"
+      }
+    ]
+  },
+  "ahri": {
+    "guides": [
+      {
+        "title": "Ahri Mid Lane Guide",
+        "url": "https://www.mobafire.com/league-of-legends/ahri-guide",
+        "description": "Master Ahri's charm and assassination potential"
+      }
+    ],
+    "videos": [
+      {
+        "title": "Ahri Positioning Guide",
+        "url": "https://youtube.com/watch?v=ahri-positioning",
+        "description": "Learn optimal positioning for team fights"
+      }
+    ]
+  }
+}

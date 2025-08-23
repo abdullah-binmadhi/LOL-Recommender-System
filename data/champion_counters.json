@@ -1,0 +1,22 @@
+{
+  "aatrox": {
+    "strong_against": ["Melee champions", "Low mobility fighters"],
+    "weak_against": ["Ranged champions", "High mobility assassins"],
+    "synergizes_with": ["Engage supports", "AP carries"]
+  },
+  "ahri": {
+    "strong_against": ["Immobile mages", "Squishy carries"],
+    "weak_against": ["Assassins", "Long-range poke"],
+    "synergizes_with": ["Tanks", "Engage supports"]
+  },
+  "akali": {
+    "strong_against": ["Squishy carries", "Immobile champions"],
+    "weak_against": ["Tanks", "Point-and-click CC"],
+    "synergizes_with": ["Divers", "Split push compositions"]
+  },
+  "alistar": {
+    "strong_against": ["Dive compositions", "Melee supports"],
+    "weak_against": ["Poke compositions", "Ranged supports"],
+    "synergizes_with": ["Hypercarry ADCs", "AOE damage dealers"]
+  }
+}

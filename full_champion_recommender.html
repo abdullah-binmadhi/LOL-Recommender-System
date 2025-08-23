@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoL Champion Recommender - Full Version</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 LoL Champion Recommender</h1>
+            <p>Discover your perfect League of Legends champion with our advanced AI system</p>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="card start-screen">
+            <h2>Welcome to the Champion Recommender!</h2>
+            <p>Answer 9 carefully crafted questions about your playstyle preferences, and our advanced algorithm will
+                recommend the perfect League of Legends champion for you.</p>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Smart Matching</h3>
+                    <p>AI-powered recommendations based on your unique preferences</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Comprehensive Analysis</h3>
+                    <p>9 detailed questions covering all aspects of gameplay</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🏆</div>
+                    <h3>Proven Results</h3>
+                    <p>Thousands of players have found their perfect main</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Multiple Options</h3>
+                    <p>Get alternatives and detailed champion information</p>
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-large" onclick="startQuestionnaire()">Start Questionnaire</button>
+        </div>
+
+        <!-- Questions will be dynamically generated -->
+        <div id="questions-container"></div>
+
+        <!-- Recommendation Screen -->
+        <div id="recommendation" class="card recommendation" style="display: none;">
+            <h2>Your Recommended Champion</h2>
+            <div class="champion-card" id="main-champion">
+                <!-- Champion details will be populated here -->
+            </div>
+            <div class="buttons">
+                <button class="btn btn-secondary" onclick="restartQuestionnaire()">Try Again</button>
+                <button class="btn btn-primary" onclick="showAlternatives()">See Alternatives</button>
+                <button class="btn btn-accent" onclick="showChampionDetails()">Champion Details</button>
+            </div>
+        </div>
+
+        <!-- Alternatives Screen -->
+        <div id="alternatives" class="card alternatives" style="display: none;">
+            <h2>Alternative Recommendations</h2>
+            <p>Here are other champions that might suit your playstyle:</p>
+            <div id="alternatives-container">
+                <!-- Alternative champions will be populated here -->
+            </div>
+            <div class="buttons">
+                <button class="btn btn-secondary" onclick="backToRecommendation()">Back to Main</button>
+                <button class="btn btn-primary" onclick="restartQuestionnaire()">Try Again</button>
+            </div>
+        </div>
+
+        <!-- Champion Details Modal -->
+        <div id="champion-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <div id="champion-details">
+                    <!-- Detailed champion information will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="hybrid_champion_system.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

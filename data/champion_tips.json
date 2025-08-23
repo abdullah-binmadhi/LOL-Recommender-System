@@ -1,0 +1,32 @@
+{
+  "aatrox": [
+    "Use your Q ability in different directions to catch enemies off guard",
+    "Your ultimate provides healing and damage - use it when low on health",
+    "Chain your abilities together for maximum damage output",
+    "Focus on hitting the edge of your Q for bonus damage"
+  ],
+  "ahri": [
+    "Use Charm to set up kills for your team",
+    "Your ultimate provides three dashes - use them wisely",
+    "Orb of Deception deals true damage on return",
+    "Position safely and poke with Q before engaging"
+  ],
+  "akali": [
+    "Use your shroud to avoid damage and reposition",
+    "Your passive gives you movement speed - use it to kite",
+    "Energy management is crucial for sustained fights",
+    "Your ultimate can execute low-health enemies"
+  ],
+  "alistar": [
+    "Your W-Q combo is your primary engage tool",
+    "Use your ultimate to tank damage for your team",
+    "Roam to other lanes to set up kills",
+    "Your E provides sustain for you and your ADC"
+  ],
+  "amumu": [
+    "Your ultimate can change team fights - use it on multiple enemies",
+    "Bandage Toss is your primary engage - don't miss it",
+    "Build tanky items to maximize your effectiveness",
+    "Your W deals percent health damage to nearby enemies"
+  ]
+}

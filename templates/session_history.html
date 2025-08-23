@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Session History - LoL Champion Recommender{% endblock %}
+
+{% block content %}
+<div class="recommendation-container">
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <h1 class="mb-3" style="color: var(--accent-gold); font-weight: 700;">
+            <i class="fas fa-history me-3"></i>Session History
+        </h1>
+        <p class="text-muted">Review your previous champion recommendations</p>
+    </div>
+    
+    <!-- Session History -->
+    {% if history %}
+        <div class="row">
+            {% for session in history %}
+            <div class="col-lg-4 mb-4">
+                <div class="card session-card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <i class="fas fa-clock me-2"></i>
+                            Session {{ loop.index }}
+                        </h6>
+                        <small class="text-muted">
+                            {% if session.completed_at %}
+                                {{ session.completed_at[:19].replace('T', ' ') }}
+                            {% endif %}
+                        </small>
+                    </div>
+                    <div class="card-body">
+                        <!-- Champion Info -->
+                        {% if session.champion %}
+                        <div class="text-center mb-3">
+                            <div class="champion-image-placeholder bg-primary text-white d-flex align-items-center justify-content-center rounded mb-2" 
+                                 style="width: 60px; height: 60px; margin: 0 auto;">
+                                <i class="fas fa-crown fa-lg"></i>
+                            </div>
+                            <h6 class="text-primary mb-1">{{ session.champion.name }}</h6>
+                            <p class="text-muted small mb-2">{{ session.champion.title }}</p>
+                            <div class="mb-2">
+                                <span class="badge bg-primary me-1">{{ session.champion.role }}</span>
+                                <span class="badge bg-{{ 'success' if session.champion.difficulty <= 3 else 'warning' if session.champion.difficulty <= 6 else 'danger' }}">
+                                    {{ session.champion.difficulty }}/10
+                                </span>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="text-center mb-3">
+                            <div class="text-muted">
+                                <i class="fas fa-question-circle fa-2x mb-2"></i>
+                                <p>No recommendation data</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Session Stats -->
+                        <div class="mb-3">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="text-warning fw-bold">{{ session.responses|length }}</div>
+                                    <small class="text-muted">Questions</small>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-warning fw-bold">
+                                        {% if session.session_id %}
+                                            {{ session.session_id[:8] }}...
+                                        {% else %}
+                                            Unknown
+                                        {% endif %}
+                                    </div>
+                                    <small class="text-muted">Session ID</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="d-grid gap-2">
+                            {% if current_session %}
+                            <a href="{{ url_for('compare_with_previous', history_index=loop.index0) }}" 
+                               class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-balance-scale me-2"></i>Compare with Current
+                            </a>
+                            {% endif %}
+                            <a href="{{ url_for('restore_session', history_index=loop.index0) }}" 
+                               class="btn btn-success btn-sm">
+                                <i class="fas fa-undo me-2"></i>Restore Session
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center">
+            <div class="card">
+                <div class="card-body p-5">
+                    <i class="fas fa-history fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted mb-3">No Previous Sessions</h4>
+                    <p class="text-muted mb-4">
+                        Complete a questionnaire to start building your session history.
+                    </p>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                        <i class="fas fa-play me-2"></i>Start New Session
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- Action Buttons -->
+    <div class="text-center mt-4">
+        {% if current_session %}
+        <a href="{{ url_for('recommendation') }}" class="btn btn-outline-primary me-3">
+            <i class="fas fa-arrow-left me-2"></i>Back to Current
+        </a>
+        {% endif %}
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+            <i class="fas fa-home me-2"></i>New Session
+        </a>
+    </div>
+</div>
+
+<style>
+.session-card {
+    transition: all 0.3s ease;
+}
+
+.session-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(200, 155, 60, 0.2);
+}
+</style>
+{% endblock %}

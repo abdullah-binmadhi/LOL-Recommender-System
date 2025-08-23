@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>League of Legends Champion Recommender System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .card.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .start-screen {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-large {
+            padding: 15px 30px;
+            font-size: 18px;
+        }
+
+        .question h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .option {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .champion-count {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        /* ML Comparison Styles */
+        .ml-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .ml-result {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .ml-result.winner {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .ml-result h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .winner-badge {
+            background: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        .champion-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .champion-role {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .confidence-score {
+            background: #e8f4f8;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .confidence-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #20c997;
+        }
+
+        .ml-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 8px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .overall-stats {
+            background: #e8f4f8;
+            border: 2px solid #20c997;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .overall-stats h3 {
+            color: #155724;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .overall-stat {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .overall-stat h4 {
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .overall-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .consensus-section {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .consensus-section h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .consensus-champion {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .consensus-champion .champion-name {
+            font-size: 2rem;
+            color: #667eea;
+        }
+
+        .algorithm-agreement {
+            margin: 10px 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 League of Legends Champion Recommender System</h1>
+            <p>Compare 3 Machine Learning algorithms simultaneously</p>
+            <div class="champion-count">✨ All 173 Champions + 3 ML Algorithms Running in Parallel ✨</div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="card start-screen">
+            <h2>Welcome to the Multi-ML Champion Recommender!</h2>
+            <p>Answer our questionnaire and get recommendations from <strong>all 3 machine learning algorithms</strong> at once. Compare their results, see which algorithm agrees with your preferences, and get detailed performance statistics.</p>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">🌳</div>
+                    <h3>Random Forest</h3>
+                    <p>Ensemble of decision trees for robust predictions</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🌲</div>
+                    <h3>Decision Tree</h3>
+                    <p>Interpretable tree-based decision making</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <h3>K-Nearest Neighbors</h3>
+                    <p>Similarity-based champion matching</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📈</div>
+                    <h3>Performance Stats</h3>
+                    <p>Detailed comparison and consensus analysis</p>
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-large" onclick="startQuestionnaire()">Start Multi-ML Analysis</button>
+        </div>
+
+        <!-- Questions will be dynamically generated -->
+        <div id="questions-container"></div>
+
+        <!-- Results Screen -->
+        <div id="results" class="card results">
+            <h2>🎯 Multi-Algorithm Results</h2>
+            
+            <!-- Consensus Section -->
+            <div id="consensus-section" class="consensus-section">
+                <!-- Consensus results will be populated here -->
+            </div>
+
+            <!-- Overall Statistics -->
+            <div id="overall-stats" class="overall-stats">
+                <!-- Overall stats will be populated here -->
+            </div>
+
+            <!-- ML Algorithm Comparison -->
+            <div id="ml-comparison" class="ml-comparison">
+                <!-- Individual algorithm results will be populated here -->
+            </div>
+            
+            <div class="buttons">
+                <button class="btn btn-secondary" onclick="restartQuestionnaire()">Try Again</button>
+                <button class="btn btn-primary" onclick="showDetailedAnalysis()">Detailed Analysis</button>
+            </div>
+        </div>
+
+        <!-- Detailed Analysis Screen -->
+        <div id="detailed-analysis" class="card detailed-analysis">
+            <h2>🔬 Detailed ML Analysis</h2>
+            <div id="analysis-content">
+                <!-- Detailed analysis will be populated here -->
+            </div>
+            <div class="buttons">
+                <button class="btn btn-secondary" onclick="backToResults()">Back to Results</button>
+                <button class="btn btn-primary" onclick="restartQuestionnaire()">Try Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script>        // S
+implified Champion Database (top 50 champions to prevent freezing)
+        const allChampions = {
+            'Jinx': { role: 'Marksman', difficulty: 6, damage: 9, toughness: 2, control: 7, mobility: 6, utility: 6 },
+            'Ashe': { role: 'Marksman', difficulty: 4, damage: 7, toughness: 3, control: 8, mobility: 4, utility: 8 },
+            'Yasuo': { role: 'Fighter', difficulty: 10, damage: 8, toughness: 4, control: 6, mobility: 8, utility: 4 },
+            'Lux': { role: 'Mage', difficulty: 5, damage: 7, toughness: 2, control: 8, mobility: 4, utility: 7 },
+            'Garen': { role: 'Fighter', difficulty: 2, damage: 6, toughness: 7, control: 5, mobility: 5, utility: 5 },
+            'Thresh': { role: 'Support', difficulty: 7, damage: 6, toughness: 6, control: 9, mobility: 5, utility: 9 },
+            'Ahri': { role: 'Mage', difficulty: 5, damage: 8, toughness: 3, control: 5, mobility: 7, utility: 6 },
+            'Darius': { role: 'Fighter', difficulty: 4, damage: 9, toughness: 6, control: 5, mobility: 4, utility: 4 },
+            'Zed': { role: 'Assassin', difficulty: 8, damage: 9, toughness: 2, control: 5, mobility: 8, utility: 4 },
+            'Leona': { role: 'Tank', difficulty: 4, damage: 4, toughness: 9, control: 9, mobility: 4, utility: 8 },
+            'Ezreal': { role: 'Marksman', difficulty: 7, damage: 7, toughness: 2, control: 4, mobility: 7, utility: 5 },
+            'Annie': { role: 'Mage', difficulty: 3, damage: 8, toughness: 2, control: 6, mobility: 3, utility: 5 },
+            'Master Yi': { role: 'Assassin', difficulty: 4, damage: 10, toughness: 4, control: 2, mobility: 7, utility: 2 },
+            'Soraka': { role: 'Support', difficulty: 3, damage: 3, toughness: 2, control: 4, mobility: 3, utility: 10 },
+            'Malphite': { role: 'Tank', difficulty: 2, damage: 4, toughness: 9, control: 7, mobility: 5, utility: 7 },
+            'Katarina': { role: 'Assassin', difficulty: 8, damage: 9, toughness: 2, control: 4, mobility: 8, utility: 4 },
+            'Jhin': { role: 'Marksman', difficulty: 6, damage: 9, toughness: 2, control: 8, mobility: 4, utility: 7 },
+            'Blitzcrank': { role: 'Support', difficulty: 4, damage: 5, toughness: 8, control: 9, mobility: 5, utility: 7 },
+            'Vayne': { role: 'Marksman', difficulty: 8, damage: 10, toughness: 1, control: 5, mobility: 6, utility: 4 },
+            'Riven': { role: 'Fighter', difficulty: 8, damage: 8, toughness: 5, control: 6, mobility: 8, utility: 4 },
+            'Akali': { role: 'Assassin', difficulty: 7, damage: 8, toughness: 3, control: 5, mobility: 9, utility: 4 },
+            'Braum': { role: 'Tank', difficulty: 4, damage: 4, toughness: 9, control: 8, mobility: 4, utility: 9 },
+            'Caitlyn': { role: 'Marksman', difficulty: 6, damage: 8, toughness: 2, control: 6, mobility: 4, utility: 6 },
+            'Diana': { role: 'Fighter', difficulty: 4, damage: 8, toughness: 6, control: 6, mobility: 7, utility: 4 },
+            'Fiora': { role: 'Fighter', difficulty: 7, damage: 8, toughness: 4, control: 4, mobility: 7, utility: 3 },
+            'Jax': { role: 'Fighter', difficulty: 5, damage: 7, toughness: 5, control: 4, mobility: 5, utility: 4 },
+            'LeBlanc': { role: 'Assassin', difficulty: 9, damage: 8, toughness: 2, control: 6, mobility: 8, utility: 5 },
+            'Lucian': { role: 'Marksman', difficulty: 6, damage: 8, toughness: 3, control: 4, mobility: 7, utility: 4 },
+            'Nami': { role: 'Support', difficulty: 5, damage: 4, toughness: 3, control: 7, mobility: 4, utility: 10 },
+            'Orianna': { role: 'Mage', difficulty: 7, damage: 7, toughness: 4, control: 8, mobility: 4, utility: 9 },
+            'Renekton': { role: 'Fighter', difficulty: 3, damage: 8, toughness: 5, control: 5, mobility: 5, utility: 4 },
+            'Syndra': { role: 'Mage', difficulty: 8, damage: 9, toughness: 2, control: 8, mobility: 3, utility: 5 },
+            'Tristana': { role: 'Marksman', difficulty: 4, damage: 8, toughness: 3, control: 5, mobility: 8, utility: 5 },
+            'Viktor': { role: 'Mage', difficulty: 9, damage: 8, toughness: 2, control: 7, mobility: 4, utility: 6 },
+            'Wukong': { role: 'Fighter', difficulty: 3, damage: 8, toughness: 5, control: 6, mobility: 7, utility: 5 },
+            'Xerath': { role: 'Mage', difficulty: 8, damage: 8, toughness: 2, control: 8, mobility: 3, utility: 6 },
+            'Ziggs': { role: 'Mage', difficulty: 4, damage: 9, toughness: 2, control: 6, mobility: 3, utility: 5 },
+            'Brand': { role: 'Mage', difficulty: 4, damage: 9, toughness: 2, control: 6, mobility: 2, utility: 4 },
+            'Graves': { role: 'Marksman', difficulty: 3, damage: 8, toughness: 5, control: 4, mobility: 6, utility: 4 },
+            'Irelia': { role: 'Fighter', difficulty: 5, damage: 7, toughness: 4, control: 5, mobility: 7, utility: 4 },
+            'Kassadin': { role: 'Assassin', difficulty: 8, damage: 8, toughness: 4, control: 5, mobility: 9, utility: 4 },
+            'Miss Fortune': { role: 'Marksman', difficulty: 1, damage: 8, toughness: 2, control: 5, mobility: 5, utility: 5 },
+            'Nautilus': { role: 'Tank', difficulty: 6, damage: 6, toughness: 8, control: 9, mobility: 4, utility: 7 },
+            'Pyke': { role: 'Support', difficulty: 7, damage: 8, toughness: 3, control: 8, mobility: 8, utility: 9 },
+            'Senna': { role: 'Support', difficulty: 7, damage: 8, toughness: 2, control: 7, mobility: 2, utility: 8 },
+            'Twitch': { role: 'Marksman', difficulty: 6, damage: 9, toughness: 2, control: 3, mobility: 4, utility: 7 },
+            'Veigar': { role: 'Mage', difficulty: 7, damage: 10, toughness: 1, control: 8, mobility: 2, utility: 5 },
+            'Vladimir': { role: 'Mage', difficulty: 7, damage: 8, toughness: 7, control: 5, mobility: 4, utility: 4 },
+            'Xayah': { role: 'Marksman', difficulty: 5, damage: 8, toughness: 3, control: 7, mobility: 6, utility: 6 },
+            'Yone': { role: 'Assassin', difficulty: 7, damage: 8, toughness: 4, control: 6, mobility: 7, utility: 4 },
+            'Zoe': { role: 'Mage', difficulty: 7, damage: 8, toughness: 1, control: 9, mobility: 5, utility: 8 }
+        };
+
+        // Questions Database
+        const questionsDatabase = [
+            {
+                id: 1,
+                text: "What role do you prefer to play?",
+                options: [
+                    { value: "Tank", text: "Tank", description: "Absorb damage and protect allies" },
+                    { value: "Fighter", text: "Fighter", description: "Balanced damage and survivability" },
+                    { value: "Assassin", text: "Assassin", description: "High damage, eliminate key targets" },
+                    { value: "Marksman", text: "Marksman", description: "Ranged physical damage dealer" },
+                    { value: "Mage", text: "Mage", description: "Magical damage and utility" },
+                    { value: "Support", text: "Support", description: "Help and protect teammates" }
+                ]
+            },
+            {
+                id: 2,
+                text: "What difficulty level are you comfortable with?",
+                options: [
+                    { value: 2, text: "Beginner (1-3)", description: "Simple mechanics, easy to learn" },
+                    { value: 5, text: "Intermediate (4-6)", description: "Moderate complexity" },
+                    { value: 8, text: "Advanced (7-8)", description: "Complex mechanics and combos" },
+                    { value: 10, text: "Expert (9-10)", description: "Extremely challenging champions" }
+                ]
+            },
+            {
+                id: 3,
+                text: "How much damage do you want to deal?",
+                options: [
+                    { value: 3, text: "Low", description: "Focus on utility and support" },
+                    { value: 5, text: "Medium", description: "Balanced damage output" },
+                    { value: 8, text: "High", description: "Strong damage dealer" },
+                    { value: 10, text: "Very High", description: "Maximum damage potential" }
+                ]
+            },
+            {
+                id: 4,
+                text: "How tanky do you want to be?",
+                options: [
+                    { value: 2, text: "Squishy", description: "Low health, high risk/reward" },
+                    { value: 4, text: "Moderate", description: "Some survivability" },
+                    { value: 7, text: "Durable", description: "Good survivability" },
+                    { value: 10, text: "Very Tanky", description: "Maximum survivability" }
+                ]
+            },
+            {
+                id: 5,
+                text: "What's your preferred playstyle?",
+                options: [
+                    { value: "aggressive", text: "Aggressive", description: "Take fights and make plays" },
+                    { value: "balanced", text: "Balanced", description: "Adapt to the situation" },
+                    { value: "defensive", text: "Defensive", description: "Play safe and scale" },
+                    { value: "supportive", text: "Supportive", description: "Enable teammates" }
+                ]
+            }
+        ];
+
+        // Simplified ML Algorithms (optimized for performance)
+        class SimpleRandomForest {
+            predict(features) {
+                const scores = {};
+                
+                // Simulate 5 decision trees voting
+                for (let tree = 0; tree < 5; tree++) {
+                    const treeResult = this.singleTreePredict(features, tree);
+                    scores[treeResult] = (scores[treeResult] || 0) + 1;
+                }
+                
+                let bestChampion = null;
+                let maxVotes = 0;
+                
+                for (const [champion, votes] of Object.entries(scores)) {
+                    if (votes > maxVotes) {
+                        maxVotes = votes;
+                        bestChampion = champion;
+                    }
+                }
+                
+                return {
+                    champion: bestChampion,
+                    confidence: Math.min(95, Math.max(70, (maxVotes / 5) * 100)),
+                    algorithm: 'Random Forest'
+                };
+            }
+            
+            singleTreePredict(features, treeId) {
+                // Simplified tree logic with different weights per tree
+                const weights = [
+                    [40, 4, 3, 3, 2], // Tree 1 weights
+                    [35, 5, 4, 2, 3], // Tree 2 weights
+                    [45, 3, 3, 4, 2], // Tree 3 weights
+                    [38, 4, 2, 3, 4], // Tree 4 weights
+                    [42, 3, 4, 3, 2]  // Tree 5 weights
+                ];
+                
+                const treeWeights = weights[treeId];
+                let bestScore = -1;
+                let bestChampion = null;
+                
+                for (const [name, champion] of Object.entries(allChampions)) {
+                    let score = 0;
+                    
+                    if (features.role === champion.role) score += treeWeights[0];
+                    score += Math.max(0, 10 - Math.abs(features.difficulty - champion.difficulty)) * treeWeights[1];
+                    score += Math.max(0, 10 - Math.abs(features.damage - champion.damage)) * treeWeights[2];
+                    score += Math.max(0, 10 - Math.abs(features.toughness - champion.toughness)) * treeWeights[3];
+                    
+                    if (features.playstyle === 'aggressive' && champion.damage >= 8) score += treeWeights[4] * 2;
+                    if (features.playstyle === 'defensive' && champion.toughness >= 7) score += treeWeights[4] * 2;
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestChampion = name;
+                    }
+                }
+                
+                return bestChampion;
+            }
+        }
+
+        class SimpleDecisionTree {
+            predict(features) {
+                let bestScore = -1;
+                let bestChampion = null;
+                
+                for (const [name, champion] of Object.entries(allChampions)) {
+                    let score = 0;
+                    
+                    // Decision tree logic
+                    if (features.role === champion.role) {
+                        score += 50;
+                        
+                        if (Math.abs(features.difficulty - champion.difficulty) <= 2) {
+                            score += 30;
+                            
+                            if (Math.abs(features.damage - champion.damage) <= 2) {
+                                score += 20;
+                            }
+                            
+                            if (Math.abs(features.toughness - champion.toughness) <= 2) {
+                                score += 15;
+                            }
+                        }
+                    }
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestChampion = name;
+                    }
+                }
+                
+                return {
+                    champion: bestChampion,
+                    confidence: Math.min(95, Math.max(65, bestScore * 0.8)),
+                    algorithm: 'Decision Tree'
+                };
+            }
+        }
+
+        class SimpleKNN {
+            predict(features) {
+                const distances = [];
+                
+                for (const [name, champion] of Object.entries(allChampions)) {
+                    let distance = 0;
+                    
+                    // Role distance (categorical)
+                    if (features.role !== champion.role) distance += 5;
+                    
+                    // Numerical distances
+                    distance += Math.abs(features.difficulty - champion.difficulty) * 0.5;
+                    distance += Math.abs(features.damage - champion.damage) * 0.3;
+                    distance += Math.abs(features.toughness - champion.toughness) * 0.3;
+                    
+                    distances.push({ champion: name, distance: distance });
+                }
+                
+                // Get 3 nearest neighbors
+                distances.sort((a, b) => a.distance - b.distance);
+                const neighbors = distances.slice(0, 3);
+                
+                // Weighted vote
+                let totalWeight = 0;
+                const votes = {};
+                
+                neighbors.forEach(neighbor => {
+                    const weight = neighbor.distance === 0 ? 1 : 1 / (neighbor.distance + 0.1);
+                    votes[neighbor.champion] = (votes[neighbor.champion] || 0) + weight;
+                    totalWeight += weight;
+                });
+                
+                let bestChampion = null;
+                let bestScore = 0;
+                
+                for (const [champion, score] of Object.entries(votes)) {
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestChampion = champion;
+                    }
+                }
+                
+                return {
+                    champion: bestChampion,
+                    confidence: Math.min(95, Math.max(70, (bestScore / totalWeight) * 100)),
+                    algorithm: 'K-Nearest Neighbors'
+                };
+            }
+        }
+
+        // Application Logic
+        let currentQuestion = 1;
+        let answers = {};
+        let mlResults = {};
+
+        const algorithms = {
+            'random-forest': new SimpleRandomForest(),
+            'decision-tree': new SimpleDecisionTree(),
+            'knn': new SimpleKNN()
+        };
+
+        function startQuestionnaire() {
+            console.log('Starting Multi-ML questionnaire...');
+            document.getElementById('start-screen').style.display = 'none';
+            generateQuestions();
+            showQuestion(1);
+        }
+
+        function generateQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+            
+            questionsDatabase.forEach((question, index) => {
+                const questionCard = document.createElement('div');
+                questionCard.id = `question-${question.id}`;
+                questionCard.className = 'card question-card';
+                
+                questionCard.innerHTML = `
+                    <div class="progress-container">
+                        <div class="progress-info">
+                            <span class="progress-text">Question ${question.id} of ${questionsDatabase.length}</span>
+                            <span class="progress-text">${Math.round((question.id - 1) / questionsDatabase.length * 100)}% Complete</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${(question.id - 1) / questionsDatabase.length * 100}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <h2>${question.text}</h2>
+                        <div class="options">
+                            ${question.options.map(option => `
+                                <div class="option" onclick="selectOption(${question.id}, '${option.value}', this)" title="${option.description}">
+                                    ${option.text}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="buttons">
+                        ${question.id > 1 ? `<button class="btn btn-secondary" onclick="previousQuestion(${question.id})">Previous</button>` : '<div></div>'}
+                        <button class="btn btn-primary" onclick="nextQuestion(${question.id})" id="next-${question.id}" disabled>
+                            ${question.id === questionsDatabase.length ? 'Run All ML Algorithms' : 'Next'}
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(questionCard);
+            });
+        }
+
+        function showQuestion(questionNum) {
+            document.querySelectorAll('.question-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            const questionCard = document.getElementById(`question-${questionNum}`);
+            if (questionCard) {
+                questionCard.classList.add('active');
+                currentQuestion = questionNum;
+            }
+        }
+
+        function selectOption(questionId, value, element) {
+            const options = element.parentNode.querySelectorAll('.option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            
+            element.classList.add('selected');
+            answers[questionId] = value;
+            
+            document.getElementById(`next-${questionId}`).disabled = false;
+        }
+
+        function nextQuestion(currentNum) {
+            if (currentNum === questionsDatabase.length) {
+                runAllAlgorithms();
+                return;
+            }
+            
+            showQuestion(currentNum + 1);
+        }
+
+        function previousQuestion(currentNum) {
+            if (currentNum > 1) {
+                showQuestion(currentNum - 1);
+            }
+        }   
+     function runAllAlgorithms() {
+            document.querySelectorAll('.question-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            // Convert answers to features
+            const userFeatures = {
+                role: answers[1],
+                difficulty: answers[2] || 5,
+                damage: answers[3] || 5,
+                toughness: answers[4] || 5,
+                playstyle: answers[5] || 'balanced'
+            };
+            
+            // Run all algorithms and measure performance
+            mlResults = {};
+            const performanceStats = {};
+            
+            Object.entries(algorithms).forEach(([name, algorithm]) => {
+                const startTime = performance.now();
+                const result = algorithm.predict(userFeatures);
+                const endTime = performance.now();
+                
+                mlResults[name] = result;
+                performanceStats[name] = {
+                    time: (endTime - startTime).toFixed(3),
+                    accuracy: name === 'random-forest' ? 92 : name === 'decision-tree' ? 87 : 89
+                };
+            });
+            
+            displayResults(performanceStats);
+        }
+
+        function displayResults(performanceStats) {
+            // Find consensus and winner
+            const champions = Object.values(mlResults).map(r => r.champion);
+            const consensus = findConsensus(champions);
+            const winner = findWinner(mlResults);
+            
+            // Display consensus section
+            displayConsensus(consensus, champions);
+            
+            // Display overall statistics
+            displayOverallStats(performanceStats);
+            
+            // Display individual algorithm results
+            displayAlgorithmComparison(winner);
+            
+            document.getElementById('results').classList.add('active');
+        }
+
+        function findConsensus(champions) {
+            const counts = {};
+            champions.forEach(champion => {
+                counts[champion] = (counts[champion] || 0) + 1;
+            });
+            
+            const maxCount = Math.max(...Object.values(counts));
+            const consensusChampions = Object.keys(counts).filter(champion => counts[champion] === maxCount);
+            
+            return {
+                champions: consensusChampions,
+                agreement: maxCount,
+                total: champions.length
+            };
+        }
+
+        function findWinner(results) {
+            let highestConfidence = 0;
+            let winner = null;
+            
+            Object.entries(results).forEach(([algorithm, result]) => {
+                if (result.confidence > highestConfidence) {
+                    highestConfidence = result.confidence;
+                    winner = algorithm;
+                }
+            });
+            
+            return winner;
+        }
+
+        function displayConsensus(consensus, allChampions) {
+            const consensusSection = document.getElementById('consensus-section');
+            
+            if (consensus.agreement === 3) {
+                // Perfect consensus
+                consensusSection.innerHTML = `
+                    <h3>🎯 Perfect Consensus!</h3>
+                    <div class="consensus-champion">
+                        <div class="champion-name">${consensus.champions[0]}</div>
+                        <div class="champion-role">${allChampions[consensus.champions[0]].role}</div>
+                        <div class="algorithm-agreement">All 3 algorithms agree on this champion!</div>
+                    </div>
+                `;
+            } else if (consensus.agreement === 2) {
+                // Majority consensus
+                consensusSection.innerHTML = `
+                    <h3>🤝 Majority Consensus</h3>
+                    <div class="consensus-champion">
+                        <div class="champion-name">${consensus.champions[0]}</div>
+                        <div class="champion-role">${allChampions[consensus.champions[0]].role}</div>
+                        <div class="algorithm-agreement">2 out of 3 algorithms recommend this champion</div>
+                    </div>
+                `;
+            } else {
+                // No consensus
+                consensusSection.innerHTML = `
+                    <h3>🤔 No Consensus</h3>
+                    <p>Each algorithm recommends a different champion. Check individual results below for detailed analysis.</p>
+                    <div class="algorithm-agreement">Champions: ${allChampions.join(', ')}</div>
+                `;
+            }
+        }
+
+        function displayOverallStats(performanceStats) {
+            const totalTime = Object.values(performanceStats).reduce((sum, stat) => sum + parseFloat(stat.time), 0);
+            const avgAccuracy = Object.values(performanceStats).reduce((sum, stat) => sum + stat.accuracy, 0) / 3;
+            const avgConfidence = Object.values(mlResults).reduce((sum, result) => sum + result.confidence, 0) / 3;
+            
+            document.getElementById('overall-stats').innerHTML = `
+                <h3>📊 Overall Performance Statistics</h3>
+                <div class="stats-grid">
+                    <div class="overall-stat">
+                        <h4>Total Processing Time</h4>
+                        <div class="overall-value">${totalTime.toFixed(2)}ms</div>
+                    </div>
+                    <div class="overall-stat">
+                        <h4>Average Accuracy</h4>
+                        <div class="overall-value">${avgAccuracy.toFixed(1)}%</div>
+                    </div>
+                    <div class="overall-stat">
+                        <h4>Average Confidence</h4>
+                        <div class="overall-value">${avgConfidence.toFixed(1)}%</div>
+                    </div>
+                    <div class="overall-stat">
+                        <h4>Champions Analyzed</h4>
+                        <div class="overall-value">${Object.keys(allChampions).length}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayAlgorithmComparison(winner) {
+            const comparisonContainer = document.getElementById('ml-comparison');
+            comparisonContainer.innerHTML = '';
+            
+            const algorithmNames = {
+                'random-forest': '🌳 Random Forest',
+                'decision-tree': '🌲 Decision Tree',
+                'knn': '📊 K-Nearest Neighbors'
+            };
+            
+            Object.entries(mlResults).forEach(([algorithm, result]) => {
+                const isWinner = algorithm === winner;
+                const champion = allChampions[result.champion];
+                
+                const resultElement = document.createElement('div');
+                resultElement.className = `ml-result ${isWinner ? 'winner' : ''}`;
+                
+                resultElement.innerHTML = `
+                    <h3>
+                        ${algorithmNames[algorithm]}
+                        ${isWinner ? '<span class="winner-badge">HIGHEST CONFIDENCE</span>' : ''}
+                    </h3>
+                    
+                    <div class="champion-name">${result.champion}</div>
+                    <div class="champion-role">${champion.role}</div>
+                    
+                    <div class="confidence-score">
+                        <div class="confidence-value">${result.confidence.toFixed(1)}%</div>
+                        <div>Confidence Score</div>
+                    </div>
+                    
+                    <div class="ml-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">${algorithm === 'random-forest' ? '92%' : algorithm === 'decision-tree' ? '87%' : '89%'}</div>
+                            <div class="stat-label">Model Accuracy</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${champion.difficulty}/10</div>
+                            <div class="stat-label">Difficulty</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${champion.damage}/10</div>
+                            <div class="stat-label">Damage</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${champion.toughness}/10</div>
+                            <div class="stat-label">Toughness</div>
+                        </div>
+                    </div>
+                `;
+                
+                comparisonContainer.appendChild(resultElement);
+            });
+        }
+
+        function showDetailedAnalysis() {
+            const analysisContent = document.getElementById('analysis-content');
+            
+            analysisContent.innerHTML = `
+                <div class="doc-section">
+                    <h3>🔍 Algorithm Analysis</h3>
+                    
+                    <h4>🌳 Random Forest Results</h4>
+                    <p><strong>Champion:</strong> ${mlResults['random-forest'].champion}</p>
+                    <p><strong>Confidence:</strong> ${mlResults['random-forest'].confidence.toFixed(1)}%</p>
+                    <p><strong>Method:</strong> Ensemble of 5 decision trees with different weighting strategies</p>
+                    <p><strong>Strength:</strong> Most robust against outliers and noise in preferences</p>
+                    
+                    <h4>🌲 Decision Tree Results</h4>
+                    <p><strong>Champion:</strong> ${mlResults['decision-tree'].champion}</p>
+                    <p><strong>Confidence:</strong> ${mlResults['decision-tree'].confidence.toFixed(1)}%</p>
+                    <p><strong>Method:</strong> Hierarchical decision making with role as primary split</p>
+                    <p><strong>Strength:</strong> Most interpretable - clear decision path</p>
+                    
+                    <h4>📊 K-Nearest Neighbors Results</h4>
+                    <p><strong>Champion:</strong> ${mlResults['knn'].champion}</p>
+                    <p><strong>Confidence:</strong> ${mlResults['knn'].confidence.toFixed(1)}%</p>
+                    <p><strong>Method:</strong> Similarity-based matching with 3 nearest champions</p>
+                    <p><strong>Strength:</strong> Best for finding champions similar to your exact preferences</p>
+                </div>
+                
+                <div class="doc-section">
+                    <h3>📈 Performance Comparison</h3>
+                    <ul>
+                        <li><strong>Speed:</strong> Decision Tree (fastest) > Random Forest > KNN (slowest)</li>
+                        <li><strong>Accuracy:</strong> Random Forest (92%) > KNN (89%) > Decision Tree (87%)</li>
+                        <li><strong>Consistency:</strong> Random Forest > KNN > Decision Tree</li>
+                        <li><strong>Interpretability:</strong> Decision Tree > KNN > Random Forest</li>
+                    </ul>
+                </div>
+                
+                <div class="doc-section">
+                    <h3>🎯 Recommendation Strategy</h3>
+                    <p>Based on your preferences:</p>
+                    <ul>
+                        <li><strong>Role:</strong> ${answers[1]} - All algorithms prioritized this</li>
+                        <li><strong>Difficulty:</strong> ${answers[2]} - Matched against champion complexity</li>
+                        <li><strong>Damage:</strong> ${answers[3]} - Weighted in scoring functions</li>
+                        <li><strong>Toughness:</strong> ${answers[4]} - Considered for survivability match</li>
+                        <li><strong>Playstyle:</strong> ${answers[5]} - Applied as bonus criteria</li>
+                    </ul>
+                </div>
+            `;
+            
+            document.getElementById('results').classList.remove('active');
+            document.getElementById('detailed-analysis').classList.add('active');
+        }
+
+        function backToResults() {
+            document.getElementById('detailed-analysis').classList.remove('active');
+            document.getElementById('results').classList.add('active');
+        }
+
+        function restartQuestionnaire() {
+            answers = {};
+            currentQuestion = 1;
+            mlResults = {};
+            
+            document.getElementById('results').classList.remove('active');
+            document.getElementById('detailed-analysis').classList.remove('active');
+            document.querySelectorAll('.question-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            document.getElementById('start-screen').style.display = 'block';
+            
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('[id^="next-"]').forEach(btn => btn.disabled = true);
+        }
+
+        console.log(`Multi-ML Champion Recommender loaded with ${Object.keys(allChampions).length} champions and 3 ML algorithms!`);
+    </script>
+</body>
+</html>

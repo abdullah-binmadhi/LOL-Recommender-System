@@ -1,0 +1,3595 @@
+{
+  "champions": [
+    {
+      "id": "aatrox",
+      "name": "Aatrox",
+      "title": "the Darkin Blade",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 3.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "ahri",
+      "name": "Ahri",
+      "title": "the Nine-Tailed Fox",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "akali",
+      "name": "Akali",
+      "title": "the Rogue Assassin",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Middle', 'Top'}",
+      "herotype": "Assassin"
+    },
+    {
+      "id": "akshan",
+      "name": "Akshan",
+      "title": "the Rogue Sentinel",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 3.0,
+        "utility": 2.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "alistar",
+      "name": "Alistar",
+      "title": "the Minotaur",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 3.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Support'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "ambessa",
+      "name": "Ambessa",
+      "title": "The Matriarch of War",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 1.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "amumu",
+      "name": "Amumu",
+      "title": "the Sad Mummy",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Support'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "anivia",
+      "name": "Anivia",
+      "title": "the Cryophoenix",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "annie",
+      "name": "Annie",
+      "title": "the Dark Child",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "aphelios",
+      "name": "Aphelios",
+      "title": "the Weapon of the Faithful",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "ashe",
+      "name": "Ashe",
+      "title": "the Frost Archer",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Support', 'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "aurelionsol",
+      "name": "AurelionSol",
+      "title": "The Star Forger",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "aurora",
+      "name": "Aurora",
+      "title": "the Witch Between Worlds",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle', 'Top'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "azir",
+      "name": "Azir",
+      "title": "the Emperor of the Sands",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "bard",
+      "name": "Bard",
+      "title": "the Wandering Caretaker",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 2.0,
+        "utility": 3.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Support'}",
+      "herotype": "Support"
+    },
+    {
+      "id": "belveth",
+      "name": "Belveth",
+      "title": "the Empress of the Void",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "blitzcrank",
+      "name": "Blitzcrank",
+      "title": "the Great Steam Golem",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 2.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Support'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "brand",
+      "name": "Brand",
+      "title": "the Burning Vengeance",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Jungle', 'Middle', 'Support'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "braum",
+      "name": "Braum",
+      "title": "the Heart of the Freljord",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 2.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Support'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "briar",
+      "name": "Briar",
+      "title": "the Restrained Hunger",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 3.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "caitlyn",
+      "name": "Caitlyn",
+      "title": "the Sheriff of Piltover",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "camille",
+      "name": "Camille",
+      "title": "the Steel Shadow",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Melee",
+      "position": "{'Support', 'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "cassiopeia",
+      "name": "Cassiopeia",
+      "title": "the Serpent's Embrace",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "chogath",
+      "name": "Chogath",
+      "title": "the Terror of the Void",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "corki",
+      "name": "Corki",
+      "title": "the Daring Bombardier",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "darius",
+      "name": "Darius",
+      "title": "the Hand of Noxus",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "diana",
+      "name": "Diana",
+      "title": "Scorn of the Moon",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Middle'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "drmundo",
+      "name": "DrMundo",
+      "title": "the Madman of Zaun",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 1.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "draven",
+      "name": "Draven",
+      "title": "the Glorious Executioner",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "ekko",
+      "name": "Ekko",
+      "title": "the Boy Who Shattered Time",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Middle'}",
+      "herotype": "Assassin"
+    },
+    {
+      "id": "elise",
+      "name": "Elise",
+      "title": "the Spider Queen",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Jungle'}",
+      "herotype": "Assassin"
+    },
+    {
+      "id": "evelynn",
+      "name": "Evelynn",
+      "title": "Agony's Embrace",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 1.0,
+        "mobility": 2.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Assassin"
+    },
+    {
+      "id": "ezreal",
+      "name": "Ezreal",
+      "title": "the Prodigal Explorer",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "fiddlesticks",
+      "name": "Fiddlesticks",
+      "title": "the Ancient Fear",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Jungle'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "fiora",
+      "name": "Fiora",
+      "title": "the Grand Duelist",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "fizz",
+      "name": "Fizz",
+      "title": "the Tidal Trickster",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Middle'}",
+      "herotype": "Assassin"
+    },
+    {
+      "id": "galio",
+      "name": "Galio",
+      "title": "the Colossus",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 3.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Middle', 'Support'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "gangplank",
+      "name": "Gangplank",
+      "title": "the Saltwater Scourge",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "garen",
+      "name": "Garen",
+      "title": "The Might of Demacia",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 1.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "gnar",
+      "name": "Gnar",
+      "title": "the Missing Link",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "gnarbig",
+      "name": "GnarBig",
+      "title": "the Missing Link",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "gragas",
+      "name": "Gragas",
+      "title": "the Rabble Rouser",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 3.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Middle', 'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "graves",
+      "name": "Graves",
+      "title": "the Outlaw",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 1.0,
+        "mobility": 2.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Jungle'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "gwen",
+      "name": "Gwen",
+      "title": "The Hallowed Seamstress",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 1.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "hecarim",
+      "name": "Hecarim",
+      "title": "the Shadow of War",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "heimerdinger",
+      "name": "Heimerdinger",
+      "title": "the Revered Inventor",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle', 'Support', 'Top'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "hwei",
+      "name": "Hwei",
+      "title": "the Visionary",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle', 'Support'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "illaoi",
+      "name": "Illaoi",
+      "title": "the Kraken Priestess",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 1.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "irelia",
+      "name": "Irelia",
+      "title": "the Blade Dancer",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 3.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Middle', 'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "ivern",
+      "name": "Ivern",
+      "title": "the Green Father",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 2.0,
+        "utility": 3.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Jungle'}",
+      "herotype": "Support"
+    },
+    {
+      "id": "janna",
+      "name": "Janna",
+      "title": "the Storm's Fury",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 3.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Support'}",
+      "herotype": "Support"
+    },
+    {
+      "id": "jarvaniv",
+      "name": "JarvanIV",
+      "title": "the Exemplar of Demacia",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 2.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "jax",
+      "name": "Jax",
+      "title": "Grandmaster at Arms",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "jayce",
+      "name": "Jayce",
+      "title": "the Defender of Tomorrow",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 2.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Middle', 'Top'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "jhin",
+      "name": "Jhin",
+      "title": "the Virtuoso",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "jinx",
+      "name": "Jinx",
+      "title": "the Loose Cannon",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "ksante",
+      "name": "KSante",
+      "title": "the Pride of Nazumah",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 3.0,
+        "mobility": 2.0,
+        "utility": 2.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "kaisa",
+      "name": "Kaisa",
+      "title": "Daughter of the Void",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "kalista",
+      "name": "Kalista",
+      "title": "the Spear of Vengeance",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 3.0,
+        "utility": 2.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "karma",
+      "name": "Karma",
+      "title": "the Enlightened One",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle', 'Support', 'Top'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "karthus",
+      "name": "Karthus",
+      "title": "the Deathsinger",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Jungle'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "kassadin",
+      "name": "Kassadin",
+      "title": "the Void Walker",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 1.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Middle'}",
+      "herotype": "Assassin"
+    },
+    {
+      "id": "katarina",
+      "name": "Katarina",
+      "title": "the Sinister Blade",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Middle'}",
+      "herotype": "Assassin"
+    },
+    {
+      "id": "kayle",
+      "name": "Kayle",
+      "title": "the Righteous",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 1.0,
+        "utility": 3.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "kayn",
+      "name": "Kayn",
+      "title": "the Shadow Reaper",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "kennen",
+      "name": "Kennen",
+      "title": "the Heart of the Tempest",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Top'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "khazix",
+      "name": "Khazix",
+      "title": "the Voidreaver",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Assassin"
+    },
+    {
+      "id": "kindred",
+      "name": "Kindred",
+      "title": "The Eternal Hunters",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 3.0,
+        "utility": 2.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Jungle'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "kled",
+      "name": "Kled",
+      "title": "the Cantankerous Cavalier",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 1.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "kogmaw",
+      "name": "KogMaw",
+      "title": "the Mouth of the Abyss",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "leblanc",
+      "name": "Leblanc",
+      "title": "the Deceiver",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle'}",
+      "herotype": "Assassin"
+    },
+    {
+      "id": "leesin",
+      "name": "LeeSin",
+      "title": "the Blind Monk",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "leona",
+      "name": "Leona",
+      "title": "the Radiant Dawn",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 3.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Support'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "lillia",
+      "name": "Lillia",
+      "title": "the Bashful Bloom",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 2.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "lissandra",
+      "name": "Lissandra",
+      "title": "the Ice Witch",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "lucian",
+      "name": "Lucian",
+      "title": "the Purifier",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "lulu",
+      "name": "Lulu",
+      "title": "the Fae Sorceress",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 3.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Support'}",
+      "herotype": "Support"
+    },
+    {
+      "id": "lux",
+      "name": "Lux",
+      "title": "the Lady of Luminosity",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle', 'Support'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "malphite",
+      "name": "Malphite",
+      "title": "Shard of the Monolith",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 3.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Middle', 'Support', 'Top'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "malzahar",
+      "name": "Malzahar",
+      "title": "the Prophet of the Void",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "maokai",
+      "name": "Maokai",
+      "title": "the Twisted Treant",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 3.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Support'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "masteryi",
+      "name": "MasterYi",
+      "title": "the Wuju Bladesman",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Assassin"
+    },
+    {
+      "id": "mel",
+      "name": "Mel",
+      "title": "the Soul's Reflection",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle', 'Support'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "milio",
+      "name": "Milio",
+      "title": "The Gentle Flame",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 3.0,
+        "utility": 3.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Support'}",
+      "herotype": "Support"
+    },
+    {
+      "id": "missfortune",
+      "name": "MissFortune",
+      "title": "the Bounty Hunter",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "mordekaiser",
+      "name": "Mordekaiser",
+      "title": "the Iron Revenant",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 1.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "morgana",
+      "name": "Morgana",
+      "title": "the Fallen",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Support'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "naafiri",
+      "name": "Naafiri",
+      "title": "the Hound of a Hundred Bites",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Middle'}",
+      "herotype": "Assassin"
+    },
+    {
+      "id": "nami",
+      "name": "Nami",
+      "title": "the Tidecaller",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Support'}",
+      "herotype": "Support"
+    },
+    {
+      "id": "nasus",
+      "name": "Nasus",
+      "title": "the Curator of the Sands",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "nautilus",
+      "name": "Nautilus",
+      "title": "the Titan of the Depths",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 3.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Support'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "neeko",
+      "name": "Neeko",
+      "title": "the Curious Chameleon",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle', 'Support'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "nidalee",
+      "name": "Nidalee",
+      "title": "the Bestial Huntress",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 3.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Jungle'}",
+      "herotype": "Assassin"
+    },
+    {
+      "id": "nilah",
+      "name": "Nilah",
+      "title": "the Joy Unbound",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 3.0,
+        "utility": 2.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Melee",
+      "position": "{'Bottom'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "nocturne",
+      "name": "Nocturne",
+      "title": "the Eternal Nightmare",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 2.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "nunu",
+      "name": "Nunu",
+      "title": "the Boy and His Yeti",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 3.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "olaf",
+      "name": "Olaf",
+      "title": "the Berserker",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "orianna",
+      "name": "Orianna",
+      "title": "the Lady of Clockwork",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "ornn",
+      "name": "Ornn",
+      "title": "The Fire Below the Mountain",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 3.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "pantheon",
+      "name": "Pantheon",
+      "title": "the Unbreakable Spear",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Middle', 'Support', 'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "poppy",
+      "name": "Poppy",
+      "title": "Keeper of the Hammer",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 3.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Top'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "pyke",
+      "name": "Pyke",
+      "title": "the Bloodharbor Ripper",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Support'}",
+      "herotype": "Support"
+    },
+    {
+      "id": "qiyana",
+      "name": "Qiyana",
+      "title": "Empress of the Elements",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Melee",
+      "position": "{'Middle'}",
+      "herotype": "Assassin"
+    },
+    {
+      "id": "quinn",
+      "name": "Quinn",
+      "title": "Demacia's Wings",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Top'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "rakan",
+      "name": "Rakan",
+      "title": "The Charmer",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 2.0,
+        "control": 3.0,
+        "mobility": 3.0,
+        "utility": 3.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Support'}",
+      "herotype": "Support"
+    },
+    {
+      "id": "rammus",
+      "name": "Rammus",
+      "title": "the Armordillo",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 3.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "reksai",
+      "name": "RekSai",
+      "title": "the Void Burrower",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "rell",
+      "name": "Rell",
+      "title": "the Iron Maiden",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 3.0,
+        "control": 3.0,
+        "mobility": 2.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Support'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "renata",
+      "name": "Renata",
+      "title": "the Chem-Baroness",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Support'}",
+      "herotype": "Support"
+    },
+    {
+      "id": "renekton",
+      "name": "Renekton",
+      "title": "the Butcher of the Sands",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "rengar",
+      "name": "Rengar",
+      "title": "the Pridestalker",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Top'}",
+      "herotype": "Assassin"
+    },
+    {
+      "id": "riven",
+      "name": "Riven",
+      "title": "the Exile",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "rumble",
+      "name": "Rumble",
+      "title": "the Mechanized Menace",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Middle', 'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "ryze",
+      "name": "Ryze",
+      "title": "the Rune Mage",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "samira",
+      "name": "Samira",
+      "title": "the Desert Rose",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 1.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "sejuani",
+      "name": "Sejuani",
+      "title": "Fury of the North",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 3.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "senna",
+      "name": "Senna",
+      "title": "the Redeemer",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 3.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Support', 'Bottom'}",
+      "herotype": "Support"
+    },
+    {
+      "id": "seraphine",
+      "name": "Seraphine",
+      "title": "the Starry-Eyed Songstress",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Support', 'Bottom'}",
+      "herotype": "Support"
+    },
+    {
+      "id": "sett",
+      "name": "Sett",
+      "title": "the Boss",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "shaco",
+      "name": "Shaco",
+      "title": "the Demon Jester",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Support'}",
+      "herotype": "Assassin"
+    },
+    {
+      "id": "shen",
+      "name": "Shen",
+      "title": "the Eye of Twilight",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 3.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Support', 'Top'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "shyvana",
+      "name": "Shyvana",
+      "title": "the Half-Dragon",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 1.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "singed",
+      "name": "Singed",
+      "title": "the Mad Chemist",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "sion",
+      "name": "Sion",
+      "title": "The Undead Juggernaut",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "sivir",
+      "name": "Sivir",
+      "title": "the Battle Mistress",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "skarner",
+      "name": "Skarner",
+      "title": "the Primordial Sovereign",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 3.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Top'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "smolder",
+      "name": "Smolder",
+      "title": "the Fiery Fledgling",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle', 'Bottom', 'Top'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "sona",
+      "name": "Sona",
+      "title": "Maven of the Strings",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Support'}",
+      "herotype": "Support"
+    },
+    {
+      "id": "soraka",
+      "name": "Soraka",
+      "title": "the Starchild",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 3.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Support'}",
+      "herotype": "Support"
+    },
+    {
+      "id": "swain",
+      "name": "Swain",
+      "title": "the Noxian Grand General",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle', 'Support'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "sylas",
+      "name": "Sylas",
+      "title": "the Unshackled",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 1.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Melee",
+      "position": "{'Middle', 'Top'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "syndra",
+      "name": "Syndra",
+      "title": "the Dark Sovereign",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "tahmkench",
+      "name": "TahmKench",
+      "title": "The River King",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 3.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Support', 'Top'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "taliyah",
+      "name": "Taliyah",
+      "title": "the Stoneweaver",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 3.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Jungle', 'Middle'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "talon",
+      "name": "Talon",
+      "title": "the Blade's Shadow",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Assassin"
+    },
+    {
+      "id": "taric",
+      "name": "Taric",
+      "title": "the Shield of Valoran",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 3.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Middle', 'Support'}",
+      "herotype": "Support"
+    },
+    {
+      "id": "teemo",
+      "name": "Teemo",
+      "title": "the Swift Scout",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Jungle', 'Support', 'Top'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "thresh",
+      "name": "Thresh",
+      "title": "the Chain Warden",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 2.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 3.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Support'}",
+      "herotype": "Support"
+    },
+    {
+      "id": "tristana",
+      "name": "Tristana",
+      "title": "the Yordle Gunner",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle', 'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "trundle",
+      "name": "Trundle",
+      "title": "the Troll King",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 1.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "tryndamere",
+      "name": "Tryndamere",
+      "title": "the Barbarian King",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 1.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "twistedfate",
+      "name": "TwistedFate",
+      "title": "the Card Master",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle', 'Bottom', 'Top'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "twitch",
+      "name": "Twitch",
+      "title": "the Plague Rat",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Support', 'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "udyr",
+      "name": "Udyr",
+      "title": "the Spirit Walker",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "urgot",
+      "name": "Urgot",
+      "title": "the Dreadnought",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "varus",
+      "name": "Varus",
+      "title": "the Arrow of Retribution",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "vayne",
+      "name": "Vayne",
+      "title": "the Night Hunter",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Bottom', 'Top'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "veigar",
+      "name": "Veigar",
+      "title": "the Tiny Master of Evil",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle', 'Support'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "velkoz",
+      "name": "Velkoz",
+      "title": "the Eye of the Void",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle', 'Support'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "vex",
+      "name": "Vex",
+      "title": "the Gloomist",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "vi",
+      "name": "Vi",
+      "title": "the Piltover Enforcer",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 3.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "viego",
+      "name": "Viego",
+      "title": "The Ruined King",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "viktor",
+      "name": "Viktor",
+      "title": "the Herald of the Arcane",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "vladimir",
+      "name": "Vladimir",
+      "title": "the Crimson Reaper",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 1.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle', 'Top'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "volibear",
+      "name": "Volibear",
+      "title": "the Relentless Storm",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "warwick",
+      "name": "Warwick",
+      "title": "the Uncaged Wrath of Zaun",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "monkeyking",
+      "name": "MonkeyKing",
+      "title": "the Monkey King",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "xayah",
+      "name": "Xayah",
+      "title": "the Rebel",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 2.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "xerath",
+      "name": "Xerath",
+      "title": "the Magus Ascendant",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle', 'Support'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "xinzhao",
+      "name": "XinZhao",
+      "title": "the Seneschal of Demacia",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "yasuo",
+      "name": "Yasuo",
+      "title": "the Unforgiven",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 3.0,
+        "utility": 2.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Melee",
+      "position": "{'Middle', 'Bottom', 'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "yone",
+      "name": "Yone",
+      "title": "the Unforgotten",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Melee",
+      "position": "{'Middle', 'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "yorick",
+      "name": "Yorick",
+      "title": "Shepherd of Souls",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 2.0,
+        "control": 2.0,
+        "mobility": 1.0,
+        "utility": 2.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Melee",
+      "position": "{'Top'}",
+      "herotype": "Fighter"
+    },
+    {
+      "id": "yuumi",
+      "name": "Yuumi",
+      "title": "the Magical Cat",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 1.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 3.0,
+        "utility": 3.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Support'}",
+      "herotype": "Support"
+    },
+    {
+      "id": "zac",
+      "name": "Zac",
+      "title": "the Secret Weapon",
+      "role": "Fighter",
+      "difficulty": 1,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 3.0,
+        "control": 3.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 1.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Support', 'Top'}",
+      "herotype": "Tank"
+    },
+    {
+      "id": "zed",
+      "name": "Zed",
+      "title": "the Master of Shadows",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 1.0,
+        "mobility": 3.0,
+        "utility": 1.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Melee",
+      "position": "{'Jungle', 'Middle'}",
+      "herotype": "Assassin"
+    },
+    {
+      "id": "zeri",
+      "name": "Zeri",
+      "title": "The Spark of Zaun",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 3.0,
+        "utility": 0.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Bottom'}",
+      "herotype": "Marksman"
+    },
+    {
+      "id": "ziggs",
+      "name": "Ziggs",
+      "title": "the Hexplosives Expert",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle', 'Bottom'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "zilean",
+      "name": "Zilean",
+      "title": "the Chronokeeper",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 2.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 3.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Support'}",
+      "herotype": "Support"
+    },
+    {
+      "id": "zoe",
+      "name": "Zoe",
+      "title": "the Aspect of Twilight",
+      "role": "Fighter",
+      "difficulty": 3,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 2.0,
+        "mobility": 2.0,
+        "utility": 1.0,
+        "difficulty": 3.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Middle'}",
+      "herotype": "Mage"
+    },
+    {
+      "id": "zyra",
+      "name": "Zyra",
+      "title": "Rise of the Thorns",
+      "role": "Fighter",
+      "difficulty": 2,
+      "tags": [
+        "Fighter"
+      ],
+      "attributes": {
+        "damage": 3.0,
+        "toughness": 1.0,
+        "control": 3.0,
+        "mobility": 1.0,
+        "utility": 1.0,
+        "difficulty": 2.0
+      },
+      "range_type": "Ranged",
+      "position": "{'Support'}",
+      "herotype": "Mage"
+    }
+  ]
+}
