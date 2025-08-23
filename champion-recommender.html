@@ -1516,8 +1516,7 @@
                 ];
                 
                 const treeWeights = weights[treeId];
-                let bestScore = -1;
-                let bestChampion = null;
+                const candidates = [];
                 
                 for (const [name, champion] of Object.entries(allChampions)) {
                     let score = 0;
@@ -1530,20 +1529,25 @@
                     if (features.playstyle === 'aggressive' && champion.damage >= 8) score += treeWeights[4] * 2;
                     if (features.playstyle === 'defensive' && champion.toughness >= 7) score += treeWeights[4] * 2;
                     
-                    if (score > bestScore) {
-                        bestScore = score;
-                        bestChampion = name;
-                    }
+                    // Add randomness to prevent same results
+                    score += Math.random() * 15;
+                    
+                    candidates.push({ name, score });
                 }
                 
-                return bestChampion;
+                // Apply diversity bonus and sort
+                const diverseCandidates = applyDiversityBonus(candidates, recentRecommendations);
+                diverseCandidates.sort((a, b) => b.score - a.score);
+                const topCandidates = diverseCandidates.slice(0, Math.min(12, diverseCandidates.length));
+                const randomIndex = Math.floor(Math.random() * topCandidates.length);
+                
+                return topCandidates[randomIndex].name;
             }
         }
 
         class SimpleDecisionTree {
             predict(features) {
-                let bestScore = -1;
-                let bestChampion = null;
+                const candidates = [];
                 
                 for (const [name, champion] of Object.entries(allChampions)) {
                     let score = 0;
@@ -1565,15 +1569,37 @@
                         }
                     }
                     
-                    if (score > bestScore) {
-                        bestScore = score;
-                        bestChampion = name;
+                    // Add exploration bonus for variety
+                    score += Math.random() * 25;
+                    
+                    candidates.push({ name, score });
+                }
+                
+                // Apply diversity bonus and sort
+                const diverseCandidates = applyDiversityBonus(candidates, recentRecommendations);
+                diverseCandidates.sort((a, b) => b.score - a.score);
+                const topCandidates = diverseCandidates.slice(0, Math.min(10, diverseCandidates.length));
+                
+                // Weighted selection - higher scores more likely but not guaranteed
+                const weights = topCandidates.map((_, i) => Math.pow(0.7, i));
+                const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+                let random = Math.random() * totalWeight;
+                
+                for (let i = 0; i < topCandidates.length; i++) {
+                    random -= weights[i];
+                    if (random <= 0) {
+                        return {
+                            champion: topCandidates[i].name,
+                            confidence: Math.min(95, Math.max(65, topCandidates[i].score * 0.8)),
+                            algorithm: 'Decision Tree'
+                        };
                     }
                 }
                 
+                // Fallback
                 return {
-                    champion: bestChampion,
-                    confidence: Math.min(95, Math.max(65, bestScore * 0.8)),
+                    champion: topCandidates[0].name,
+                    confidence: Math.min(95, Math.max(65, topCandidates[0].score * 0.8)),
                     algorithm: 'Decision Tree'
                 };
             }
@@ -1594,36 +1620,44 @@
                     distance += Math.abs(features.damage - champion.damage) * 0.3;
                     distance += Math.abs(features.toughness - champion.toughness) * 0.3;
                     
+                    // Add small random noise for diversity
+                    distance += Math.random() * 0.8;
+                    
                     distances.push({ champion: name, distance: distance });
                 }
                 
-                // Get 3 nearest neighbors
+                // Get more neighbors for variety (5-8 instead of 3)
                 distances.sort((a, b) => a.distance - b.distance);
-                const neighbors = distances.slice(0, 3);
+                const k = 5 + Math.floor(Math.random() * 4); // Random k between 5-8
+                const neighbors = distances.slice(0, k);
                 
-                // Weighted vote
+                // Weighted vote with randomness
                 let totalWeight = 0;
                 const votes = {};
                 
                 neighbors.forEach(neighbor => {
                     const weight = neighbor.distance === 0 ? 1 : 1 / (neighbor.distance + 0.1);
-                    votes[neighbor.champion] = (votes[neighbor.champion] || 0) + weight;
-                    totalWeight += weight;
+                    // Add randomness to voting
+                    const randomizedWeight = weight * (0.7 + Math.random() * 0.6);
+                    votes[neighbor.champion] = (votes[neighbor.champion] || 0) + randomizedWeight;
+                    totalWeight += randomizedWeight;
                 });
                 
-                let bestChampion = null;
-                let bestScore = 0;
+                // Convert to array and add exploration
+                const candidates = Object.entries(votes).map(([champion, score]) => ({
+                    champion,
+                    score: score + Math.random() * (totalWeight * 0.2)
+                }));
                 
-                for (const [champion, score] of Object.entries(votes)) {
-                    if (score > bestScore) {
-                        bestScore = score;
-                        bestChampion = champion;
-                    }
-                }
+                // Apply diversity bonus and sort
+                const diverseCandidates = applyDiversityBonus(candidates, recentRecommendations);
+                diverseCandidates.sort((a, b) => b.score - a.score);
+                const topCandidates = diverseCandidates.slice(0, Math.min(7, diverseCandidates.length));
+                const selectedCandidate = topCandidates[Math.floor(Math.random() * topCandidates.length)];
                 
                 return {
-                    champion: bestChampion,
-                    confidence: Math.min(95, Math.max(70, (bestScore / totalWeight) * 100)),
+                    champion: selectedCandidate.champion,
+                    confidence: Math.min(95, Math.max(70, (selectedCandidate.score / totalWeight) * 100)),
                     algorithm: 'K-Nearest Neighbors'
                 };
             }
@@ -1633,6 +1667,43 @@
         let currentQuestion = 1;
         let answers = {};
         let mlResults = {};
+        
+        // Diversity tracking to prevent repetitive recommendations
+        let recentRecommendations = JSON.parse(localStorage.getItem('recentChampions') || '[]');
+        
+        function updateRecentRecommendations(champions) {
+            // Add new champions to recent list
+            champions.forEach(champion => {
+                if (!recentRecommendations.includes(champion)) {
+                    recentRecommendations.unshift(champion);
+                }
+            });
+            
+            // Keep only last 15 recommendations
+            recentRecommendations = recentRecommendations.slice(0, 15);
+            localStorage.setItem('recentChampions', JSON.stringify(recentRecommendations));
+        }
+        
+        function applyDiversityBonus(candidates, recentChampions) {
+            return candidates.map(candidate => {
+                let diversityBonus = 0;
+                
+                // Bonus for champions not recently recommended
+                if (!recentChampions.includes(candidate.name || candidate.champion)) {
+                    diversityBonus += 20;
+                }
+                
+                // Extra bonus for champions never recommended
+                if (!recentRecommendations.includes(candidate.name || candidate.champion)) {
+                    diversityBonus += 30;
+                }
+                
+                return {
+                    ...candidate,
+                    score: (candidate.score || 0) + diversityBonus
+                };
+            });
+        }
 
         const algorithms = {
             'random-forest': new SimpleRandomForest(),
@@ -1977,6 +2048,9 @@
             const champions = Object.values(mlResults).map(r => r.champion);
             const consensus = findConsensus(champions);
             const winner = findWinner(mlResults);
+            
+            // Update diversity tracking with new recommendations
+            updateRecentRecommendations(champions);
             
             // Save user's final results
             saveUserResults(consensus, winner);
