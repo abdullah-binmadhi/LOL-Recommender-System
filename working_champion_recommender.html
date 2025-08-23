@@ -177,6 +177,15 @@
             padding: 20px;
         }
 
+        .champion-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid #667eea;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
         .champion-name {
             font-size: 2rem;
             font-weight: bold;
@@ -284,20 +293,20 @@
     <script>
         // Compact Champion Database - All 173 Champions
         const allChampions = {
-            'Jinx': { role: 'Marksman', difficulty: 6, damage: 9, toughness: 2, control: 7, mobility: 6, utility: 6 },
-            'Ashe': { role: 'Marksman', difficulty: 4, damage: 7, toughness: 3, control: 8, mobility: 4, utility: 8 },
-            'Yasuo': { role: 'Fighter', difficulty: 10, damage: 8, toughness: 4, control: 6, mobility: 8, utility: 4 },
-            'Lux': { role: 'Mage', difficulty: 5, damage: 7, toughness: 2, control: 8, mobility: 4, utility: 7 },
-            'Garen': { role: 'Fighter', difficulty: 2, damage: 6, toughness: 7, control: 5, mobility: 5, utility: 5 },
-            'Thresh': { role: 'Support', difficulty: 7, damage: 6, toughness: 6, control: 9, mobility: 5, utility: 9 },
-            'Ahri': { role: 'Mage', difficulty: 5, damage: 8, toughness: 3, control: 5, mobility: 7, utility: 6 },
-            'Darius': { role: 'Fighter', difficulty: 4, damage: 9, toughness: 6, control: 5, mobility: 4, utility: 4 },
-            'Zed': { role: 'Assassin', difficulty: 8, damage: 9, toughness: 2, control: 5, mobility: 8, utility: 4 },
-            'Leona': { role: 'Tank', difficulty: 4, damage: 4, toughness: 9, control: 9, mobility: 4, utility: 8 },
-            'Ezreal': { role: 'Marksman', difficulty: 7, damage: 7, toughness: 2, control: 4, mobility: 7, utility: 5 },
-            'Annie': { role: 'Mage', difficulty: 3, damage: 8, toughness: 2, control: 6, mobility: 3, utility: 5 },
-            'Master Yi': { role: 'Assassin', difficulty: 4, damage: 10, toughness: 4, control: 2, mobility: 7, utility: 2 },
-            'Soraka': { role: 'Support', difficulty: 3, damage: 3, toughness: 2, control: 4, mobility: 3, utility: 10 },
+            'Jinx': { role: 'Marksman', difficulty: 6, damage: 9, toughness: 2, control: 7, mobility: 6, utility: 6, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Jinx.png' },
+            'Ashe': { role: 'Marksman', difficulty: 4, damage: 7, toughness: 3, control: 8, mobility: 4, utility: 8, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ashe.png' },
+            'Yasuo': { role: 'Fighter', difficulty: 10, damage: 8, toughness: 4, control: 6, mobility: 8, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Yasuo.png' },
+            'Lux': { role: 'Mage', difficulty: 5, damage: 7, toughness: 2, control: 8, mobility: 4, utility: 7, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Lux.png' },
+            'Garen': { role: 'Fighter', difficulty: 2, damage: 6, toughness: 7, control: 5, mobility: 5, utility: 5, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Garen.png' },
+            'Thresh': { role: 'Support', difficulty: 7, damage: 6, toughness: 6, control: 9, mobility: 5, utility: 9, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Thresh.png' },
+            'Ahri': { role: 'Mage', difficulty: 5, damage: 8, toughness: 3, control: 5, mobility: 7, utility: 6, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ahri.png' },
+            'Darius': { role: 'Fighter', difficulty: 4, damage: 9, toughness: 6, control: 5, mobility: 4, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Darius.png' },
+            'Zed': { role: 'Assassin', difficulty: 8, damage: 9, toughness: 2, control: 5, mobility: 8, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Zed.png' },
+            'Leona': { role: 'Tank', difficulty: 4, damage: 4, toughness: 9, control: 9, mobility: 4, utility: 8, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Leona.png' },
+            'Ezreal': { role: 'Marksman', difficulty: 7, damage: 7, toughness: 2, control: 4, mobility: 7, utility: 5, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ezreal.png' },
+            'Annie': { role: 'Mage', difficulty: 3, damage: 8, toughness: 2, control: 6, mobility: 3, utility: 5, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Annie.png' },
+            'Master Yi': { role: 'Assassin', difficulty: 4, damage: 10, toughness: 4, control: 2, mobility: 7, utility: 2, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/MasterYi.png' },
+            'Soraka': { role: 'Support', difficulty: 3, damage: 3, toughness: 2, control: 4, mobility: 3, utility: 10, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Soraka.png' },
             'Malphite': { role: 'Tank', difficulty: 2, damage: 4, toughness: 9, control: 7, mobility: 5, utility: 7 },
             'Katarina': { role: 'Assassin', difficulty: 8, damage: 9, toughness: 2, control: 4, mobility: 8, utility: 4 },
             'Jhin': { role: 'Marksman', difficulty: 6, damage: 9, toughness: 2, control: 8, mobility: 4, utility: 7 },
@@ -482,7 +491,10 @@
 
             if (recommendation) {
                 // Update recommendation display
+                const championData = allChampions[recommendation.name];
                 document.getElementById('main-champion').innerHTML = `
+                    <img src="${championData.image}" alt="${recommendation.name}" class="champion-image" 
+                         onerror="this.src='https://via.placeholder.com/120x120?text=${recommendation.name}'">
                     <div class="champion-name">${recommendation.name}</div>
                     <div class="champion-role">${recommendation.role}</div>
                     <div class="confidence">

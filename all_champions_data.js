@@ -11,6 +11,10 @@ const championDatabase = {
         tags: ['Mage', 'Assassin'],
         attributes: { damage: 8, toughness: 3, control: 6, mobility: 8, utility: 5 },
         description: 'Innately connected to the latent power of Runeterra, Ahri is a vastaya who can reshape magic into orbs of raw energy.',
+        image: {
+            square: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ahri.png',
+            splash: 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_0.jpg'
+        },
         abilities: [
             { key: 'P', name: 'Essence Theft', description: 'After killing 9 minions or monsters, Ahri heals when damaging enemies with her abilities.' },
             { key: 'Q', name: 'Orb of Deception', description: 'Ahri sends out and pulls back her orb, dealing magic damage on the way out and true damage on the way back.' },
@@ -39,6 +43,10 @@ const championDatabase = {
         tags: ['Assassin'],
         attributes: { damage: 8, toughness: 3, control: 4, mobility: 9, utility: 4 },
         description: 'Abandoning the Kinkou Order and her title of the Fist of Shadow, Akali now strikes alone, ready to be the deadly weapon her people need.',
+        image: {
+            square: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Akali.png',
+            splash: 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_0.jpg'
+        },
         abilities: [
             { key: 'P', name: 'Assassin\'s Mark', description: 'Dealing ability damage to a champion creates a ring around them. Exiting the ring empowers Akali\'s next basic attack.' },
             { key: 'Q', name: 'Five Point Strike', description: 'Akali throws kunai in an arc, dealing damage and restoring energy if cast at maximum range.' },
@@ -67,6 +75,10 @@ const championDatabase = {
         tags: ['Fighter', 'Mage'],
         attributes: { damage: 8, toughness: 6, control: 4, mobility: 7, utility: 4 },
         description: 'Bearing her crescent moonblade, Diana fights as a warrior of the Lunari—a faith all but quashed in the lands around Mount Targon.',
+        image: {
+            square: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Diana.png',
+            splash: 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Diana_0.jpg'
+        },
         abilities: [
             { key: 'P', name: 'Moonsilver Blade', description: 'Diana\'s third basic attack cleaves nearby enemies for bonus magic damage.' },
             { key: 'Q', name: 'Crescent Strike', description: 'Diana swings her blade to unleash a bolt of lunar energy that deals damage in an arc.' },
@@ -95,6 +107,10 @@ const championDatabase = {
         tags: ['Assassin', 'Mage'],
         attributes: { damage: 8, toughness: 3, control: 7, mobility: 9, utility: 6 },
         description: 'A prodigy from the rough streets of Zaun, Ekko manipulates time to twist any situation to his advantage.',
+        image: {
+            square: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ekko.png',
+            splash: 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ekko_0.jpg'
+        },
         abilities: [
             { key: 'P', name: 'Z-Drive Resonance', description: 'Ekko\'s damaging spells and attacks build up Resonance stacks on enemies. At 3 stacks, he deals bonus damage and gains movement speed.' },
             { key: 'Q', name: 'Timewinder', description: 'Ekko throws a temporal grenade that expands into a time-distortion field, slowing and damaging enemies.' },
@@ -123,6 +139,10 @@ const championDatabase = {
         tags: ['Assassin', 'Mage'],
         attributes: { damage: 9, toughness: 2, control: 4, mobility: 7, utility: 3 },
         description: 'Within the dark seams of Runeterra, the demon Evelynn searches for her next victim.',
+        image: {
+            square: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Evelynn.png',
+            splash: 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Evelynn_0.jpg'
+        },
         abilities: [
             { key: 'P', name: 'Demon Shade', description: 'Evelynn enters Demon Shade when out of combat, gaining camouflage and increased movement speed.' },
             { key: 'Q', name: 'Hate Spike', description: 'Evelynn strikes out with her lasher, dealing damage to the first unit hit.' },

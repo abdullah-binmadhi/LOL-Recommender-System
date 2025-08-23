@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Champion Images Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1e2328;
+            color: white;
+            padding: 20px;
+        }
+        
+        .champion-card {
+            background: #3c3c41;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .champion-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid #c89b3c;
+        }
+        
+        .champion-splash {
+            width: 200px;
+            height: 120px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+        
+        .champion-info h3 {
+            margin: 0 0 5px 0;
+            color: #f0e6d2;
+        }
+        
+        .champion-role {
+            color: #c89b3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>League of Legends Champion Images Demo</h1>
+    
+    <div class="champion-card">
+        <img src="https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ahri.png" 
+             alt="Ahri" class="champion-image">
+        <div class="champion-info">
+            <h3>Ahri</h3>
+            <div class="champion-role">Assassin</div>
+            <p>The Nine-Tailed Fox</p>
+        </div>
+    </div>
+    
+    <div class="champion-card">
+        <img src="https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Akali.png" 
+             alt="Akali" class="champion-image">
+        <div class="champion-info">
+            <h3>Akali</h3>
+            <div class="champion-role">Assassin</div>
+            <p>The Rogue Assassin</p>
+        </div>
+    </div>
+    
+    <h2>Splash Art Examples</h2>
+    
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        <div>
+            <h4>Ahri Splash</h4>
+            <img src="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_0.jpg" 
+                 alt="Ahri Splash" class="champion-splash">
+        </div>
+        <div>
+            <h4>Akali Splash</h4>
+            <img src="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_0.jpg" 
+                 alt="Akali Splash" class="champion-splash">
+        </div>
+    </div>
+
+    <script>
+        // Example of how to use the image data from your champion database
+        const championDatabase = {
+            'Ahri': {
+                name: 'Ahri',
+                title: 'the Nine-Tailed Fox',
+                role: 'Assassin',
+                image: {
+                    square: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ahri.png',
+                    splash: 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_0.jpg'
+                }
+            }
+        };
+        
+        // Function to create champion card with image
+        function createChampionCard(championName) {
+            const champion = championDatabase[championName];
+            if (!champion) return null;
+            
+            return `
+                <div class="champion-card">
+                    <img src="${champion.image.square}" 
+                         alt="${champion.name}" 
+                         class="champion-image"
+                         onerror="this.src='https://via.placeholder.com/80x80?text=${champion.name}'">
+                    <div class="champion-info">
+                        <h3>${champion.name}</h3>
+                        <div class="champion-role">${champion.role}</div>
+                        <p>${champion.title}</p>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
