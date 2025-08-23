@@ -1323,16 +1323,16 @@
     <script>      
   // Champion Database (50 champions for optimal performance)
         const allChampions = {
-            'Jinx': { role: 'Marksman', difficulty: 6, damage: 9, toughness: 2, control: 7, mobility: 6, utility: 6, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Jinx.png', stats: { winRate: 51.8, pickRate: 12.3, banRate: 4.2, tier: 'A', trend: 'stable' } },
-            'Ashe': { role: 'Marksman', difficulty: 4, damage: 7, toughness: 3, control: 8, mobility: 4, utility: 8, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ashe.png', stats: { winRate: 50.9, pickRate: 8.7, banRate: 1.8, tier: 'B+', trend: 'rising' } },
-            'Yasuo': { role: 'Fighter', difficulty: 10, damage: 8, toughness: 4, control: 6, mobility: 8, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Yasuo.png', stats: { winRate: 49.2, pickRate: 15.6, banRate: 28.4, tier: 'B', trend: 'falling' } },
-            'Lux': { role: 'Mage', difficulty: 5, damage: 7, toughness: 2, control: 8, mobility: 4, utility: 7, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Lux.png', stats: { winRate: 52.3, pickRate: 9.1, banRate: 3.7, tier: 'A', trend: 'stable' } },
-            'Garen': { role: 'Fighter', difficulty: 2, damage: 6, toughness: 7, control: 5, mobility: 5, utility: 5, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Garen.png', stats: { winRate: 53.1, pickRate: 6.8, banRate: 2.3, tier: 'A+', trend: 'rising' } },
-            'Thresh': { role: 'Support', difficulty: 7, damage: 6, toughness: 6, control: 9, mobility: 5, utility: 9, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Thresh.png', stats: { winRate: 50.2, pickRate: 11.4, banRate: 6.8, tier: 'B+', trend: 'stable' } },
-            'Ahri': { role: 'Mage', difficulty: 5, damage: 8, toughness: 3, control: 5, mobility: 7, utility: 6, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ahri.png', stats: { winRate: 52.1, pickRate: 8.4, banRate: 2.1, tier: 'A', trend: 'stable' } },
-            'Darius': { role: 'Fighter', difficulty: 4, damage: 9, toughness: 6, control: 5, mobility: 4, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Darius.png', stats: { winRate: 47.8, pickRate: 5.4, banRate: 7.2, tier: 'C', trend: 'falling' } },
-            'Zed': { role: 'Assassin', difficulty: 8, damage: 9, toughness: 2, control: 5, mobility: 8, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Zed.png', stats: { winRate: 49.5, pickRate: 7.8, banRate: 12.4, tier: 'B', trend: 'stable' } },
-            'Leona': { role: 'Tank', difficulty: 4, damage: 4, toughness: 9, control: 9, mobility: 4, utility: 8, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Leona.png', stats: { winRate: 48.7, pickRate: 9.2, banRate: 4.1, tier: 'C+', trend: 'stable' } },
+            'Jinx': { role: 'Marksman', positions: ['ADC'], difficulty: 6, damage: 9, toughness: 2, control: 7, mobility: 6, utility: 6, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Jinx.png', stats: { winRate: 51.8, pickRate: 12.3, banRate: 4.2, tier: 'A', trend: 'stable' } },
+            'Ashe': { role: 'Marksman', positions: ['ADC'], difficulty: 4, damage: 7, toughness: 3, control: 8, mobility: 4, utility: 8, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ashe.png', stats: { winRate: 50.9, pickRate: 8.7, banRate: 1.8, tier: 'B+', trend: 'rising' } },
+            'Yasuo': { role: 'Fighter', positions: ['Mid', 'Top'], difficulty: 10, damage: 8, toughness: 4, control: 6, mobility: 8, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Yasuo.png', stats: { winRate: 49.2, pickRate: 15.6, banRate: 28.4, tier: 'B', trend: 'falling' } },
+            'Lux': { role: 'Mage', positions: ['Mid', 'Support'], difficulty: 5, damage: 7, toughness: 2, control: 8, mobility: 4, utility: 7, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Lux.png', stats: { winRate: 52.3, pickRate: 9.1, banRate: 3.7, tier: 'A', trend: 'stable' } },
+            'Garen': { role: 'Fighter', positions: ['Top'], difficulty: 2, damage: 6, toughness: 7, control: 5, mobility: 5, utility: 5, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Garen.png', stats: { winRate: 53.1, pickRate: 6.8, banRate: 2.3, tier: 'A+', trend: 'rising' } },
+            'Thresh': { role: 'Support', positions: ['Support'], difficulty: 7, damage: 6, toughness: 6, control: 9, mobility: 5, utility: 9, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Thresh.png', stats: { winRate: 50.2, pickRate: 11.4, banRate: 6.8, tier: 'B+', trend: 'stable' } },
+            'Ahri': { role: 'Mage', positions: ['Mid'], difficulty: 5, damage: 8, toughness: 3, control: 5, mobility: 7, utility: 6, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ahri.png', stats: { winRate: 52.1, pickRate: 8.4, banRate: 2.1, tier: 'A', trend: 'stable' } },
+            'Darius': { role: 'Fighter', positions: ['Top'], difficulty: 4, damage: 9, toughness: 6, control: 5, mobility: 4, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Darius.png', stats: { winRate: 47.8, pickRate: 5.4, banRate: 7.2, tier: 'C', trend: 'falling' } },
+            'Zed': { role: 'Assassin', positions: ['Mid'], difficulty: 8, damage: 9, toughness: 2, control: 5, mobility: 8, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Zed.png', stats: { winRate: 49.5, pickRate: 7.8, banRate: 12.4, tier: 'B', trend: 'stable' } },
+            'Leona': { role: 'Tank', positions: ['Support'], difficulty: 4, damage: 4, toughness: 9, control: 9, mobility: 4, utility: 8, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Leona.png', stats: { winRate: 48.7, pickRate: 9.2, banRate: 4.1, tier: 'C+', trend: 'stable' } },
             'Ezreal': { role: 'Marksman', difficulty: 7, damage: 7, toughness: 2, control: 4, mobility: 7, utility: 5 },
             'Annie': { role: 'Mage', difficulty: 3, damage: 8, toughness: 2, control: 6, mobility: 3, utility: 5 },
             'Master Yi': { role: 'Assassin', difficulty: 4, damage: 10, toughness: 4, control: 2, mobility: 7, utility: 2 },
@@ -1500,11 +1500,24 @@
                     { value: "Assassin", text: "Assassin", description: "High damage, eliminate key targets" },
                     { value: "Marksman", text: "Marksman", description: "Ranged physical damage dealer" },
                     { value: "Mage", text: "Mage", description: "Magical damage and utility" },
-                    { value: "Support", text: "Support", description: "Help and protect teammates" }
+                    { value: "Support", text: "Support", description: "Help and protect teammates" },
+                    { value: "No Preference", text: "No Preference", description: "I'm open to any role" }
                 ]
             },
             {
                 id: 2,
+                text: "What position/lane do you want to play?",
+                options: [
+                    { value: "Top", text: "Top Lane", description: "Solo lane, usually tanky fighters" },
+                    { value: "Jungle", text: "Jungle", description: "Roam the map, gank lanes, control objectives" },
+                    { value: "Mid", text: "Mid Lane", description: "Solo lane, usually mages or assassins" },
+                    { value: "ADC", text: "ADC (Bot Lane)", description: "Attack Damage Carry, usually marksmen" },
+                    { value: "Support", text: "Support (Bot Lane)", description: "Help ADC, provide utility and vision" },
+                    { value: "No Preference", text: "No Preference", description: "I can play any position" }
+                ]
+            },
+            {
+                id: 3,
                 text: "What difficulty level are you comfortable with?",
                 options: [
                     { value: 2, text: "Beginner (1-3)", description: "Simple mechanics, easy to learn" },
@@ -1514,7 +1527,7 @@
                 ]
             },
             {
-                id: 3,
+                id: 4,
                 text: "How much damage do you want to deal?",
                 options: [
                     { value: 3, text: "Low", description: "Focus on utility and support" },
@@ -1524,7 +1537,7 @@
                 ]
             },
             {
-                id: 4,
+                id: 5,
                 text: "How tanky do you want to be?",
                 options: [
                     { value: 2, text: "Squishy", description: "Low health, high risk/reward" },
@@ -1534,13 +1547,22 @@
                 ]
             },
             {
-                id: 5,
+                id: 6,
                 text: "What's your preferred playstyle?",
                 options: [
                     { value: "aggressive", text: "Aggressive", description: "Take fights and make plays" },
                     { value: "balanced", text: "Balanced", description: "Adapt to the situation" },
                     { value: "defensive", text: "Defensive", description: "Play safe and scale" },
                     { value: "supportive", text: "Supportive", description: "Enable teammates" }
+                ]
+            },
+            {
+                id: 7,
+                text: "Do you prefer ranged or melee champions?",
+                options: [
+                    { value: "ranged", text: "Ranged", description: "Attack from a distance" },
+                    { value: "melee", text: "Melee", description: "Close combat fighting" },
+                    { value: "no_preference", text: "No Preference", description: "Either is fine" }
                 ]
             }
         ];
@@ -1574,13 +1596,13 @@
             }
             
             singleTreePredict(features, treeId) {
-                // Simplified tree logic with different weights per tree
+                // Enhanced tree logic with role and position priority
                 const weights = [
-                    [40, 4, 3, 3, 2], // Tree 1 weights
-                    [35, 5, 4, 2, 3], // Tree 2 weights
-                    [45, 3, 3, 4, 2], // Tree 3 weights
-                    [38, 4, 2, 3, 4], // Tree 4 weights
-                    [42, 3, 4, 3, 2]  // Tree 5 weights
+                    [50, 30, 4, 3, 3, 2], // Tree 1 weights: [role, position, difficulty, damage, toughness, playstyle]
+                    [45, 35, 5, 4, 2, 3], // Tree 2 weights
+                    [55, 25, 3, 3, 4, 2], // Tree 3 weights
+                    [48, 32, 4, 2, 3, 4], // Tree 4 weights
+                    [52, 28, 3, 4, 3, 2]  // Tree 5 weights
                 ];
                 
                 const treeWeights = weights[treeId];
@@ -1589,13 +1611,25 @@
                 for (const [name, champion] of Object.entries(allChampions)) {
                     let score = 0;
                     
-                    if (features.role === champion.role) score += treeWeights[0];
-                    score += Math.max(0, 10 - Math.abs(features.difficulty - champion.difficulty)) * treeWeights[1];
-                    score += Math.max(0, 10 - Math.abs(features.damage - champion.damage)) * treeWeights[2];
-                    score += Math.max(0, 10 - Math.abs(features.toughness - champion.toughness)) * treeWeights[3];
+                    // Role matching (highest priority)
+                    if (features.role === 'No Preference' || features.role === champion.role) {
+                        score += treeWeights[0];
+                    }
                     
-                    if (features.playstyle === 'aggressive' && champion.damage >= 8) score += treeWeights[4] * 2;
-                    if (features.playstyle === 'defensive' && champion.toughness >= 7) score += treeWeights[4] * 2;
+                    // Position matching (second highest priority)
+                    if (features.position === 'No Preference' || 
+                        (champion.positions && champion.positions.includes(features.position))) {
+                        score += treeWeights[1];
+                    }
+                    
+                    // Other attributes
+                    score += Math.max(0, 10 - Math.abs(features.difficulty - champion.difficulty)) * treeWeights[2];
+                    score += Math.max(0, 10 - Math.abs(features.damage - champion.damage)) * treeWeights[3];
+                    score += Math.max(0, 10 - Math.abs(features.toughness - champion.toughness)) * treeWeights[4];
+                    
+                    // Playstyle bonuses
+                    if (features.playstyle === 'aggressive' && champion.damage >= 8) score += treeWeights[5] * 2;
+                    if (features.playstyle === 'defensive' && champion.toughness >= 7) score += treeWeights[5] * 2;
                     
                     // Add randomness to prevent same results
                     score += Math.random() * 15;
@@ -1620,25 +1654,45 @@
                 for (const [name, champion] of Object.entries(allChampions)) {
                     let score = 0;
                     
-                    // Decision tree logic
-                    if (features.role === champion.role) {
-                        score += 50;
+                    // Enhanced decision tree logic with role and position priority
+                    
+                    // Role matching (highest priority)
+                    if (features.role === 'No Preference' || features.role === champion.role) {
+                        score += 60;
                         
-                        if (Math.abs(features.difficulty - champion.difficulty) <= 2) {
-                            score += 30;
+                        // Position matching (second priority)
+                        if (features.position === 'No Preference' || 
+                            (champion.positions && champion.positions.includes(features.position))) {
+                            score += 40;
                             
-                            if (Math.abs(features.damage - champion.damage) <= 2) {
-                                score += 20;
-                            }
-                            
-                            if (Math.abs(features.toughness - champion.toughness) <= 2) {
-                                score += 15;
+                            // Difficulty matching
+                            if (Math.abs(features.difficulty - champion.difficulty) <= 2) {
+                                score += 30;
+                                
+                                // Damage preference
+                                if (Math.abs(features.damage - champion.damage) <= 2) {
+                                    score += 20;
+                                }
+                                
+                                // Toughness preference
+                                if (Math.abs(features.toughness - champion.toughness) <= 2) {
+                                    score += 15;
+                                }
                             }
                         }
+                    } else {
+                        // Heavy penalty for wrong role
+                        score -= 30;
                     }
                     
-                    // Add exploration bonus for variety
-                    score += Math.random() * 25;
+                    // Position penalty if specified but doesn't match
+                    if (features.position !== 'No Preference' && 
+                        champion.positions && !champion.positions.includes(features.position)) {
+                        score -= 20;
+                    }
+                    
+                    // Add small exploration bonus for variety
+                    score += Math.random() * 15;
                     
                     candidates.push({ name, score });
                 }
@@ -1680,8 +1734,16 @@
                 for (const [name, champion] of Object.entries(allChampions)) {
                     let distance = 0;
                     
-                    // Role distance (categorical)
-                    if (features.role !== champion.role) distance += 5;
+                    // Role distance (highest weight)
+                    if (features.role !== 'No Preference' && features.role !== champion.role) {
+                        distance += 8; // Increased penalty for wrong role
+                    }
+                    
+                    // Position distance (second highest weight)
+                    if (features.position !== 'No Preference' && 
+                        champion.positions && !champion.positions.includes(features.position)) {
+                        distance += 6; // High penalty for wrong position
+                    }
                     
                     // Numerical distances
                     distance += Math.abs(features.difficulty - champion.difficulty) * 0.5;
@@ -2086,10 +2148,12 @@
             // Convert answers to features
             const userFeatures = {
                 role: answers[1],
-                difficulty: answers[2] || 5,
-                damage: answers[3] || 5,
-                toughness: answers[4] || 5,
-                playstyle: answers[5] || 'balanced'
+                position: answers[2],
+                difficulty: answers[3] || 5,
+                damage: answers[4] || 5,
+                toughness: answers[5] || 5,
+                playstyle: answers[6] || 'balanced',
+                range: answers[7] || 'no_preference'
             };
             
             // Run all algorithms and measure performance
