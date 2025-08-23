@@ -1,12 +1,16 @@
 # 🎮 League of Legends Champion Recommender
 
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Try_Now!-brightgreen?style=for-the-badge)](https://abdullah-binmadhi.github.io/LOL-Recommender-System/)
+
 An AI-powered champion recommendation system that uses 3 machine learning algorithms to suggest the perfect League of Legends champion based on your playstyle preferences.
 
 ## 🌐 Live Website
 
-**GitHub Pages URL:** `https://yourusername.github.io/your-repo-name`
+### 🚀 **[Try the Champion Recommender Live!](https://abdullah-binmadhi.github.io/LOL-Recommender-System/)**
 
-*(Replace with your actual GitHub username and repository name)*
+**Direct Link:** https://abdullah-binmadhi.github.io/LOL-Recommender-System/
+
+> Click the link above to use the AI-powered champion recommendation system right now!
 
 ## ✨ Features
 
