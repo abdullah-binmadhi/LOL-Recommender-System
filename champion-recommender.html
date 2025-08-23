@@ -213,11 +213,79 @@
             font-size: 0.8rem;
         }
 
+        .champion-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid #667eea;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .champion-image-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid #667eea;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
         .champion-name {
             font-size: 1.5rem;
             font-weight: bold;
             color: #333;
             margin-bottom: 5px;
+        }
+
+        .champion-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 8px;
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            margin: 5px 0;
+        }
+
+        .tier-S { background: #ff6b6b; color: white; }
+        .tier-A { background: #4ecdc4; color: white; }
+        .tier-B { background: #45b7d1; color: white; }
+        .tier-C { background: #96ceb4; color: white; }
+        .tier-D { background: #feca57; color: white; }
+
+        .trend-indicator {
+            display: inline-block;
+            margin-left: 5px;
         }
 
         .champion-role {
@@ -1255,16 +1323,16 @@
     <script>      
   // Champion Database (50 champions for optimal performance)
         const allChampions = {
-            'Jinx': { role: 'Marksman', difficulty: 6, damage: 9, toughness: 2, control: 7, mobility: 6, utility: 6 },
-            'Ashe': { role: 'Marksman', difficulty: 4, damage: 7, toughness: 3, control: 8, mobility: 4, utility: 8 },
-            'Yasuo': { role: 'Fighter', difficulty: 10, damage: 8, toughness: 4, control: 6, mobility: 8, utility: 4 },
-            'Lux': { role: 'Mage', difficulty: 5, damage: 7, toughness: 2, control: 8, mobility: 4, utility: 7 },
-            'Garen': { role: 'Fighter', difficulty: 2, damage: 6, toughness: 7, control: 5, mobility: 5, utility: 5 },
-            'Thresh': { role: 'Support', difficulty: 7, damage: 6, toughness: 6, control: 9, mobility: 5, utility: 9 },
-            'Ahri': { role: 'Mage', difficulty: 5, damage: 8, toughness: 3, control: 5, mobility: 7, utility: 6 },
-            'Darius': { role: 'Fighter', difficulty: 4, damage: 9, toughness: 6, control: 5, mobility: 4, utility: 4 },
-            'Zed': { role: 'Assassin', difficulty: 8, damage: 9, toughness: 2, control: 5, mobility: 8, utility: 4 },
-            'Leona': { role: 'Tank', difficulty: 4, damage: 4, toughness: 9, control: 9, mobility: 4, utility: 8 },
+            'Jinx': { role: 'Marksman', difficulty: 6, damage: 9, toughness: 2, control: 7, mobility: 6, utility: 6, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Jinx.png', stats: { winRate: 51.8, pickRate: 12.3, banRate: 4.2, tier: 'A', trend: 'stable' } },
+            'Ashe': { role: 'Marksman', difficulty: 4, damage: 7, toughness: 3, control: 8, mobility: 4, utility: 8, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ashe.png', stats: { winRate: 50.9, pickRate: 8.7, banRate: 1.8, tier: 'B+', trend: 'rising' } },
+            'Yasuo': { role: 'Fighter', difficulty: 10, damage: 8, toughness: 4, control: 6, mobility: 8, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Yasuo.png', stats: { winRate: 49.2, pickRate: 15.6, banRate: 28.4, tier: 'B', trend: 'falling' } },
+            'Lux': { role: 'Mage', difficulty: 5, damage: 7, toughness: 2, control: 8, mobility: 4, utility: 7, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Lux.png', stats: { winRate: 52.3, pickRate: 9.1, banRate: 3.7, tier: 'A', trend: 'stable' } },
+            'Garen': { role: 'Fighter', difficulty: 2, damage: 6, toughness: 7, control: 5, mobility: 5, utility: 5, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Garen.png', stats: { winRate: 53.1, pickRate: 6.8, banRate: 2.3, tier: 'A+', trend: 'rising' } },
+            'Thresh': { role: 'Support', difficulty: 7, damage: 6, toughness: 6, control: 9, mobility: 5, utility: 9, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Thresh.png', stats: { winRate: 50.2, pickRate: 11.4, banRate: 6.8, tier: 'B+', trend: 'stable' } },
+            'Ahri': { role: 'Mage', difficulty: 5, damage: 8, toughness: 3, control: 5, mobility: 7, utility: 6, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ahri.png', stats: { winRate: 52.1, pickRate: 8.4, banRate: 2.1, tier: 'A', trend: 'stable' } },
+            'Darius': { role: 'Fighter', difficulty: 4, damage: 9, toughness: 6, control: 5, mobility: 4, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Darius.png', stats: { winRate: 47.8, pickRate: 5.4, banRate: 7.2, tier: 'C', trend: 'falling' } },
+            'Zed': { role: 'Assassin', difficulty: 8, damage: 9, toughness: 2, control: 5, mobility: 8, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Zed.png', stats: { winRate: 49.5, pickRate: 7.8, banRate: 12.4, tier: 'B', trend: 'stable' } },
+            'Leona': { role: 'Tank', difficulty: 4, damage: 4, toughness: 9, control: 9, mobility: 4, utility: 8, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Leona.png', stats: { winRate: 48.7, pickRate: 9.2, banRate: 4.1, tier: 'C+', trend: 'stable' } },
             'Ezreal': { role: 'Marksman', difficulty: 7, damage: 7, toughness: 2, control: 4, mobility: 7, utility: 5 },
             'Annie': { role: 'Mage', difficulty: 3, damage: 8, toughness: 2, control: 6, mobility: 3, utility: 5 },
             'Master Yi': { role: 'Assassin', difficulty: 4, damage: 10, toughness: 4, control: 2, mobility: 7, utility: 2 },
@@ -2187,8 +2255,32 @@
                 consensusSection.innerHTML = `
                     <h3>🎯 Perfect Consensus!</h3>
                     <div class="consensus-champion">
+                        <img src="${allChampions[consensus.champions[0]].image}" alt="${consensus.champions[0]}" class="champion-image-large" 
+                             onerror="this.src='https://via.placeholder.com/120x120?text=${consensus.champions[0]}'">
                         <div class="champion-name">${consensus.champions[0]}</div>
                         <div class="champion-role">${allChampions[consensus.champions[0]].role}</div>
+                        
+                        <div class="champion-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">${allChampions[consensus.champions[0]].stats?.winRate || 'N/A'}%</div>
+                                <div class="stat-label">Win Rate</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${allChampions[consensus.champions[0]].stats?.pickRate || 'N/A'}%</div>
+                                <div class="stat-label">Pick Rate</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${allChampions[consensus.champions[0]].stats?.banRate || 'N/A'}%</div>
+                                <div class="stat-label">Ban Rate</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">
+                                    <span class="tier-badge tier-${allChampions[consensus.champions[0]].stats?.tier?.charAt(0) || 'C'}">${allChampions[consensus.champions[0]].stats?.tier || 'C'}</span>
+                                </div>
+                                <div class="stat-label">Tier</div>
+                            </div>
+                        </div>
+                        
                         <div class="algorithm-agreement">All 3 algorithms agree on this champion!</div>
                     </div>
                 `;
@@ -2197,8 +2289,32 @@
                 consensusSection.innerHTML = `
                     <h3>🤝 Majority Consensus</h3>
                     <div class="consensus-champion">
+                        <img src="${allChampions[consensus.champions[0]].image}" alt="${consensus.champions[0]}" class="champion-image-large" 
+                             onerror="this.src='https://via.placeholder.com/120x120?text=${consensus.champions[0]}'">
                         <div class="champion-name">${consensus.champions[0]}</div>
                         <div class="champion-role">${allChampions[consensus.champions[0]].role}</div>
+                        
+                        <div class="champion-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">${allChampions[consensus.champions[0]].stats?.winRate || 'N/A'}%</div>
+                                <div class="stat-label">Win Rate</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${allChampions[consensus.champions[0]].stats?.pickRate || 'N/A'}%</div>
+                                <div class="stat-label">Pick Rate</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${allChampions[consensus.champions[0]].stats?.banRate || 'N/A'}%</div>
+                                <div class="stat-label">Ban Rate</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">
+                                    <span class="tier-badge tier-${allChampions[consensus.champions[0]].stats?.tier?.charAt(0) || 'C'}">${allChampions[consensus.champions[0]].stats?.tier || 'C'}</span>
+                                </div>
+                                <div class="stat-label">Tier</div>
+                            </div>
+                        </div>
+                        
                         <div class="algorithm-agreement">2 out of 3 algorithms recommend this champion</div>
                     </div>
                 `;
@@ -2263,8 +2379,23 @@
                         ${isWinner ? '<span class="winner-badge">HIGHEST CONFIDENCE</span>' : ''}
                     </h3>
                     
+                    <img src="${champion.image}" alt="${result.champion}" class="champion-image" 
+                         onerror="this.src='https://via.placeholder.com/80x80?text=${result.champion}'">
                     <div class="champion-name">${result.champion}</div>
                     <div class="champion-role">${champion.role}</div>
+                    
+                    <div class="champion-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">${champion.stats?.winRate || 'N/A'}%</div>
+                            <div class="stat-label">Win Rate</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">
+                                <span class="tier-badge tier-${champion.stats?.tier?.charAt(0) || 'C'}">${champion.stats?.tier || 'C'}</span>
+                            </div>
+                            <div class="stat-label">Tier</div>
+                        </div>
+                    </div>
                     
                     <div class="confidence-score">
                         <div class="confidence-value">${result.confidence.toFixed(1)}%</div>
@@ -2329,8 +2460,14 @@
                                 </div>
                                 
                                 <div class="champion-result">
+                                    <img src="${champion.image}" alt="${result.champion}" class="champion-image" 
+                                         onerror="this.src='https://via.placeholder.com/80x80?text=${result.champion}'">
                                     <div class="champion-name">${result.champion}</div>
                                     <div class="champion-role">${champion.role}</div>
+                                    <div style="margin-top: 10px;">
+                                        <span class="tier-badge tier-${champion.stats?.tier?.charAt(0) || 'C'}">${champion.stats?.tier || 'C'}</span>
+                                        <span style="margin-left: 10px; font-weight: bold; color: #667eea;">${champion.stats?.winRate || 'N/A'}% WR</span>
+                                    </div>
                                 </div>
                                 
                                 <div class="confidence-display">
