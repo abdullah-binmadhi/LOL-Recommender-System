@@ -15,6 +15,15 @@ const championDatabase = {
             square: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ahri.png',
             splash: 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ahri_0.jpg'
         },
+        stats: {
+            winRate: 52.1,
+            pickRate: 8.4,
+            banRate: 2.1,
+            tier: 'A',
+            trend: 'stable', // 'rising', 'falling', 'stable'
+            patch: '14.23',
+            lastUpdated: '2024-11-20'
+        },
         abilities: [
             { key: 'P', name: 'Essence Theft', description: 'After killing 9 minions or monsters, Ahri heals when damaging enemies with her abilities.' },
             { key: 'Q', name: 'Orb of Deception', description: 'Ahri sends out and pulls back her orb, dealing magic damage on the way out and true damage on the way back.' },
@@ -46,6 +55,15 @@ const championDatabase = {
         image: {
             square: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Akali.png',
             splash: 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Akali_0.jpg'
+        },
+        stats: {
+            winRate: 49.8,
+            pickRate: 6.2,
+            banRate: 15.3,
+            tier: 'B',
+            trend: 'falling',
+            patch: '14.23',
+            lastUpdated: '2024-11-20'
         },
         abilities: [
             { key: 'P', name: 'Assassin\'s Mark', description: 'Dealing ability damage to a champion creates a ring around them. Exiting the ring empowers Akali\'s next basic attack.' },
@@ -79,6 +97,15 @@ const championDatabase = {
             square: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Diana.png',
             splash: 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Diana_0.jpg'
         },
+        stats: {
+            winRate: 51.7,
+            pickRate: 4.1,
+            banRate: 3.8,
+            tier: 'A',
+            trend: 'rising',
+            patch: '14.23',
+            lastUpdated: '2024-11-20'
+        },
         abilities: [
             { key: 'P', name: 'Moonsilver Blade', description: 'Diana\'s third basic attack cleaves nearby enemies for bonus magic damage.' },
             { key: 'Q', name: 'Crescent Strike', description: 'Diana swings her blade to unleash a bolt of lunar energy that deals damage in an arc.' },
@@ -111,6 +138,15 @@ const championDatabase = {
             square: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ekko.png',
             splash: 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Ekko_0.jpg'
         },
+        stats: {
+            winRate: 50.9,
+            pickRate: 5.7,
+            banRate: 8.2,
+            tier: 'B+',
+            trend: 'stable',
+            patch: '14.23',
+            lastUpdated: '2024-11-20'
+        },
         abilities: [
             { key: 'P', name: 'Z-Drive Resonance', description: 'Ekko\'s damaging spells and attacks build up Resonance stacks on enemies. At 3 stacks, he deals bonus damage and gains movement speed.' },
             { key: 'Q', name: 'Timewinder', description: 'Ekko throws a temporal grenade that expands into a time-distortion field, slowing and damaging enemies.' },
@@ -142,6 +178,15 @@ const championDatabase = {
         image: {
             square: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Evelynn.png',
             splash: 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Evelynn_0.jpg'
+        },
+        stats: {
+            winRate: 53.2,
+            pickRate: 3.9,
+            banRate: 12.7,
+            tier: 'A+',
+            trend: 'rising',
+            patch: '14.23',
+            lastUpdated: '2024-11-20'
         },
         abilities: [
             { key: 'P', name: 'Demon Shade', description: 'Evelynn enters Demon Shade when out of combat, gaining camouflage and increased movement speed.' },

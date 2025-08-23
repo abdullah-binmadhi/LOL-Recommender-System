@@ -186,6 +186,60 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
+        .champion-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin: 5px 0;
+        }
+
+        .tier-S { background: #ff6b6b; color: white; }
+        .tier-A { background: #4ecdc4; color: white; }
+        .tier-B { background: #45b7d1; color: white; }
+        .tier-C { background: #96ceb4; color: white; }
+        .tier-D { background: #feca57; color: white; }
+
+        .trend-indicator {
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        .trend-rising { color: #27ae60; }
+        .trend-falling { color: #e74c3c; }
+        .trend-stable { color: #f39c12; }
+
         .champion-name {
             font-size: 2rem;
             font-weight: bold;
@@ -293,11 +347,11 @@
     <script>
         // Compact Champion Database - All 173 Champions
         const allChampions = {
-            'Jinx': { role: 'Marksman', difficulty: 6, damage: 9, toughness: 2, control: 7, mobility: 6, utility: 6, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Jinx.png' },
-            'Ashe': { role: 'Marksman', difficulty: 4, damage: 7, toughness: 3, control: 8, mobility: 4, utility: 8, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ashe.png' },
-            'Yasuo': { role: 'Fighter', difficulty: 10, damage: 8, toughness: 4, control: 6, mobility: 8, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Yasuo.png' },
-            'Lux': { role: 'Mage', difficulty: 5, damage: 7, toughness: 2, control: 8, mobility: 4, utility: 7, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Lux.png' },
-            'Garen': { role: 'Fighter', difficulty: 2, damage: 6, toughness: 7, control: 5, mobility: 5, utility: 5, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Garen.png' },
+            'Jinx': { role: 'Marksman', difficulty: 6, damage: 9, toughness: 2, control: 7, mobility: 6, utility: 6, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Jinx.png', stats: { winRate: 51.8, pickRate: 12.3, banRate: 4.2, tier: 'A', trend: 'stable' } },
+            'Ashe': { role: 'Marksman', difficulty: 4, damage: 7, toughness: 3, control: 8, mobility: 4, utility: 8, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ashe.png', stats: { winRate: 50.9, pickRate: 8.7, banRate: 1.8, tier: 'B+', trend: 'rising' } },
+            'Yasuo': { role: 'Fighter', difficulty: 10, damage: 8, toughness: 4, control: 6, mobility: 8, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Yasuo.png', stats: { winRate: 49.2, pickRate: 15.6, banRate: 28.4, tier: 'B', trend: 'falling' } },
+            'Lux': { role: 'Mage', difficulty: 5, damage: 7, toughness: 2, control: 8, mobility: 4, utility: 7, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Lux.png', stats: { winRate: 52.3, pickRate: 9.1, banRate: 3.7, tier: 'A', trend: 'stable' } },
+            'Garen': { role: 'Fighter', difficulty: 2, damage: 6, toughness: 7, control: 5, mobility: 5, utility: 5, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Garen.png', stats: { winRate: 53.1, pickRate: 6.8, banRate: 2.3, tier: 'A+', trend: 'rising' } },
             'Thresh': { role: 'Support', difficulty: 7, damage: 6, toughness: 6, control: 9, mobility: 5, utility: 9, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Thresh.png' },
             'Ahri': { role: 'Mage', difficulty: 5, damage: 8, toughness: 3, control: 5, mobility: 7, utility: 6, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ahri.png' },
             'Darius': { role: 'Fighter', difficulty: 4, damage: 9, toughness: 6, control: 5, mobility: 4, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Darius.png' },
@@ -492,11 +546,45 @@
             if (recommendation) {
                 // Update recommendation display
                 const championData = allChampions[recommendation.name];
+                
+                // Get trend indicator
+                const getTrendIcon = (trend) => {
+                    switch(trend) {
+                        case 'rising': return '📈';
+                        case 'falling': return '📉';
+                        case 'stable': return '➡️';
+                        default: return '';
+                    }
+                };
+                
                 document.getElementById('main-champion').innerHTML = `
                     <img src="${championData.image}" alt="${recommendation.name}" class="champion-image" 
                          onerror="this.src='https://via.placeholder.com/120x120?text=${recommendation.name}'">
                     <div class="champion-name">${recommendation.name}</div>
                     <div class="champion-role">${recommendation.role}</div>
+                    
+                    <div class="champion-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">${championData.stats?.winRate || 'N/A'}%</div>
+                            <div class="stat-label">Win Rate</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${championData.stats?.pickRate || 'N/A'}%</div>
+                            <div class="stat-label">Pick Rate</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${championData.stats?.banRate || 'N/A'}%</div>
+                            <div class="stat-label">Ban Rate</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">
+                                <span class="tier-badge tier-${championData.stats?.tier?.charAt(0) || 'C'}">${championData.stats?.tier || 'C'}</span>
+                                <span class="trend-indicator trend-${championData.stats?.trend || 'stable'}">${getTrendIcon(championData.stats?.trend)}</span>
+                            </div>
+                            <div class="stat-label">Tier & Trend</div>
+                        </div>
+                    </div>
+                    
                     <div class="confidence">
                         <strong>Match Confidence: ${recommendation.confidence}%</strong>
                         <div class="confidence-bar">
@@ -505,7 +593,9 @@
                     </div>
                     <div class="explanation">
                         ${recommendation.name} is a ${recommendation.role} champion that matches your preferences perfectly! 
-                        With a difficulty level of ${recommendation.difficulty}/10, this champion should be a great fit for your playstyle.
+                        With a difficulty level of ${recommendation.difficulty}/10 and a ${championData.stats?.winRate || 'decent'}% win rate, 
+                        this champion should be a great fit for your playstyle.
+                        ${championData.stats ? `<br><small>Stats from Patch ${championData.stats.patch} (${championData.stats.lastUpdated})</small>` : ''}
                     </div>
                 `;
 
