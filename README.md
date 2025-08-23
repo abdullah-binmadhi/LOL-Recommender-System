@@ -97,12 +97,13 @@ This project is for educational purposes. League of Legends is a trademark of Ri
 
 ## 🎯 Champion Database
 
-Includes 50+ champions across all roles:
-- **ADC**: Jinx, Ashe, Caitlyn, Vayne, etc.
-- **Support**: Thresh, Lulu, Braum, Leona, etc.
-- **Mid**: Yasuo, Zed, Ahri, Lux, etc.
-- **Jungle**: Graves, Lee Sin, Elise, etc.
-- **Top**: Garen, Darius, Fiora, etc.
+Includes **162 champions** across all roles:
+- **Marksman/ADC**: Jinx, Ashe, Caitlyn, Vayne, Ezreal, Jhin, Lucian, Tristana, etc.
+- **Support**: Thresh, Lulu, Braum, Leona, Nami, Soraka, Pyke, Senna, etc.
+- **Mage/Mid**: Yasuo, Zed, Ahri, Lux, Annie, LeBlanc, Orianna, Syndra, etc.
+- **Fighter/Top**: Garen, Darius, Riven, Fiora, Jax, Renekton, Wukong, Irelia, etc.
+- **Assassin**: Zed, Akali, Katarina, Master Yi, Kassadin, Yone, etc.
+- **Tank**: Leona, Malphite, Braum, Nautilus, Alistar, etc.
 
 ## 📞 Support
 
