@@ -1,0 +1,31 @@
+# GitHub Pages configuration
+title: LoL Champion Recommender
+description: A League of Legends champion recommendation system
+baseurl: ""
+url: "https://abdullah-binmadhi.github.io"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+
+# Exclude files from processing
+exclude:
+  - PYTHON_TESTING/
+  - __pycache__/
+  - .pytest_cache/
+  - cache/
+  - logs/
+  - test_cache/
+  - tests/
+  - .env.example
+  - requirements.txt
+  - app.py
+  - config.py
+  - run_*.py
+  - test_*.py
+  - benchmark_*.py
+  - simple_server.py
+
+# Include files that start with underscores
+include:
+  - _config.yml
