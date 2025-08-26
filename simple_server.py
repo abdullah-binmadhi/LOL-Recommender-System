@@ -13,22 +13,27 @@ import webbrowser
 import threading
 import time
 
-PORT = 8080
+PORT = 8082
 
 class ChampionRecommenderHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
+        # Redirect root to champion-recommender.html
         if self.path == '/' or self.path == '/index.html':
+            self.path = '/champion-recommender.html'
+        
+        # Serve champion-recommender.html when requested
+        if self.path == '/champion-recommender.html':
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             
-            # Read and serve the demo.html file
+            # Read and serve the champion-recommender.html file
             try:
-                with open('demo.html', 'r', encoding='utf-8') as f:
+                with open('champion-recommender.html', 'r', encoding='utf-8') as f:
                     content = f.read()
                 self.wfile.write(content.encode('utf-8'))
             except FileNotFoundError:
-                self.wfile.write(b'<h1>Demo file not found. Please make sure demo.html exists.</h1>')
+                self.wfile.write(b'<h1>Champion recommender file not found. Please make sure champion-recommender.html exists.</h1>')
         else:
             # Serve static files normally
             super().do_GET()
