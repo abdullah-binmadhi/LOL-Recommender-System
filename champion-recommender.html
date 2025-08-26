@@ -593,6 +593,471 @@
             color: #6c757d;
         }
 
+        /* ML Insights Section Styles */
+        .ml-insights-section {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .ml-insights-section h3 {
+            color: #1565c0;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.6rem;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .insight-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #1976d2;
+        }
+
+        .insight-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .insight-icon {
+            font-size: 2rem;
+        }
+
+        .insight-header h4 {
+            color: #1565c0;
+            font-size: 1.3rem;
+            margin: 0;
+        }
+
+        .strength-badge {
+            background: linear-gradient(135deg, #1976d2, #42a5f5);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .approach-text {
+            color: #424242;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .best-for {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #616161;
+        }
+
+        .algorithm-choice {
+            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #4caf50;
+        }
+
+        .choice-label {
+            font-size: 0.8rem;
+            color: #2e7d32;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .choice-champion {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #1b5e20;
+            margin-bottom: 5px;
+        }
+
+        .choice-reason {
+            font-size: 0.8rem;
+            color: #388e3c;
+        }
+
+        /* Champion Analysis Section Styles */
+        .champion-analysis-section {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .champion-analysis-section h3 {
+            color: #e65100;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.6rem;
+        }
+
+        .analysis-explanation {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .analysis-explanation p {
+            color: #bf360c;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .match-analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+        }
+
+        .match-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-top: 4px solid #ff9800;
+        }
+
+        .match-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .match-champion-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid #ff9800;
+        }
+
+        .match-info h4 {
+            color: #e65100;
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .match-tier {
+            color: #757575;
+            font-size: 0.9rem;
+        }
+
+        .compatibility-score {
+            background: linear-gradient(135deg, #ff9800, #ffc107);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .score-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .score-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .match-breakdown {
+            margin-bottom: 20px;
+        }
+
+        .breakdown-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+
+        .breakdown-label {
+            flex: 0 0 100px;
+            font-size: 0.9rem;
+            color: #424242;
+            font-weight: 500;
+        }
+
+        .breakdown-bar {
+            flex: 1;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .breakdown-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #8bc34a);
+            transition: width 0.5s ease;
+        }
+
+        .breakdown-value {
+            flex: 0 0 40px;
+            text-align: right;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #2e7d32;
+        }
+
+        .champion-highlights {
+            border-top: 1px solid #e0e0e0;
+            padding-top: 15px;
+        }
+
+        .highlight-title {
+            color: #424242;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .highlight-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .highlight-tag {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .highlight-tag.damage { background: #ffebee; color: #c62828; }
+        .highlight-tag.tank { background: #e8f5e8; color: #2e7d32; }
+        .highlight-tag.mobile { background: #e3f2fd; color: #1565c0; }
+        .highlight-tag.control { background: #f3e5f5; color: #7b1fa2; }
+        .highlight-tag.utility { background: #fff3e0; color: #ef6c00; }
+        .highlight-tag.easy { background: #e0f2f1; color: #00695c; }
+
+        /* Recommendations Section Styles */
+        .recommendations-section {
+            background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .recommendations-section h3 {
+            color: #4a148c;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.6rem;
+        }
+
+        .recommendation-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .recommendation-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .primary-rec {
+            border-top: 4px solid #9c27b0;
+        }
+
+        .learning-path {
+            border-top: 4px solid #673ab7;
+        }
+
+        .alternative-picks {
+            border-top: 4px solid #3f51b5;
+        }
+
+        .meta-insights {
+            border-top: 4px solid #2196f3;
+        }
+
+        .rec-icon {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .recommendation-card h4 {
+            color: #4a148c;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .primary-champion {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #7b1fa2;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 8px 12px;
+            background: #9c27b0;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .action-btn:hover {
+            background: #7b1fa2;
+        }
+
+        .learning-steps {
+            space-y: 12px;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .step-number {
+            background: #673ab7;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .alternatives-list {
+            space-y: 10px;
+        }
+
+        .alternative-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .alt-champion-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #3f51b5;
+        }
+
+        .alt-name {
+            font-weight: 600;
+            color: #1a237e;
+        }
+
+        .alt-reason {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .meta-info {
+            space-y: 12px;
+        }
+
+        .meta-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .meta-label {
+            color: #424242;
+            font-size: 0.9rem;
+        }
+
+        .meta-value {
+            font-weight: bold;
+            color: #1565c0;
+        }
+
+        .meta-recommendation {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #0d47a1;
+            margin-top: 12px;
+        }
+
+        .final-tips {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .final-tips h4 {
+            color: #4a148c;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .tip-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 15px;
+            background: #fafafa;
+            border-radius: 10px;
+        }
+
+        .tip-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .tip-text {
+            color: #424242;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
         .strategy-section {
             background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
             border-radius: 15px;
@@ -2668,111 +3133,246 @@
                 </div>
 
                 <div class="performance-section">
-                    <h3>📈 Algorithm Performance Comparison</h3>
+                    <h3>🧠 AI Decision-Making Process</h3>
                     <div class="performance-grid">
                         <div class="performance-card">
-                            <h4>🌳 Random Forest</h4>
-                            <div class="performance-metric">92%</div>
-                            <div class="performance-description">Highest accuracy through ensemble learning</div>
-                        </div>
-                        <div class="performance-card">
-                            <h4>🌲 Decision Tree</h4>
-                            <div class="performance-metric">87%</div>
-                            <div class="performance-description">Most interpretable with clear decision paths</div>
-                        </div>
-                        <div class="performance-card">
-                            <h4>📊 K-Nearest Neighbors</h4>
-                            <div class="performance-metric">89%</div>
-                            <div class="performance-description">Best for similarity-based matching</div>
+                            <h4>🔍 Data Points Analyzed</h4>
+                            <div class="performance-metric">${Object.keys(allChampions).length * 8}</div>
+                            <div class="performance-description">Individual champion attributes processed across all algorithms</div>
                         </div>
                         <div class="performance-card">
                             <h4>⚡ Processing Speed</h4>
-                            <div class="performance-metric">&lt;1ms</div>
-                            <div class="performance-description">Real-time predictions for all algorithms</div>
+                            <div class="performance-metric">&lt;200ms</div>
+                            <div class="performance-description">Real-time analysis of ${Object.keys(allChampions).length}+ champions with sub-second response</div>
+                        </div>
+                        <div class="performance-card">
+                            <h4>🎯 Consensus Accuracy</h4>
+                            <div class="performance-metric">${Math.round((Object.values(mlResults).reduce((sum, result) => sum + result.confidence, 0) / 3) * 10) / 10}%</div>
+                            <div class="performance-description">Average confidence across all three ML algorithms for your profile</div>
+                        </div>
+                        <div class="performance-card">
+                            <h4>🔄 Algorithm Diversity</h4>
+                            <div class="performance-metric">${new Set(Object.values(mlResults).map(result => result.champion)).size}/3</div>
+                            <div class="performance-description">Unique champion recommendations ensuring comprehensive analysis</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="comparison-table">
-                    <h3>🏆 Head-to-Head Comparison</h3>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Metric</th>
-                                    <th>🌳 Random Forest</th>
-                                    <th>🌲 Decision Tree</th>
-                                    <th>📊 K-Nearest Neighbors</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><strong>Recommended Champion</strong></td>
-                                    <td class="${winner === 'random-forest' ? 'table-winner' : ''}">${mlResults['random-forest'].champion}</td>
-                                    <td class="${winner === 'decision-tree' ? 'table-winner' : ''}">${mlResults['decision-tree'].champion}</td>
-                                    <td class="${winner === 'knn' ? 'table-winner' : ''}">${mlResults['knn'].champion}</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Confidence Score</strong></td>
-                                    <td class="${winner === 'random-forest' ? 'table-winner' : ''}">${mlResults['random-forest'].confidence.toFixed(1)}%</td>
-                                    <td class="${winner === 'decision-tree' ? 'table-winner' : ''}">${mlResults['decision-tree'].confidence.toFixed(1)}%</td>
-                                    <td class="${winner === 'knn' ? 'table-winner' : ''}">${mlResults['knn'].confidence.toFixed(1)}%</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Model Accuracy</strong></td>
-                                    <td class="table-winner">92%</td>
-                                    <td>87%</td>
-                                    <td>89%</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Interpretability</strong></td>
-                                    <td>Medium</td>
-                                    <td class="table-winner">High</td>
-                                    <td>Medium</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Robustness</strong></td>
-                                    <td class="table-winner">High</td>
-                                    <td>Medium</td>
-                                    <td>Medium</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <div class="ml-insights-section">
+                    <h3>🔬 Machine Learning Insights</h3>
+                    <div class="insights-grid">
+                        ${Object.entries(mlResults).map(([algorithm, result]) => {
+                            const algorithmInfo = {
+                                'random-forest': { 
+                                    name: 'Random Forest', 
+                                    icon: '🌳',
+                                    strength: 'Ensemble Learning',
+                                    approach: 'Combines multiple decision trees to reduce overfitting and improve accuracy',
+                                    bestFor: 'Complex pattern recognition and handling noisy data'
+                                },
+                                'decision-tree': { 
+                                    name: 'Decision Tree', 
+                                    icon: '🌲',
+                                    strength: 'Interpretability',
+                                    approach: 'Creates clear decision paths based on champion attributes and preferences',
+                                    bestFor: 'Transparent decision-making and feature importance analysis'
+                                },
+                                'knn': { 
+                                    name: 'K-Nearest Neighbors', 
+                                    icon: '📊',
+                                    strength: 'Similarity Matching',
+                                    approach: 'Finds champions similar to your preferences using distance metrics',
+                                    bestFor: 'Personalized recommendations based on user similarity'
+                                }
+                            };
+                            const info = algorithmInfo[algorithm];
+                            const champion = allChampions[result.champion];
+                            
+                            return `
+                                <div class="insight-card">
+                                    <div class="insight-header">
+                                        <span class="insight-icon">${info.icon}</span>
+                                        <h4>${info.name}</h4>
+                                    </div>
+                                    <div class="insight-content">
+                                        <div class="strength-badge">${info.strength}</div>
+                                        <p class="approach-text">${info.approach}</p>
+                                        <div class="best-for">
+                                            <strong>Best for:</strong> ${info.bestFor}
+                                        </div>
+                                        <div class="algorithm-choice">
+                                            <div class="choice-label">Selected Champion:</div>
+                                            <div class="choice-champion">${result.champion}</div>
+                                            <div class="choice-reason">Confidence: ${result.confidence.toFixed(1)}% | Tier: ${champion.stats?.tier || 'N/A'}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
                     </div>
                 </div>
 
-                <div class="strategy-section">
-                    <h3>🎯 Your Preference Analysis</h3>
-                    <div class="preference-grid">
-                        <div class="preference-item">
-                            <h4>🎭 Role Preference</h4>
-                            <div class="preference-value">${answers[1]}</div>
-                            <div class="preference-description">All algorithms prioritized this role in their matching process</div>
+                <div class="champion-analysis-section">
+                    <h3>🔍 Champion Match Analysis</h3>
+                    <div class="analysis-explanation">
+                        <p>Based on your preferences, here's how each recommended champion aligns with your playstyle:</p>
+                    </div>
+                    
+                    <div class="match-analysis-grid">
+                        ${Object.entries(mlResults).map(([algorithm, result]) => {
+                            const champion = allChampions[result.champion];
+                            const roleMatch = answers[1] === 'No Preference' || champion.role === answers[1] ? 100 : 70;
+                            const difficultyMatch = Math.max(0, 100 - Math.abs(champion.difficulty - (parseInt(answers[2]) || 5)) * 10);
+                            const damageMatch = Math.max(0, 100 - Math.abs(champion.damage - (parseInt(answers[3]) || 5)) * 8);
+                            const toughnessMatch = Math.max(0, 100 - Math.abs(champion.toughness - (parseInt(answers[4]) || 5)) * 8);
+                            
+                            return `
+                                <div class="match-card">
+                                    <div class="match-header">
+                                        <img src="${getChampionImageUrl(result.champion)}" alt="${result.champion}" class="match-champion-img">
+                                        <div class="match-info">
+                                            <h4>${result.champion}</h4>
+                                            <div class="match-tier">Tier ${champion.stats?.tier || 'B'} • ${champion.stats?.winRate || '50.0'}% WR</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="compatibility-score">
+                                        <div class="score-label">Compatibility Score</div>
+                                        <div class="score-value">${result.confidence.toFixed(0)}%</div>
+                                    </div>
+                                    
+                                    <div class="match-breakdown">
+                                        <div class="breakdown-item">
+                                            <span class="breakdown-label">Role Match</span>
+                                            <div class="breakdown-bar">
+                                                <div class="breakdown-fill" style="width: ${roleMatch}%"></div>
+                                            </div>
+                                            <span class="breakdown-value">${roleMatch}%</span>
+                                        </div>
+                                        
+                                        <div class="breakdown-item">
+                                            <span class="breakdown-label">Difficulty</span>
+                                            <div class="breakdown-bar">
+                                                <div class="breakdown-fill" style="width: ${difficultyMatch}%"></div>
+                                            </div>
+                                            <span class="breakdown-value">${difficultyMatch}%</span>
+                                        </div>
+                                        
+                                        <div class="breakdown-item">
+                                            <span class="breakdown-label">Damage Style</span>
+                                            <div class="breakdown-bar">
+                                                <div class="breakdown-fill" style="width: ${damageMatch}%"></div>
+                                            </div>
+                                            <span class="breakdown-value">${damageMatch}%</span>
+                                        </div>
+                                        
+                                        <div class="breakdown-item">
+                                            <span class="breakdown-label">Survivability</span>
+                                            <div class="breakdown-bar">
+                                                <div class="breakdown-fill" style="width: ${toughnessMatch}%"></div>
+                                            </div>
+                                            <span class="breakdown-value">${toughnessMatch}%</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="champion-highlights">
+                                        <div class="highlight-title">Key Strengths:</div>
+                                        <div class="highlight-tags">
+                                            ${champion.damage >= 8 ? '<span class="highlight-tag damage">High Damage</span>' : ''}
+                                            ${champion.toughness >= 7 ? '<span class="highlight-tag tank">Tanky</span>' : ''}
+                                            ${champion.mobility >= 7 ? '<span class="highlight-tag mobile">Mobile</span>' : ''}
+                                            ${champion.control >= 7 ? '<span class="highlight-tag control">Crowd Control</span>' : ''}
+                                            ${champion.utility >= 8 ? '<span class="highlight-tag utility">High Utility</span>' : ''}
+                                            ${champion.difficulty <= 3 ? '<span class="highlight-tag easy">Beginner Friendly</span>' : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <div class="recommendations-section">
+                    <h3>🎯 Personalized Recommendations & Next Steps</h3>
+                    
+                    <div class="recommendation-cards">
+                        <div class="recommendation-card primary-rec">
+                            <div class="rec-icon">🏆</div>
+                            <h4>Primary Recommendation</h4>
+                            <div class="primary-champion">${Object.values(mlResults).reduce((prev, current) => prev.confidence > current.confidence ? prev : current).champion}</div>
+                            <p>Based on consensus analysis, this champion best matches your playstyle preferences and skill level.</p>
+                            <div class="action-buttons">
+                                <button class="action-btn" onclick="window.open('https://www.mobafire.com/league-of-legends/${Object.values(mlResults).reduce((prev, current) => prev.confidence > current.confidence ? prev : current).champion.toLowerCase()}-guide', '_blank')">📚 View Guide</button>
+                                <button class="action-btn" onclick="window.open('https://u.gg/lol/champions/${Object.values(mlResults).reduce((prev, current) => prev.confidence > current.confidence ? prev : current).champion.toLowerCase()}/build', '_blank')">⚙️ Build Guide</button>
+                            </div>
                         </div>
-                        <div class="preference-item">
-                            <h4>⚡ Difficulty Level</h4>
-                            <div class="preference-value">${answers[2]}/10</div>
-                            <div class="preference-description">Matched against champion complexity ratings</div>
+                        
+                        <div class="recommendation-card learning-path">
+                            <div class="rec-icon">🎓</div>
+                            <h4>Learning Path</h4>
+                            <div class="learning-steps">
+                                <div class="step"><span class="step-number">1</span> Start with ${answers[2] <= 3 ? 'Practice Tool to learn abilities' : 'Normal games for experience'}</div>
+                                <div class="step"><span class="step-number">2</span> Focus on ${answers[1] === 'Tank' ? 'positioning and engagement timing' : answers[1] === 'Support' ? 'map awareness and vision control' : answers[1] === 'Marksman' ? 'last-hitting and positioning' : 'ability combos and trading'}</div>
+                                <div class="step"><span class="step-number">3</span> Master ${answers[1] === 'Assassin' ? 'roaming and target selection' : answers[1] === 'Mage' ? 'mana management and skill shots' : 'team fighting fundamentals'}</div>
+                            </div>
                         </div>
-                        <div class="preference-item">
-                            <h4>⚔️ Damage Output</h4>
-                            <div class="preference-value">${answers[3]}/10</div>
-                            <div class="preference-description">Weighted heavily in all scoring functions</div>
+                        
+                        <div class="recommendation-card alternative-picks">
+                            <div class="rec-icon">🔄</div>
+                            <h4>Alternative Champions</h4>
+                            <div class="alternatives-list">
+                                ${Object.values(mlResults).slice(1).map(result => `
+                                    <div class="alternative-item">
+                                        <img src="${getChampionImageUrl(result.champion)}" alt="${result.champion}" class="alt-champion-img">
+                                        <div class="alt-info">
+                                            <div class="alt-name">${result.champion}</div>
+                                            <div class="alt-reason">${result.confidence.toFixed(0)}% match • ${allChampions[result.champion].role}</div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
-                        <div class="preference-item">
-                            <h4>🛡️ Survivability</h4>
-                            <div class="preference-value">${answers[4]}/10</div>
-                            <div class="preference-description">Considered for durability matching</div>
+                        
+                        <div class="recommendation-card meta-insights">
+                            <div class="rec-icon">📈</div>
+                            <h4>Current Meta Insights</h4>
+                            <div class="meta-info">
+                                <div class="meta-stat">
+                                    <span class="meta-label">Average Win Rate:</span>
+                                    <span class="meta-value">${Math.round(Object.values(mlResults).reduce((sum, result) => sum + (allChampions[result.champion].stats?.winRate || 50), 0) / Object.values(mlResults).length * 10) / 10}%</span>
+                                </div>
+                                <div class="meta-stat">
+                                    <span class="meta-label">Avg. Difficulty:</span>
+                                    <span class="meta-value">${Math.round(Object.values(mlResults).reduce((sum, result) => sum + allChampions[result.champion].difficulty, 0) / Object.values(mlResults).length * 10) / 10}/10</span>
+                                </div>
+                                <div class="meta-recommendation">
+                                    ${Object.values(mlResults).every(result => (allChampions[result.champion].stats?.winRate || 50) >= 50) ? 
+                                        '✅ All recommendations are currently meta-viable with positive win rates!' : 
+                                        '⚠️ Some recommendations may require extra practice due to current meta shifts.'}
+                                </div>
+                            </div>
                         </div>
-                        <div class="preference-item">
-                            <h4>🎮 Playstyle</h4>
-                            <div class="preference-value">${answers[5]}</div>
-                            <div class="preference-description">Applied as bonus criteria for champion selection</div>
-                        </div>
-                        <div class="preference-item">
-                            <h4>📊 Champions Analyzed</h4>
-                            <div class="preference-value">${Object.keys(allChampions).length}</div>
-                            <div class="preference-description">Total champions evaluated by all algorithms</div>
+                    </div>
+                    
+                    <div class="final-tips">
+                        <h4>💡 Pro Tips for Success</h4>
+                        <div class="tips-grid">
+                            <div class="tip-item">
+                                <span class="tip-icon">🎯</span>
+                                <div class="tip-text">Focus on mastering one champion at a time before expanding your pool</div>
+                            </div>
+                            <div class="tip-item">
+                                <span class="tip-icon">📊</span>
+                                <div class="tip-text">Review your replays to identify improvement areas and decision-making patterns</div>
+                            </div>
+                            <div class="tip-item">
+                                <span class="tip-icon">📚</span>
+                                <div class="tip-text">Study professional gameplay and high-ELO strategies for your chosen champions</div>
+                            </div>
+                            <div class="tip-item">
+                                <span class="tip-icon">⚙️</span>
+                                <div class="tip-text">Experiment with different builds and runes to find your optimal playstyle</div>
+                            </div>
                         </div>
                     </div>
                 </div>
