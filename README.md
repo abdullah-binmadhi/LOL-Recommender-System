@@ -1,31 +1,60 @@
 # 🎮 League of Legends Champion Recommender
 
-[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Try_Now!-brightgreen?style=for-the-badge)](https://abdullah-binmadhi.github.io/LOL-Recommender-System/)
+<p align="center">
+  <a href="https://abdullah-binmadhi.github.io/LOL-Recommender-System/">
+    <img src="https://img.shields.io/badge/🎮_Live_Demo-Try_Now!-brightgreen?style=for-the-badge&logo=googlechrome" alt="Live Demo">
+  </a>
+  <a href="https://github.com/abdullah-binmadhi/LOL-Recommender-System/stargazers">
+    <img src="https://img.shields.io/github/stars/abdullah-binmadhi/LOL-Recommender-System?style=for-the-badge&logo=github" alt="GitHub Stars">
+  </a>
+  <a href="https://github.com/abdullah-binmadhi/LOL-Recommender-System/issues">
+    <img src="https://img.shields.io/github/issues/abdullah-binmadhi/LOL-Recommender-System?style=for-the-badge&logo=github" alt="GitHub Issues">
+  </a>
+</p>
 
-An AI-powered champion recommendation system that uses 3 machine learning algorithms to suggest the perfect League of Legends champion based on your playstyle preferences.
+<p align="center">
+  <img src="https://opengraph.githubassets.com/1/abdullah-binmadhi/LOL-Recommender-System" alt="Project Banner" width="100%">
+</p>
 
-## 🌐 Live Website
+## 🌟 Discover Your Perfect Champion
 
-### 🚀 **[Try the Champion Recommender Live!](https://abdullah-binmadhi.github.io/LOL-Recommender-System/)**
+An **AI-powered champion recommendation system** that uses **3 machine learning algorithms** to suggest the perfect League of Legends champion based on your playstyle preferences.
 
-## ✨ Features
+> **No more guessing!** Get personalized champion recommendations backed by data science.
 
-- 🤖 **3 ML Algorithms**: Random Forest, Decision Tree, and K-Nearest Neighbors
-- 🎲 **Advanced Diversity System**: No more repetitive recommendations - explore all 162 champions
-- 📊 **Real-time Comparison**: See all algorithm results simultaneously
-- 🎯 **Consensus System**: Get the most agreed-upon recommendation
-- 📈 **Confidence Scores**: Know how certain each algorithm is
-- 🧠 **Smart Memory**: Tracks previous recommendations for fresh suggestions
-- 💾 **Data Export**: Export your results as CSV (Ctrl+Shift+E)
-- 📱 **Responsive Design**: Works on desktop and mobile
+---
 
-## 🚀 Quick Start
+## 🚀 Try It Live
 
-1. **Visit the website** using the GitHub Pages URL
-2. **Fill out the registration form** with your details
-3. **Answer the questionnaire** about your playstyle preferences
-4. **Get your recommendation** with detailed algorithm analysis
-5. **Export your data** using Ctrl+Shift+E
+### 🎯 **[Launch Champion Recommender](https://abdullah-binmadhi.github.io/LOL-Recommender-System/)**
+
+---
+
+## ✨ Key Features
+
+<div align="center">
+
+| Feature | Description |
+|--------|-------------|
+| 🤖 **3 ML Algorithms** | Random Forest, Decision Tree, and K-Nearest Neighbors working together |
+| 🎲 **Smart Diversity** | Never get repetitive recommendations - explore all 150+ champions |
+| 📊 **Real-time Analysis** | See all algorithm results side-by-side with confidence scores |
+| 🎯 **Consensus System** | Get the most agreed-upon recommendation from all algorithms |
+| 💾 **Data Export** | Export your results as CSV with Ctrl+Shift+E |
+| 📱 **Mobile Friendly** | Works perfectly on desktop, tablet, and mobile devices |
+
+</div>
+
+---
+
+## 🧠 How It Works
+
+1. **🎯 Answer 5 Simple Questions** - Tell us about your preferred role, position, difficulty level, playstyle, and range
+2. **🤖 AI Analysis** - Our ML algorithms analyze your preferences
+3. **🏆 Get Your Champion** - Receive a personalized champion recommendation with detailed analysis
+4. **🔄 Explore Alternatives** - See other great champion options that match your playstyle
+
+---
 
 ## 📁 Project Structure
 
@@ -41,21 +70,29 @@ An AI-powered champion recommendation system that uses 3 machine learning algori
 
 For detailed documentation about the project structure, see [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) and [ORGANIZATION_SUMMARY.md](ORGANIZATION_SUMMARY.md).
 
-## 🛠️ Technical Stack
+---
 
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **ML Algorithms**: Custom JavaScript implementations
-- **Data Storage**: LocalStorage (client-side)
-- **Hosting**: GitHub Pages
+## 🛠️ Built With
 
-## 🤝 Contributing
+<div align="center">
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+| Technology | Purpose |
+|------------|---------|
+| **HTML5** | Structure and content |
+| **CSS3** | Styling and animations |
+| **JavaScript (ES6+)** | Interactivity and logic |
+| **Custom ML Algorithms** | Champion recommendation engine |
+| **LocalStorage** | Client-side data persistence |
+| **GitHub Pages** | Hosting and deployment |
+
+</div>
+
+---
 
 ## 📄 License
 
-This project is for educational purposes. League of Legends is a trademark of Riot Games.
+This project is for **educational purposes**. League of Legends is a trademark of Riot Games.
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Made_With_❤️_For-LoL_Community-blue?style=for-the-badge" alt="Made for LoL Community">
+</p>
