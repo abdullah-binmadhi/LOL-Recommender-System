@@ -84,114 +84,18 @@ This directory contains comprehensive documentation for the LoL Champion Recomme
 - **Security**: Input validation, CSRF protection, and secure headers
 - **Testing**: Comprehensive test suite with fixtures and mocks
 
-## Architecture Overview
-
-```mermaid
-graph TB
-    A[User Interface] --> B[Flask Web Server]
-    B --> C[Question Service]
-    B --> D[Recommendation Engine]
-    B --> E[Champion Service]
-    
-    C --> F[Questions Dataset]
-    D --> G[ML Models]
-    E --> H[Champions Dataset]
-    
-    I[Cache Layer] --> B
-    J[Performance Monitor] --> B
-    K[Error Handler] --> B
-```
-
 ## Technology Stack
-
-### Backend
-- **Python 3.8+**: Core application language
-- **Flask**: Web framework
-- **scikit-learn**: Machine learning library
-- **pandas**: Data manipulation
-- **NumPy**: Numerical computing
 
 ### Frontend
 - **HTML5/CSS3**: Modern web standards
 - **JavaScript**: Interactive functionality
-- **Bootstrap**: Responsive design framework
+
+### Data
+- **JSON**: Data storage format
+- **LocalStorage**: Client-side data persistence
 
 ### Infrastructure
-- **Gunicorn**: WSGI HTTP Server
-- **Nginx**: Reverse proxy and static file serving
-- **Redis**: Caching and session storage
-- **Docker**: Containerization
-
-### Development Tools
-- **pytest**: Testing framework
-- **black**: Code formatting
-- **flake8**: Code linting
-- **coverage**: Test coverage analysis
-
-## Data Sources
-
-### Champion Data
-- **Source**: League of Legends official data
-- **Format**: JSON with champion attributes, abilities, and metadata
-- **Updates**: Regular updates to reflect game changes
-
-### Question Data
-- **Source**: Curated questionnaire based on gameplay research
-- **Format**: JSON with question types, options, and weights
-- **Validation**: Comprehensive answer validation rules
-
-### ML Training Data
-- **Source**: Generated from champion attributes and user preferences
-- **Models**: Random Forest, K-Nearest Neighbors, ensemble methods
-- **Accuracy**: Regularly evaluated and retrained
-
-## Performance Characteristics
-
-### Response Times
-- **Page Load**: < 2 seconds
-- **API Responses**: < 500ms
-- **ML Predictions**: < 300ms
-- **Cache Hit Rate**: > 80%
-
-### Scalability
-- **Concurrent Users**: Tested up to 100 concurrent users
-- **Horizontal Scaling**: Load balancer ready
-- **Vertical Scaling**: Configurable worker processes
-- **Caching**: Multi-layer caching strategy
-
-### Reliability
-- **Uptime Target**: 99.9%
-- **Error Rate**: < 1%
-- **Recovery Time**: < 5 minutes
-- **Backup Strategy**: Automated daily backups
-
-## Security Features
-
-### Application Security
-- **Input Validation**: All user inputs validated
-- **CSRF Protection**: Cross-site request forgery prevention
-- **XSS Prevention**: Output encoding and CSP headers
-- **Session Security**: Secure session management
-
-### Infrastructure Security
-- **HTTPS**: SSL/TLS encryption
-- **Firewall**: UFW firewall configuration
-- **Updates**: Automated security updates
-- **Monitoring**: Security event logging
-
-## Compliance and Standards
-
-### Web Standards
-- **HTML5**: Semantic markup
-- **CSS3**: Modern styling
-- **WCAG 2.1**: Accessibility compliance
-- **Responsive Design**: Mobile-first approach
-
-### Code Quality
-- **PEP 8**: Python style guide compliance
-- **Type Hints**: Static type checking
-- **Documentation**: Comprehensive docstrings
-- **Testing**: >90% code coverage
+- **GitHub Pages**: Hosting platform
 
 ## Support and Community
 
