@@ -1884,26 +1884,6 @@
                 ]
             },
             {
-                id: 4,
-                text: "How much damage do you want to deal?",
-                options: [
-                    { value: 3, text: "Low", description: "Focus on utility and support" },
-                    { value: 5, text: "Medium", description: "Balanced damage output" },
-                    { value: 8, text: "High", description: "Strong damage dealer" },
-                    { value: 10, text: "Very High", description: "Maximum damage potential" }
-                ]
-            },
-            {
-                id: 5,
-                text: "How tanky do you want to be?",
-                options: [
-                    { value: 2, text: "Squishy", description: "Low health, high risk/reward" },
-                    { value: 4, text: "Moderate", description: "Some survivability" },
-                    { value: 7, text: "Durable", description: "Good survivability" },
-                    { value: 10, text: "Very Tanky", description: "Maximum survivability" }
-                ]
-            },
-            {
                 id: 6,
                 text: "What's your preferred playstyle?",
                 options: [
@@ -2507,10 +2487,10 @@
                 role: answers[1],
                 position: answers[2],
                 difficulty: answers[3] || 5,
-                damage: answers[4] || 5,
-                toughness: answers[5] || 5,
-                playstyle: answers[6] || 'balanced',
-                range: answers[7] || 'no_preference'
+                damage: 5, // Default value since this question was removed
+                toughness: 5, // Default value since this question was removed
+                playstyle: answers[4] || 'balanced',
+                range: answers[5] || 'no_preference'
             };
             
             // Run all algorithms and measure performance
@@ -2713,20 +2693,16 @@ function showDetailedAnalysis() {
                                 
                                 <div class="algorithm-details">
                                     <div class="detail-item">
-                                        <span class="detail-label">Model Accuracy</span>
-                                        <span class="detail-value">${algorithm === 'random-forest' ? '92%' : algorithm === 'decision-tree' ? '87%' : '89%'}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="detail-label">Champion Difficulty</span>
-                                        <span class="detail-value">${champion.difficulty}/10</span>
-                                    </div>
-                                    <div class="detail-item">
                                         <span class="detail-label">Damage Rating</span>
                                         <span class="detail-value">${champion.damage}/10</span>
                                     </div>
                                     <div class="detail-item">
                                         <span class="detail-label">Toughness Rating</span>
                                         <span class="detail-value">${champion.toughness}/10</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Mobility Rating</span>
+                                        <span class="detail-value">${champion.mobility}/10</span>
                                     </div>
                                 </div>
                             </div>
@@ -2745,8 +2721,8 @@ function showDetailedAnalysis() {
                             const champion = allChampions[result.champion];
                             const roleMatch = answers[1] === 'No Preference' || champion.role === answers[1] ? 100 : 70;
                             const difficultyMatch = Math.max(0, 100 - Math.abs(champion.difficulty - (parseInt(answers[2]) || 5)) * 10);
-                            const damageMatch = Math.max(0, 100 - Math.abs(champion.damage - (parseInt(answers[3]) || 5)) * 8);
-                            const toughnessMatch = Math.max(0, 100 - Math.abs(champion.toughness - (parseInt(answers[4]) || 5)) * 8);
+                            const damageMatch = Math.max(0, 100 - Math.abs(champion.damage - 5) * 8);
+                            const toughnessMatch = Math.max(0, 100 - Math.abs(champion.toughness - 5) * 8);
                             
                             return `
                                 <div class="match-card">
@@ -2781,7 +2757,7 @@ function showDetailedAnalysis() {
                                         </div>
                                         
                                         <div class="breakdown-item">
-                                            <span class="breakdown-label">Damage Style</span>
+                                            <span class="breakdown-label">Damage Rating</span>
                                             <div class="breakdown-bar">
                                                 <div class="breakdown-fill" style="width: ${damageMatch}%"></div>
                                             </div>
@@ -2833,9 +2809,9 @@ function showDetailedAnalysis() {
                             <div class="rec-icon">🎓</div>
                             <h4>Learning Path</h4>
                             <div class="learning-steps">
-                                <div class="step"><span class="step-number">1</span> Start with ${answers[2] <= 3 ? 'Practice Tool to learn abilities' : 'Normal games for experience'}</div>
-                                <div class="step"><span class="step-number">2</span> Focus on ${answers[1] === 'Tank' ? 'positioning and engagement timing' : answers[1] === 'Support' ? 'map awareness and vision control' : answers[1] === 'Marksman' ? 'last-hitting and positioning' : 'ability combos and trading'}</div>
-                                <div class="step"><span class="step-number">3</span> Master ${answers[1] === 'Assassin' ? 'roaming and target selection' : answers[1] === 'Mage' ? 'mana management and skill shots' : 'team fighting fundamentals'}</div>
+                                <div class="step"><span class="step-number">1</span> Start with normal games for experience</div>
+                                <div class="step"><span class="step-number">2</span> Focus on ability combos and trading</div>
+                                <div class="step"><span class="step-number">3</span> Master team fighting fundamentals</div>
                             </div>
                         </div>
                         
