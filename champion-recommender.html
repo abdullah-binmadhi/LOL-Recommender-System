@@ -1884,7 +1884,7 @@
                 ]
             },
             {
-                id: 6,
+                id: 4,
                 text: "What's your preferred playstyle?",
                 options: [
                     { value: "aggressive", text: "Aggressive", description: "Take fights and make plays" },
@@ -1894,7 +1894,7 @@
                 ]
             },
             {
-                id: 7,
+                id: 5,
                 text: "Do you prefer ranged or melee champions?",
                 options: [
                     { value: "ranged", text: "Ranged", description: "Attack from a distance" },
@@ -2720,7 +2720,7 @@ function showDetailedAnalysis() {
                         ${Object.entries(mlResults).map(([algorithm, result]) => {
                             const champion = allChampions[result.champion];
                             const roleMatch = answers[1] === 'No Preference' || champion.role === answers[1] ? 100 : 70;
-                            const difficultyMatch = Math.max(0, 100 - Math.abs(champion.difficulty - (parseInt(answers[2]) || 5)) * 10);
+                            const difficultyMatch = Math.max(0, 100 - Math.abs(champion.difficulty - (parseInt(answers[3]) || 5)) * 10);
                             const damageMatch = Math.max(0, 100 - Math.abs(champion.damage - 5) * 8);
                             const toughnessMatch = Math.max(0, 100 - Math.abs(champion.toughness - 5) * 8);
                             
@@ -2809,9 +2809,9 @@ function showDetailedAnalysis() {
                             <div class="rec-icon">🎓</div>
                             <h4>Learning Path</h4>
                             <div class="learning-steps">
-                                <div class="step"><span class="step-number">1</span> Start with normal games for experience</div>
-                                <div class="step"><span class="step-number">2</span> Focus on ability combos and trading</div>
-                                <div class="step"><span class="step-number">3</span> Master team fighting fundamentals</div>
+                                <div class="step"><span class="step-number">1</span> Start with ${answers[3] <= 3 ? 'Practice Tool to learn abilities' : 'Normal games for experience'}</div>
+                                <div class="step"><span class="step-number">2</span> Focus on ${answers[1] === 'Tank' ? 'positioning and engagement timing' : answers[1] === 'Support' ? 'map awareness and vision control' : answers[1] === 'Marksman' ? 'last-hitting and positioning' : 'ability combos and trading'}</div>
+                                <div class="step"><span class="step-number">3</span> Master ${answers[1] === 'Assassin' ? 'roaming and target selection' : answers[1] === 'Mage' ? 'mana management and skill shots' : 'team fighting fundamentals'}</div>
                             </div>
                         </div>
                         
