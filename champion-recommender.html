@@ -36,13 +36,15 @@
         }
 
         .card {
-            background: white;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 0;
             margin: 30px 0;
             box-shadow: 0 15px 40px rgba(0,0,0,0.15);
             display: none;
             overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .card.active {
@@ -88,21 +90,47 @@
             cursor: pointer;
             transition: all 0.3s ease;
             margin: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .btn-primary {
-            background: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
         .btn-primary:hover {
-            background: #5a6fd8;
+            background: linear-gradient(135deg, #764ba2, #667eea);
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         }
 
         .btn-secondary {
-            background: #6c757d;
+            background: rgba(108, 117, 125, 0.8);
             color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(108, 117, 125, 1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         }
 
         .btn-large {
@@ -112,37 +140,46 @@
 
         .question h2 {
             margin-bottom: 20px;
-            color: #333;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            font-size: 1.5rem;
+            padding: 25px 25px 0 25px;
         }
 
         .options {
             display: grid;
             gap: 15px;
-            margin: 20px 0;
+            margin: 20px 25px;
         }
 
         .option {
             padding: 15px 20px;
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
         .option:hover {
-            background: #e9ecef;
+            background: rgba(255, 255, 255, 0.25);
             transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .option.selected {
             background: #667eea;
             color: white;
-            border-color: #667eea;
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
         }
 
         .progress-container {
             margin-bottom: 30px;
+            padding: 0 25px;
         }
 
         .progress-info {
@@ -150,11 +187,13 @@
             justify-content: space-between;
             margin-bottom: 10px;
             font-weight: 600;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
         .progress-bar {
             height: 8px;
-            background: #e9ecef;
+            background: rgba(233, 236, 239, 0.3);
             border-radius: 4px;
             overflow: hidden;
         }
@@ -168,7 +207,8 @@
         .buttons {
             display: flex;
             justify-content: space-between;
-            margin-top: 30px;
+            margin: 30px 25px;
+            padding-bottom: 25px;
         }
 
         .champion-count {
@@ -1224,29 +1264,39 @@
         .user-registration {
             max-width: 500px;
             margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
         }
 
         .registration-header {
             text-align: center;
             margin-bottom: 25px;
+            padding-top: 25px;
+            color: white;
         }
 
         .registration-header h2 {
-            color: #495057;
-            font-size: 1.6rem;
+            color: white;
+            font-size: 1.8rem;
             margin-bottom: 10px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
 
         .registration-header p {
-            color: #6c757d;
-            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
 
         .registration-form {
-            background: #f8f9fa;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
             padding: 25px;
             border-radius: 15px;
-            border: 1px solid #e9ecef;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin: 0 25px 25px 25px;
         }
 
         .form-group {
@@ -1257,9 +1307,10 @@
         .form-group label {
             display: block;
             font-weight: 600;
-            color: #495057;
+            color: white;
             margin-bottom: 8px;
             font-size: 0.9rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
 
         .form-group input,
@@ -1267,17 +1318,78 @@
             width: 100%;
             padding: 12px 45px 12px 12px;
             border: 1px solid #e9ecef;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .form-group .input-icon {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .form-buttons .btn {
+            flex: 1;
+        }
+        
+        /* Enhanced for ML Analysis Section */
+        .detailed-analysis {
+            background: rgba(255, 255, 255, 0.15) !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .detailed-analysis h2 {
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            padding: 25px 25px 0 25px;
+            font-size: 1.8rem;
+        }
+        
+        /* Enhanced styling for analysis content */
+        #analysis-content {
+            padding: 0 25px 25px 25px;
+            color: white;
+        }
+        
+        /* Style for question cards */
+        .question-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 45px 12px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 8px;
             font-size: 0.95rem;
             transition: all 0.3s ease;
-            background: white;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+            color: white;
         }
 
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
         }
 
         .form-icon {
