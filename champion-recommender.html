@@ -580,6 +580,8 @@
             font-weight: bold;
             color: #667eea;
         }
+
+        .match-analysis-card {
             background: white;
             border-radius: 15px;
             padding: 25px;
@@ -1027,17 +1029,17 @@
         /* Enhanced Start Screen Styles */
         .hero-section {
             text-align: center;
-            padding: 40px 20px;
+            padding: 30px 20px;
             color: white;
             margin-bottom: 20px;
         }
 
         .hero-content {
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         .hero-title {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 800;
             margin-bottom: 15px;
         }
@@ -1050,54 +1052,54 @@
             line-height: 1.6;
         }
 
-        .hero-features {
+        .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            margin: 40px 0;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
         }
 
-        .feature-card {
+        .feature {
+            text-align: center;
+            padding: 20px;
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px 20px;
+            border-radius: 12px;
             transition: all 0.3s ease;
         }
 
-        .feature-card:hover {
+        .feature:hover {
             background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-5px);
+            transform: translateY(-3px);
         }
 
         .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
+            font-size: 2rem;
+            margin-bottom: 12px;
             display: block;
         }
 
-        .feature-card h3 {
+        .feature h3 {
             color: white;
-            margin-bottom: 10px;
-            font-size: 1.3rem;
+            margin-bottom: 8px;
+            font-size: 1.2rem;
         }
 
-        .feature-card p {
+        .feature p {
             color: rgba(255, 255, 255, 0.85);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             line-height: 1.5;
         }
 
         .cta-section {
             text-align: center;
-            margin: 40px 0 20px;
+            margin: 30px 0;
         }
 
         .btn-hero {
             background: white;
             color: #667eea;
             border: none;
-            padding: 18px 35px;
+            padding: 16px 32px;
             border-radius: 50px;
             font-size: 1.1rem;
             font-weight: 600;
@@ -1128,49 +1130,38 @@
             font-size: 0.9rem;
         }
 
-        /* Remove the old champion count styling */
-        .champion-count {
-            display: none;
-        }
-
-        /* User Registration Form Styles */
+        /* Simplified User Registration Form Styles */
         .user-registration {
-            max-width: 600px;
+            max-width: 500px;
             margin: 0 auto;
         }
 
         .registration-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .registration-header h2 {
             color: #495057;
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             margin-bottom: 10px;
         }
 
         .registration-header p {
             color: #6c757d;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
 
         .registration-form {
             background: #f8f9fa;
-            padding: 30px;
+            padding: 25px;
             border-radius: 15px;
             border: 1px solid #e9ecef;
         }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-
         .form-group {
             position: relative;
+            margin-bottom: 20px;
         }
 
         .form-group label {
@@ -1202,17 +1193,16 @@
         .form-icon {
             position: absolute;
             right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
+            top: 38px;
             font-size: 1rem;
             pointer-events: none;
-            margin-top: 12px;
         }
 
         .form-buttons {
             display: flex;
             justify-content: space-between;
             gap: 15px;
+            margin-top: 10px;
         }
 
         .form-buttons .btn {
@@ -1282,18 +1272,18 @@
                     <p class="hero-description">Discover the League of Legends champion that matches your playstyle with our AI-powered recommendation system</p>
                 </div>
                 
-                <div class="hero-features">
-                    <div class="feature-card">
+                <div class="features">
+                    <div class="feature">
                         <div class="feature-icon">🤖</div>
                         <h3>Smart Recommendations</h3>
                         <p>Our AI analyzes your preferences to find the perfect champion for you</p>
                     </div>
-                    <div class="feature-card">
+                    <div class="feature">
                         <div class="feature-icon">⚡</div>
                         <h3>Instant Results</h3>
                         <p>Get personalized champion recommendations in under 2 minutes</p>
                     </div>
-                    <div class="feature-card">
+                    <div class="feature">
                         <div class="feature-icon">🎯</div>
                         <h3>Accurate Matching</h3>
                         <p>92% accuracy rate with 150+ champions analyzed</p>
@@ -1310,7 +1300,7 @@
             </div>
         </div>
 
-        <!-- User Registration Form -->
+        <!-- Simplified User Registration Form -->
         <div id="user-registration" class="card user-registration">
             <div class="registration-header">
                 <h2>📝 Quick Setup</h2>
@@ -1318,25 +1308,23 @@
             </div>
 
             <form id="user-form" class="registration-form">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="fullName">Name</label>
-                        <input type="text" id="fullName" name="fullName" placeholder="Enter your name">
-                        <span class="form-icon">👤</span>
-                    </div>
+                <div class="form-group">
+                    <label for="fullName">Name</label>
+                    <input type="text" id="fullName" name="fullName" placeholder="Enter your name" required>
+                    <span class="form-icon">👤</span>
+                </div>
 
-                    <div class="form-group">
-                        <label for="experience">LoL Experience</label>
-                        <select id="experience" name="experience">
-                            <option value="">Select your experience</option>
-                            <option value="New Player">New Player</option>
-                            <option value="Beginner">Beginner</option>
-                            <option value="Intermediate">Intermediate</option>
-                            <option value="Advanced">Advanced</option>
-                            <option value="Expert">Expert</option>
-                        </select>
-                        <span class="form-icon">🎮</span>
-                    </div>
+                <div class="form-group">
+                    <label for="experience">LoL Experience</label>
+                    <select id="experience" name="experience" required>
+                        <option value="">Select your experience</option>
+                        <option value="New Player">New Player</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                        <option value="Expert">Expert</option>
+                    </select>
+                    <span class="form-icon">🎮</span>
                 </div>
 
                 <div class="form-buttons">
