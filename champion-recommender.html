@@ -518,8 +518,68 @@
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 25px;
         }
-
+        
         .match-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-top: 4px solid #ff9800;
+        }
+
+        .match-card.winner {
+            border: 2px solid #28a745;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e6f7ef 100%);
+        }
+        
+        .winner-badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        
+        .algorithm-info {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 3px;
+        }
+        
+        .champion-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin: 15px 0;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .champion-stats-grid .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: white;
+            padding: 8px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .champion-stats-grid .stat-label {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+        
+        .champion-stats-grid .stat-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #667eea;
+        }
             background: white;
             border-radius: 15px;
             padding: 25px;
@@ -2655,59 +2715,8 @@ function showDetailedAnalysis() {
             
             analysisContent.innerHTML = `
                 <div class="analysis-header">
-                    <h2>🔬 Detailed Machine Learning Analysis</h2>
-                    <p>Comprehensive breakdown of all 3 algorithms and their recommendations</p>
-                </div>
-
-                <div class="analysis-grid">
-                    ${Object.entries(mlResults).map(([algorithm, result]) => {
-                        const isWinner = algorithm === winner;
-                        const algInfo = algorithmNames[algorithm];
-                        const champion = allChampions[result.champion];
-                        
-                        return `
-                            <div class="algorithm-analysis ${isWinner ? 'winner' : ''}">
-                                <div class="algorithm-header">
-                                    <div class="algorithm-title">
-                                        <span class="algorithm-icon">${algInfo.icon}</span>
-                                        <h3>${algInfo.name}</h3>
-                                    </div>
-                                    ${isWinner ? '<div class="winner-crown">👑 WINNER</div>' : ''}
-                                </div>
-                                
-                                <div class="champion-result">
-                                    <img src="${getChampionImageUrl(result.champion)}" alt="${result.champion}" class="champion-image" 
-                                         onerror="this.src='https://via.placeholder.com/80x80/667eea/white?text=${result.champion.replace(/[^a-zA-Z0-9]/g, '')}'">
-                                    <div class="champion-name">${result.champion}</div>
-                                    <div class="champion-role">${champion.role}</div>
-                                    <div style="margin-top: 10px;">
-                                        <span class="tier-badge tier-${champion.stats?.tier?.charAt(0) || 'C'}">${champion.stats?.tier || 'C'}</span>
-                                        <span style="margin-left: 10px; font-weight: bold; color: #667eea;">${champion.stats?.winRate || 'N/A'}% WR</span>
-                                    </div>
-                                </div>
-                                
-                                <div class="confidence-display">
-                                    <div class="confidence-number">${result.confidence.toFixed(1)}%</div>
-                                    <div class="confidence-label">Confidence Score</div>
-                                </div>
-                                
-                                <div class="algorithm-details">
-                                    <div class="detail-item">
-                                        <span class="detail-label">Damage Rating</span>
-                                        <span class="detail-value">${champion.damage}/10</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="detail-label">Toughness Rating</span>
-                                        <span class="detail-value">${champion.toughness}/10</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="detail-label">Mobility Rating</span>
-                                        <span class="detail-value">${champion.mobility}/10</span>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
+                    <h2>🔬 Detailed Champion Analysis</h2>
+                    <p>Personalized champion recommendations based on your preferences</p>
                 </div>
 
                 <div class="champion-analysis-section">
@@ -2719,18 +2728,22 @@ function showDetailedAnalysis() {
                     <div class="match-analysis-grid">
                         ${Object.entries(mlResults).map(([algorithm, result]) => {
                             const champion = allChampions[result.champion];
+                            const isWinner = algorithm === winner;
+                            const algInfo = algorithmNames[algorithm];
                             const roleMatch = answers[1] === 'No Preference' || champion.role === answers[1] ? 100 : 70;
                             const difficultyMatch = Math.max(0, 100 - Math.abs(champion.difficulty - (parseInt(answers[3]) || 5)) * 10);
                             const damageMatch = Math.max(0, 100 - Math.abs(champion.damage - 5) * 8);
                             const toughnessMatch = Math.max(0, 100 - Math.abs(champion.toughness - 5) * 8);
                             
                             return `
-                                <div class="match-card">
+                                <div class="match-card ${isWinner ? 'winner' : ''}">
                                     <div class="match-header">
-                                        <img src="${getChampionImageUrl(result.champion)}" alt="${result.champion}" class="match-champion-img">
+                                        <img src="${getChampionImageUrl(result.champion)}" alt="${result.champion}" class="match-champion-img"
+                                             onerror="this.src='https://via.placeholder.com/80x80/667eea/white?text=${result.champion.replace(/[^a-zA-Z0-9]/g, '')}'">
                                         <div class="match-info">
-                                            <h4>${result.champion}</h4>
+                                            <h4>${result.champion} ${isWinner ? '<span class="winner-badge">👑 TOP PICK</span>' : ''}</h4>
                                             <div class="match-tier">Tier ${champion.stats?.tier || 'B'} • ${champion.stats?.winRate || '50.0'}% WR</div>
+                                            <div class="algorithm-info">${algInfo.icon} ${algInfo.name} • ${result.confidence.toFixed(1)}% confidence</div>
                                         </div>
                                     </div>
                                     
@@ -2771,6 +2784,13 @@ function showDetailedAnalysis() {
                                             </div>
                                             <span class="breakdown-value">${toughnessMatch}%</span>
                                         </div>
+                                    </div>
+                                    
+                                    <div class="champion-stats-grid">
+                                        <div class="stat-item"><span class="stat-label">Damage</span><span class="stat-value">${champion.damage}/10</span></div>
+                                        <div class="stat-item"><span class="stat-label">Toughness</span><span class="stat-value">${champion.toughness}/10</span></div>
+                                        <div class="stat-item"><span class="stat-label">Mobility</span><span class="stat-value">${champion.mobility}/10</span></div>
+                                        <div class="stat-item"><span class="stat-label">Control</span><span class="stat-value">${champion.control}/10</span></div>
                                     </div>
                                     
                                     <div class="champion-highlights">
