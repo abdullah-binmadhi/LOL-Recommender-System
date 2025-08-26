@@ -2666,6 +2666,13 @@ function showDetailedAnalysis() {
             // Find the winner algorithm
             const winner = findWinner(mlResults);
             
+            // Define algorithm names for consistent use throughout
+            const algorithmNames = {
+                'random-forest': { name: 'Random Forest', icon: '🌳' },
+                'decision-tree': { name: 'Decision Tree', icon: '🌲' },
+                'knn': { name: 'K-Nearest Neighbors', icon: '📊' }
+            };
+            
             analysisContent.innerHTML = `
                 <div class="analysis-header">
                     <h2>🔬 Detailed Machine Learning Analysis</h2>
@@ -2675,11 +2682,6 @@ function showDetailedAnalysis() {
                 <div class="analysis-grid">
                     ${Object.entries(mlResults).map(([algorithm, result]) => {
                         const isWinner = algorithm === winner;
-                        const algorithmNames = {
-                            'random-forest': { name: 'Random Forest', icon: '🌳' },
-                            'decision-tree': { name: 'Decision Tree', icon: '🌲' },
-                            'knn': { name: 'K-Nearest Neighbors', icon: '📊' }
-                        };
                         const algInfo = algorithmNames[algorithm];
                         const champion = allChampions[result.champion];
                         
@@ -2819,11 +2821,11 @@ function showDetailedAnalysis() {
                         <div class="recommendation-card primary-rec">
                             <div class="rec-icon">🏆</div>
                             <h4>Primary Recommendation</h4>
-                            <div class="primary-champion">${Object.values(mlResults).reduce((prev, current) => prev.confidence > current.confidence ? prev : current).champion}</div>
-                            <p>Based on consensus analysis, this champion best matches your playstyle preferences and skill level.</p>
+                            <div class="primary-champion">${mlResults[winner].champion}</div>
+                            <p>Recommended by ${algorithmNames[winner].name} (${winner === 'random-forest' ? '92%' : winner === 'decision-tree' ? '87%' : '89%'} accuracy) with ${mlResults[winner].confidence.toFixed(1)}% confidence.</p>
                             <div class="action-buttons">
-                                <button class="action-btn" onclick="window.open('https://www.mobafire.com/league-of-legends/${Object.values(mlResults).reduce((prev, current) => prev.confidence > current.confidence ? prev : current).champion.toLowerCase()}-guide', '_blank')">📚 View Guide</button>
-                                <button class="action-btn" onclick="window.open('https://u.gg/lol/champions/${Object.values(mlResults).reduce((prev, current) => prev.confidence > current.confidence ? prev : current).champion.toLowerCase()}/build', '_blank')">⚙️ Build Guide</button>
+                                <button class="action-btn" onclick="window.open('https://www.mobafire.com/league-of-legends/${mlResults[winner].champion.toLowerCase()}-guide', '_blank')">📚 View Guide</button>
+                                <button class="action-btn" onclick="window.open('https://u.gg/lol/champions/${mlResults[winner].champion.toLowerCase()}/build', '_blank')">⚙️ Build Guide</button>
                             </div>
                         </div>
                         
@@ -2878,7 +2880,7 @@ function showDetailedAnalysis() {
                         <h4>💡 Pro Tips</h4>
                         <div class="tips-grid">
                             ${(() => {
-                                const topChampion = Object.values(mlResults).reduce((prev, current) => prev.confidence > current.confidence ? prev : current).champion;
+                                const topChampion = mlResults[winner].champion;
                                 const proTips = getChampionProTips(topChampion);
                                 return proTips.map(tip => `
                                     <div class="tip-item">
@@ -2889,7 +2891,7 @@ function showDetailedAnalysis() {
                             })()} 
                         </div>
                         <div class="champion-tip-source">
-                            <small>🎯 Pro tips for ${Object.values(mlResults).reduce((prev, current) => prev.confidence > current.confidence ? prev : current).champion} - Master these fundamentals to excel with your recommended champion!</small>
+                            <small>🎯 Pro tips for ${mlResults[winner].champion} - Master these fundamentals to excel with your recommended champion!</small>
                         </div>
                     </div>
                 </div>
