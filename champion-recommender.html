@@ -1323,36 +1323,36 @@
     <script>      
   // Champion Database (50 champions for optimal performance)
         const allChampions = {
-            'Jinx': { role: 'Marksman', positions: ['ADC'], difficulty: 6, damage: 9, toughness: 2, control: 7, mobility: 6, utility: 6, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Jinx.png', stats: { winRate: 51.8, pickRate: 12.3, banRate: 4.2, tier: 'A', trend: 'stable' } },
-            'Ashe': { role: 'Marksman', positions: ['ADC'], difficulty: 4, damage: 7, toughness: 3, control: 8, mobility: 4, utility: 8, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ashe.png', stats: { winRate: 50.9, pickRate: 8.7, banRate: 1.8, tier: 'B+', trend: 'rising' } },
-            'Yasuo': { role: 'Fighter', positions: ['Mid', 'Top'], difficulty: 10, damage: 8, toughness: 4, control: 6, mobility: 8, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Yasuo.png', stats: { winRate: 49.2, pickRate: 15.6, banRate: 28.4, tier: 'B', trend: 'falling' } },
-            'Lux': { role: 'Mage', positions: ['Mid', 'Support'], difficulty: 5, damage: 7, toughness: 2, control: 8, mobility: 4, utility: 7, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Lux.png', stats: { winRate: 52.3, pickRate: 9.1, banRate: 3.7, tier: 'A', trend: 'stable' } },
-            'Garen': { role: 'Fighter', positions: ['Top'], difficulty: 2, damage: 6, toughness: 7, control: 5, mobility: 5, utility: 5, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Garen.png', stats: { winRate: 53.1, pickRate: 6.8, banRate: 2.3, tier: 'A+', trend: 'rising' } },
-            'Thresh': { role: 'Support', positions: ['Support'], difficulty: 7, damage: 6, toughness: 6, control: 9, mobility: 5, utility: 9, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Thresh.png', stats: { winRate: 50.2, pickRate: 11.4, banRate: 6.8, tier: 'B+', trend: 'stable' } },
-            'Ahri': { role: 'Mage', positions: ['Mid'], difficulty: 5, damage: 8, toughness: 3, control: 5, mobility: 7, utility: 6, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Ahri.png', stats: { winRate: 52.1, pickRate: 8.4, banRate: 2.1, tier: 'A', trend: 'stable' } },
-            'Darius': { role: 'Fighter', positions: ['Top'], difficulty: 4, damage: 9, toughness: 6, control: 5, mobility: 4, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Darius.png', stats: { winRate: 47.8, pickRate: 5.4, banRate: 7.2, tier: 'C', trend: 'falling' } },
-            'Zed': { role: 'Assassin', positions: ['Mid'], difficulty: 8, damage: 9, toughness: 2, control: 5, mobility: 8, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Zed.png', stats: { winRate: 49.5, pickRate: 7.8, banRate: 12.4, tier: 'B', trend: 'stable' } },
-            'Leona': { role: 'Tank', positions: ['Support'], difficulty: 4, damage: 4, toughness: 9, control: 9, mobility: 4, utility: 8, image: 'https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/Leona.png', stats: { winRate: 48.7, pickRate: 9.2, banRate: 4.1, tier: 'C+', trend: 'stable' } },
-            'Ezreal': { role: 'Marksman', difficulty: 7, damage: 7, toughness: 2, control: 4, mobility: 7, utility: 5 },
-            'Annie': { role: 'Mage', difficulty: 3, damage: 8, toughness: 2, control: 6, mobility: 3, utility: 5 },
-            'Master Yi': { role: 'Assassin', difficulty: 4, damage: 10, toughness: 4, control: 2, mobility: 7, utility: 2 },
-            'Soraka': { role: 'Support', difficulty: 3, damage: 3, toughness: 2, control: 4, mobility: 3, utility: 10 },
-            'Malphite': { role: 'Tank', difficulty: 2, damage: 4, toughness: 9, control: 7, mobility: 5, utility: 7 },
-            'Katarina': { role: 'Assassin', difficulty: 8, damage: 9, toughness: 2, control: 4, mobility: 8, utility: 4 },
-            'Jhin': { role: 'Marksman', difficulty: 6, damage: 9, toughness: 2, control: 8, mobility: 4, utility: 7 },
-            'Blitzcrank': { role: 'Support', difficulty: 4, damage: 5, toughness: 8, control: 9, mobility: 5, utility: 7 },
-            'Vayne': { role: 'Marksman', difficulty: 8, damage: 10, toughness: 1, control: 5, mobility: 6, utility: 4 },
-            'Riven': { role: 'Fighter', difficulty: 8, damage: 8, toughness: 5, control: 6, mobility: 8, utility: 4 },
-            'Akali': { role: 'Assassin', difficulty: 7, damage: 8, toughness: 3, control: 5, mobility: 9, utility: 4 },
-            'Braum': { role: 'Tank', difficulty: 4, damage: 4, toughness: 9, control: 8, mobility: 4, utility: 9 },
-            'Caitlyn': { role: 'Marksman', difficulty: 6, damage: 8, toughness: 2, control: 6, mobility: 4, utility: 6 },
-            'Diana': { role: 'Fighter', difficulty: 4, damage: 8, toughness: 6, control: 6, mobility: 7, utility: 4 },
-            'Fiora': { role: 'Fighter', difficulty: 7, damage: 8, toughness: 4, control: 4, mobility: 7, utility: 3 },
-            'Jax': { role: 'Fighter', difficulty: 5, damage: 7, toughness: 5, control: 4, mobility: 5, utility: 4 },
-            'LeBlanc': { role: 'Assassin', difficulty: 9, damage: 8, toughness: 2, control: 6, mobility: 8, utility: 5 },
-            'Lucian': { role: 'Marksman', difficulty: 6, damage: 8, toughness: 3, control: 4, mobility: 7, utility: 4 },
-            'Nami': { role: 'Support', difficulty: 5, damage: 4, toughness: 3, control: 7, mobility: 4, utility: 10 },
-            'Orianna': { role: 'Mage', difficulty: 7, damage: 7, toughness: 4, control: 8, mobility: 4, utility: 9 },
+            'Jinx': { role: 'Marksman', positions: ['ADC'], difficulty: 6, damage: 9, toughness: 2, control: 7, mobility: 6, utility: 6, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Jinx.png', stats: { winRate: 51.8, pickRate: 12.3, banRate: 4.2, tier: 'A', trend: 'stable' } },
+            'Ashe': { role: 'Marksman', positions: ['ADC'], difficulty: 4, damage: 7, toughness: 3, control: 8, mobility: 4, utility: 8, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Ashe.png', stats: { winRate: 50.9, pickRate: 8.7, banRate: 1.8, tier: 'B+', trend: 'rising' } },
+            'Yasuo': { role: 'Fighter', positions: ['Mid', 'Top'], difficulty: 10, damage: 8, toughness: 4, control: 6, mobility: 8, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Yasuo.png', stats: { winRate: 49.2, pickRate: 15.6, banRate: 28.4, tier: 'B', trend: 'falling' } },
+            'Lux': { role: 'Mage', positions: ['Mid', 'Support'], difficulty: 5, damage: 7, toughness: 2, control: 8, mobility: 4, utility: 7, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Lux.png', stats: { winRate: 52.3, pickRate: 9.1, banRate: 3.7, tier: 'A', trend: 'stable' } },
+            'Garen': { role: 'Fighter', positions: ['Top'], difficulty: 2, damage: 6, toughness: 7, control: 5, mobility: 5, utility: 5, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Garen.png', stats: { winRate: 53.1, pickRate: 6.8, banRate: 2.3, tier: 'A+', trend: 'rising' } },
+            'Thresh': { role: 'Support', positions: ['Support'], difficulty: 7, damage: 6, toughness: 6, control: 9, mobility: 5, utility: 9, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Thresh.png', stats: { winRate: 50.2, pickRate: 11.4, banRate: 6.8, tier: 'B+', trend: 'stable' } },
+            'Ahri': { role: 'Mage', positions: ['Mid'], difficulty: 5, damage: 8, toughness: 3, control: 5, mobility: 7, utility: 6, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Ahri.png', stats: { winRate: 52.1, pickRate: 8.4, banRate: 2.1, tier: 'A', trend: 'stable' } },
+            'Darius': { role: 'Fighter', positions: ['Top'], difficulty: 4, damage: 9, toughness: 6, control: 5, mobility: 4, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Darius.png', stats: { winRate: 47.8, pickRate: 5.4, banRate: 7.2, tier: 'C', trend: 'falling' } },
+            'Zed': { role: 'Assassin', positions: ['Mid'], difficulty: 8, damage: 9, toughness: 2, control: 5, mobility: 8, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Zed.png', stats: { winRate: 49.5, pickRate: 7.8, banRate: 12.4, tier: 'B', trend: 'stable' } },
+            'Leona': { role: 'Tank', positions: ['Support'], difficulty: 4, damage: 4, toughness: 9, control: 9, mobility: 4, utility: 8, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Leona.png', stats: { winRate: 48.7, pickRate: 9.2, banRate: 4.1, tier: 'C+', trend: 'stable' } },
+            'Ezreal': { role: 'Marksman', difficulty: 7, damage: 7, toughness: 2, control: 4, mobility: 7, utility: 5, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Ezreal.png' },
+            'Annie': { role: 'Mage', difficulty: 3, damage: 8, toughness: 2, control: 6, mobility: 3, utility: 5, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Annie.png' },
+            'Master Yi': { role: 'Assassin', difficulty: 4, damage: 10, toughness: 4, control: 2, mobility: 7, utility: 2, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/MasterYi.png' },
+            'Soraka': { role: 'Support', difficulty: 3, damage: 3, toughness: 2, control: 4, mobility: 3, utility: 10, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Soraka.png' },
+            'Malphite': { role: 'Tank', difficulty: 2, damage: 4, toughness: 9, control: 7, mobility: 5, utility: 7, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Malphite.png' },
+            'Katarina': { role: 'Assassin', difficulty: 8, damage: 9, toughness: 2, control: 4, mobility: 8, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Katarina.png' },
+            'Jhin': { role: 'Marksman', difficulty: 6, damage: 9, toughness: 2, control: 8, mobility: 4, utility: 7, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Jhin.png' },
+            'Blitzcrank': { role: 'Support', difficulty: 4, damage: 5, toughness: 8, control: 9, mobility: 5, utility: 7, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Blitzcrank.png' },
+            'Vayne': { role: 'Marksman', difficulty: 8, damage: 10, toughness: 1, control: 5, mobility: 6, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Vayne.png' },
+            'Riven': { role: 'Fighter', difficulty: 8, damage: 8, toughness: 5, control: 6, mobility: 8, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Riven.png' },
+            'Akali': { role: 'Assassin', difficulty: 7, damage: 8, toughness: 3, control: 5, mobility: 9, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Akali.png' },
+            'Braum': { role: 'Tank', difficulty: 4, damage: 4, toughness: 9, control: 8, mobility: 4, utility: 9, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Braum.png' },
+            'Caitlyn': { role: 'Marksman', difficulty: 6, damage: 8, toughness: 2, control: 6, mobility: 4, utility: 6, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Caitlyn.png' },
+            'Diana': { role: 'Fighter', difficulty: 4, damage: 8, toughness: 6, control: 6, mobility: 7, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Diana.png' },
+            'Fiora': { role: 'Fighter', difficulty: 7, damage: 8, toughness: 4, control: 4, mobility: 7, utility: 3, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Fiora.png' },
+            'Jax': { role: 'Fighter', difficulty: 5, damage: 7, toughness: 5, control: 4, mobility: 5, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Jax.png' },
+            'LeBlanc': { role: 'Assassin', difficulty: 9, damage: 8, toughness: 2, control: 6, mobility: 8, utility: 5, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Leblanc.png' },
+            'Lucian': { role: 'Marksman', difficulty: 6, damage: 8, toughness: 3, control: 4, mobility: 7, utility: 4, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Lucian.png' },
+            'Nami': { role: 'Support', difficulty: 5, damage: 4, toughness: 3, control: 7, mobility: 4, utility: 10, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Nami.png' },
+            'Orianna': { role: 'Mage', difficulty: 7, damage: 7, toughness: 4, control: 8, mobility: 4, utility: 9, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Orianna.png' },
             'Renekton': { role: 'Fighter', difficulty: 3, damage: 8, toughness: 5, control: 5, mobility: 5, utility: 4 },
             'Syndra': { role: 'Mage', difficulty: 8, damage: 9, toughness: 2, control: 8, mobility: 3, utility: 5 },
             'Tristana': { role: 'Marksman', difficulty: 4, damage: 8, toughness: 3, control: 5, mobility: 8, utility: 5 },
@@ -1488,6 +1488,25 @@
             'Zilean': { role: 'Support', difficulty: 6, damage: 6, toughness: 5, control: 7, mobility: 5, utility: 10 },
             'Zyra': { role: 'Support', difficulty: 7, damage: 8, toughness: 2, control: 8, mobility: 3, utility: 6 }
         };
+
+        // Helper function to get champion image URL
+        function getChampionImageUrl(championName) {
+            const champion = allChampions[championName];
+            if (champion && champion.image) {
+                return champion.image;
+            }
+            // Generate image URL automatically for champions without image property
+            // Convert champion name to API format (remove spaces, apostrophes, etc.)
+            const apiName = championName.replace(/[^a-zA-Z0-9]/g, '');
+            return `https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/${apiName}.png`;
+        }
+
+        // Ensure all champions have image URLs
+        Object.keys(allChampions).forEach(championName => {
+            if (!allChampions[championName].image) {
+                allChampions[championName].image = getChampionImageUrl(championName);
+            }
+        });
 
         // Questions Database
         const questionsDatabase = [
@@ -2319,8 +2338,8 @@
                 consensusSection.innerHTML = `
                     <h3>🎯 Perfect Consensus!</h3>
                     <div class="consensus-champion">
-                        <img src="${allChampions[consensus.champions[0]].image}" alt="${consensus.champions[0]}" class="champion-image-large" 
-                             onerror="this.src='https://via.placeholder.com/120x120?text=${consensus.champions[0]}'">
+                        <img src="${getChampionImageUrl(consensus.champions[0])}" alt="${consensus.champions[0]}" class="champion-image-large" 
+                             onerror="this.src='https://via.placeholder.com/120x120/667eea/white?text=${consensus.champions[0].replace(/[^a-zA-Z0-9]/g, '')}'">
                         <div class="champion-name">${consensus.champions[0]}</div>
                         <div class="champion-role">${allChampions[consensus.champions[0]].role}</div>
                         
@@ -2353,8 +2372,8 @@
                 consensusSection.innerHTML = `
                     <h3>🤝 Majority Consensus</h3>
                     <div class="consensus-champion">
-                        <img src="${allChampions[consensus.champions[0]].image}" alt="${consensus.champions[0]}" class="champion-image-large" 
-                             onerror="this.src='https://via.placeholder.com/120x120?text=${consensus.champions[0]}'">
+                        <img src="${getChampionImageUrl(consensus.champions[0])}" alt="${consensus.champions[0]}" class="champion-image-large" 
+                             onerror="this.src='https://via.placeholder.com/120x120/667eea/white?text=${consensus.champions[0].replace(/[^a-zA-Z0-9]/g, '')}'">
                         <div class="champion-name">${consensus.champions[0]}</div>
                         <div class="champion-role">${allChampions[consensus.champions[0]].role}</div>
                         
@@ -2443,8 +2462,8 @@
                         ${isWinner ? '<span class="winner-badge">HIGHEST CONFIDENCE</span>' : ''}
                     </h3>
                     
-                    <img src="${champion.image}" alt="${result.champion}" class="champion-image" 
-                         onerror="this.src='https://via.placeholder.com/80x80?text=${result.champion}'">
+                    <img src="${getChampionImageUrl(result.champion)}" alt="${result.champion}" class="champion-image" 
+                         onerror="this.src='https://via.placeholder.com/80x80/667eea/white?text=${result.champion.replace(/[^a-zA-Z0-9]/g, '')}'">
                     <div class="champion-name">${result.champion}</div>
                     <div class="champion-role">${champion.role}</div>
                     
@@ -2524,8 +2543,8 @@
                                 </div>
                                 
                                 <div class="champion-result">
-                                    <img src="${champion.image}" alt="${result.champion}" class="champion-image" 
-                                         onerror="this.src='https://via.placeholder.com/80x80?text=${result.champion}'">
+                                    <img src="${getChampionImageUrl(result.champion)}" alt="${result.champion}" class="champion-image" 
+                                         onerror="this.src='https://via.placeholder.com/80x80/667eea/white?text=${result.champion.replace(/[^a-zA-Z0-9]/g, '')}'">
                                     <div class="champion-name">${result.champion}</div>
                                     <div class="champion-role">${champion.role}</div>
                                     <div style="margin-top: 10px;">
