@@ -1807,10 +1807,46 @@
             if (champion && champion.image) {
                 return champion.image;
             }
-            // Generate image URL automatically for champions without image property
-            // Convert champion name to API format (remove spaces, apostrophes, etc.)
-            const apiName = championName.replace(/[^a-zA-Z0-9]/g, '');
-            return `https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/${apiName}.png`;
+            
+            // Special cases for champions with known Riot API names
+            const specialCases = {
+                'Aurelion Sol': 'AurelionSol',
+                'Bel\'Veth': 'Belveth',
+                'Cho\'Gath': 'Chogath',
+                'Dr. Mundo': 'DrMundo',
+                'Jarvan IV': 'JarvanIV',
+                'Kai\'Sa': 'Kaisa',
+                'Kha\'Zix': 'Khazix',
+                'Kog\'Maw': 'KogMaw',
+                'Lee Sin': 'LeeSin',
+                'Master Yi': 'MasterYi',
+                'Miss Fortune': 'MissFortune',
+                'Nunu & Willump': 'Nunu',
+                'Rek\'Sai': 'RekSai',
+                'Tahm Kench': 'TahmKench',
+                'Twisted Fate': 'TwistedFate',
+                'Vel\'Koz': 'Velkoz',
+                'Xin Zhao': 'XinZhao'
+            };
+            
+            // Use special case if available, otherwise generate URL automatically
+            const apiName = specialCases[championName] || championName.replace(/[^a-zA-Z0-9]/g, '');
+            const url = `https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/${apiName}.png`;
+            
+            // Log the generated URL for debugging
+            console.log(`Generated image URL for ${championName}: ${url}`);
+            
+            return url;
+        }
+
+        // Test function to verify champion image URLs (for debugging)
+        function testChampionImageUrls() {
+            const testChampions = ['Aurelion Sol', 'Jarvan IV', 'Lee Sin', 'Tahm Kench', 'Twisted Fate', 'Xin Zhao', 'Nunu & Willump', 'Kai\'Sa', 'Cho\'Gath'];
+            console.log('Testing champion image URLs:');
+            testChampions.forEach(championName => {
+                const url = getChampionImageUrl(championName);
+                console.log(`${championName}: ${url}`);
+            });
         }
 
         // Comprehensive stats database for all champions (Season 15 - August 2025)
@@ -2739,7 +2775,9 @@ function showDetailedAnalysis() {
                                 <div class="match-card ${isWinner ? 'winner' : ''}">
                                     <div class="match-header">
                                         <img src="${getChampionImageUrl(result.champion)}" alt="${result.champion}" class="match-champion-img"
-                                             onerror="this.src='https://via.placeholder.com/80x80/667eea/white?text=${result.champion.replace(/[^a-zA-Z0-9]/g, '')}'">
+                                             onerror="console.log('Failed to load image for champion:', '${result.champion}', 'Generated URL:', this.src); 
+                                                     this.src='https://via.placeholder.com/80x80/667eea/white?text=${encodeURIComponent(result.champion.length > 3 ? result.champion.substring(0, 3) : result.champion)}'; 
+                                                     this.onerror=null;">
                                         <div class="match-info">
                                             <h4>${result.champion} ${isWinner ? '<span class="winner-badge">👑 TOP PICK</span>' : ''}</h4>
                                             <div class="match-tier">Tier ${champion.stats?.tier || 'B'} • ${champion.stats?.winRate || '50.0'}% WR</div>
@@ -2841,7 +2879,10 @@ function showDetailedAnalysis() {
                             <div class="alternatives-list">
                                 ${Object.values(mlResults).filter(result => result.champion !== mlResults[winner].champion).slice(0, 2).map(result => `
                                     <div class="alternative-item">
-                                        <img src="${getChampionImageUrl(result.champion)}" alt="${result.champion}" class="alt-champion-img">
+                                        <img src="${getChampionImageUrl(result.champion)}" alt="${result.champion}" class="alt-champion-img"
+                                             onerror="console.log('Failed to load image for alternative champion:', '${result.champion}', 'Generated URL:', this.src); 
+                                                     this.src='https://via.placeholder.com/40x40/667eea/white?text=${encodeURIComponent(result.champion.length > 2 ? result.champion.substring(0, 2) : result.champion)}'; 
+                                                     this.onerror=null;">
                                         <div class="alt-info">
                                             <div class="alt-name">${result.champion}</div>
                                             <div class="alt-reason">${result.confidence.toFixed(0)}% match • ${allChampions[result.champion].role}</div>
