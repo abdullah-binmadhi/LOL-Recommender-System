@@ -2843,7 +2843,7 @@ function showDetailedAnalysis() {
                             <div class="rec-icon">🔄</div>
                             <h4>Alternative Champions</h4>
                             <div class="alternatives-list">
-                                ${Object.values(mlResults).slice(1).map(result => `
+                                ${Object.values(mlResults).filter(result => result.champion !== mlResults[winner].champion).slice(0, 2).map(result => `
                                     <div class="alternative-item">
                                         <img src="${getChampionImageUrl(result.champion)}" alt="${result.champion}" class="alt-champion-img">
                                         <div class="alt-info">
