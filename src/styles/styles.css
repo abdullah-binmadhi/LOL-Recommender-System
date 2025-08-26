@@ -698,6 +698,12 @@ body {
     outline-offset: 2px;
 }
 
+/* Fix for dropdown options being white on white */
+select option {
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+}
+
 /* High contrast mode support */
 @media (prefers-contrast: high) {
     :root {
