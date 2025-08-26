@@ -854,6 +854,21 @@
             line-height: 1.4;
         }
 
+        .champion-tip-source {
+            margin-top: 15px;
+            text-align: center;
+            padding: 12px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .champion-tip-source small {
+            color: #4a148c;
+            font-style: italic;
+            font-weight: 500;
+        }
+
         .strategy-section {
             background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
             border-radius: 15px;
@@ -2860,30 +2875,211 @@ function showDetailedAnalysis() {
                     </div>
                     
                     <div class="final-tips">
-                        <h4>💡 Pro Tips for Success</h4>
+                        <h4>💡 Pro Tips</h4>
                         <div class="tips-grid">
-                            <div class="tip-item">
-                                <span class="tip-icon">🎯</span>
-                                <div class="tip-text">Focus on mastering one champion at a time before expanding your pool</div>
-                            </div>
-                            <div class="tip-item">
-                                <span class="tip-icon">📊</span>
-                                <div class="tip-text">Review your replays to identify improvement areas and decision-making patterns</div>
-                            </div>
-                            <div class="tip-item">
-                                <span class="tip-icon">📚</span>
-                                <div class="tip-text">Study professional gameplay and high-ELO strategies for your chosen champions</div>
-                            </div>
-                            <div class="tip-item">
-                                <span class="tip-icon">⚙️</span>
-                                <div class="tip-text">Experiment with different builds and runes to find your optimal playstyle</div>
-                            </div>
+                            ${(() => {
+                                const topChampion = Object.values(mlResults).reduce((prev, current) => prev.confidence > current.confidence ? prev : current).champion;
+                                const proTips = getChampionProTips(topChampion);
+                                return proTips.map(tip => `
+                                    <div class="tip-item">
+                                        <span class="tip-icon">${tip.icon}</span>
+                                        <div class="tip-text">${tip.tip}</div>
+                                    </div>
+                                `).join('');
+                            })()} 
+                        </div>
+                        <div class="champion-tip-source">
+                            <small>🎯 Pro tips for ${Object.values(mlResults).reduce((prev, current) => prev.confidence > current.confidence ? prev : current).champion} - Master these fundamentals to excel with your recommended champion!</small>
                         </div>
                     </div>
                 </div>
             `;
             
             document.getElementById('detailed-analysis').classList.add('active');
+        }
+
+        // Champion Pro Tips Database - Based on pro player strategies and guides
+        const championProTips = {
+            'Jinx': [
+                { icon: '🎯', tip: 'Use Fishbones (rocket launcher) for teamfights and Pow-Pow (minigun) for objectives' },
+                { icon: '⚡', tip: 'Get Excited! passive gives massive movement speed - use it to chase or escape' },
+                { icon: '💥', tip: 'Super Mega Death Rocket executes low HP enemies globally - watch for snipe opportunities' },
+                { icon: '🛡️', tip: 'Stay behind your frontline and use your range advantage to avoid assassins' }
+            ],
+            'Ashe': [
+                { icon: '🏹', tip: 'Use Hawkshot (E) frequently for vision control and tracking enemy jungler' },
+                { icon: '❄️', tip: 'Frost Shot passive slows help with kiting - weave auto attacks between abilities' },
+                { icon: '🎯', tip: 'Crystal Arrow (R) is best used to initiate fights or catch out-of-position enemies' },
+                { icon: '📊', tip: 'Focus on farming safely early game - Ashe scales incredibly well into late game' }
+            ],
+            'Yasuo': [
+                { icon: '🌪️', tip: 'Use minions to dash through and position for optimal Wind Wall placement' },
+                { icon: '⚔️', tip: 'Stack Q tornado on minions before engaging - it\'s your main engage tool' },
+                { icon: '🛡️', tip: 'Wind Wall blocks projectiles completely - time it against key enemy abilities' },
+                { icon: '⚡', tip: 'Last Breath (R) resets your shield - use it when shield is broken for maximum value' }
+            ],
+            'Lux': [
+                { icon: '💡', tip: 'Proc your passive with auto attacks after landing abilities for maximum damage' },
+                { icon: '🌟', tip: 'Use Light Binding (Q) through minions to catch enemies behind the wave' },
+                { icon: '⚡', tip: 'Final Spark (R) has very long range - use it to secure objectives from safety' },
+                { icon: '🛡️', tip: 'Prismatic Barrier (W) can shield allies twice - position to hit maximum teammates' }
+            ],
+            'Garen': [
+                { icon: '💪', tip: 'Perseverance passive heals you - disengage when low to recover health' },
+                { icon: '🏃', tip: 'Use Decisive Strike (Q) to remove slows and gain movement speed for engages' },
+                { icon: '🌪️', tip: 'Judgment (E) deals more damage to isolated targets - focus single enemies' },
+                { icon: '⚔️', tip: 'Demacian Justice (R) executes based on missing health - time it perfectly' }
+            ],
+            'Thresh': [
+                { icon: '⛓️', tip: 'Death Sentence (Q) can be reactivated to dash - sometimes don\'t take it for positioning' },
+                { icon: '🏮', tip: 'Dark Passage (W) gives shield and mobility - throw it preemptively for escapes' },
+                { icon: '💀', tip: 'Flay (E) can interrupt dashes - practice timing against mobile champions' },
+                { icon: '🔄', tip: 'The Box (R) slows heavily on first wall hit - use it to zone enemies' }
+            ],
+            'Ahri': [
+                { icon: '💖', tip: 'Charm (E) amplifies damage - always combo it with Q and W for maximum burst' },
+                { icon: '🦊', tip: 'Spirit Rush (R) has three charges - don\'t waste them all at once' },
+                { icon: '⚡', tip: 'Orb of Deception (Q) deals magic damage out, true damage back - position for both hits' },
+                { icon: '🎯', tip: 'Use Fox-Fire (W) while moving to maintain damage while repositioning' }
+            ],
+            'Darius': [
+                { icon: '🩸', tip: 'Hemorrhage passive stacks to 5 - get full stacks before all-inning' },
+                { icon: '⚔️', tip: 'Apprehend (E) pulls and slows - use it to interrupt enemy escapes' },
+                { icon: '🌪️', tip: 'Decimate (Q) heals and deals more damage at max range - space properly' },
+                { icon: '💀', tip: 'Noxian Guillotine (R) resets on kills - look for multi-kill opportunities' }
+            ],
+            'Zed': [
+                { icon: '👤', tip: 'Living Shadow (W) can be reactivated to swap - use for escapes or gap closing' },
+                { icon: '⚡', tip: 'Razor Shuriken (Q) deals reduced damage through units - hit from angles' },
+                { icon: '💀', tip: 'Death Mark (R) spawns shadow behind target - use it for guaranteed W+E+Q combo' },
+                { icon: '🔄', tip: 'You can swap to any shadow within 4 seconds - plan your escape route' }
+            ],
+            'Leona': [
+                { icon: '☀️', tip: 'Sunlight passive marks enemies - coordinate with ADC to proc marks' },
+                { icon: '⚔️', tip: 'Zenith Blade (E) is your main engage - aim for carries behind frontline' },
+                { icon: '🛡️', tip: 'Eclipse (W) provides armor/MR and explodes for damage - activate before engaging' },
+                { icon: '☀️', tip: 'Solar Flare (R) has huge range - use it to start fights from unexpected angles' }
+            ],
+            'Ezreal': [
+                { icon: '⚡', tip: 'Mystic Shot (Q) reduces all cooldowns on hit - spam it for more abilities' },
+                { icon: '🔮', tip: 'Essence Flux (W) marks enemies - detonate with Q for extra damage' },
+                { icon: '📍', tip: 'Arcane Shift (E) can go through walls - learn wall jump spots' },
+                { icon: '🌟', tip: 'Trueshot Barrage (R) hits all enemies - use for waveclear and teamfight damage' }
+            ],
+            'Annie': [
+                { icon: '🔥', tip: 'Pyromania passive stuns on 4th ability - keep track of your stacks' },
+                { icon: '🧸', tip: 'Summon: Tibbers (R) with stun passive is devastating - flash+R for surprise engages' },
+                { icon: '💫', tip: 'Disintegrate (Q) refunds mana and reduces cooldown on kill - use for farming' },
+                { icon: '🔥', tip: 'Molten Shield (E) reflects damage - activate before trading or teamfights' }
+            ],
+            'Master Yi': [
+                { icon: '⚔️', tip: 'Alpha Strike (Q) can dodge abilities - time it to avoid key enemy cooldowns' },
+                { icon: '🧘', tip: 'Meditate (W) reduces damage taken - use it to tank jungle monsters or tower shots' },
+                { icon: '⚡', tip: 'Wuju Style (E) gives true damage - activate before fighting tanky enemies' },
+                { icon: '🏃', tip: 'Highlander (R) resets on takedowns - look for cleanup opportunities in teamfights' }
+            ],
+            'Soraka': [
+                { icon: '⭐', tip: 'Starcall (Q) heals you when hitting enemies - stay healthy by landing Qs' },
+                { icon: '🌙', tip: 'Astral Infusion (W) costs your health - balance healing with your own survival' },
+                { icon: '🔇', tip: 'Equinox (E) silences in center, roots after delay - zone enemies from objectives' },
+                { icon: '💫', tip: 'Wish (R) heals all allies globally - save low health teammates across the map' }
+            ],
+            'Malphite': [
+                { icon: '🗿', tip: 'Granite Shield passive blocks damage - let it recharge before trading' },
+                { icon: '🔨', tip: 'Seismic Shard (Q) steals movement speed - use it to stick to enemies or escape' },
+                { icon: '🌍', tip: 'Ground Slam (E) reduces enemy attack speed - great against ADCs and auto-attackers' },
+                { icon: '💥', tip: 'Unstoppable Force (R) is unstoppable - use it to engage teamfights or escape' }
+            ],
+            'Katarina': [
+                { icon: '🗡️', tip: 'Shunpo (E) resets on kills/assists - look for reset opportunities in teamfights' },
+                { icon: '💀', tip: 'Death Lotus (R) deals massive damage - position safely before channeling' },
+                { icon: '🌪️', tip: 'Bouncing Blade (Q) bounces to nearby enemies - use minions to hit champions' },
+                { icon: '⚡', tip: 'Preparation (W) gives movement speed - use it for mobility and gap closing' }
+            ],
+            'Jhin': [
+                { icon: '🎭', tip: 'Whisper passive makes 4th shot crit and reload - count your shots carefully' },
+                { icon: '🌸', tip: 'Deadly Flourish (W) roots marked enemies - combo with Q or grenade marks' },
+                { icon: '💥', tip: 'Dancing Grenade (Q) gains damage per kill - try to execute minions first' },
+                { icon: '🎯', tip: 'Curtain Call (R) has massive range - use walls and bushes for surprise snipes' }
+            ],
+            'Blitzcrank': [
+                { icon: '🤖', tip: 'Rocket Grab (Q) is game-changing - practice hooks through minion gaps' },
+                { icon: '💪', tip: 'Power Fist (E) knocks up - combo it immediately after landing hook' },
+                { icon: '⚡', tip: 'Static Field (R) passively damages nearby enemies and can silence on activation' },
+                { icon: '🛡️', tip: 'Mana Barrier passive gives huge shield when low - don\'t be afraid to engage' }
+            ],
+            'Vayne': [
+                { icon: '🏹', tip: 'Silver Bolts (W) deals true damage every 3rd hit - focus same target' },
+                { icon: '🎯', tip: 'Condemn (E) can stun against walls - position enemies near terrain' },
+                { icon: '🌙', tip: 'Tumble (Q) becomes invisible during Final Hour - use it for repositioning' },
+                { icon: '⚡', tip: 'Final Hour (R) gives massive AD and stealth on Q - save for teamfights' }
+            ],
+            'Riven': [
+                { icon: '⚔️', tip: 'Broken Wings (Q) can be cancelled with movement - animation cancel for faster combos' },
+                { icon: '🛡️', tip: 'Valor (E) gives shield and mobility - use it to engage or escape' },
+                { icon: '🌪️', tip: 'Ki Burst (W) stuns around you - combo it after gap closing with E+Q' },
+                { icon: '💥', tip: 'Blade of the Exile (R) increases damage and gives execute - time the recast perfectly' }
+            ],
+            'Miss Fortune': [
+                { icon: '🏹', tip: 'Double Up (Q) bounces and crits - position to hit enemies behind minions' },
+                { icon: '💥', tip: 'Bullet Time (R) deals massive damage - channel from safe positions' },
+                { icon: '🌊', tip: 'Make It Rain (E) slows enemies - use it to zone or set up other abilities' },
+                { icon: '⚡', tip: 'Love Tap passive gives bonus damage - switch targets between auto attacks' }
+            ],
+            'Nami': [
+                { icon: '💧', tip: 'Surging Tides passive gives movement speed to ability-hit allies' },
+                { icon: '🌊', tip: 'Aqua Prison (Q) has travel time - predict enemy movement' },
+                { icon: '💫', tip: 'Ebb and Flow (W) bounces between enemies and allies - position for optimal bounces' },
+                { icon: '🌊', tip: 'Tidal Wave (R) knocks up and buffs allies it passes through' }
+            ],
+            // Default tips for other champions based on role
+            'Tank': [
+                { icon: '🛡️', tip: 'Engage when your team is ready and enemies are grouped together' },
+                { icon: '🎯', tip: 'Focus on peeling for your carries rather than diving their backline' },
+                { icon: '👥', tip: 'Use your crowd control abilities to set up kills for your team' },
+                { icon: '⚡', tip: 'Build according to enemy team composition - armor vs AD, MR vs AP' }
+            ],
+            'Fighter': [
+                { icon: '⚔️', tip: 'Look for extended trades where you can use your full combo' },
+                { icon: '🏃', tip: 'Use teleport to join teamfights or split push when ahead' },
+                { icon: '💪', tip: 'Build a mix of damage and survivability to stay relevant' },
+                { icon: '🎯', tip: 'Target the enemy backline but don\'t dive too deep alone' }
+            ],
+            'Assassin': [
+                { icon: '💀', tip: 'Wait for enemy cooldowns before going in for the kill' },
+                { icon: '👤', tip: 'Use fog of war and flanking to catch enemies off guard' },
+                { icon: '⚡', tip: 'Burst down high-priority targets quickly then get out' },
+                { icon: '🌙', tip: 'Roam frequently to get kills and help other lanes snowball' }
+            ],
+            'Marksman': [
+                { icon: '🏹', tip: 'Position safely behind your team and focus nearest target' },
+                { icon: '💰', tip: 'Farm consistently and avoid risky trades early game' },
+                { icon: '🎯', tip: 'Use attack-move to maintain DPS while kiting backwards' },
+                { icon: '⚡', tip: 'Build lifesteal to sustain through teamfights' }
+            ],
+            'Mage': [
+                { icon: '🔮', tip: 'Manage your mana carefully and look for ability combos' },
+                { icon: '📏', tip: 'Use your range advantage to poke before teamfights' },
+                { icon: '🛡️', tip: 'Position safely and use crowd control to protect yourself' },
+                { icon: '💥', tip: 'Save your ultimate for maximum impact in teamfights' }
+            ],
+            'Support': [
+                { icon: '👁️', tip: 'Ward key areas and deny enemy vision with control wards' },
+                { icon: '🤝', tip: 'Roam to help other lanes when your ADC is safe' },
+                { icon: '🛡️', tip: 'Protect your carries and peel for them in teamfights' },
+                { icon: '💡', tip: 'Build according to team needs - tank items or enchanter items' }
+            ]
+        };
+
+        // Get champion-specific pro tips
+        function getChampionProTips(championName) {
+            if (championProTips[championName]) {
+                return championProTips[championName];
+            }
+            
+            // Fall back to role-based tips
+            const champion = allChampions[championName];
+            return championProTips[champion?.role] || championProTips['Fighter'];
         }
 
 function restartQuestionnaire() {
