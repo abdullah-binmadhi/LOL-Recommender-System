@@ -11,6 +11,7 @@ highlighter: rouge
 # Exclude files from processing
 exclude:
   - PYTHON_TESTING/
+  - archive/
   - __pycache__/
   - .pytest_cache/
   - cache/
@@ -29,3 +30,5 @@ exclude:
 # Include files that start with underscores
 include:
   - _config.yml
+  - src/
+  - docs/
