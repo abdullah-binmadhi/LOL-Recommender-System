@@ -863,11 +863,12 @@
 
         .matchup-category {
             font-weight: 600;
-            color: #424242;
+            color: #212121;
             margin: 12px 0 8px;
             display: flex;
             align-items: center;
             gap: 8px;
+            font-size: 1.05rem;
         }
 
         .matchup-icon {
@@ -883,18 +884,23 @@
             padding: 8px 12px;
             border-radius: 6px;
             margin-bottom: 8px;
+            color: #333333;
+            font-weight: 500;
         }
 
         .strong-against {
             border-left: 3px solid #4caf50;
+            background-color: rgba(76, 175, 80, 0.12);
         }
 
         .weak-against {
             border-left: 3px solid #f44336;
+            background-color: rgba(244, 67, 54, 0.12);
         }
 
         .synergizes-with {
             border-left: 3px solid #2196f3;
+            background-color: rgba(33, 150, 243, 0.12);
         }
 
         .alternatives-list {
@@ -2962,7 +2968,7 @@ function showDetailedAnalysis() {
             content += '<div class="rec-icon">🏆</div>';
             content += '<h4>Primary Recommendation</h4>';
             content += '<div class="primary-champion">' + mlResults[winner].champion + '</div>';
-            content += '<p>Recommended by ' + algorithmNames[winner].name + ' (' + (winner === 'random-forest' ? '92%' : winner === 'decision-tree' ? '87%' : '89%') + ' accuracy) with ' + mlResults[winner].confidence.toFixed(1) + '% confidence.</p>';
+            content += '<p style="color: #333; text-align: center; margin-bottom: 15px; font-size: 0.95rem;">Recommended by ' + algorithmNames[winner].name + ' (' + (winner === 'random-forest' ? '92%' : winner === 'decision-tree' ? '87%' : '89%') + ' accuracy) with ' + mlResults[winner].confidence.toFixed(1) + '% confidence.</p>';
             content += '<div class="action-buttons">';
             content += '<button class="action-btn" onclick="window.open(\'https://www.mobafire.com/league-of-legends/' + mlResults[winner].champion.toLowerCase() + '-guide\', \'_blank\')">📚 View Guide</button>';
             content += '<button class="action-btn" onclick="window.open(\'https://u.gg/lol/champions/' + mlResults[winner].champion.toLowerCase() + '/build\', \'_blank\')">⚙️ Build Guide</button>';
