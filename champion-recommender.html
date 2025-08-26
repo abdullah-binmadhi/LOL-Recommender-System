@@ -802,7 +802,7 @@
             border-top: 4px solid #9c27b0;
         }
 
-        .learning-path {
+        .counter-synergies {
             border-top: 4px solid #673ab7;
         }
 
@@ -857,29 +857,44 @@
             background: #7b1fa2;
         }
 
-        .learning-steps {
-            space-y: 12px;
+        .matchup-list {
+            margin-bottom: 15px;
         }
 
-        .step {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .step-number {
-            background: #673ab7;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
+        .matchup-category {
+            font-weight: 600;
+            color: #424242;
+            margin: 12px 0 8px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: bold;
-            flex-shrink: 0;
+            gap: 8px;
+        }
+
+        .matchup-icon {
+            color: #673ab7;
+            font-size: 1.1rem;
+        }
+
+        .matchup-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f5f5f5;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .strong-against {
+            border-left: 3px solid #4caf50;
+        }
+
+        .weak-against {
+            border-left: 3px solid #f44336;
+        }
+
+        .synergizes-with {
+            border-left: 3px solid #2196f3;
         }
 
         .alternatives-list {
@@ -2862,6 +2877,22 @@ function showDetailedAnalysis() {
                                     
                                     <div class="match-breakdown">
                                         <div class="breakdown-item">
+                                            <div class="breakdown-label">Toughness</div>
+                                            <div class="breakdown-value">${toughnessMatch}%</div>
+                                        </div>
+                                        <div class="breakdown-item">
+                                            <div class="breakdown-label">Role</div>
+                                            <div class="breakdown-value">${champion.role}</div>
+                                        </div>
+                                        <div class="breakdown-item">
+                                            <div class="breakdown-label">Synergy</div>
+                                            <div class="breakdown-value">${result.synergy.toFixed(0)}%</div>
+                                        </div>
+                                        <div class="breakdown-item">
+                                            <div class="breakdown-label">Counters</div>
+                                            <div class="breakdown-value">${result.counters.toFixed(0)}%</div>
+                                        </div>
+                                        <div class="breakdown-item">
                                             <span class="breakdown-label">Role Match</span>
                                             <div class="breakdown-bar">
                                                 <div class="breakdown-fill" style="width: ${roleMatch}%"></div>
@@ -2926,14 +2957,63 @@ function showDetailedAnalysis() {
                             </div>
                         </div>
                         
-                        <div class="recommendation-card learning-path">
-                            <div class="rec-icon">🎓</div>
-                            <h4>Learning Path</h4>
-                            <div class="learning-steps">
-                                <div class="step"><span class="step-number">1</span> Start with ${answers[3] <= 3 ? 'Practice Tool to learn abilities' : 'Normal games for experience'}</div>
-                                <div class="step"><span class="step-number">2</span> Focus on ${answers[1] === 'Tank' ? 'positioning and engagement timing' : answers[1] === 'Support' ? 'map awareness and vision control' : answers[1] === 'Marksman' ? 'last-hitting and positioning' : 'ability combos and trading'}</div>
-                                <div class="step"><span class="step-number">3</span> Master ${answers[1] === 'Assassin' ? 'roaming and target selection' : answers[1] === 'Mage' ? 'mana management and skill shots' : 'team fighting fundamentals'}</div>
+                        <div class="recommendation-card counter-synergies">
+                            <div class="rec-icon">⚔️</div>
+                            <h4>Counter Matchups & Synergies</h4>
+                            <div class="matchup-list">
+                                <div class="matchup-category"><span class="matchup-icon">✓</span> Strong Against:</div>
+                                <div id="strong-against-list">
+                                    <div class="matchup-item strong-against">Immobile champions</div>
+                                    <div class="matchup-item strong-against">Squishy targets</div>
+                                </div>
+                                
+                                <div class="matchup-category"><span class="matchup-icon">✗</span> Weak Against:</div>
+                                <div id="weak-against-list">
+                                    <div class="matchup-item weak-against">Mobile champions</div>
+                                    <div class="matchup-item weak-against">Tanks</div>
+                                </div>
+                                
+                                <div class="matchup-category"><span class="matchup-icon">🤝</span> Synergizes With:</div>
+                                <div id="synergizes-list">
+                                    <div class="matchup-item synergizes-with">Engage supports</div>
+                                    <div class="matchup-item synergizes-with">CC-heavy junglers</div>
+                                </div>
                             </div>
+                            
+                            <script>
+                                // Load counter data for the recommended champion
+                                (function loadCounterData() {
+                                    const champion = mlResults[winner].champion.toLowerCase();
+                                    
+                                    fetch('data/champion_counters.json')
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data[champion]) {
+                                                // Update the counter lists
+                                                let strongHtml = '';
+                                                let weakHtml = '';
+                                                let synergyHtml = '';
+                                                
+                                                data[champion].strong_against.forEach(item => {
+                                                    strongHtml += '<div class="matchup-item strong-against">' + item + '</div>';
+                                                });
+                                                
+                                                data[champion].weak_against.forEach(item => {
+                                                    weakHtml += '<div class="matchup-item weak-against">' + item + '</div>';
+                                                });
+                                                
+                                                data[champion].synergizes_with.forEach(item => {
+                                                    synergyHtml += '<div class="matchup-item synergizes-with">' + item + '</div>';
+                                                });
+                                                
+                                                document.getElementById('strong-against-list').innerHTML = strongHtml;
+                                                document.getElementById('weak-against-list').innerHTML = weakHtml;
+                                                document.getElementById('synergizes-list').innerHTML = synergyHtml;
+                                            }
+                                        })
+                                        .catch(err => console.log('Could not load counter data:', err));
+                                })();
+                            </script>
                         </div>
                         
                         <div class="recommendation-card alternative-picks">
@@ -2983,12 +3063,12 @@ function showDetailedAnalysis() {
                                 const topChampion = mlResults[winner].champion;
                                 const proTips = getChampionProTips(topChampion);
                                 // Show up to 6 tips instead of 4
-                                return proTips.slice(0, 6).map(tip => `
-                                    <div class="tip-item">
-                                        <span class="tip-icon">${tip.icon}</span>
-                                        <div class="tip-text">${tip.tip}</div>
-                                    </div>
-                                `).join('');
+                                return proTips.slice(0, 6).map(function(tip) {
+                                    return '<div class="tip-item">' +
+                                        '<span class="tip-icon">' + tip.icon + '</span>' +
+                                        '<div class="tip-text">' + tip.tip + '</div>' +
+                                    '</div>';
+                                }).join('');
                             })()} 
                         </div>
                         <div class="champion-tip-source">
@@ -2997,6 +3077,20 @@ function showDetailedAnalysis() {
                     </div>
                 </div>
             `;
+            
+            analysisContent.innerHTML = 
+                '<div class="recommendation-section">' +
+                    '<div class="recommendation-cards">' +
+                        '<div class="recommendation-card primary-rec">' +
+                            '<div class="rec-icon">🥇</div>' +
+                            '<h4>Primary Recommendation</h4>' +
+                            '<div class="primary-champion">' + mlResults[winner].champion + '</div>' +
+                            '<p>Recommended by ' + algorithmNames[winner].name + ' (' + (winner === 'random-forest' ? '92%' : winner === 'decision-tree' ? '87%' : '89%') + ' accuracy) with ' + mlResults[winner].confidence.toFixed(1) + '% confidence.</p>' +
+                            '<div class="action-buttons">' +
+                                '<button class="action-btn" onclick="window.open(\'https://www.mobafire.com/league-of-legends/' + mlResults[winner].champion.toLowerCase() + '-guide\', \'_blank\')">📚 View Guide</button>' +
+                                '<button class="action-btn" onclick="window.open(\'https://u.gg/lol/champions/' + mlResults[winner].champion.toLowerCase() + '/build\', \'_blank\')">⚙️ Build Guide</button>' +
+                            '</div>' +
+                        '</div>';
             
             document.getElementById('detailed-analysis').classList.add('active');
         }
@@ -3291,7 +3385,7 @@ function restartQuestionnaire() {
                     user.consensusLevel || '',
                     user.userAnswers || '',
                     user.completionDate || ''
-                ].map(field => `"${field}"`);
+                ].map(field => '"' + field + '"');
                 
                 csvContent += row.join(',') + '\\n';
             });
@@ -3344,9 +3438,10 @@ function restartQuestionnaire() {
         setInterval(() => {
             const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
             if (userData.length > 0) {
-                console.log(`${userData.length} users registered so far`);
+                console.log(userData.length + ' users registered so far');
             }
         }, 60000); // Check every minute
     </script>
 </body>
+</html>
 </html>
