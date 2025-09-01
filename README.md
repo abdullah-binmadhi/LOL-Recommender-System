@@ -1,4 +1,4 @@
-# 🎮 League of Legends Champion Recommender
+# League of Legends Champion Recommender
 
 <p align="center">
   <a href="https://abdullah-binmadhi.github.io/LOL-Recommender-System/">
@@ -16,7 +16,7 @@
   <img src="https://opengraph.githubassets.com/1/abdullah-binmadhi/LOL-Recommender-System" alt="Project Banner" width="100%">
 </p>
 
-## 🌟 Discover Your Perfect Champion
+## Discover Your Perfect Champion
 
 An **AI-powered champion recommendation system** that uses **3 machine learning algorithms** to suggest the perfect League of Legends champion based on your playstyle preferences.
 
@@ -24,39 +24,39 @@ An **AI-powered champion recommendation system** that uses **3 machine learning 
 
 ---
 
-## 🚀 Try It Live
+## Try It Live
 
-### 🎯 **[Launch Champion Recommender](https://abdullah-binmadhi.github.io/LOL-Recommender-System/)**
+### **[Launch Champion Recommender](https://abdullah-binmadhi.github.io/LOL-Recommender-System/)**
 
 ---
 
-## ✨ Key Features
+## Key Features
 
 <div align="center">
 
 | Feature | Description |
 |--------|-------------|
-| 🤖 **3 ML Algorithms** | Random Forest, Decision Tree, and K-Nearest Neighbors working together |
-| 🎲 **Smart Diversity** | Never get repetitive recommendations - explore all 150+ champions |
-| 📊 **Real-time Analysis** | See all algorithm results side-by-side with confidence scores |
-| 🎯 **Consensus System** | Get the most agreed-upon recommendation from all algorithms |
-| 💾 **Data Export** | Export your results as CSV with Ctrl+Shift+E |
-| 📱 **Mobile Friendly** | Works perfectly on desktop, tablet, and mobile devices |
+| **3 ML Algorithms** | Random Forest, Decision Tree, and K-Nearest Neighbors working together |
+| **Smart Diversity** | Never get repetitive recommendations - explore all 150+ champions |
+| **Real-time Analysis** | See all algorithm results side-by-side with confidence scores |
+| **Consensus System** | Get the most agreed-upon recommendation from all algorithms |
+| **Data Export** | Export your results as CSV with Ctrl+Shift+E |
+| **Mobile Friendly** | Works perfectly on desktop, tablet, and mobile devices |
 
 </div>
 
 ---
 
-## 🧠 How It Works
+## How It Works
 
-1. **🎯 Answer 5 Simple Questions** - Tell us about your preferred role, position, difficulty level, playstyle, and range
-2. **🤖 AI Analysis** - Our ML algorithms analyze your preferences
-3. **🏆 Get Your Champion** - Receive a personalized champion recommendation with detailed analysis
-4. **🔄 Explore Alternatives** - See other great champion options that match your playstyle
+1. **Answer 5 Simple Questions** - Tell us about your preferred role, position, difficulty level, playstyle, and range
+2. **AI Analysis** - Our ML algorithms analyze your preferences
+3. **Get Your Champion** - Receive a personalized champion recommendation with detailed analysis
+4. **Explore Alternatives** - See other great champion options that match your playstyle
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ├── src/                    # Source code
@@ -72,7 +72,7 @@ For detailed documentation about the project structure, see [PROJECT_STRUCTURE.m
 
 ---
 
-## 🛠️ Built With
+## Built With
 
 <div align="center">
 
@@ -89,7 +89,7 @@ For detailed documentation about the project structure, see [PROJECT_STRUCTURE.m
 
 ---
 
-## 📄 License
+## License
 
 This project is for **educational purposes**. League of Legends is a trademark of Riot Games.
 
