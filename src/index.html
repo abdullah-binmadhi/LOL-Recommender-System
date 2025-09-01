@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>League of Legends Champion Recommender System</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23667eea'><path d='M15 5.1L9 3 3 5.02v16.2l6-2.33 6 2.1 6-2.02V2.77L15 5.1zm0 13.79l-6-2.11V5.11l6 2.11v11.67z'/></svg>">
     <style>
         * {
             margin: 0;
@@ -2881,9 +2882,9 @@ function showDetailedAnalysis() {
             
             // Define algorithm names for consistent use throughout
             const algorithmNames = {
-                'random-forest': { name: 'Random Forest', icon: '🌳' },
-                'decision-tree': { name: 'Decision Tree', icon: '🌲' },
-                'knn': { name: 'K-Nearest Neighbors', icon: '📊' }
+                'random-forest': { name: 'Random Forest', icon: '<i class="ai-brain-icon"></i>' },
+                'decision-tree': { name: 'Decision Tree', icon: '<i class="target-icon"></i>' },
+                'knn': { name: 'K-Nearest Neighbors', icon: '<i class="lightning-icon"></i>' }
             };
             
             // Add missing properties if needed for backward compatibility
@@ -2895,12 +2896,12 @@ function showDetailedAnalysis() {
             // Generate the detailed analysis content using string concatenation instead of template literals
             var content = '';
             content += '<div class="analysis-header">';
-            content += '<h2>🔬 Detailed Champion Analysis</h2>';
+            content += '<h2><i class="analysis-icon"></i> Detailed Champion Analysis</h2>';
             content += '<p>Personalized champion recommendations based on your preferences</p>';
             content += '</div>';
             
             content += '<div class="champion-analysis-section">';
-            content += '<h3>🔍 Champion Match Analysis</h3>';
+            content += '<h3><i class="champion-finder-icon"></i> Champion Match Analysis</h3>';
             content += '<div class="analysis-explanation">';
             content += '<p>Based on your preferences, here\'s how each recommended champion aligns with your playstyle:</p>';
             content += '</div>';
@@ -2923,7 +2924,7 @@ function showDetailedAnalysis() {
                 content += 'this.src=\'https://via.placeholder.com/80x80/667eea/white?text=' + encodeURIComponent(result.champion.length > 3 ? result.champion.substring(0, 3) : result.champion) + '\'; ';
                 content += 'this.onerror=null;">';
                 content += '<div class="match-info">';
-                content += '<h4>' + result.champion + ' ' + (isWinner ? '<span class="winner-badge">👑 TOP PICK</span>' : '') + '</h4>';
+                content += '<h4>' + result.champion + ' ' + (isWinner ? '<span class="winner-badge"><i class="league-icon"></i> TOP PICK</span>' : '') + '</h4>';
                 content += '<div class="match-tier">Tier ' + (champion.stats?.tier || 'B') + ' • ' + (champion.stats?.winRate || '50.0') + '% WR</div>';
                 content += '<div class="algorithm-info">' + algInfo.icon + ' ' + algInfo.name + ' • ' + result.confidence.toFixed(1) + '% confidence</div>';
                 content += '</div>';
@@ -3006,7 +3007,7 @@ function showDetailedAnalysis() {
             
             content += '<div class="recommendation-cards">';
             content += '<div class="recommendation-card primary-rec">';
-            content += '<div class="rec-icon">🏆</div>';
+            content += '<div class="rec-icon"><i class="league-icon"></i></div>';
             content += '<h4>Primary Recommendation</h4>';
             content += '<div class="primary-champion">' + mlResults[winner].champion + '</div>';
             content += '<p style="color: #333; text-align: center; margin-bottom: 15px; font-size: 0.95rem;">Recommended by ' + algorithmNames[winner].name + ' (' + (winner === 'random-forest' ? '92%' : winner === 'decision-tree' ? '87%' : '89%') + ' accuracy) with ' + mlResults[winner].confidence.toFixed(1) + '% confidence.</p>';
@@ -3017,7 +3018,7 @@ function showDetailedAnalysis() {
             content += '</div>';
             
             content += '<div class="recommendation-card counter-synergies">';
-            content += '<div class="rec-icon">⚔️</div>';
+            content += '<div class="rec-icon"><i class="champion-finder-icon"></i></div>';
             content += '<h4>Counter Matchups & Synergies</h4>';
             content += '<div class="matchup-list">';
             content += '<div class="matchup-category"><span class="matchup-icon">✓</span> Strong Against:</div>';
@@ -3041,7 +3042,7 @@ function showDetailedAnalysis() {
             content += '</div>';
             
             content += '<div class="recommendation-card alternative-picks">';
-            content += '<div class="rec-icon">🔄</div>';
+            content += '<div class="rec-icon"><i class="target-icon"></i></div>';
             content += '<h4>Alternative Champions</h4>';
             content += '<div class="alternatives-list">';
             
@@ -3067,7 +3068,7 @@ function showDetailedAnalysis() {
             content += '</div>';
             
             content += '<div class="recommendation-card meta-insights">';
-            content += '<div class="rec-icon">📈</div>';
+            content += '<div class="rec-icon"><i class="analysis-icon"></i></div>';
             content += '<h4>Current Meta Insights</h4>';
             content += '<div class="meta-info">';
             
@@ -3114,7 +3115,7 @@ function showDetailedAnalysis() {
             content += '</div>';
             
             content += '<div class="final-tips">';
-            content += '<h4>💡 Pro Tips</h4>';
+            content += '<h4><i class="sparkle-icon-sm"></i> Pro Tips</h4>';
             content += '<div class="tips-grid">';
             
             // Add pro tips
