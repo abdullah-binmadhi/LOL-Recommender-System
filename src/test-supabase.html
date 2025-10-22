@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Test</title>
+</head>
+<body>
+    <h1>Supabase Integration Test</h1>
+    <button id="testButton">Test Supabase Connection</button>
+    <div id="result"></div>
+
+    <script type="module">
+        import { supabase } from './js/supabase.js';
+
+        document.getElementById('testButton').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing Supabase connection...';
+            
+            try {
+                // Test the connection by trying to fetch table info
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('id')
+                    .limit(1);
+
+                if (error) {
+                    if (error.message.includes('relation "users" does not exist')) {
+                        resultDiv.innerHTML = '✅ Supabase client is working! But you need to create the tables first.<br><br>Run these SQL commands in your Supabase SQL editor:<br><br>' +
+                            '<pre>' +
+                            'CREATE TABLE users (\n' +
+                            '  id uuid default uuid_generate_v4() primary key,\n' +
+                            '  full_name text,\n' +
+                            '  email text,\n' +
+                            '  phone text,\n' +
+                            '  age integer,\n' +
+                            '  gender text,\n' +
+                            '  experience text,\n' +
+                            '  registration_date timestamp with time zone default now(),\n' +
+                            '  session_id text unique\n' +
+                            ');\n\n' +
+                            'CREATE TABLE questionnaire_results (\n' +
+                            '  id uuid default uuid_generate_v4() primary key,\n' +
+                            '  session_id text references users(session_id),\n' +
+                            '  recommended_champion text,\n' +
+                            '  winning_algorithm text,\n' +
+                            '  confidence_score numeric,\n' +
+                            '  random_forest_champion text,\n' +
+                            '  random_forest_confidence numeric,\n' +
+                            '  decision_tree_champion text,\n' +
+                            '  decision_tree_confidence numeric,\n' +
+                            '  knn_champion text,\n' +
+                            '  knn_confidence numeric,\n' +
+                            '  consensus_level integer,\n' +
+                            '  user_answers jsonb,\n' +
+                            '  completion_date timestamp with time zone default now(),\n' +
+                            '  pressure_response text,\n' +
+                            '  aesthetic_preference text,\n' +
+                            '  team_contribution text,\n' +
+                            '  character_identity text,\n' +
+                            '  problem_solving text\n' +
+                            ');' +
+                            '</pre>';
+                    } else {
+                        resultDiv.innerHTML = `❌ Supabase error: ${error.message}`;
+                    }
+                } else {
+                    resultDiv.innerHTML = '✅ Supabase is working correctly! Tables exist and connection is successful.';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>

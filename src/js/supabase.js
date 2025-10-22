@@ -2,8 +2,10 @@
 import { createClient } from '@supabase/supabase-js'
 
 // Initialize Supabase client
-const supabaseUrl = process.env.SUPABASE_URL || 'YOUR_SUPABASE_URL'
-const supabaseKey = process.env.SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY'
+// In a Vercel environment, these will be set as environment variables
+// For local development, you can set them in a .env file
+const supabaseUrl = process.env.SUPABASE_URL || 'https://brshmbbohqcdseyirqsn.supabase.co'
+const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJyc2htYmJvaHFjZHNleWlycXNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwOTYyNzAsImV4cCI6MjA3NjY3MjI3MH0.Yi-aWEuvArux0qRrEgnnzIljrsh5NnVBOxHlpBqbn2E'
 
 export const supabase = createClient(supabaseUrl, supabaseKey)
 
