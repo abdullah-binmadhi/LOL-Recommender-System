@@ -1,0 +1,19 @@
+{
+  "name": "lol-champion-recommender",
+  "version": "1.0.0",
+  "description": "A League of Legends champion recommendation system using AI-powered algorithms",
+  "scripts": {
+    "dev": "python3 -m http.server 3000",
+    "start": "python3 -m http.server 3000",
+    "build": "echo 'No build step required for static site'"
+  },
+  "keywords": [
+    "league-of-legends",
+    "champion-recommender",
+    "machine-learning",
+    "ai",
+    "web-app"
+  ],
+  "author": "Abdullah Bin Madhi",
+  "license": "MIT"
+}

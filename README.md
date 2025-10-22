@@ -78,6 +78,26 @@ For detailed documentation about the project structure, see [PROJECT_STRUCTURE.m
 
 ---
 
+## Deployment Options
+
+### GitHub Pages (Current)
+The project is currently deployed on GitHub Pages at: https://abdullah-binmadhi.github.io/LOL-Recommender-System/
+
+### Vercel Deployment
+This project is also compatible with Vercel deployment. To deploy on Vercel:
+
+1. Fork this repository
+2. Connect your GitHub repository to Vercel
+3. Vercel will automatically detect the configuration and deploy the site
+
+The project includes:
+- `vercel.json` for routing configuration
+- `package.json` for deployment metadata
+
+No build step is required as this is a static site.
+
+---
+
 ## Built With
 
 <div align="center">
