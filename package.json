@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "A League of Legends champion recommendation system using AI-powered algorithms",
   "scripts": {
-    "dev": "python3 -m http.server 3000",
-    "start": "python3 -m http.server 3000",
-    "build": "echo 'No build step required for static site'"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
   },
   "keywords": [
     "league-of-legends",
@@ -17,6 +17,9 @@
   "author": "Abdullah Bin Madhi",
   "license": "MIT",
   "dependencies": {
-    "@supabase/supabase-js": "^2.76.1"
+    "@supabase/supabase-js": "^2.76.1",
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }

@@ -72,3 +72,7 @@ node_modules/
 # Temporary files
 *.tmp
 *.temp
+
+# Next.js
+.next/
+out/

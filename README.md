@@ -108,6 +108,17 @@ This project now supports Supabase integration for centralized user data storage
    - `SUPABASE_URL`
    - `SUPABASE_ANON_KEY`
 
+### Next.js Development Setup
+
+This project also includes a Next.js application for enhanced Supabase integration:
+
+1. Navigate to the project directory
+2. Install dependencies with `npm install`
+3. Start the development server with `npm run dev`
+4. Access the application at http://localhost:3000
+
+See [NEXTJS_README.md](NEXTJS_README.md) for detailed instructions.
+
 ### Database Schema
 
 Create these tables in your Supabase database:
