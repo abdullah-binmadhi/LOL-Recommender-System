@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3E1E68 0%, #5D2F77 100%);
             min-height: 100vh;
             color: #333;
         }
@@ -89,12 +89,12 @@
         }
 
         .btn-primary {
-            background: #667eea;
+            background: #3E1E68;
             color: white;
         }
 
         .btn-primary:hover {
-            background: #5a6fd8;
+            background: #5D2F77;
             transform: translateY(-2px);
         }
 
@@ -134,9 +134,9 @@
         }
 
         .option.selected {
-            background: #667eea;
+            background: #3E1E68;
             color: white;
-            border-color: #667eea;
+            border-color: #3E1E68;
         }
 
         .progress-container {
@@ -159,7 +159,7 @@
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
+            background: linear-gradient(90deg, #3E1E68, #5D2F77);
             transition: width 0.5s ease;
         }
 
@@ -2472,7 +2472,15 @@
             const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
             const userCount = userData.length;
             
-            const message = `Admin Panel\n\nTotal registered users: ${userCount}\n\nOptions:\n- OK: Export CSV file\n- Cancel: Close panel\n\nNote: Data is stored locally. Press Ctrl+Shift+E anytime to export CSV.`;
+            const message = `Admin Panel
+
+Total registered users: ${userCount}
+
+Options:
+- OK: Export CSV file
+- Cancel: Close panel
+
+Note: Data is stored locally. Press Ctrl+Shift+E anytime to export CSV.`;
             
             if (confirm(message)) {
                 exportToCSV();

@@ -7,11 +7,11 @@
 }
 
 :root {
-    --primary-color: #667eea;
-    --secondary-color: #764ba2;
-    --accent-color: #f093fb;
+    --primary-color: #3E1E68; /* Dark purple */
+    --secondary-color: #5D2F77; /* Purple */
+    --accent-color: #E45A92; /* Pink */
     --success-color: #48bb78;
-    --warning-color: #ed8936;
+    --warning-color: #FFACAC; /* Light pink */
     --error-color: #f56565;
     --text-primary: #2d3748;
     --text-secondary: #4a5568;
