@@ -310,29 +310,91 @@
                 }
             });
 
-            // 3. Resource Types (Bar Chart) - Using difficulty as proxy for resource complexity
-            const difficultyData = {1: 0, 2: 0, 3: 0};
+            // 3. Resource Types (Bar Chart) - Using actual resource types instead of difficulty
+            const resourceData = {};
+            const championResources = {
+                // Champions with Mana
+                'Ahri': 'Mana', 'Anivia': 'Mana', 'Annie': 'Mana', 'AurelionSol': 'Mana', 'Azir': 'Mana',
+                'Brand': 'Mana', 'Cassiopeia': 'Mana', 'Diana': 'Mana', 'Ekko': 'Mana', 'Fizz': 'Mana',
+                'Galio': 'Mana', 'Heimerdinger': 'Mana', 'Karma': 'Mana', 'Karthus': 'Mana', 'Kassadin': 'Mana',
+                'Leblanc': 'Mana', 'Lissandra': 'Mana', 'Lux': 'Mana', 'Malzahar': 'Mana', 'Morgana': 'Mana',
+                'Nami': 'Mana', 'Orianna': 'Mana', 'Ryze': 'Mana', 'Sona': 'Mana', 'Swain': 'Mana',
+                'Syndra': 'Mana', 'Taliyah': 'Mana', 'Targon': 'Mana', 'TwistedFate': 'Mana', 'Veigar': 'Mana',
+                'Velkoz': 'Mana', 'Viktor': 'Mana', 'Xerath': 'Mana', 'Ziggs': 'Mana', 'Zilean': 'Mana',
+                'Zoe': 'Mana',
+                
+                // Champions with Energy
+                'Akali': 'Energy', 'Kennen': 'Energy', 'LeeSin': 'Energy', 'Shen': 'Energy', 'Zed': 'Energy',
+                
+                // Champions with Fury
+                'Aatrox': 'Fury', 'Renekton': 'Fury', 'Rengar': 'Fury', 'Shyvana': 'Fury', 'Tryndamere': 'Fury',
+                
+                // Champions with Ferocity
+                'Katarina': 'Ferocity', 'RekSai': 'Ferocity',
+                
+                // Champions with Rage
+                'Gnar': 'Rage', 'Gwen': 'Rage',
+                
+                // Champions with Heat
+                'Rumble': 'Heat',
+                
+                // Champions with Blood Well (Bloodthirster)
+                'Draven': 'Blood Well', 'Kled': 'Courage', 'Vladimir': 'Bloodthirster',
+                
+                // Champions with None/Unique
+                'Bard': 'Mana', 'Blitzcrank': 'Mana', 'Braum': 'Mana', 'ChoGath': 'Mana', 'Darius': 'Mana',
+                'Elise': 'Mana', 'Evelynn': 'Mana', 'Fiddlesticks': 'Mana', 'Gangplank': 'Mana', 'Garen': 'Mana',
+                'Graves': 'Mana', 'Hecarim': 'Mana', 'Illaoi': 'Mana', 'Irelia': 'Mana', 'JarvanIV': 'Mana',
+                'Jax': 'Mana', 'Jayce': 'Mana', 'Kalista': 'Mana', 'KhaZix': 'Mana', 'Kindred': 'Mana',
+                'Lulu': 'Mana', 'MasterYi': 'Mana', 'Mordekaiser': 'Mana', 'Nasus': 'Mana', 'Nocturne': 'Mana',
+                'Olaf': 'Mana', 'Pantheon': 'Mana', 'Poppy': 'Mana', 'Quinn': 'Mana', 'Rammus': 'Mana',
+                'Sejuani': 'Mana', 'Sion': 'Mana', 'Sivir': 'Mana', 'Skarner': 'Mana', 'TahmKench': 'Mana',
+                'Taric': 'Mana', 'Thresh': 'Mana', 'Trundle': 'Mana', 'Udyr': 'Mana', 'Urgot': 'Mana',
+                'Vi': 'Mana', 'Volibear': 'Mana', 'Warwick': 'Mana', 'Wukong': 'Mana', 'Xayah': 'Mana',
+                'XinZhao': 'Mana', 'Yasuo': 'Mana', 'Yorick': 'Mana', 'Zac': 'Mana',
+                
+                // Champions with Bloodthirster
+                'Alistar': 'Mana', 'Amumu': 'Mana', 'Annie': 'Mana', 'Ashe': 'Mana', 'Caitlyn': 'Mana',
+                'Corki': 'Mana', 'DrMundo': 'Mana', 'Ezreal': 'Mana', 'Fiora': 'Mana', 'Gragas': 'Mana',
+                'Ivern': 'Mana', 'Janna': 'Mana', 'Jhin': 'Mana', 'Jinx': 'Mana', 'KogMaw': 'Mana',
+                'Leona': 'Mana', 'Lucian': 'Mana', 'Lux': 'Mana', 'Maokai': 'Mana', 'MissFortune': 'Mana',
+                'MonkeyKing': 'Mana', 'Nidalee': 'Mana', 'Nunu': 'Mana', 'Riven': 'Mana', 'Singed': 'Mana',
+                'Soraka': 'Mana', 'Teemo': 'Mana', 'Tristana': 'Mana', 'Twitch': 'Mana', 'Varus': 'Mana',
+                'Vayne': 'Mana', 'Yuumi': 'Mana', 'Zyra': 'Mana'
+            };
+            
+            // Count resource types
             champions.forEach(champion => {
-                const difficulty = champion.difficulty || 2;
-                difficultyData[difficulty] = (difficultyData[difficulty] || 0) + 1;
+                const resourceName = championResources[champion.name] || 'Other';
+                resourceData[resourceName] = (resourceData[resourceName] || 0) + 1;
             });
             
             const resourceTypeCtx = document.getElementById('resourceTypeChart').getContext('2d');
             new Chart(resourceTypeCtx, {
                 type: 'bar',
                 data: {
-                    labels: ['Low (1)', 'Medium (2)', 'High (3)'],
+                    labels: Object.keys(resourceData),
                     datasets: [{
                         label: 'Number of Champions',
-                        data: [difficultyData[1], difficultyData[2], difficultyData[3]],
+                        data: Object.values(resourceData),
                         backgroundColor: [
-                            'rgba(75, 192, 192, 0.7)',
                             'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(153, 102, 255, 0.7)',
+                            'rgba(255, 159, 64, 0.7)',
+                            'rgba(199, 199, 199, 0.7)',
+                            'rgba(83, 109, 254, 0.7)',
                             'rgba(255, 99, 132, 0.7)'
                         ],
                         borderColor: [
-                            'rgba(75, 192, 192, 1)',
                             'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(199, 199, 199, 1)',
+                            'rgba(83, 109, 254, 1)',
                             'rgba(255, 99, 132, 1)'
                         ],
                         borderWidth: 1
