@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Champion Analytics Dashboard</title>
+    <title>Test Champion Analytics Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -98,7 +98,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Champion Analytics Dashboard</h1>
+            <h1>Test Champion Analytics Dashboard</h1>
             <p>Comprehensive data visualization of League of Legends champions</p>
         </div>
         
@@ -143,67 +143,29 @@
     </div>
 
     <script>
-        // Load champion data with error handling
-        fetch('./src/data/champions.json')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                const champions = data.champions;
-                if (champions && champions.length > 0) {
-                    initializeCharts(champions);
-                } else {
-                    throw new Error('No champion data found');
-                }
-            })
-            .catch(error => {
-                console.error('Error loading champion data from src/data:', error);
-                // Try alternative path
-                fetch('./data/champions.json')
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        const champions = data.champions;
-                        if (champions && champions.length > 0) {
-                            initializeCharts(champions);
-                        } else {
-                            throw new Error('No champion data found');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error loading champion data from data/:', error);
-                        // Use sample data if loading fails
-                        const sampleChampions = [
-                            { herotype: "Fighter", range_type: "Melee", difficulty: 2 },
-                            { herotype: "Mage", range_type: "Ranged", difficulty: 3 },
-                            { herotype: "Tank", range_type: "Melee", difficulty: 1 },
-                            { herotype: "Marksman", range_type: "Ranged", difficulty: 2 },
-                            { herotype: "Support", range_type: "Ranged", difficulty: 1 },
-                            { herotype: "Assassin", range_type: "Melee", difficulty: 3 },
-                            { herotype: "Fighter", range_type: "Melee", difficulty: 2 },
-                            { herotype: "Mage", range_type: "Ranged", difficulty: 1 },
-                            { herotype: "Tank", range_type: "Melee", difficulty: 3 },
-                            { herotype: "Marksman", range_type: "Ranged", difficulty: 2 },
-                            { herotype: "Support", range_type: "Ranged", difficulty: 1 },
-                            { herotype: "Assassin", range_type: "Melee", difficulty: 3 },
-                            { herotype: "Fighter", range_type: "Melee", difficulty: 2 },
-                            { herotype: "Mage", range_type: "Ranged", difficulty: 3 },
-                            { herotype: "Tank", range_type: "Melee", difficulty: 1 }
-                        ];
-                        console.log('Using sample data for charts');
-                        initializeCharts(sampleChampions);
-                    });
-            });
+        // Use sample data directly
+        const sampleChampions = [
+            { herotype: "Fighter", range_type: "Melee", difficulty: 2 },
+            { herotype: "Mage", range_type: "Ranged", difficulty: 3 },
+            { herotype: "Tank", range_type: "Melee", difficulty: 1 },
+            { herotype: "Marksman", range_type: "Ranged", difficulty: 2 },
+            { herotype: "Support", range_type: "Ranged", difficulty: 1 },
+            { herotype: "Assassin", range_type: "Melee", difficulty: 3 },
+            { herotype: "Fighter", range_type: "Melee", difficulty: 2 },
+            { herotype: "Mage", range_type: "Ranged", difficulty: 1 },
+            { herotype: "Tank", range_type: "Melee", difficulty: 3 },
+            { herotype: "Marksman", range_type: "Ranged", difficulty: 2 },
+            { herotype: "Support", range_type: "Ranged", difficulty: 1 },
+            { herotype: "Assassin", range_type: "Melee", difficulty: 3 },
+            { herotype: "Fighter", range_type: "Melee", difficulty: 2 },
+            { herotype: "Mage", range_type: "Ranged", difficulty: 3 },
+            { herotype: "Tank", range_type: "Melee", difficulty: 1 }
+        ];
+        
+        // Initialize charts with sample data
+        initializeCharts(sampleChampions);
 
         function initializeCharts(champions) {
-            console.log('Initializing charts with', champions.length, 'champions');
             // 1. Champions per Hero Type (Bar Chart)
             const heroTypeData = {};
             champions.forEach(champion => {
