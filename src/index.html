@@ -3930,8 +3930,32 @@ Note: Press Ctrl+Shift+E to export CSV.`;
                 const winner = findWinner(mlResults);
                 const recommendedChampion = mlResults[winner].champion;
                 
-                // Create the data object
-                const data = {
+                // First, create a minimal user entry
+                const userData = {
+                    full_name: 'Anonymous User',
+                    email: '',
+                    phone: '',
+                    age: null,
+                    gender: '',
+                    experience: '',
+                    registration_date: new Date().toISOString(),
+                    session_id: sessionId
+                };
+                
+                // Insert user data into Supabase
+                const { data: userResult, error: userError } = await supabase
+                    .from('users')
+                    .insert([userData])
+                    .select();
+                
+                if (userError) {
+                    console.error('Error saving user to Supabase:', userError);
+                    alert('Error saving user data: ' + userError.message);
+                    return;
+                }
+                
+                // Create the questionnaire results data object
+                const questionnaireData = {
                     session_id: sessionId,
                     recommended_champion: recommendedChampion,
                     winning_algorithm: winner,
@@ -3952,15 +3976,15 @@ Note: Press Ctrl+Shift+E to export CSV.`;
                     problem_solving: answers[10] || null
                 };
                 
-                // Insert data into Supabase
+                // Insert questionnaire results into Supabase
                 const { data: result, error } = await supabase
                     .from('questionnaire_results')
-                    .insert([data])
+                    .insert([questionnaireData])
                     .select();
                 
                 if (error) {
-                    console.error('Error saving to Supabase:', error);
-                    alert('Error saving to database: ' + error.message);
+                    console.error('Error saving questionnaire results to Supabase:', error);
+                    alert('Error saving questionnaire results: ' + error.message);
                 } else {
                     console.log('Data saved successfully:', result);
                     alert('Data saved to database successfully!');
