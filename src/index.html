@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>League of Legends Champion Recommender System</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23667eea'><path d='M15 5.1L9 3 3 5.02v16.2l6-2.33 6 2.1 6-2.02V2.77L15 5.1zm0 13.79l-6-2.11V5.11l6 2.11v11.67z'/></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23667eea'><path d='M15 5.1L9 3 3 5.02v16.2l6-2.33 6 2.1 6-2.02V2.77L15 5.1zm0 13.79l-6-2.11V5.11l6 2.11v11.67z'/></svg>" />
     <style>
         * {
             margin: 0;
@@ -1663,19 +1663,19 @@
             <form id="user-form" class="registration-form">
                 <div class="form-group">
                     <label for="fullName">Name</label>
-                    <input type="text" id="fullName" name="fullName" placeholder="Enter your name" required>
+                    <input type="text" id="fullName" name="fullName" placeholder="Enter your name" required />
                     <span class="form-icon"><i class="summoner-icon"></i></span>
                 </div>
 
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required />
                     <span class="form-icon"><i class="summoner-icon"></i></span>
                 </div>
 
                 <div class="form-group">
                     <label for="age">Age</label>
-                    <input type="number" id="age" name="age" placeholder="Enter your age" min="13" max="100" required>
+                    <input type="number" id="age" name="age" placeholder="Enter your age" min="13" max="100" required />
                     <span class="form-icon"><i class="summoner-icon"></i></span>
                 </div>
 
@@ -1706,7 +1706,7 @@
 
                 <div class="form-group">
                     <label for="phone">Phone (Optional)</label>
-                    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number">
+                    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" />
                     <span class="form-icon"><i class="summoner-icon"></i></span>
                 </div>
 
@@ -3213,19 +3213,19 @@ function showDetailedAnalysis() {
             content += '<div class="rec-icon"><i class="champion-finder-icon"></i></div>';
             content += '<h4>Counter Matchups & Synergies</h4>';
             content += '<div class="matchup-list">';
-            content += '<div class="matchup-category"><span class="matchup-icon">✓</span> Strong Against:</div>';
+            content += '<div class="matchup-category"><span class="matchup-icon">&#10003;</span> Strong Against:</div>';
             content += '<div id="strong-against-list">';
             content += '<div class="matchup-item strong-against">Immobile champions</div>';
             content += '<div class="matchup-item strong-against">Squishy targets</div>';
             content += '</div>';
             
-            content += '<div class="matchup-category"><span class="matchup-icon">✗</span> Weak Against:</div>';
+            content += '<div class="matchup-category"><span class="matchup-icon">&#10007;</span> Weak Against:</div>';
             content += '<div id="weak-against-list">';
             content += '<div class="matchup-item weak-against">Mobile champions</div>';
             content += '<div class="matchup-item weak-against">Tanks</div>';
             content += '</div>';
             
-            content += '<div class="matchup-category"><span class="matchup-icon">🤝</span> Synergizes With:</div>';
+            content += '<div class="matchup-category"><span class="matchup-icon">&#129309;</span> Synergizes With:</div>';
             content += '<div id="synergizes-list">';
             content += '<div class="matchup-item synergizes-with">Engage supports</div>';
             content += '<div class="matchup-item synergizes-with">CC-heavy junglers</div>';
@@ -3324,7 +3324,7 @@ function showDetailedAnalysis() {
             
             content += '</div>';
             content += '<div class="champion-tip-source">';
-            content += '<small>🎯 Pro tips for ' + mlResults[winner].champion + ' - Master these fundamentals to excel with your recommended champion!</small>';
+            content += '<small>&#127919; Pro tips for ' + mlResults[winner].champion + ' - Master these fundamentals to excel with your recommended champion!</small>';
             content += '</div>';
             content += '</div>';
             content += '</div>';
@@ -3400,57 +3400,57 @@ function showDetailedAnalysis() {
         }
         const championProTips = {
             'Jinx': [
-                { icon: '🎯', tip: 'Use Fishbones (rocket launcher) for teamfights and Pow-Pow (minigun) for objectives' },
-                { icon: '⚡', tip: 'Get Excited! passive gives massive movement speed - use it to chase or escape' },
-                { icon: '💥', tip: 'Super Mega Death Rocket executes low HP enemies globally - watch for snipe opportunities' },
-                { icon: '🛡️', tip: 'Stay behind your frontline and use your range advantage to avoid assassins' },
-                { icon: '🔄', tip: 'Switch between forms based on distance - Fishbones for long range, Pow-Pow for sustained DPS' },
-                { icon: '🎯', tip: 'Use your long range to control minion waves and deny farm to enemy ADC' }
+                { icon: '&#127919;', tip: 'Use Fishbones (rocket launcher) for teamfights and Pow-Pow (minigun) for objectives' },
+                { icon: '&#9889;', tip: 'Get Excited! passive gives massive movement speed - use it to chase or escape' },
+                { icon: '&#128165;', tip: 'Super Mega Death Rocket executes low HP enemies globally - watch for snipe opportunities' },
+                { icon: '&#128737;', tip: 'Stay behind your frontline and use your range advantage to avoid assassins' },
+                { icon: '&#128259;', tip: 'Switch between forms based on distance - Fishbones for long range, Pow-Pow for sustained DPS' },
+                { icon: '&#127919;', tip: 'Use your long range to control minion waves and deny farm to enemy ADC' }
             ],
             'Ashe': [
-                { icon: '🏹', tip: 'Use Hawkshot (E) frequently for vision control and tracking enemy jungler' },
-                { icon: '❄️', tip: 'Frost Shot passive slows help with kiting - weave auto attacks between abilities' },
-                { icon: '🎯', tip: 'Crystal Arrow (R) is best used to initiate fights or catch out-of-position enemies' },
-                { icon: '📊', tip: 'Focus on farming safely early game - Ashe scales incredibly well into late game' },
-                { icon: '❄️', tip: 'Use Volley (W) to push waves quickly when your ADC is safe' },
-                { icon: '🎯', tip: 'Position for teamfights where you can land your ultimate on multiple enemies' }
+                { icon: '&#127993;', tip: 'Use Hawkshot (E) frequently for vision control and tracking enemy jungler' },
+                { icon: '&#10052;', tip: 'Frost Shot passive slows help with kiting - weave auto attacks between abilities' },
+                { icon: '&#127919;', tip: 'Crystal Arrow (R) is best used to initiate fights or catch out-of-position enemies' },
+                { icon: '&#128202;', tip: 'Focus on farming safely early game - Ashe scales incredibly well into late game' },
+                { icon: '&#10052;', tip: 'Use Volley (W) to push waves quickly when your ADC is safe' },
+                { icon: '&#127919;', tip: 'Position for teamfights where you can land your ultimate on multiple enemies' }
             ],
             'Yasuo': [
-                { icon: '🌪️', tip: 'Use minions to dash through and position for optimal Wind Wall placement' },
-                { icon: '⚔️', tip: 'Stack Q tornado on minions before engaging - it\'s your main engage tool' },
-                { icon: '🛡️', tip: 'Wind Wall blocks projectiles completely - time it against key enemy abilities' },
-                { icon: '⚡', tip: 'Last Breath (R) resets your shield - use it when shield is broken for maximum value' }
+                { icon: '&#127744;', tip: 'Use minions to dash through and position for optimal Wind Wall placement' },
+                { icon: '&#9876;', tip: 'Stack Q tornado on minions before engaging - it\'s your main engage tool' },
+                { icon: '&#128737;', tip: 'Wind Wall blocks projectiles completely - time it against key enemy abilities' },
+                { icon: '&#9889;', tip: 'Last Breath (R) resets your shield - use it when shield is broken for maximum value' }
             ],
             'Lux': [
-                { icon: '💡', tip: 'Proc your passive with auto attacks after landing abilities for maximum damage' },
-                { icon: '🌟', tip: 'Use Light Binding (Q) through minions to catch enemies behind the wave' },
+                { icon: '&#128161;', tip: 'Proc your passive with auto attacks after landing abilities for maximum damage' },
+                { icon: '&#127775;', tip: 'Use Light Binding (Q) through minions to catch enemies behind the wave' },
                 { icon: '⚡', tip: 'Final Spark (R) has very long range - use it to secure objectives from safety' },
                 { icon: '🛡️', tip: 'Prismatic Barrier (W) can shield allies twice - position to hit maximum teammates' },
-                { icon: '🌟', tip: 'Use your abilities to zone enemies from minion waves and control CS' },
-                { icon: '💡', tip: 'Combine your abilities for maximum damage - Q + E + auto + R combo' }
+                { icon: '&#127775;', tip: 'Use your abilities to zone enemies from minion waves and control CS' },
+                { icon: '&#128161;', tip: 'Combine your abilities for maximum damage - Q + E + auto + R combo' }
             ],
             'Garen': [
-                { icon: '💪', tip: 'Perseverance passive heals you - disengage when low to recover health' },
-                { icon: '🏃', tip: 'Use Decisive Strike (Q) to remove slows and gain movement speed for engages' },
+                { icon: '&#128170;', tip: 'Perseverance passive heals you - disengage when low to recover health' },
+                { icon: '&#127937;', tip: 'Use Decisive Strike (Q) to remove slows and gain movement speed for engages' },
                 { icon: '🌪️', tip: 'Judgment (E) deals more damage to isolated targets - focus single enemies' },
-                { icon: '⚔️', tip: 'Demacian Justice (R) executes based on missing health - time it perfectly' },
-                { icon: '🛡️', tip: 'Use Courage (W) to reduce incoming damage during trades' },
-                { icon: '💪', tip: 'Roam when your lane is pushed to help other lanes get ahead' }
+                { icon: '&#9876;', tip: 'Demacian Justice (R) executes based on missing health - time it perfectly' },
+                { icon: '&#128737;', tip: 'Use Courage (W) to reduce incoming damage during trades' },
+                { icon: '&#128170;', tip: 'Roam when your lane is pushed to help other lanes get ahead' }
             ],
             'Thresh': [
-                { icon: '⛓️', tip: 'Death Sentence (Q) can be reactivated to dash - sometimes don\'t take it for positioning' },
-                { icon: '🏮', tip: 'Dark Passage (W) gives shield and mobility - throw it preemptively for escapes' },
-                { icon: '💀', tip: 'Flay (E) can interrupt dashes - practice timing against mobile champions' },
-                { icon: '🔄', tip: 'The Box (R) slows heavily on first wall hit - use it to zone enemies' }
+                { icon: '&#9937;', tip: 'Death Sentence (Q) can be reactivated to dash - sometimes don\'t take it for positioning' },
+                { icon: '&#127985;', tip: 'Dark Passage (W) gives shield and mobility - throw it preemptively for escapes' },
+                { icon: '&#128128;', tip: 'Flay (E) can interrupt dashes - practice timing against mobile champions' },
+                { icon: '&#128259;', tip: 'The Box (R) slows heavily on first wall hit - use it to zone enemies' }
             ],
             'Ahri': [
-                { icon: '💖', tip: 'Charm (E) amplifies damage - always combo it with Q and W for maximum burst' },
-                { icon: '🦊', tip: 'Spirit Rush (R) has three charges - don\'t waste them all at once' },
-                { icon: '⚡', tip: 'Orb of Deception (Q) deals magic damage out, true damage back - position for both hits' },
-                { icon: '🎯', tip: 'Use Fox-Fire (W) while moving to maintain damage while repositioning' }
+                { icon: '&#128150;', tip: 'Charm (E) amplifies damage - always combo it with Q and W for maximum burst' },
+                { icon: '&#129418;', tip: 'Spirit Rush (R) has three charges - don\'t waste them all at once' },
+                { icon: '&#9889;', tip: 'Orb of Deception (Q) deals magic damage out, true damage back - position for both hits' },
+                { icon: '&#127919;', tip: 'Use Fox-Fire (W) while moving to maintain damage while repositioning' }
             ],
             'Darius': [
-                { icon: '🩸', tip: 'Hemorrhage passive stacks to 5 - get full stacks before all-inning' },
+                { icon: '&#129656;', tip: 'Hemorrhage passive stacks to 5 - get full stacks before all-inning' },
                 { icon: '⚔️', tip: 'Apprehend (E) pulls and slows - use it to interrupt enemy escapes' },
                 { icon: '🌪️', tip: 'Decimate (Q) heals and deals more damage at max range - space properly' },
                 { icon: '💀', tip: 'Noxian Guillotine (R) resets on kills - look for multi-kill opportunities' },
@@ -3478,7 +3478,7 @@ function showDetailedAnalysis() {
                 { icon: '🔮', tip: 'Essence Flux (W) marks enemies - detonate with Q for extra damage' },
                 { icon: '📍', tip: 'Arcane Shift (E) can go through walls - learn wall jump spots' },
                 { icon: '🌟', tip: 'Trueshot Barrage (R) hits all enemies - use for waveclear and teamfight damage' },
-                { icon: '🎯', tip: 'Use your mobility to reposition and avoid enemy abilities' },
+                { icon: '&#127919;', tip: 'Use your mobility to reposition and avoid enemy abilities' },
                 { icon: '⚡', tip: 'Focus on landing Q consistently to reduce your ability cooldowns' }
             ],
             'Annie': [
@@ -3525,7 +3525,7 @@ function showDetailedAnalysis() {
                 { icon: '🎭', tip: 'Whisper passive makes 4th shot crit and reload - count your shots carefully' },
                 { icon: '🌸', tip: 'Deadly Flourish (W) roots marked enemies - combo with Q or grenade marks' },
                 { icon: '💥', tip: 'Dancing Grenade (Q) gains damage per kill - try to execute minions first' },
-                { icon: '🎯', tip: 'Curtain Call (R) has massive range - use walls and bushes for surprise snipes' },
+                { icon: '&#127919;', tip: 'Curtain Call (R) has massive range - use walls and bushes for surprise snipes' },
                 { icon: '🎯', tip: 'Use your long range to control minion waves and deny farm to enemy ADC' },
                 { icon: '🎭', tip: 'Focus on landing your abilities to maximize your passive damage' }
             ],
@@ -3537,7 +3537,7 @@ function showDetailedAnalysis() {
             ],
             'Vayne': [
                 { icon: '🏹', tip: 'Silver Bolts (W) deals true damage every 3rd hit - focus same target' },
-                { icon: '🎯', tip: 'Condemn (E) can stun against walls - position enemies near terrain' },
+                { icon: '&#127919;', tip: 'Condemn (E) can stun against walls - position enemies near terrain' },
                 { icon: '🌙', tip: 'Tumble (Q) becomes invisible during Final Hour - use it for repositioning' },
                 { icon: '⚡', tip: 'Final Hour (R) gives massive AD and stealth on Q - save for teamfights' },
                 { icon: '🌙', tip: 'Use your mobility to reposition and avoid enemy abilities' },
@@ -3556,8 +3556,8 @@ function showDetailedAnalysis() {
                 { icon: '💥', tip: 'Bullet Time (R) deals massive damage - channel from safe positions' },
                 { icon: '🌊', tip: 'Make It Rain (E) slows enemies - use it to zone or set up other abilities' },
                 { icon: '⚡', tip: 'Love Tap passive gives bonus damage - switch targets between auto attacks' },
-                { icon: '🎯', tip: 'Use your long range to control minion waves and deny farm to enemy ADC' },
-                { icon: '🏹', tip: 'Position for teamfights where you can land your ultimate on multiple enemies' }
+                { icon: '&#127919;', tip: 'Use your long range to control minion waves and deny farm to enemy ADC' },
+                { icon: '&#127993;', tip: 'Position for teamfights where you can land your ultimate on multiple enemies' }
             ],
             'Nami': [
                 { icon: '💧', tip: 'Surging Tides passive gives movement speed to ability-hit allies' },
@@ -3569,8 +3569,8 @@ function showDetailedAnalysis() {
             ],
             // Default tips for other champions based on role
             'Tank': [
-                { icon: '🛡️', tip: 'Engage when your team is ready and enemies are grouped together' },
-                { icon: '🎯', tip: 'Focus on peeling for your carries rather than diving their backline' },
+                { icon: '&#128737;', tip: 'Engage when your team is ready and enemies are grouped together' },
+                { icon: '&#127919;', tip: 'Focus on peeling for your carries rather than diving their backline' },
                 { icon: '👥', tip: 'Use your crowd control abilities to set up kills for your team' },
                 { icon: '⚡', tip: 'Build according to enemy team composition - armor vs AD, MR vs AP' },
                 { icon: '🛡️', tip: 'Use your tankiness to soak up damage and protect your carries' },
@@ -3593,9 +3593,9 @@ function showDetailedAnalysis() {
             'Marksman': [
                 { icon: '🏹', tip: 'Position safely behind your team and focus nearest target' },
                 { icon: '💰', tip: 'Farm consistently and avoid risky trades early game' },
-                { icon: '🎯', tip: 'Use attack-move to maintain DPS while kiting backwards' },
-                { icon: '⚡', tip: 'Build lifesteal to sustain through teamfights' },
-                { icon: '🎯', tip: 'Use your long range to control minion waves and deny farm to enemy ADC' },
+                { icon: '&#127919;', tip: 'Use attack-move to maintain DPS while kiting backwards' },
+                { icon: '&#9889;', tip: 'Build lifesteal to sustain through teamfights' },
+                { icon: '&#127919;', tip: 'Use your long range to control minion waves and deny farm to enemy ADC' },
                 { icon: '🏹', tip: 'Position for teamfights where you can maximize your damage output' }
             ],
             'Mage': [
@@ -3608,11 +3608,11 @@ function showDetailedAnalysis() {
             ],
             'Support': [
                 { icon: '👁️', tip: 'Ward key areas and deny enemy vision with control wards' },
-                { icon: '🤝', tip: 'Roam to help other lanes when your ADC is safe' },
-                { icon: '🛡️', tip: 'Protect your carries and peel for them in teamfights' },
+                { icon: '&#129309;', tip: 'Roam to help other lanes when your ADC is safe' },
+                { icon: '&#128737;', tip: 'Protect your carries and peel for them in teamfights' },
                 { icon: '💡', tip: 'Build according to team needs - tank items or enchanter items' },
-                { icon: '👁️', tip: 'Use your vision control to set up ganks and avoid enemy ganks' },
-                { icon: '🤝', tip: 'Look for opportunities to create picks with your crowd control' }
+                { icon: '&#128065;', tip: 'Use your vision control to set up ganks and avoid enemy ganks' },
+                { icon: '&#129309;', tip: 'Look for opportunities to create picks with your crowd control' }
             ]
         };
 
