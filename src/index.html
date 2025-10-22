@@ -2575,10 +2575,6 @@
                 });
         }
 
-        function generateSessionId() {
-            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        }
-
         function saveUserDataToExcel(data) {
             return new Promise((resolve, reject) => {
                 // Try to save to Python server first (PYTHON_TESTING folder)
@@ -2596,6 +2592,10 @@
                     reject(error);
                 }
             });
+        }
+
+        function generateSessionId() {
+            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         }
 
                         phone: data.phone,
@@ -2642,6 +2642,10 @@
             });
         }
 
+        function generateSessionId() {
+            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
         function createExcelFile(userData) {
             // Create CSV content (Excel compatible)
             let csvContent = "Full Name,Email,Phone,Age,Gender,LoL Experience,Registration Date,Session ID\n";
@@ -2677,6 +2681,8 @@
                 
                 document.body.removeChild(link);
             }
+        }
+
         }
 
         // Function to manually download user data (for admin use)
