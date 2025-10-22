@@ -1680,6 +1680,18 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    <span class="form-icon"><i class="summoner-icon"></i></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <input type="number" id="age" name="age" placeholder="Enter your age" min="13" max="100" required>
+                    <span class="form-icon"><i class="summoner-icon"></i></span>
+                </div>
+
+                <div class="form-group">
                     <label for="experience">LoL Experience</label>
                     <select id="experience" name="experience" required>
                         <option value="">Select your experience</option>
@@ -1690,6 +1702,24 @@
                         <option value="Expert">Expert</option>
                     </select>
                     <span class="form-icon"><i class="mastery-icon"></i></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender">
+                        <option value="">Prefer not to say</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Non-binary">Non-binary</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <span class="form-icon"><i class="mastery-icon"></i></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone (Optional)</label>
+                    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number">
+                    <span class="form-icon"><i class="summoner-icon"></i></span>
                 </div>
 
                 <div class="form-buttons">
@@ -2036,63 +2066,142 @@
             }
         });
 
-        // Questions Database
-        const questionsDatabase = [
-            {
-                id: 1,
-                text: "What role do you prefer to play?",
-                options: [
-                    { value: "Tank", text: "Tank", description: "Absorb damage and protect allies" },
-                    { value: "Fighter", text: "Fighter", description: "Balanced damage and survivability" },
-                    { value: "Assassin", text: "Assassin", description: "High damage, eliminate key targets" },
-                    { value: "Marksman", text: "Marksman", description: "Ranged physical damage dealer" },
-                    { value: "Mage", text: "Mage", description: "Magical damage and utility" },
-                    { value: "Support", text: "Support", description: "Help and protect teammates" },
-                    { value: "No Preference", text: "No Preference", description: "I'm open to any role" }
-                ]
-            },
-            {
-                id: 2,
-                text: "What position/lane do you want to play?",
-                options: [
-                    { value: "Top", text: "Top Lane", description: "Solo lane, usually tanky fighters" },
-                    { value: "Jungle", text: "Jungle", description: "Roam the map, gank lanes, control objectives" },
-                    { value: "Mid", text: "Mid Lane", description: "Solo lane, usually mages or assassins" },
-                    { value: "ADC", text: "ADC (Bot Lane)", description: "Attack Damage Carry, usually marksmen" },
-                    { value: "Support", text: "Support (Bot Lane)", description: "Help ADC, provide utility and vision" },
-                    { value: "No Preference", text: "No Preference", description: "I can play any position" }
-                ]
-            },
-            {
-                id: 3,
-                text: "What difficulty level are you comfortable with?",
-                options: [
-                    { value: 2, text: "Beginner (1-3)", description: "Simple mechanics, easy to learn" },
-                    { value: 5, text: "Intermediate (4-6)", description: "Moderate complexity" },
-                    { value: 8, text: "Advanced (7-8)", description: "Complex mechanics and combos" },
-                    { value: 10, text: "Expert (9-10)", description: "Extremely challenging champions" }
-                ]
-            },
-            {
-                id: 4,
-                text: "What's your preferred playstyle?",
-                options: [
-                    { value: "aggressive", text: "Aggressive", description: "Take fights and make plays" },
-                    { value: "balanced", text: "Balanced", description: "Adapt to the situation" },
-                    { value: "defensive", text: "Defensive", description: "Play safe and scale" },
-                    { value: "supportive", text: "Supportive", description: "Enable teammates" }
-                ]
-            },
-            {
-                id: 5,
-                text: "Do you prefer ranged or melee champions?",
-                options: [
-                    { value: "ranged", text: "Ranged", description: "Attack from a distance" },
-                    { value: "melee", text: "Melee", description: "Close combat fighting" },
-                    { value: "no_preference", text: "No Preference", description: "Either is fine" }
-                ]
-            }
-        ];
+        // Questions Database - Loading from JSON file
+        let questionsDatabase = [];
+        
+        // Load questions from JSON file
+        fetch('data/questions.json')
+            .then(response => response.json())
+            .then(data => {
+                questionsDatabase = data.questions.map(question => {
+                    return {
+                        id: question.id,
+                        text: question.text,
+                        options: question.options.map(option => {
+                            return {
+                                value: option,
+                                text: option,
+                                description: ''
+                            };
+                        }),
+                        dimension: question.dimension || ''
+                    };
+                });
+            })
+            .catch(error => {
+                console.error('Failed to load questions from JSON, using default questions:', error);
+                // Fallback to default questions
+                questionsDatabase = [
+                    {
+                        id: 1,
+                        text: "What is your preferred difficulty?",
+                        options: [
+                            { value: "Easy (1-3)", text: "Easy (1-3)", description: "Simple mechanics, easy to learn" },
+                            { value: "Medium (4-6)", text: "Medium (4-6)", description: "Moderate complexity" },
+                            { value: "Hard (7-8)", text: "Hard (7-8)", description: "Complex mechanics and combos" },
+                            { value: "Very Hard (9-10)", text: "Very Hard (9-10)", description: "Extremely challenging champions" }
+                        ]
+                    },
+                    {
+                        id: 2,
+                        text: "What is your preferred role?",
+                        options: [
+                            { value: "Tank", text: "Tank", description: "Absorb damage and protect allies" },
+                            { value: "Fighter", text: "Fighter", description: "Balanced damage and survivability" },
+                            { value: "Assassin", text: "Assassin", description: "High damage, eliminate key targets" },
+                            { value: "Marksman", text: "Marksman", description: "Ranged physical damage dealer" },
+                            { value: "Mage", text: "Mage", description: "Magical damage and utility" },
+                            { value: "Support", text: "Support", description: "Help and protect teammates" }
+                        ]
+                    },
+                    {
+                        id: 3,
+                        text: "What is your preferred position?",
+                        options: [
+                            { value: "Top", text: "Top", description: "Solo lane, usually tanky fighters" },
+                            { value: "Jungle", text: "Jungle", description: "Roam the map, gank lanes, control objectives" },
+                            { value: "Mid", text: "Mid", description: "Solo lane, usually mages or assassins" },
+                            { value: "Bot", text: "Bot", description: "ADC or Support position" },
+                            { value: "Support", text: "Support", description: "Help ADC, provide utility and vision" }
+                        ]
+                    },
+                    {
+                        id: 4,
+                        text: "What playstyle do you prefer?",
+                        options: [
+                            { value: "High Damage Output", text: "High Damage Output", description: "Focus on dealing maximum damage" },
+                            { value: "Tanky and Durable", text: "Tanky and Durable", description: "Absorb damage and protect allies" },
+                            { value: "Support Team", text: "Support Team", description: "Enable and assist teammates" },
+                            { value: "Balanced/Hybrid", text: "Balanced/Hybrid", description: "Mix of damage and utility" }
+                        ]
+                    },
+                    {
+                        id: 5,
+                        text: "Do you prefer range or melee?",
+                        options: [
+                            { value: "Ranged", text: "Ranged", description: "Attack from a distance" },
+                            { value: "Melee", text: "Melee", description: "Close combat fighting" },
+                            { value: "No Preference", text: "No Preference", description: "Either is fine" }
+                        ]
+                    },
+                    {
+                        id: 6,
+                        text: "How do you usually respond under pressure in a game?",
+                        options: [
+                            { value: "Stay calm and strategic", text: "Stay calm and strategic", description: "Maintain composure and think strategically" },
+                            { value: "Take charge and lead", text: "Take charge and lead", description: "Become the team leader in critical moments" },
+                            { value: "Get aggressive and take risks", text: "Get aggressive and take risks", description: "Seize opportunities through bold plays" },
+                            { value: "Play cautiously to avoid mistakes", text: "Play cautiously to avoid mistakes", description: "Minimize risks and avoid errors" }
+                        ],
+                        dimension: "Emotional stability & risk-taking"
+                    },
+                    {
+                        id: 7,
+                        text: "What type of character aesthetic appeals to you most?",
+                        options: [
+                            { value: "Heroic", text: "Heroic", description: "Traditional heroic characters" },
+                            { value: "Mysterious", text: "Mysterious", description: "Enigmatic and secretive characters" },
+                            { value: "Dark and edgy", text: "Dark and edgy", description: "Gothic or sinister-themed characters" },
+                            { value: "Cute or playful", text: "Cute or playful", description: "Adorable or fun characters" },
+                            { value: "Monstrous or non-human", text: "Monstrous or non-human", description: "Beastly or otherworldly characters" }
+                        ],
+                        dimension: "Aesthetic & identity preference"
+                    },
+                    {
+                        id: 8,
+                        text: "When cooperating with others, how do you prefer to contribute to the team?",
+                        options: [
+                            { value: "Lead and make decisions", text: "Lead and make decisions", description: "Take command and direct the team" },
+                            { value: "Support and enable others", text: "Support and enable others", description: "Empower teammates to succeed" },
+                            { value: "Balance between both", text: "Balance between both", description: "Adapt role based on team needs" },
+                            { value: "Stay independent and focus on my role", text: "Stay independent and focus on my role", description: "Focus on individual responsibilities" }
+                        ],
+                        dimension: "Teamwork & leadership orientation"
+                    },
+                    {
+                        id: 9,
+                        text: "Which character identity do you usually prefer?",
+                        options: [
+                            { value: "Male", text: "Male", description: "Traditional male characters" },
+                            { value: "Female", text: "Female", description: "Traditional female characters" },
+                            { value: "Non-human", text: "Non-human", description: "Creatures or beings beyond human" },
+                            { value: "No preference", text: "No preference", description: "Any character identity is fine" }
+                        ],
+                        dimension: "Character identity & self-expression"
+                    },
+                    {
+                        id: 10,
+                        text: "When faced with a difficult challenge, what best describes your approach?",
+                        options: [
+                            { value: "Analyze carefully before acting", text: "Analyze carefully before acting", description: "Study the situation thoroughly first" },
+                            { value: "Jump in and adapt on the fly", text: "Jump in and adapt on the fly", description: "Act quickly and adjust as needed" },
+                            { value: "Follow the team's lead", text: "Follow the team's lead", description: "Coordinate with teammates" },
+                            { value: "Focus on long-term improvement", text: "Focus on long-term improvement", description: "Prioritize skill development over immediate results" }
+                        ],
+                        dimension: "Cognitive style & problem-solving preference"
+                    }
+                ];
+            });
 
         // Simplified ML Algorithms (optimized for performance)
         class SimpleRandomForest {
@@ -2486,18 +2595,9 @@
                     console.error('❌ Failed to save to localStorage:', error);
                     reject(error);
                 }
-                
-                // Original server code (commented out for GitHub Pages)
-                /*
-                fetch('http://localhost:5001/api/register_user', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    mode: 'cors',
-                    body: JSON.stringify({
-                        fullName: data.fullName,
-                        email: data.email,
+            });
+        }
+
                         phone: data.phone,
                         age: parseInt(data.age),
                         gender: data.gender,
@@ -2717,10 +2817,15 @@
                 role: answers[1],
                 position: answers[2],
                 difficulty: answers[3] || 5,
-                damage: 5, // Default value since this question was removed
-                toughness: 5, // Default value since this question was removed
+                damage: 5, // Default value
+                toughness: 5, // Default value
                 playstyle: answers[4] || 'balanced',
-                range: answers[5] || 'no_preference'
+                range: answers[5] || 'no_preference',
+                pressure_response: answers[6] || 'balanced',
+                aesthetic_preference: answers[7] || 'no_preference',
+                team_contribution: answers[8] || 'balanced',
+                character_identity: answers[9] || 'no_preference',
+                problem_solving: answers[10] || 'analytical'
             };
             
             // Run all algorithms and measure performance
@@ -3469,6 +3574,60 @@ function restartQuestionnaire() {
             document.querySelectorAll('[id^="next-"]').forEach(btn => btn.disabled = true);
         }
 
+        // Function to manually download user data (for admin use)
+        function downloadUserData() {
+            const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
+            if (userData.length > 0) {
+                // Trigger download
+                const csvContent = "Full Name,Email,Phone,Age,Gender,LoL Experience,Registration Date,Session ID,Recommended Champion,Winning Algorithm,Confidence Score,Random Forest Champion,Random Forest Confidence,Decision Tree Champion,Decision Tree Confidence,KNN Champion,KNN Confidence,Consensus Level,User Answers,Completion Date,Pressure Response,Aesthetic Preference,Team Contribution,Character Identity,Problem Solving Approach\n";
+                let content = csvContent;
+                
+                userData.forEach(user => {
+                    const row = [
+                        user.fullName,
+                        user.email,
+                        user.phone,
+                        user.age,
+                        user.gender,
+                        user.experience,
+                        new Date(user.registrationDate).toLocaleString(),
+                        user.sessionId,
+                        user.recommendedChampion || '',
+                        user.winningAlgorithm || '',
+                        user.confidence || '',
+                        user.randomForestChampion || '',
+                        user.randomForestConfidence || '',
+                        user.decisionTreeChampion || '',
+                        user.decisionTreeConfidence || '',
+                        user.knnChampion || '',
+                        user.knnConfidence || '',
+                        user.consensusLevel || '',
+                        user.userAnswers || '',
+                        user.completionDate || '',
+                        user.pressureResponse || '',
+                        user.aestheticPreference || '',
+                        user.teamContribution || '',
+                        user.characterIdentity || '',
+                        user.problemSolving || ''
+                    ].map(field => `"${field}"`).join(',');
+                    
+                    content += row + "\n";
+                });
+                
+                const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'champion_recommender_users.csv';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            } else {
+                alert('No user data available to download.');
+            }
+        }
+        
         // Manual CSV export function
         function exportToCSV() {
             const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
@@ -3485,10 +3644,12 @@ function restartQuestionnaire() {
                 'Random Forest Champion', 'Random Forest Confidence',
                 'Decision Tree Champion', 'Decision Tree Confidence',
                 'KNN Champion', 'KNN Confidence', 'Consensus Level',
-                'User Answers', 'Completion Date'
+                'User Answers', 'Completion Date',
+                'Pressure Response', 'Aesthetic Preference', 'Team Contribution',
+                'Character Identity', 'Problem Solving Approach'
             ];
             
-            let csvContent = headers.join(',') + '\\n';
+            let csvContent = headers.join(',') + '\n';
             
             userData.forEach((user, index) => {
                 const row = [
@@ -3512,10 +3673,15 @@ function restartQuestionnaire() {
                     user.knnConfidence || '',
                     user.consensusLevel || '',
                     user.userAnswers || '',
-                    user.completionDate || ''
+                    user.completionDate || '',
+                    user.pressureResponse || '',
+                    user.aestheticPreference || '',
+                    user.teamContribution || '',
+                    user.characterIdentity || '',
+                    user.problemSolving || ''
                 ].map(field => '"' + field + '"');
                 
-                csvContent += row.join(',') + '\\n';
+                csvContent += row.join(',') + '\n';
             });
             
             // Download CSV

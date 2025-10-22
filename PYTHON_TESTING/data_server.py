@@ -76,7 +76,12 @@ def update_results():
             'knn_confidence': data.get('knnConfidence'),
             'consensus_level': data.get('consensusLevel'),
             'user_answers': data.get('userAnswers'),
-            'completion_timestamp': data.get('completionDate')
+            'completion_timestamp': data.get('completionDate'),
+            'pressure_response': data.get('pressureResponse'),
+            'aesthetic_preference': data.get('aestheticPreference'),
+            'team_contribution': data.get('teamContribution'),
+            'character_identity': data.get('characterIdentity'),
+            'problem_solving': data.get('problemSolving')
         }
         
         success = data_manager.update_user_results(session_id, results_data)

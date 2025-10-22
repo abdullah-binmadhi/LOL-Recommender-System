@@ -36,6 +36,7 @@ An **AI-powered champion recommendation system** that uses **3 machine learning 
 
 | Feature | Description |
 |--------|-------------|
+| **Enhanced Questionnaire** | 10 questions (5 game-related + 5 psychological/behavioral) for deeper insights |
 | **3 ML Algorithms** | Random Forest, Decision Tree, and K-Nearest Neighbors working together |
 | **Smart Diversity** | Never get repetitive recommendations - explore all 150+ champions |
 | **Real-time Analysis** | See all algorithm results side-by-side with confidence scores |
@@ -49,10 +50,11 @@ An **AI-powered champion recommendation system** that uses **3 machine learning 
 
 ## How It Works
 
-1. **Answer 5 Simple Questions** - Tell us about your preferred role, position, difficulty level, playstyle, and range
-2. **AI Analysis** - Our ML algorithms analyze your preferences
-3. **Get Your Champion** - Receive a personalized champion recommendation with detailed analysis
-4. **Explore Alternatives** - See other great champion options that match your playstyle
+1. **Answer 10 Insightful Questions** - Tell us about your preferred role, position, difficulty level, playstyle, range, and psychological preferences
+2. **Enhanced Registration** - Provide additional personal information for better analysis
+3. **AI Analysis** - Our ML algorithms analyze your comprehensive preferences
+4. **Get Your Champion** - Receive a personalized champion recommendation with detailed analysis
+5. **Explore Alternatives** - See other great champion options that match your playstyle
 
 ---
 
@@ -63,6 +65,10 @@ An **AI-powered champion recommendation system** that uses **3 machine learning 
 │   ├── index.html         # Main application
 │   ├── data/              # Champion data files
 │   └── assets/            # Images and other assets
+├── PYTHON_TESTING/        # Backend and data management
+│   ├── data_server.py     # Flask server for data storage
+│   ├── user_data_manager.py # CSV management
+│   └── champion_recommender_users.csv # Data file
 ├── docs/                  # Documentation
 ├── .github/               # GitHub configurations
 └── README.md              # This file

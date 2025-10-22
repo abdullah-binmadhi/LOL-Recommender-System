@@ -54,7 +54,9 @@ class UserDataManager:
             'Random Forest Champion', 'Random Forest Confidence',
             'Decision Tree Champion', 'Decision Tree Confidence',
             'KNN Champion', 'KNN Confidence', 'Consensus Level',
-            'User Answers', 'Completion Date'
+            'User Answers', 'Completion Date',
+            'Pressure Response', 'Aesthetic Preference', 'Team Contribution',
+            'Character Identity', 'Problem Solving Approach'
         ]
         
         # Write CSV file
@@ -84,7 +86,12 @@ class UserDataManager:
                     'KNN Confidence': user.get('knn_confidence', ''),
                     'Consensus Level': user.get('consensus_level', ''),
                     'User Answers': user.get('user_answers', ''),
-                    'Completion Date': user.get('completion_timestamp', '')
+                    'Completion Date': user.get('completion_timestamp', ''),
+                    'Pressure Response': user.get('pressure_response', ''),
+                    'Aesthetic Preference': user.get('aesthetic_preference', ''),
+                    'Team Contribution': user.get('team_contribution', ''),
+                    'Character Identity': user.get('character_identity', ''),
+                    'Problem Solving Approach': user.get('problem_solving', '')
                 }
                 writer.writerow(row)
         

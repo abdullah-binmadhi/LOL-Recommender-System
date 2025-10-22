@@ -39,6 +39,51 @@
       "options": ["Ranged", "Melee", "No Preference"],
       "weight": 0.7,
       "feature_mapping": "attack_range"
+    },
+    {
+      "id": 6,
+      "text": "How do you usually respond under pressure in a game?",
+      "type": "multiple_choice",
+      "options": ["Stay calm and strategic", "Take charge and lead", "Get aggressive and take risks", "Play cautiously to avoid mistakes"],
+      "weight": 0.6,
+      "feature_mapping": "pressure_response",
+      "dimension": "Emotional stability & risk-taking"
+    },
+    {
+      "id": 7,
+      "text": "What type of character aesthetic appeals to you most?",
+      "type": "multiple_choice",
+      "options": ["Heroic", "Mysterious", "Dark and edgy", "Cute or playful", "Monstrous or non-human"],
+      "weight": 0.5,
+      "feature_mapping": "aesthetic_preference",
+      "dimension": "Aesthetic & identity preference"
+    },
+    {
+      "id": 8,
+      "text": "When cooperating with others, how do you prefer to contribute to the team?",
+      "type": "multiple_choice",
+      "options": ["Lead and make decisions", "Support and enable others", "Balance between both", "Stay independent and focus on my role"],
+      "weight": 0.7,
+      "feature_mapping": "team_contribution",
+      "dimension": "Teamwork & leadership orientation"
+    },
+    {
+      "id": 9,
+      "text": "Which character identity do you usually prefer?",
+      "type": "multiple_choice",
+      "options": ["Male", "Female", "Non-human", "No preference"],
+      "weight": 0.5,
+      "feature_mapping": "character_identity",
+      "dimension": "Character identity & self-expression"
+    },
+    {
+      "id": 10,
+      "text": "When faced with a difficult challenge, what best describes your approach?",
+      "type": "multiple_choice",
+      "options": ["Analyze carefully before acting", "Jump in and adapt on the fly", "Follow the team's lead", "Focus on long-term improvement"],
+      "weight": 0.6,
+      "feature_mapping": "problem_solving",
+      "dimension": "Cognitive style & problem-solving preference"
     }
   ]
 }
