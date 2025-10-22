@@ -3,11 +3,12 @@
 Script to test Supabase connection for the League of Legends Champion Recommender
 """
 
+import os
 from supabase import create_client, Client
 
-# Supabase configuration
-SUPABASE_URL = "https://brshmbbohqcdseyirqsn.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJyc2htYmJvaHFjZHNleWlycXNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwOTYyNzAsImV4cCI6MjA3NjY3MjI3MH0.Yi-aWEuvArux0qRrEgnnzIljrsh5NnVBOxHlpBqbn2E"
+# Supabase configuration - using environment variables for security
+SUPABASE_URL = os.getenv('SUPABASE_URL', 'https://brshmbbohqcdseyirqsn.supabase.co')
+SUPABASE_KEY = os.getenv('SUPABASE_ANON_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJyc2htYmJvaHFjZHNleWlycXNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwOTYyNzAsImV4cCI6MjA3NjY3MjI3MH0.Yi-aWEuvArux0qRrEgnnzIljrsh5NnVBOxHlpBqbn2E')
 
 def test_supabase_connection():
     """Test the Supabase connection"""

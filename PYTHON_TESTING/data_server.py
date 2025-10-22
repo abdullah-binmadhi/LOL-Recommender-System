@@ -18,11 +18,31 @@ CORS(app)  # Enable CORS for all routes
 # Initialize the user data manager
 data_manager = UserDataManager()
 
+# Initialize Supabase client
+supabase = None
+try:
+    # Get Supabase credentials from environment variables
+    SUPABASE_URL = os.getenv('SUPABASE_URL')
+    SUPABASE_KEY = os.getenv('SUPABASE_ANON_KEY')
+    
+    if SUPABASE_URL and SUPABASE_KEY:
+        from supabase import create_client, Client
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        print("✅ Supabase client initialized successfully!")
+    else:
+        print("⚠️  Supabase credentials not found in environment variables.")
+except Exception as e:
+    print(f"❌ Error initializing Supabase client: {e}")
+
 @app.route('/api/register_user', methods=['POST'])
 def register_user():
     """Register a new user and update CSV file"""
     try:
         user_data = request.json
+        
+        # Validate that we have JSON data
+        if not user_data:
+            return jsonify({'error': 'No JSON data provided'}), 400
         
         # Validate required fields
         required_fields = ['fullName', 'email', 'age']
@@ -59,6 +79,11 @@ def update_results():
     """Update user with recommendation results and update CSV"""
     try:
         data = request.json
+        
+        # Validate that we have JSON data
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
+        
         session_id = data.get('sessionId')
         
         if not session_id:
