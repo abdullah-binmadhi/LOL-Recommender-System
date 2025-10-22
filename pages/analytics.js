@@ -15,7 +15,7 @@ const AnalyticsPage = () => {
       const Chart = ChartModule.default;
 
       // Fetch champion data
-      fetch('/src/data/champions.json')
+      fetch('/data/champions.json')
         .then(response => response.json())
         .then(data => {
           const champions = data.champions;
@@ -146,7 +146,84 @@ const AnalyticsPage = () => {
           });
         }
 
-        // 3. Resource Types (Bar Chart) - Using difficulty as proxy
+        // 3. Resource Types (Bar Chart) - Show actual resource types
+        const resourceData = {
+          'Mana': 0,
+          'Fury': 0,
+          'Energy': 0,
+          'Ferocity': 0,
+          'Rage': 0,
+          'Heat': 0,
+          'Other': 0
+        };
+        
+        const championResources = {
+          // Champions with Mana (most common)
+          'Aatrox': 'Fury', 'Ahri': 'Mana', 'Akali': 'Energy', 'Alistar': 'Mana', 'Amumu': 'Mana',
+          'Anivia': 'Mana', 'Annie': 'Mana', 'Aphelios': 'Mana', 'Ashe': 'Mana', 'AurelionSol': 'Mana',
+          'Azir': 'Mana', 'Bard': 'Mana', 'Blitzcrank': 'Mana', 'Brand': 'Mana', 'Braum': 'Mana',
+          'Caitlyn': 'Mana', 'Camille': 'Mana', 'Cassiopeia': 'Mana', 'ChoGath': 'Mana', 'Corki': 'Mana',
+          'Darius': 'Mana', 'Diana': 'Mana', 'DrMundo': 'Mana', 'Draven': 'Mana', 'Ekko': 'Mana',
+          'Elise': 'Mana', 'Evelynn': 'Mana', 'Ezreal': 'Mana', 'Fiddlesticks': 'Mana', 'Fiora': 'Mana',
+          'Fizz': 'Mana', 'Galio': 'Mana', 'Gangplank': 'Mana', 'Garen': 'Mana', 'Gragas': 'Mana',
+          'Graves': 'Mana', 'Hecarim': 'Mana', 'Heimerdinger': 'Mana', 'Illaoi': 'Mana', 'Irelia': 'Mana',
+          'Ivern': 'Mana', 'Janna': 'Mana', 'JarvanIV': 'Mana', 'Jax': 'Mana', 'Jayce': 'Mana',
+          'Jhin': 'Mana', 'Jinx': 'Mana', 'Kaisa': 'Mana', 'Kalista': 'Mana', 'Karma': 'Mana',
+          'Karthus': 'Mana', 'Kassadin': 'Mana', 'Katarina': 'Ferocity', 'Kayle': 'Mana', 'Kayn': 'Fury',
+          'Kennen': 'Energy', 'Khazix': 'Mana', 'Kindred': 'Mana', 'Kled': 'Fury', 'KogMaw': 'Mana',
+          'Leblanc': 'Mana', 'LeeSin': 'Energy', 'Leona': 'Mana', 'Lissandra': 'Mana', 'Lucian': 'Mana',
+          'Lulu': 'Mana', 'Lux': 'Mana', 'Malphite': 'Mana', 'Malzahar': 'Mana', 'Maokai': 'Mana',
+          'MasterYi': 'Mana', 'MissFortune': 'Mana', 'MonkeyKing': 'Mana', 'Mordekaiser': 'Mana', 'Morgana': 'Mana',
+          'Nami': 'Mana', 'Nasus': 'Mana', 'Nautilus': 'Mana', 'Neeko': 'Mana', 'Nidalee': 'Mana',
+          'Nocturne': 'Mana', 'Nunu': 'Mana', 'Olaf': 'Mana', 'Orianna': 'Mana', 'Ornn': 'Mana',
+          'Pantheon': 'Mana', 'Poppy': 'Mana', 'Pyke': 'Mana', 'Qiyana': 'Mana', 'Quinn': 'Mana',
+          'Rakan': 'Mana', 'Rammus': 'Mana', 'RekSai': 'Ferocity', 'Rell': 'Mana', 'Renekton': 'Fury',
+          'Rengar': 'Fury', 'Riven': 'Mana', 'Rumble': 'Heat', 'Ryze': 'Mana', 'Samira': 'Mana',
+          'Sejuani': 'Mana', 'Senna': 'Mana', 'Seraphine': 'Mana', 'Sett': 'Fury', 'Shaco': 'Mana',
+          'Shen': 'Energy', 'Shyvana': 'Fury', 'Singed': 'Mana', 'Sion': 'Mana', 'Sivir': 'Mana',
+          'Skarner': 'Mana', 'Sona': 'Mana', 'Soraka': 'Mana', 'Swain': 'Mana', 'Sylas': 'Mana',
+          'Syndra': 'Mana', 'TahmKench': 'Mana', 'Taliyah': 'Mana', 'Talon': 'Mana', 'Taric': 'Mana',
+          'Teemo': 'Mana', 'Thresh': 'Mana', 'Tristana': 'Mana', 'Trundle': 'Mana', 'Tryndamere': 'Fury',
+          'TwistedFate': 'Mana', 'Twitch': 'Mana', 'Udyr': 'Mana', 'Urgot': 'Mana', 'Varus': 'Mana',
+          'Vayne': 'Mana', 'Veigar': 'Mana', 'Velkoz': 'Mana', 'Vex': 'Mana', 'Vi': 'Mana',
+          'Viktor': 'Mana', 'Vladimir': 'Mana', 'Volibear': 'Mana', 'Warwick': 'Mana', 'Xayah': 'Mana',
+          'Xerath': 'Mana', 'XinZhao': 'Mana', 'Yasuo': 'Mana', 'Yone': 'Fury', 'Yorick': 'Mana',
+          'Yuumi': 'Mana', 'Zac': 'Mana', 'Zed': 'Energy', 'Ziggs': 'Mana', 'Zilean': 'Mana',
+          'Zoe': 'Mana', 'Zyra': 'Mana',
+          
+          // Champions with Fury
+          'Aatrox': 'Fury', 'Renekton': 'Fury', 'Rengar': 'Fury', 'Shyvana': 'Fury', 'Tryndamere': 'Fury',
+          'Kled': 'Fury', 'Sett': 'Fury', 'Yone': 'Fury', 'Kayn': 'Fury',
+          
+          // Champions with Energy
+          'Akali': 'Energy', 'Kennen': 'Energy', 'LeeSin': 'Energy', 'Shen': 'Energy', 'Zed': 'Energy',
+          
+          // Champions with Ferocity
+          'Katarina': 'Ferocity', 'RekSai': 'Ferocity',
+          
+          // Champions with Rage
+          'Gnar': 'Rage', 'Gwen': 'Rage',
+          
+          // Champions with Heat
+          'Rumble': 'Heat'
+        };
+        
+        // Count resource types
+        champions.forEach(champion => {
+          const resourceName = championResources[champion.name] || 'Other';
+          resourceData[resourceName]++;
+        });
+        
+        // Remove resource types with zero count
+        const filteredResourceData = {};
+        for (const [key, value] of Object.entries(resourceData)) {
+          if (value > 0) {
+            filteredResourceData[key] = value;
+          }
+        }
+        
+        // 4. Champion Difficulty Distribution (Pie Chart)
+        // Count difficulty levels for the difficulty distribution chart
         const difficultyData = {1: 0, 2: 0, 3: 0};
         champions.forEach(champion => {
           const difficulty = champion.difficulty || 2;
@@ -158,19 +235,27 @@ const AnalyticsPage = () => {
           new Chart(resourceTypeCtx, {
             type: 'bar',
             data: {
-              labels: ['Low (1)', 'Medium (2)', 'High (3)'],
+              labels: Object.keys(filteredResourceData),
               datasets: [{
                 label: 'Number of Champions',
-                data: [difficultyData[1], difficultyData[2], difficultyData[3]],
+                data: Object.values(filteredResourceData),
                 backgroundColor: [
-                  'rgba(75, 192, 192, 0.7)',
                   'rgba(54, 162, 235, 0.7)',
-                  'rgba(255, 99, 132, 0.7)'
+                  'rgba(255, 99, 132, 0.7)',
+                  'rgba(255, 206, 86, 0.7)',
+                  'rgba(75, 192, 192, 0.7)',
+                  'rgba(153, 102, 255, 0.7)',
+                  'rgba(255, 159, 64, 0.7)',
+                  'rgba(199, 199, 199, 0.7)'
                 ],
                 borderColor: [
-                  'rgba(75, 192, 192, 1)',
                   'rgba(54, 162, 235, 1)',
-                  'rgba(255, 99, 132, 1)'
+                  'rgba(255, 99, 132, 1)',
+                  'rgba(255, 206, 86, 1)',
+                  'rgba(75, 192, 192, 1)',
+                  'rgba(153, 102, 255, 1)',
+                  'rgba(255, 159, 64, 1)',
+                  'rgba(199, 199, 199, 1)'
                 ],
                 borderWidth: 1
               }]
