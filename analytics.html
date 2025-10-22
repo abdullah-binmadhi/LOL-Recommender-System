@@ -143,20 +143,21 @@
     </div>
 
     <script>
-        // Load champion data with error handling
+        // Load champion data with improved error handling
         fetch('./src/data/champions.json')
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
                 }
                 return response.json();
             })
             .then(data => {
                 const champions = data.champions;
                 if (champions && champions.length > 0) {
+                    console.log('Successfully loaded', champions.length, 'champions from src/data');
                     initializeCharts(champions);
                 } else {
-                    throw new Error('No champion data found');
+                    throw new Error('No champion data found in src/data');
                 }
             })
             .catch(error => {
@@ -165,37 +166,38 @@
                 fetch('./data/champions.json')
                     .then(response => {
                         if (!response.ok) {
-                            throw new Error('Network response was not ok');
+                            throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
                         }
                         return response.json();
                     })
                     .then(data => {
                         const champions = data.champions;
                         if (champions && champions.length > 0) {
+                            console.log('Successfully loaded', champions.length, 'champions from data/');
                             initializeCharts(champions);
                         } else {
-                            throw new Error('No champion data found');
+                            throw new Error('No champion data found in data/');
                         }
                     })
                     .catch(error => {
                         console.error('Error loading champion data from data/:', error);
                         // Use sample data if loading fails
                         const sampleChampions = [
-                            { herotype: "Fighter", range_type: "Melee", difficulty: 2 },
-                            { herotype: "Mage", range_type: "Ranged", difficulty: 3 },
-                            { herotype: "Tank", range_type: "Melee", difficulty: 1 },
-                            { herotype: "Marksman", range_type: "Ranged", difficulty: 2 },
-                            { herotype: "Support", range_type: "Ranged", difficulty: 1 },
-                            { herotype: "Assassin", range_type: "Melee", difficulty: 3 },
-                            { herotype: "Fighter", range_type: "Melee", difficulty: 2 },
-                            { herotype: "Mage", range_type: "Ranged", difficulty: 1 },
-                            { herotype: "Tank", range_type: "Melee", difficulty: 3 },
-                            { herotype: "Marksman", range_type: "Ranged", difficulty: 2 },
-                            { herotype: "Support", range_type: "Ranged", difficulty: 1 },
-                            { herotype: "Assassin", range_type: "Melee", difficulty: 3 },
-                            { herotype: "Fighter", range_type: "Melee", difficulty: 2 },
-                            { herotype: "Mage", range_type: "Ranged", difficulty: 3 },
-                            { herotype: "Tank", range_type: "Melee", difficulty: 1 }
+                            { herotype: "Fighter", range_type: "Melee", difficulty: 2, name: "Aatrox", resource: "Fury" },
+                            { herotype: "Mage", range_type: "Ranged", difficulty: 3, name: "Ahri", resource: "Mana" },
+                            { herotype: "Tank", range_type: "Melee", difficulty: 1, name: "Alistar", resource: "Mana" },
+                            { herotype: "Marksman", range_type: "Ranged", difficulty: 2, name: "Ashe", resource: "Mana" },
+                            { herotype: "Support", range_type: "Ranged", difficulty: 1, name: "Bard", resource: "Mana" },
+                            { herotype: "Assassin", range_type: "Melee", difficulty: 3, name: "Akali", resource: "Energy" },
+                            { herotype: "Fighter", range_type: "Melee", difficulty: 2, name: "Darius", resource: "Mana" },
+                            { herotype: "Mage", range_type: "Ranged", difficulty: 1, name: "Annie", resource: "Mana" },
+                            { herotype: "Tank", range_type: "Melee", difficulty: 3, name: "Garen", resource: "Mana" },
+                            { herotype: "Marksman", range_type: "Ranged", difficulty: 2, name: "Ezreal", resource: "Mana" },
+                            { herotype: "Support", range_type: "Ranged", difficulty: 1, name: "Thresh", resource: "Mana" },
+                            { herotype: "Assassin", range_type: "Melee", difficulty: 3, name: "Zed", resource: "Energy" },
+                            { herotype: "Fighter", range_type: "Melee", difficulty: 2, name: "Fiora", resource: "Mana" },
+                            { herotype: "Mage", range_type: "Ranged", difficulty: 3, name: "Lux", resource: "Mana" },
+                            { herotype: "Tank", range_type: "Melee", difficulty: 1, name: "Malphite", resource: "Mana" }
                         ];
                         console.log('Using sample data for charts');
                         initializeCharts(sampleChampions);
@@ -311,6 +313,7 @@
             });
 
             // 3. Resource Types (Bar Chart) - Show actual resource types
+            // Since resource data is not in the main champion file, we'll use a mapping
             const resourceData = {
                 'Mana': 0,
                 'Fury': 0,
@@ -322,34 +325,42 @@
             };
             
             const championResources = {
-                // Champions with Mana
-                'Ahri': 'Mana', 'Anivia': 'Mana', 'Annie': 'Mana', 'AurelionSol': 'Mana', 'Azir': 'Mana',
-                'Brand': 'Mana', 'Cassiopeia': 'Mana', 'Diana': 'Mana', 'Ekko': 'Mana', 'Fizz': 'Mana',
-                'Galio': 'Mana', 'Heimerdinger': 'Mana', 'Karma': 'Mana', 'Karthus': 'Mana', 'Kassadin': 'Mana',
-                'Leblanc': 'Mana', 'Lissandra': 'Mana', 'Lux': 'Mana', 'Malzahar': 'Mana', 'Morgana': 'Mana',
-                'Nami': 'Mana', 'Orianna': 'Mana', 'Ryze': 'Mana', 'Sona': 'Mana', 'Swain': 'Mana',
-                'Syndra': 'Mana', 'Taliyah': 'Mana', 'Targon': 'Mana', 'TwistedFate': 'Mana', 'Veigar': 'Mana',
-                'Velkoz': 'Mana', 'Viktor': 'Mana', 'Xerath': 'Mana', 'Ziggs': 'Mana', 'Zilean': 'Mana',
-                'Zoe': 'Mana', 'Bard': 'Mana', 'Blitzcrank': 'Mana', 'Braum': 'Mana', 'ChoGath': 'Mana',
-                'Darius': 'Mana', 'Elise': 'Mana', 'Evelynn': 'Mana', 'Fiddlesticks': 'Mana', 'Gangplank': 'Mana',
-                'Garen': 'Mana', 'Graves': 'Mana', 'Hecarim': 'Mana', 'Illaoi': 'Mana', 'Irelia': 'Mana',
-                'JarvanIV': 'Mana', 'Jax': 'Mana', 'Jayce': 'Mana', 'Kalista': 'Mana', 'KhaZix': 'Mana',
-                'Kindred': 'Mana', 'Lulu': 'Mana', 'MasterYi': 'Mana', 'Mordekaiser': 'Mana', 'Nasus': 'Mana',
-                'Nocturne': 'Mana', 'Olaf': 'Mana', 'Pantheon': 'Mana', 'Poppy': 'Mana', 'Quinn': 'Mana',
-                'Rammus': 'Mana', 'Sejuani': 'Mana', 'Sion': 'Mana', 'Sivir': 'Mana', 'Skarner': 'Mana',
-                'TahmKench': 'Mana', 'Taric': 'Mana', 'Thresh': 'Mana', 'Trundle': 'Mana', 'Udyr': 'Mana',
-                'Urgot': 'Mana', 'Vi': 'Mana', 'Volibear': 'Mana', 'Warwick': 'Mana', 'Wukong': 'Mana',
-                'Xayah': 'Mana', 'XinZhao': 'Mana', 'Yasuo': 'Mana', 'Yorick': 'Mana', 'Zac': 'Mana',
-                'Alistar': 'Mana', 'Amumu': 'Mana', 'Ashe': 'Mana', 'Caitlyn': 'Mana', 'Corki': 'Mana',
-                'DrMundo': 'Mana', 'Ezreal': 'Mana', 'Fiora': 'Mana', 'Gragas': 'Mana', 'Ivern': 'Mana',
-                'Janna': 'Mana', 'Jhin': 'Mana', 'Jinx': 'Mana', 'KogMaw': 'Mana', 'Leona': 'Mana',
-                'Lucian': 'Mana', 'Lux': 'Mana', 'Maokai': 'Mana', 'MissFortune': 'Mana', 'MonkeyKing': 'Mana',
-                'Nidalee': 'Mana', 'Nunu': 'Mana', 'Riven': 'Mana', 'Singed': 'Mana', 'Soraka': 'Mana',
-                'Teemo': 'Mana', 'Tristana': 'Mana', 'Twitch': 'Mana', 'Varus': 'Mana', 'Vayne': 'Mana',
-                'Yuumi': 'Mana', 'Zyra': 'Mana',
+                // Champions with Mana (most common)
+                'Aatrox': 'Fury', 'Ahri': 'Mana', 'Akali': 'Energy', 'Alistar': 'Mana', 'Amumu': 'Mana',
+                'Anivia': 'Mana', 'Annie': 'Mana', 'Aphelios': 'Mana', 'Ashe': 'Mana', 'AurelionSol': 'Mana',
+                'Azir': 'Mana', 'Bard': 'Mana', 'Blitzcrank': 'Mana', 'Brand': 'Mana', 'Braum': 'Mana',
+                'Caitlyn': 'Mana', 'Camille': 'Mana', 'Cassiopeia': 'Mana', 'ChoGath': 'Mana', 'Corki': 'Mana',
+                'Darius': 'Mana', 'Diana': 'Mana', 'DrMundo': 'Mana', 'Draven': 'Mana', 'Ekko': 'Mana',
+                'Elise': 'Mana', 'Evelynn': 'Mana', 'Ezreal': 'Mana', 'Fiddlesticks': 'Mana', 'Fiora': 'Mana',
+                'Fizz': 'Mana', 'Galio': 'Mana', 'Gangplank': 'Mana', 'Garen': 'Mana', 'Gragas': 'Mana',
+                'Graves': 'Mana', 'Hecarim': 'Mana', 'Heimerdinger': 'Mana', 'Illaoi': 'Mana', 'Irelia': 'Mana',
+                'Ivern': 'Mana', 'Janna': 'Mana', 'JarvanIV': 'Mana', 'Jax': 'Mana', 'Jayce': 'Mana',
+                'Jhin': 'Mana', 'Jinx': 'Mana', 'Kaisa': 'Mana', 'Kalista': 'Mana', 'Karma': 'Mana',
+                'Karthus': 'Mana', 'Kassadin': 'Mana', 'Katarina': 'Ferocity', 'Kayle': 'Mana', 'Kayn': 'Fury',
+                'Kennen': 'Energy', 'Khazix': 'Mana', 'Kindred': 'Mana', 'Kled': 'Fury', 'KogMaw': 'Mana',
+                'Leblanc': 'Mana', 'LeeSin': 'Energy', 'Leona': 'Mana', 'Lissandra': 'Mana', 'Lucian': 'Mana',
+                'Lulu': 'Mana', 'Lux': 'Mana', 'Malphite': 'Mana', 'Malzahar': 'Mana', 'Maokai': 'Mana',
+                'MasterYi': 'Mana', 'MissFortune': 'Mana', 'MonkeyKing': 'Mana', 'Mordekaiser': 'Mana', 'Morgana': 'Mana',
+                'Nami': 'Mana', 'Nasus': 'Mana', 'Nautilus': 'Mana', 'Neeko': 'Mana', 'Nidalee': 'Mana',
+                'Nocturne': 'Mana', 'Nunu': 'Mana', 'Olaf': 'Mana', 'Orianna': 'Mana', 'Ornn': 'Mana',
+                'Pantheon': 'Mana', 'Poppy': 'Mana', 'Pyke': 'Mana', 'Qiyana': 'Mana', 'Quinn': 'Mana',
+                'Rakan': 'Mana', 'Rammus': 'Mana', 'RekSai': 'Ferocity', 'Rell': 'Mana', 'Renekton': 'Fury',
+                'Rengar': 'Fury', 'Riven': 'Mana', 'Rumble': 'Heat', 'Ryze': 'Mana', 'Samira': 'Mana',
+                'Sejuani': 'Mana', 'Senna': 'Mana', 'Seraphine': 'Mana', 'Sett': 'Fury', 'Shaco': 'Mana',
+                'Shen': 'Energy', 'Shyvana': 'Fury', 'Singed': 'Mana', 'Sion': 'Mana', 'Sivir': 'Mana',
+                'Skarner': 'Mana', 'Sona': 'Mana', 'Soraka': 'Mana', 'Swain': 'Mana', 'Sylas': 'Mana',
+                'Syndra': 'Mana', 'TahmKench': 'Mana', 'Taliyah': 'Mana', 'Talon': 'Mana', 'Taric': 'Mana',
+                'Teemo': 'Mana', 'Thresh': 'Mana', 'Tristana': 'Mana', 'Trundle': 'Mana', 'Tryndamere': 'Fury',
+                'TwistedFate': 'Mana', 'Twitch': 'Mana', 'Udyr': 'Mana', 'Urgot': 'Mana', 'Varus': 'Mana',
+                'Vayne': 'Mana', 'Veigar': 'Mana', 'Velkoz': 'Mana', 'Vex': 'Mana', 'Vi': 'Mana',
+                'Viktor': 'Mana', 'Vladimir': 'Mana', 'Volibear': 'Mana', 'Warwick': 'Mana', 'Xayah': 'Mana',
+                'Xerath': 'Mana', 'XinZhao': 'Mana', 'Yasuo': 'Mana', 'Yone': 'Fury', 'Yorick': 'Mana',
+                'Yuumi': 'Mana', 'Zac': 'Mana', 'Zed': 'Energy', 'Ziggs': 'Mana', 'Zilean': 'Mana',
+                'Zoe': 'Mana', 'Zyra': 'Mana',
                 
                 // Champions with Fury
                 'Aatrox': 'Fury', 'Renekton': 'Fury', 'Rengar': 'Fury', 'Shyvana': 'Fury', 'Tryndamere': 'Fury',
+                'Kled': 'Fury', 'Sett': 'Fury', 'Yone': 'Fury', 'Kayn': 'Fury',
                 
                 // Champions with Energy
                 'Akali': 'Energy', 'Kennen': 'Energy', 'LeeSin': 'Energy', 'Shen': 'Energy', 'Zed': 'Energy',
@@ -370,21 +381,22 @@
                 resourceData[resourceName]++;
             });
             
-            // Count difficulty levels for the difficulty distribution chart
-            const difficultyData = {1: 0, 2: 0, 3: 0};
-            champions.forEach(champion => {
-                const difficulty = champion.difficulty || 2;
-                difficultyData[difficulty] = (difficultyData[difficulty] || 0) + 1;
-            });
+            // Remove resource types with zero count
+            const filteredResourceData = {};
+            for (const [key, value] of Object.entries(resourceData)) {
+                if (value > 0) {
+                    filteredResourceData[key] = value;
+                }
+            }
             
             const resourceTypeCtx = document.getElementById('resourceTypeChart').getContext('2d');
             new Chart(resourceTypeCtx, {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(resourceData),
+                    labels: Object.keys(filteredResourceData),
                     datasets: [{
                         label: 'Number of Champions',
-                        data: Object.values(resourceData),
+                        data: Object.values(filteredResourceData),
                         backgroundColor: [
                             'rgba(54, 162, 235, 0.7)',
                             'rgba(255, 99, 132, 0.7)',
@@ -437,8 +449,15 @@
                     }
                 }
             });
-
+            
             // 4. Champion Difficulty Distribution (Pie Chart)
+            // Count difficulty levels for the difficulty distribution chart
+            const difficultyData = {1: 0, 2: 0, 3: 0};
+            champions.forEach(champion => {
+                const difficulty = champion.difficulty || 2;
+                difficultyData[difficulty] = (difficultyData[difficulty] || 0) + 1;
+            });
+            
             const difficultyCtx = document.getElementById('difficultyChart').getContext('2d');
             new Chart(difficultyCtx, {
                 type: 'pie',
