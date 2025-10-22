@@ -310,11 +310,15 @@
                 }
             });
 
-            // 3. Resource Types (Bar Chart) - Simplified to Mana, Energy, and Other Sources
+            // 3. Resource Types (Bar Chart) - Show actual resource types
             const resourceData = {
                 'Mana': 0,
+                'Fury': 0,
                 'Energy': 0,
-                'Other Sources': 0
+                'Ferocity': 0,
+                'Rage': 0,
+                'Heat': 0,
+                'Other': 0
             };
             
             const championResources = {
@@ -344,20 +348,26 @@
                 'Teemo': 'Mana', 'Tristana': 'Mana', 'Twitch': 'Mana', 'Varus': 'Mana', 'Vayne': 'Mana',
                 'Yuumi': 'Mana', 'Zyra': 'Mana',
                 
+                // Champions with Fury
+                'Aatrox': 'Fury', 'Renekton': 'Fury', 'Rengar': 'Fury', 'Shyvana': 'Fury', 'Tryndamere': 'Fury',
+                
                 // Champions with Energy
-                'Akali': 'Energy', 'Kennen': 'Energy', 'LeeSin': 'Energy', 'Shen': 'Energy', 'Zed': 'Energy'
+                'Akali': 'Energy', 'Kennen': 'Energy', 'LeeSin': 'Energy', 'Shen': 'Energy', 'Zed': 'Energy',
+                
+                // Champions with Ferocity
+                'Katarina': 'Ferocity', 'RekSai': 'Ferocity',
+                
+                // Champions with Rage
+                'Gnar': 'Rage', 'Gwen': 'Rage',
+                
+                // Champions with Heat
+                'Rumble': 'Heat'
             };
             
             // Count resource types
             champions.forEach(champion => {
-                const resourceName = championResources[champion.name];
-                if (resourceName === 'Mana') {
-                    resourceData['Mana']++;
-                } else if (resourceName === 'Energy') {
-                    resourceData['Energy']++;
-                } else {
-                    resourceData['Other Sources']++;
-                }
+                const resourceName = championResources[champion.name] || 'Other';
+                resourceData[resourceName]++;
             });
             
             const resourceTypeCtx = document.getElementById('resourceTypeChart').getContext('2d');
@@ -370,13 +380,21 @@
                         data: Object.values(resourceData),
                         backgroundColor: [
                             'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 99, 132, 0.7)',
                             'rgba(255, 206, 86, 0.7)',
-                            'rgba(75, 192, 192, 0.7)'
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(153, 102, 255, 0.7)',
+                            'rgba(255, 159, 64, 0.7)',
+                            'rgba(199, 199, 199, 0.7)'
                         ],
                         borderColor: [
                             'rgba(54, 162, 235, 1)',
+                            'rgba(255, 99, 132, 1)',
                             'rgba(255, 206, 86, 1)',
-                            'rgba(75, 192, 192, 1)'
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(199, 199, 199, 1)'
                         ],
                         borderWidth: 1
                     }]
