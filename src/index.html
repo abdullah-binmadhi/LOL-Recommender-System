@@ -2660,12 +2660,35 @@
                     localStorage.setItem('championRecommenderUsers', JSON.stringify(existingData));
                     console.log('✅ User data saved to localStorage successfully!');
                     console.log('📊 Press Ctrl+Shift+E to export your data as CSV');
+                    
+                    // Also save to Supabase if available
+                    saveUserToSupabase(data);
+                    
                     resolve({ success: true, github_pages: true });
                 } catch (error) {
                     console.error('❌ Failed to save to localStorage:', error);
                     reject(error);
                 }
             });
+        }
+
+        // Save user data to Supabase
+        async function saveUserToSupabase(userData) {
+            try {
+                // Dynamically import Supabase client
+                const { supabase } = await import('./js/supabase.js');
+                
+                if (supabase) {
+                    const result = await supabase.saveUserToSupabase(userData);
+                    if (result.success) {
+                        console.log('✅ User data saved to Supabase successfully!');
+                    } else {
+                        console.log('⚠️ Failed to save user data to Supabase:', result.error);
+                    }
+                }
+            } catch (error) {
+                console.log('⚠️ Supabase not available or error occurred:', error);
+            }
         }
 
         function generateSessionId() {
@@ -2991,6 +3014,9 @@
                     localStorage.setItem('championRecommenderUsers', JSON.stringify(existingData));
                     console.log('✅ Results saved to localStorage successfully!');
                     console.log('📊 Press Ctrl+Shift+E to export complete data as CSV');
+                    
+                    // Also save to Supabase
+                    saveQuestionnaireResultsToSupabase(resultData);
                 } else {
                     console.log('⚠️ User not found in localStorage');
                 }
@@ -2999,35 +3025,24 @@
             }
         }
 
-        /*
-        fetch('http://localhost:5001/api/update_results', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            mode: 'cors',
-            body: JSON.stringify(resultData)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Server error: ${response.status}`);
+        // Save questionnaire results to Supabase
+        async function saveQuestionnaireResultsToSupabase(resultData) {
+            try {
+                // Dynamically import Supabase client
+                const { supabase } = await import('./js/supabase.js');
+                
+                if (supabase) {
+                    const result = await supabase.saveQuestionnaireResultsToSupabase(resultData);
+                    if (result.success) {
+                        console.log('✅ Questionnaire results saved to Supabase successfully!');
+                    } else {
+                        console.log('⚠️ Failed to save questionnaire results to Supabase:', result.error);
+                    }
+                }
+            } catch (error) {
+                console.log('⚠️ Supabase not available or error occurred:', error);
             }
-            return response.json();
-        })
-        .then(result => {
-            if (result.success) {
-                console.log('✅ Results saved to PYTHON_TESTING CSV file successfully!');
-                console.log('📊 CSV file updated with questionnaire results');
-                console.log('📁 CSV location:', result.csv_path);
-            } else {
-                throw new Error(result.error || 'Unknown server error');
-            }
-        })
-        .catch(error => {
-            console.log('⚠️ Could not save results to server:', error.message);
-            console.log('💾 Results saved to localStorage as backup');
-        });
-        */
+        }
 
         function findConsensus(champions) {
             const counts = {};
@@ -3797,7 +3812,7 @@ function restartQuestionnaire() {
         // Admin panel (hidden) - Press Ctrl+Shift+A to access
         document.addEventListener('keydown', function(e) {
             if (e.ctrlKey && e.shiftKey && e.key === 'A') {
-                showAdminPanel();
+                showEnhancedAdminPanel();
             }
         });
 
@@ -3814,6 +3829,49 @@ Options:
 - Cancel: Close panel
 
 Note: Data is stored locally. Press Ctrl+Shift+E anytime to export CSV.`;
+            
+            if (confirm(message)) {
+                exportToCSV();
+            }
+        }
+
+        // Enhanced admin panel with Supabase data
+        async function showEnhancedAdminPanel() {
+            const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
+            const userCount = userData.length;
+            
+            let supabaseInfo = '';
+            try {
+                // Dynamically import Supabase client
+                const { supabase } = await import('./js/supabase.js');
+                
+                if (supabase) {
+                    // Try to fetch Supabase data
+                    const supabaseUsers = await supabase.getAllUsers();
+                    if (supabaseUsers.success) {
+                        supabaseInfo = `
+Supabase users: ${supabaseUsers.data.length}
+Supabase data available for viewing.`;
+                    } else {
+                        supabaseInfo = 'Supabase connection established but unable to fetch data.';
+                    }
+                } else {
+                    supabaseInfo = 'Supabase not configured.';
+                }
+            } catch (error) {
+                supabaseInfo = 'Supabase not available or not configured.';
+            }
+            
+            const message = `Enhanced Admin Panel
+
+Local storage users: ${userCount}
+${supabaseInfo}
+
+Options:
+- OK: Export CSV file
+- Cancel: Close panel
+
+Note: Press Ctrl+Shift+E to export CSV.`;
             
             if (confirm(message)) {
                 exportToCSV();

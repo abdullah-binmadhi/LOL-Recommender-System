@@ -98,6 +98,66 @@ No build step is required as this is a static site.
 
 ---
 
+## Supabase Integration
+
+This project now supports Supabase integration for centralized user data storage. To enable Supabase:
+
+1. Create a Supabase project at https://supabase.com
+2. Set up the required database tables (see below)
+3. Add your Supabase credentials to your Vercel environment variables:
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+
+### Database Schema
+
+Create these tables in your Supabase database:
+
+```sql
+-- Users table
+create table users (
+  id uuid default uuid_generate_v4() primary key,
+  full_name text,
+  email text,
+  phone text,
+  age integer,
+  gender text,
+  experience text,
+  registration_date timestamp with time zone default now(),
+  session_id text unique
+);
+
+-- Questionnaire results table
+create table questionnaire_results (
+  id uuid default uuid_generate_v4() primary key,
+  session_id text references users(session_id),
+  recommended_champion text,
+  winning_algorithm text,
+  confidence_score numeric,
+  random_forest_champion text,
+  random_forest_confidence numeric,
+  decision_tree_champion text,
+  decision_tree_confidence numeric,
+  knn_champion text,
+  knn_confidence numeric,
+  consensus_level integer,
+  user_answers jsonb,
+  completion_date timestamp with time zone default now(),
+  pressure_response text,
+  aesthetic_preference text,
+  team_contribution text,
+  character_identity text,
+  problem_solving text
+);
+```
+
+### Environment Variables
+
+Add these environment variables to your Vercel project:
+- `SUPABASE_URL` - Your Supabase project URL
+- `SUPABASE_ANON_KEY` - Your Supabase anonymous key
+
+---
+
 ## Built With
 
 <div align="center">
@@ -110,6 +170,7 @@ No build step is required as this is a static site.
 | **Custom ML Algorithms** | Champion recommendation engine |
 | **LocalStorage** | Client-side data persistence |
 | **GitHub Pages** | Hosting and deployment |
+| **Supabase** | Backend data storage (optional) |
 
 </div>
 
