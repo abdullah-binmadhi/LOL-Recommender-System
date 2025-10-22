@@ -13,9 +13,8 @@ Follow these steps to make your Champion Recommender live on GitHub Pages!
 
 Make sure these files are in your GitHub repository:
 - `index.html` (landing page)
-- `champion-recommender.html` (main app)
+- `src/index.html` (main app)
 - `README.md` (project description)
-- `all_champions_data.js` (champion database)
 
 ```bash
 git add .
@@ -36,7 +35,7 @@ git push origin main
 
 - GitHub will show a message: "Your site is ready to be published"
 - Wait 2-5 minutes for deployment
-- You'll get a URL like: `https://yourusername.github.io/your-repo-name`
+- You'll get a URL like: `https://abdullah-binmadhi.github.io/LOL-Recommender-System`
 
 ### Step 4: Test Your Website
 
@@ -49,12 +48,12 @@ git push origin main
 
 ### Main Website
 ```
-https://yourusername.github.io/your-repo-name
+https://abdullah-binmadhi.github.io/LOL-Recommender-System/
 ```
 
 ### Direct to Champion Recommender
 ```
-https://yourusername.github.io/your-repo-name/champion-recommender.html
+https://abdullah-binmadhi.github.io/LOL-Recommender-System/src/
 ```
 
 ## ✅ What Works on GitHub Pages
