@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import Layout from '../components/Layout'
+import Link from 'next/link'
 
 export default function Home() {
   const [users, setUsers] = useState([])
@@ -70,6 +71,65 @@ export default function Home() {
     <Layout>
       <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
         <h1>League of Legends Champion Recommender - Supabase Dashboard</h1>
+        
+        <div style={{ 
+          display: 'flex', 
+          gap: '15px', 
+          marginBottom: '20px',
+          flexWrap: 'wrap'
+        }}>
+          <Link href="/analytics" style={{ 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '8px',
+            textDecoration: 'none',
+            fontWeight: '600',
+            boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)',
+            transition: 'all 0.3s ease'
+          }}>
+            View Analytics Dashboard
+          </Link>
+          
+          <Link href="/add-user" style={{ 
+            background: 'rgba(255, 255, 255, 0.15)',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '8px',
+            textDecoration: 'none',
+            fontWeight: '600',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            transition: 'all 0.3s ease'
+          }}>
+            Add User
+          </Link>
+          
+          <Link href="/init" style={{ 
+            background: 'rgba(255, 255, 255, 0.15)',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '8px',
+            textDecoration: 'none',
+            fontWeight: '600',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            transition: 'all 0.3s ease'
+          }}>
+            Initialize DB
+          </Link>
+          
+          <Link href="/test" style={{ 
+            background: 'rgba(255, 255, 255, 0.15)',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '8px',
+            textDecoration: 'none',
+            fontWeight: '600',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            transition: 'all 0.3s ease'
+          }}>
+            Test Supabase
+          </Link>
+        </div>
       
       <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: '#f0f0f0', borderRadius: '5px' }}>
         <strong>Connection Status:</strong> {connectionStatus}
