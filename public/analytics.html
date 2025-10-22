@@ -102,7 +102,7 @@
             <p>Comprehensive data visualization of League of Legends champions</p>
         </div>
         
-        <button class="back-button" onclick="window.location.href='index.html'">← Back to Home</button>
+        <button class="back-button" onclick="window.location.href='/'">← Back to Home</button>
         
         <div class="dashboard">
             <div class="chart-card">
@@ -144,7 +144,7 @@
 
     <script>
         // Load champion data
-        fetch('data/champions.json')
+        fetch('/src/data/champions.json')
             .then(response => response.json())
             .then(data => {
                 const champions = data.champions;
@@ -152,16 +152,26 @@
             })
             .catch(error => {
                 console.error('Error loading champion data:', error);
-                // Use sample data if loading fails
-                const sampleChampions = [
-                    { herotype: "Fighter", range_type: "Melee", difficulty: 2 },
-                    { herotype: "Mage", range_type: "Ranged", difficulty: 3 },
-                    { herotype: "Tank", range_type: "Melee", difficulty: 1 },
-                    { herotype: "Marksman", range_type: "Ranged", difficulty: 2 },
-                    { herotype: "Support", range_type: "Ranged", difficulty: 1 },
-                    { herotype: "Assassin", range_type: "Melee", difficulty: 3 }
-                ];
-                initializeCharts(sampleChampions);
+                // Try alternative path
+                fetch('/data/champions.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        const champions = data.champions;
+                        initializeCharts(champions);
+                    })
+                    .catch(error => {
+                        console.error('Error loading champion data from alternative path:', error);
+                        // Use sample data if loading fails
+                        const sampleChampions = [
+                            { herotype: "Fighter", range_type: "Melee", difficulty: 2 },
+                            { herotype: "Mage", range_type: "Ranged", difficulty: 3 },
+                            { herotype: "Tank", range_type: "Melee", difficulty: 1 },
+                            { herotype: "Marksman", range_type: "Ranged", difficulty: 2 },
+                            { herotype: "Support", range_type: "Ranged", difficulty: 1 },
+                            { herotype: "Assassin", range_type: "Melee", difficulty: 3 }
+                        ];
+                        initializeCharts(sampleChampions);
+                    });
             });
 
         function initializeCharts(champions) {
