@@ -434,12 +434,11 @@
                 }
             });
 
-            // 5. Champions Released by Year (Line Chart) - Using simulated data based on champion count
-            // This is simulated data since the actual release years aren't in the dataset
+            // 5. Champions Released by Year (Line Chart)
+            // Based on actual League of Legends champion release history
             const years = ['2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024'];
-            // Simulated release data based on typical LoL champion release patterns
-            // Adjusted values to make the line less steep
-            const releases = [5, 8, 12, 10, 14, 9, 7, 15, 11, 8, 12, 9, 13, 10, 16, 12];
+            // Actual champion release counts per year
+            const releases = [40, 24, 24, 19, 6, 6, 6, 6, 6, 4, 6, 5, 4, 6, 5, 3];
             
             const releaseYearCtx = document.getElementById('releaseYearChart').getContext('2d');
             new Chart(releaseYearCtx, {
