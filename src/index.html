@@ -2232,13 +2232,13 @@
             }
             
             singleTreePredict(features, treeId) {
-                // Enhanced tree logic with role and position priority
+                // Enhanced tree logic with role, position, and psychological preferences
                 const weights = [
-                    [50, 30, 4, 3, 3, 2], // Tree 1 weights: [role, position, difficulty, damage, toughness, playstyle]
-                    [45, 35, 5, 4, 2, 3], // Tree 2 weights
-                    [55, 25, 3, 3, 4, 2], // Tree 3 weights
-                    [48, 32, 4, 2, 3, 4], // Tree 4 weights
-                    [52, 28, 3, 4, 3, 2]  // Tree 5 weights
+                    [40, 25, 3, 2, 2, 2, 8, 6, 7, 5], // Tree 1 weights
+                    [35, 30, 4, 3, 2, 2, 7, 5, 8, 6], // Tree 2 weights
+                    [45, 20, 2, 2, 3, 2, 6, 7, 5, 8], // Tree 3 weights
+                    [38, 27, 3, 2, 2, 3, 7, 6, 6, 7], // Tree 4 weights
+                    [42, 23, 3, 2, 2, 2, 8, 7, 6, 5]  // Tree 5 weights
                 ];
                 
                 const treeWeights = weights[treeId];
@@ -2253,14 +2253,13 @@
                     }
                     
                     // Position matching (second highest priority)
-                    // Handle cases where champion might not have positions defined
                     const championPositions = champion.positions || [];
                     if (features.position === 'No Preference' || 
                         (championPositions.length > 0 && championPositions.includes(features.position))) {
                         score += treeWeights[1];
                     }
                     
-                    // Other attributes
+                    // Numerical attributes
                     score += Math.max(0, 10 - Math.abs(features.difficulty - champion.difficulty)) * treeWeights[2];
                     score += Math.max(0, 10 - Math.abs(features.damage - champion.damage)) * treeWeights[3];
                     score += Math.max(0, 10 - Math.abs(features.toughness - champion.toughness)) * treeWeights[4];
@@ -2268,6 +2267,32 @@
                     // Playstyle bonuses
                     if (features.playstyle === 'aggressive' && champion.damage >= 8) score += treeWeights[5] * 2;
                     if (features.playstyle === 'defensive' && champion.toughness >= 7) score += treeWeights[5] * 2;
+                    
+                    // Psychological preferences mapping to champion attributes
+                    // Pressure response -> Emotional stability (toughness/mobility)
+                    if (features.pressure_response === 'Stay calm and strategic' && champion.toughness >= 6) score += treeWeights[6];
+                    if (features.pressure_response === 'Take charge and lead' && (champion.damage >= 7 || champion.control >= 7)) score += treeWeights[6];
+                    if (features.pressure_response === 'Get aggressive and take risks' && champion.damage >= 8) score += treeWeights[6];
+                    if (features.pressure_response === 'Play cautiously to avoid mistakes' && champion.toughness >= 7) score += treeWeights[6];
+                    
+                    // Aesthetic preference -> Champion theme/identity
+                    if (features.aesthetic_preference === 'Heroic' && (champion.title && champion.title.includes('the'))) score += treeWeights[7];
+                    if (features.aesthetic_preference === 'Mysterious' && (champion.role === 'Assassin' || champion.role === 'Mage')) score += treeWeights[7];
+                    if (features.aesthetic_preference === 'Dark and edgy' && (champion.role === 'Assassin' || champion.title && champion.title.includes('dark'))) score += treeWeights[7];
+                    if (features.aesthetic_preference === 'Cute or playful' && champion.role === 'Support') score += treeWeights[7];
+                    if (features.aesthetic_preference === 'Monstrous or non-human' && (champion.role === 'Fighter' || champion.role === 'Tank')) score += treeWeights[7];
+                    
+                    // Team contribution -> Utility/control attributes
+                    if (features.team_contribution === 'Lead and make decisions' && champion.control >= 7) score += treeWeights[8];
+                    if (features.team_contribution === 'Support and enable others' && champion.utility >= 7) score += treeWeights[8];
+                    if (features.team_contribution === 'Balance between both' && (champion.utility >= 5 && champion.control >= 5)) score += treeWeights[8];
+                    if (features.team_contribution === 'Stay independent and focus on my role' && champion.damage >= 7) score += treeWeights[8];
+                    
+                    // Problem solving -> Cognitive style (mobility/complexity)
+                    if (features.problem_solving === 'Analyze carefully before acting' && champion.control >= 7) score += treeWeights[9];
+                    if (features.problem_solving === 'Jump in and adapt on the fly' && champion.mobility >= 7) score += treeWeights[9];
+                    if (features.problem_solving === 'Follow the team\'s lead' && champion.utility >= 6) score += treeWeights[9];
+                    if (features.problem_solving === 'Focus on long-term improvement' && champion.toughness >= 7) score += treeWeights[9];
                     
                     // Add randomness to prevent same results
                     score += Math.random() * 15;
@@ -2292,14 +2317,13 @@
                 for (const [name, champion] of Object.entries(allChampions)) {
                     let score = 0;
                     
-                    // Enhanced decision tree logic with role and position priority
+                    // Enhanced decision tree logic with role, position, and psychological preferences
                     
                     // Role matching (highest priority)
                     if (features.role === 'No Preference' || features.role === champion.role) {
-                        score += 60;
+                        score += 50;
                         
                         // Position matching (second priority)
-                        // Handle cases where champion might not have positions defined
                         const championPositions = champion.positions || [];
                         if (features.position === 'No Preference' || 
                             (championPositions.length > 0 && championPositions.includes(features.position))) {
@@ -2326,12 +2350,37 @@
                     }
                     
                     // Position penalty if specified but doesn't match
-                    // Handle cases where champion might not have positions defined
                     const championPositions = champion.positions || [];
                     if (features.position !== 'No Preference' && 
                         championPositions.length > 0 && !championPositions.includes(features.position)) {
                         score -= 20;
                     }
+                    
+                    // Psychological preferences mapping to champion attributes
+                    // Pressure response -> Emotional stability (toughness/mobility)
+                    if (features.pressure_response === 'Stay calm and strategic' && champion.toughness >= 6) score += 25;
+                    if (features.pressure_response === 'Take charge and lead' && (champion.damage >= 7 || champion.control >= 7)) score += 25;
+                    if (features.pressure_response === 'Get aggressive and take risks' && champion.damage >= 8) score += 25;
+                    if (features.pressure_response === 'Play cautiously to avoid mistakes' && champion.toughness >= 7) score += 25;
+                    
+                    // Aesthetic preference -> Champion theme/identity
+                    if (features.aesthetic_preference === 'Heroic' && (champion.title && champion.title.includes('the'))) score += 20;
+                    if (features.aesthetic_preference === 'Mysterious' && (champion.role === 'Assassin' || champion.role === 'Mage')) score += 20;
+                    if (features.aesthetic_preference === 'Dark and edgy' && (champion.role === 'Assassin' || champion.title && champion.title.includes('dark'))) score += 20;
+                    if (features.aesthetic_preference === 'Cute or playful' && champion.role === 'Support') score += 20;
+                    if (features.aesthetic_preference === 'Monstrous or non-human' && (champion.role === 'Fighter' || champion.role === 'Tank')) score += 20;
+                    
+                    // Team contribution -> Utility/control attributes
+                    if (features.team_contribution === 'Lead and make decisions' && champion.control >= 7) score += 25;
+                    if (features.team_contribution === 'Support and enable others' && champion.utility >= 7) score += 25;
+                    if (features.team_contribution === 'Balance between both' && (champion.utility >= 5 && champion.control >= 5)) score += 25;
+                    if (features.team_contribution === 'Stay independent and focus on my role' && champion.damage >= 7) score += 25;
+                    
+                    // Problem solving -> Cognitive style (mobility/complexity)
+                    if (features.problem_solving === 'Analyze carefully before acting' && champion.control >= 7) score += 20;
+                    if (features.problem_solving === 'Jump in and adapt on the fly' && champion.mobility >= 7) score += 20;
+                    if (features.problem_solving === 'Follow the team\'s lead' && champion.utility >= 6) score += 20;
+                    if (features.problem_solving === 'Focus on long-term improvement' && champion.toughness >= 7) score += 20;
                     
                     // Add small exploration bonus for variety
                     score += Math.random() * 15;
@@ -2382,7 +2431,6 @@
                     }
                     
                     // Position distance (second highest weight)
-                    // Handle cases where champion might not have positions defined
                     const championPositions = champion.positions || [];
                     if (features.position !== 'No Preference' && 
                         championPositions.length > 0 && !championPositions.includes(features.position)) {
@@ -2393,6 +2441,32 @@
                     distance += Math.abs(features.difficulty - champion.difficulty) * 0.5;
                     distance += Math.abs(features.damage - champion.damage) * 0.3;
                     distance += Math.abs(features.toughness - champion.toughness) * 0.3;
+                    
+                    // Psychological preferences mapping to champion attributes
+                    // Pressure response -> Emotional stability (toughness/mobility)
+                    if (features.pressure_response === 'Stay calm and strategic' && champion.toughness < 6) distance += 2;
+                    if (features.pressure_response === 'Take charge and lead' && (champion.damage < 7 && champion.control < 7)) distance += 2;
+                    if (features.pressure_response === 'Get aggressive and take risks' && champion.damage < 8) distance += 2;
+                    if (features.pressure_response === 'Play cautiously to avoid mistakes' && champion.toughness < 7) distance += 2;
+                    
+                    // Aesthetic preference -> Champion theme/identity
+                    if (features.aesthetic_preference === 'Heroic' && !(champion.title && champion.title.includes('the'))) distance += 1.5;
+                    if (features.aesthetic_preference === 'Mysterious' && !(champion.role === 'Assassin' || champion.role === 'Mage')) distance += 1.5;
+                    if (features.aesthetic_preference === 'Dark and edgy' && !(champion.role === 'Assassin' || champion.title && champion.title.includes('dark'))) distance += 1.5;
+                    if (features.aesthetic_preference === 'Cute or playful' && champion.role !== 'Support') distance += 1.5;
+                    if (features.aesthetic_preference === 'Monstrous or non-human' && !(champion.role === 'Fighter' || champion.role === 'Tank')) distance += 1.5;
+                    
+                    // Team contribution -> Utility/control attributes
+                    if (features.team_contribution === 'Lead and make decisions' && champion.control < 7) distance += 2;
+                    if (features.team_contribution === 'Support and enable others' && champion.utility < 7) distance += 2;
+                    if (features.team_contribution === 'Balance between both' && (champion.utility < 5 || champion.control < 5)) distance += 2;
+                    if (features.team_contribution === 'Stay independent and focus on my role' && champion.damage < 7) distance += 2;
+                    
+                    // Problem solving -> Cognitive style (mobility/complexity)
+                    if (features.problem_solving === 'Analyze carefully before acting' && champion.control < 7) distance += 1.5;
+                    if (features.problem_solving === 'Jump in and adapt on the fly' && champion.mobility < 7) distance += 1.5;
+                    if (features.problem_solving === 'Follow the team\'s lead' && champion.utility < 6) distance += 1.5;
+                    if (features.problem_solving === 'Focus on long-term improvement' && champion.toughness < 7) distance += 1.5;
                     
                     // Add small random noise for diversity
                     distance += Math.random() * 0.8;
@@ -2769,21 +2843,27 @@
                 card.classList.remove('active');
             });
             
-            // Convert answers to features
+            // Convert answers to features with proper mapping of psychological questions
             const userFeatures = {
-                role: answers[1],
-                position: answers[2],
-                difficulty: answers[3] || 5,
-                damage: 5, // Default value
-                toughness: 5, // Default value
-                playstyle: answers[4] || 'balanced',
-                range: answers[5] || 'no_preference',
-                pressure_response: answers[6] || 'balanced',
-                aesthetic_preference: answers[7] || 'no_preference',
-                team_contribution: answers[8] || 'balanced',
-                character_identity: answers[9] || 'no_preference',
-                problem_solving: answers[10] || 'analytical'
+                // Core gameplay preferences
+                role: answers[2] || 'No Preference',
+                position: answers[3] || 'No Preference',
+                difficulty: mapDifficulty(answers[1]),
+                damage: 5, // Will be adjusted based on playstyle
+                toughness: 5, // Will be adjusted based on playstyle
+                playstyle: mapPlaystyle(answers[4]),
+                range: mapRange(answers[5]),
+                
+                // Psychological preferences mapped to gameplay attributes
+                pressure_response: answers[6] || 'Stay calm and strategic',
+                aesthetic_preference: answers[7] || 'Heroic',
+                team_contribution: answers[8] || 'Balance between both',
+                character_identity: answers[9] || 'No preference',
+                problem_solving: answers[10] || 'Analyze carefully before acting'
             };
+            
+            // Adjust damage/toughness based on playstyle
+            adjustAttributesBasedOnPlaystyle(userFeatures);
             
             // Run all algorithms and measure performance
             mlResults = {};
@@ -2802,6 +2882,54 @@
             });
             
             displayResults(performanceStats);
+        }
+
+        // Helper functions to map questionnaire answers to numerical values
+        function mapDifficulty(answer) {
+            const mapping = {
+                'Easy (1-3)': 2,
+                'Medium (4-6)': 5,
+                'Hard (7-8)': 7.5,
+                'Very Hard (9-10)': 9.5
+            };
+            return mapping[answer] || 5;
+        }
+        
+        function mapPlaystyle(answer) {
+            const mapping = {
+                'High Damage Output': 'aggressive',
+                'Tanky and Durable': 'defensive',
+                'Support Team': 'supportive',
+                'Balanced/Hybrid': 'balanced'
+            };
+            return mapping[answer] || 'balanced';
+        }
+        
+        function mapRange(answer) {
+            return answer ? answer.toLowerCase() : 'no_preference';
+        }
+        
+        function adjustAttributesBasedOnPlaystyle(features) {
+            switch(features.playstyle) {
+                case 'aggressive':
+                    features.damage = 8;
+                    features.toughness = 3;
+                    break;
+                case 'defensive':
+                    features.damage = 4;
+                    features.toughness = 8;
+                    break;
+                case 'supportive':
+                    features.damage = 3;
+                    features.toughness = 5;
+                    features.utility = 8;
+                    break;
+                case 'balanced':
+                default:
+                    features.damage = 5;
+                    features.toughness = 5;
+                    break;
+            }
         }
 
         function displayResults(performanceStats) {
@@ -2869,38 +2997,37 @@
             } catch (error) {
                 console.log('❌ Could not save results to localStorage:', error.message);
             }
-            
-            // Original server code (commented out for GitHub Pages)
-            /*
-            fetch('http://localhost:5001/api/update_results', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                mode: 'cors',
-                body: JSON.stringify(resultData)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(result => {
-                if (result.success) {
-                    console.log('✅ Results saved to PYTHON_TESTING CSV file successfully!');
-                    console.log('📊 CSV file updated with questionnaire results');
-                    console.log('📁 CSV location:', result.csv_path);
-                } else {
-                    throw new Error(result.error || 'Unknown server error');
-                }
-            })
-            .catch(error => {
-                console.log('⚠️ Could not save results to server:', error.message);
-                console.log('💾 Results saved to localStorage as backup');
-            });
-            */
         }
+
+        /*
+        fetch('http://localhost:5001/api/update_results', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            mode: 'cors',
+            body: JSON.stringify(resultData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(result => {
+            if (result.success) {
+                console.log('✅ Results saved to PYTHON_TESTING CSV file successfully!');
+                console.log('📊 CSV file updated with questionnaire results');
+                console.log('📁 CSV location:', result.csv_path);
+            } else {
+                throw new Error(result.error || 'Unknown server error');
+            }
+        })
+        .catch(error => {
+            console.log('⚠️ Could not save results to server:', error.message);
+            console.log('💾 Results saved to localStorage as backup');
+        });
+        */
 
         function findConsensus(champions) {
             const counts = {};
