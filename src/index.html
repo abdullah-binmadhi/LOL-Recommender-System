@@ -2664,10 +2664,10 @@
         async function saveUserToSupabase(userData) {
             try {
                 // Dynamically import Supabase client
-                const { supabase } = await import('./js/supabase.js');
+                const { insertUserData } = await import('./js/supabase.js');
                 
-                if (supabase) {
-                    const result = await supabase.saveUserToSupabase(userData);
+                if (insertUserData) {
+                    const result = await insertUserData(userData);
                     if (result.success) {
                         console.log('✅ User data saved to Supabase successfully!');
                     } else {
@@ -3017,14 +3017,31 @@
         async function saveQuestionnaireResultsToSupabase(resultData) {
             try {
                 // Dynamically import Supabase client
-                const { supabase } = await import('./js/supabase.js');
+                const { insertUserData } = await import('./js/supabase.js');
                 
-                if (supabase) {
-                    const result = await supabase.saveQuestionnaireResultsToSupabase(resultData);
-                    if (result.success) {
-                        console.log('✅ Questionnaire results saved to Supabase successfully!');
-                    } else {
-                        console.log('⚠️ Failed to save questionnaire results to Supabase:', result.error);
+                if (insertUserData) {
+                    // Get the full user data from localStorage to send complete information
+                    let existingData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
+                    const userIndex = existingData.findIndex(user => user.sessionId === resultData.sessionId);
+                    
+                    if (userIndex !== -1) {
+                        const fullUserData = {
+                            ...existingData[userIndex],
+                            ...resultData,
+                            // Map psychological questions to dedicated fields
+                            pressure_response: answers[6] || '',
+                            aesthetic_preference: answers[7] || '',
+                            team_contribution: answers[8] || '',
+                            character_identity: answers[9] || '',
+                            problem_solving: answers[10] || ''
+                        };
+                        
+                        const result = await insertUserData(fullUserData);
+                        if (result.success) {
+                            console.log('✅ Questionnaire results saved to Supabase successfully!');
+                        } else {
+                            console.log('⚠️ Failed to save questionnaire results to Supabase:', result.error);
+                        }
                     }
                 }
             } catch (error) {
@@ -3831,14 +3848,14 @@ Note: Data is stored locally. Press Ctrl+Shift+E anytime to export CSV.`;
             let supabaseInfo = '';
             try {
                 // Dynamically import Supabase client
-                const { supabase } = await import('./js/supabase.js');
+                const { getUserCount } = await import('./js/supabase.js');
                 
-                if (supabase) {
+                if (getUserCount) {
                     // Try to fetch Supabase data
-                    const supabaseUsers = await supabase.getAllUsers();
+                    const supabaseUsers = await getUserCount();
                     if (supabaseUsers.success) {
                         supabaseInfo = `
-Supabase users: ${supabaseUsers.data.length}
+Supabase users: ${supabaseUsers.count}
 Supabase data available for viewing.`;
                     } else {
                         supabaseInfo = 'Supabase connection established but unable to fetch data.';

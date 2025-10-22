@@ -1,13 +1,78 @@
 // Supabase client configuration
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase client
-// In a Vercel environment, these will be set as environment variables
-// For local development, you can set them in a .env file
-const supabaseUrl = process.env.SUPABASE_URL || 'https://brshmbbohqcdseyirqsn.supabase.co'
-const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJyc2htYmJvaHFjZHNleWlycXNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwOTYyNzAsImV4cCI6MjA3NjY3MjI3MH0.Yi-aWEuvArux0qRrEgnnzIljrsh5NnVBOxHlpBqbn2E'
+// Get Supabase credentials from environment variables
+const supabaseUrl = process.env.SUPABASE_URL || 'https://brshmbbohqcdseyirqsn.supabase.co';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJyc2htYmJvaHFjZHNleWlycXNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwOTYyNzAsImV4cCI6MjA3NjY3MjI3MH0.Yi-aWEuvArux0qRrEgnnzIljrsh5NnVBOxHlpBqbn2E';
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+// Create Supabase client
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Function to insert user data into Supabase
+export async function insertUserData(userData) {
+  try {
+    const { data, error } = await supabase
+      .from('champion_recommender_users')
+      .insert([
+        {
+          full_name: userData.full_name,
+          email: userData.email,
+          phone: userData.phone || '',
+          age: userData.age,
+          gender: userData.gender || '',
+          lol_experience: userData.lol_experience || '',
+          session_id: userData.session_id,
+          recommended_champion: userData.recommended_champion || '',
+          winning_algorithm: userData.winning_algorithm || '',
+          confidence_score: userData.confidence_score || null,
+          random_forest_champion: userData.random_forest_champion || '',
+          random_forest_confidence: userData.random_forest_confidence || null,
+          decision_tree_champion: userData.decision_tree_champion || '',
+          decision_tree_confidence: userData.decision_tree_confidence || null,
+          knn_champion: userData.knn_champion || '',
+          knn_confidence: userData.knn_confidence || null,
+          consensus_level: userData.consensus_level || null,
+          user_answers: userData.user_answers || {},
+          completion_timestamp: userData.completion_timestamp || null,
+          pressure_response: userData.pressure_response || '',
+          aesthetic_preference: userData.aesthetic_preference || '',
+          team_contribution: userData.team_contribution || '',
+          character_identity: userData.character_identity || '',
+          problem_solving: userData.problem_solving || ''
+        }
+      ]);
+
+    if (error) {
+      console.error('Error inserting user data:', error);
+      return { success: false, error };
+    }
+
+    console.log('User data inserted successfully:', data);
+    return { success: true, data };
+  } catch (error) {
+    console.error('Exception occurred while inserting user data:', error);
+    return { success: false, error };
+  }
+}
+
+// Function to get user count from Supabase
+export async function getUserCount() {
+  try {
+    const { count, error } = await supabase
+      .from('champion_recommender_users')
+      .select('*', { count: 'exact' });
+
+    if (error) {
+      console.error('Error getting user count:', error);
+      return { success: false, error };
+    }
+
+    return { success: true, count };
+  } catch (error) {
+    console.error('Exception occurred while getting user count:', error);
+    return { success: false, error };
+  }
+}
 
 // Function to save user registration data
 export async function saveUserToSupabase(userData) {

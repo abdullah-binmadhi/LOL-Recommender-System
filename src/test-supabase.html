@@ -4,73 +4,156 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supabase Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #3E1E68 0%, #5D2F77 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        .result {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            white-space: pre-wrap;
+        }
+        .success {
+            border-left: 4px solid #4caf50;
+        }
+        .error {
+            border-left: 4px solid #f44336;
+        }
+    </style>
 </head>
 <body>
-    <h1>Supabase Integration Test</h1>
-    <button id="testButton">Test Supabase Connection</button>
-    <div id="result"></div>
+    <div class="container">
+        <h1>Supabase Integration Test</h1>
+        <p>Test the Supabase integration for the Champion Recommender system.</p>
+        
+        <button class="btn" onclick="testSupabaseConnection()">Test Supabase Connection</button>
+        <button class="btn" onclick="testInsertUserData()">Test Insert User Data</button>
+        <button class="btn" onclick="testGetUserCount()">Test Get User Count</button>
+        
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
 
     <script type="module">
-        import { supabase } from './js/supabase.js';
-
-        document.getElementById('testButton').addEventListener('click', async () => {
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = 'Testing Supabase connection...';
-            
+        async function testSupabaseConnection() {
             try {
-                // Test the connection by trying to fetch table info
-                const { data, error } = await supabase
-                    .from('users')
-                    .select('id')
-                    .limit(1);
-
-                if (error) {
-                    if (error.message.includes('relation "users" does not exist')) {
-                        resultDiv.innerHTML = '✅ Supabase client is working! But you need to create the tables first.<br><br>Run these SQL commands in your Supabase SQL editor:<br><br>' +
-                            '<pre>' +
-                            'CREATE TABLE users (\n' +
-                            '  id uuid default uuid_generate_v4() primary key,\n' +
-                            '  full_name text,\n' +
-                            '  email text,\n' +
-                            '  phone text,\n' +
-                            '  age integer,\n' +
-                            '  gender text,\n' +
-                            '  experience text,\n' +
-                            '  registration_date timestamp with time zone default now(),\n' +
-                            '  session_id text unique\n' +
-                            ');\n\n' +
-                            'CREATE TABLE questionnaire_results (\n' +
-                            '  id uuid default uuid_generate_v4() primary key,\n' +
-                            '  session_id text references users(session_id),\n' +
-                            '  recommended_champion text,\n' +
-                            '  winning_algorithm text,\n' +
-                            '  confidence_score numeric,\n' +
-                            '  random_forest_champion text,\n' +
-                            '  random_forest_confidence numeric,\n' +
-                            '  decision_tree_champion text,\n' +
-                            '  decision_tree_confidence numeric,\n' +
-                            '  knn_champion text,\n' +
-                            '  knn_confidence numeric,\n' +
-                            '  consensus_level integer,\n' +
-                            '  user_answers jsonb,\n' +
-                            '  completion_date timestamp with time zone default now(),\n' +
-                            '  pressure_response text,\n' +
-                            '  aesthetic_preference text,\n' +
-                            '  team_contribution text,\n' +
-                            '  character_identity text,\n' +
-                            '  problem_solving text\n' +
-                            ');' +
-                            '</pre>';
-                    } else {
-                        resultDiv.innerHTML = `❌ Supabase error: ${error.message}`;
-                    }
+                const { supabase } = await import('./js/supabase.js');
+                if (supabase) {
+                    showResult('✅ Supabase client initialized successfully!', 'success');
                 } else {
-                    resultDiv.innerHTML = '✅ Supabase is working correctly! Tables exist and connection is successful.';
+                    showResult('❌ Supabase client not available', 'error');
                 }
             } catch (error) {
-                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+                showResult(`❌ Error initializing Supabase: ${error.message}`, 'error');
             }
-        });
+        }
+
+        async function testInsertUserData() {
+            try {
+                const { insertUserData } = await import('./js/supabase.js');
+                if (insertUserData) {
+                    const testData = {
+                        full_name: 'Test User',
+                        email: 'test@example.com',
+                        phone: '123-456-7890',
+                        age: 25,
+                        gender: 'Male',
+                        lol_experience: 'Intermediate',
+                        session_id: `test_${Date.now()}`,
+                        recommended_champion: 'Yasuo',
+                        winning_algorithm: 'Random Forest',
+                        confidence_score: 85.5,
+                        random_forest_champion: 'Yasuo',
+                        random_forest_confidence: 85.5,
+                        decision_tree_champion: 'Zed',
+                        decision_tree_confidence: 78.2,
+                        knn_champion: 'Yasuo',
+                        knn_confidence: 82.1,
+                        consensus_level: 2,
+                        user_answers: JSON.stringify({
+                            "1": "Hard (7-8)",
+                            "2": "Assassin",
+                            "3": "Mid",
+                            "4": "High Damage Output",
+                            "5": "Melee",
+                            "6": "Get aggressive and take risks",
+                            "7": "Dark and edgy",
+                            "8": "Take charge and lead",
+                            "9": "Male",
+                            "10": "Jump in and adapt on the fly"
+                        }),
+                        completion_timestamp: new Date().toISOString(),
+                        pressure_response: 'Get aggressive and take risks',
+                        aesthetic_preference: 'Dark and edgy',
+                        team_contribution: 'Take charge and lead',
+                        character_identity: 'Male',
+                        problem_solving: 'Jump in and adapt on the fly'
+                    };
+
+                    const result = await insertUserData(testData);
+                    if (result.success) {
+                        showResult('✅ User data inserted successfully!', 'success');
+                    } else {
+                        showResult(`❌ Failed to insert user data: ${result.error.message}`, 'error');
+                    }
+                } else {
+                    showResult('❌ insertUserData function not available', 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Error inserting user data: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGetUserCount() {
+            try {
+                const { getUserCount } = await import('./js/supabase.js');
+                if (getUserCount) {
+                    const result = await getUserCount();
+                    if (result.success) {
+                        showResult(`✅ User count retrieved successfully: ${result.count} users`, 'success');
+                    } else {
+                        showResult(`❌ Failed to get user count: ${result.error.message}`, 'error');
+                    }
+                } else {
+                    showResult('❌ getUserCount function not available', 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Error getting user count: ${error.message}`, 'error');
+            }
+        }
+
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = message;
+            resultDiv.className = `result ${type}`;
+            resultDiv.style.display = 'block';
+        }
     </script>
 </body>
 </html>
