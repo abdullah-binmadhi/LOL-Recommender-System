@@ -2598,54 +2598,6 @@
             return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         }
 
-                        phone: data.phone,
-                        age: parseInt(data.age),
-                        gender: data.gender,
-                        experience: data.experience,
-                        sessionId: data.sessionId
-                    })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Server error: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(result => {
-                    if (result.success) {
-                        console.log('✅ User data saved to PYTHON_TESTING folder successfully!');
-                        console.log('📊 CSV file location:', result.csv_path);
-                        resolve(result);
-                    } else {
-                        throw new Error(result.error || 'Unknown server error');
-                    }
-                })
-                .catch(error => {
-                    console.log('⚠️ Server not available, saving to localStorage:', error.message);
-                    console.log('💡 To save to PYTHON_TESTING folder, run: python PYTHON_TESTING/data_server.py');
-                    console.log('📝 Alternative: Your data will be saved to localStorage and you can export it manually');
-                    
-                    // Fallback to localStorage
-                    try {
-                        let existingData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
-                        existingData.push(data);
-                        localStorage.setItem('championRecommenderUsers', JSON.stringify(existingData));
-                        console.log('💾 Data saved to localStorage as backup');
-                        console.log('📋 To export to CSV, press Ctrl+Shift+E');
-                        resolve({ success: true, fallback: true });
-                    } catch (localError) {
-                        console.error('❌ Failed to save to localStorage:', localError);
-                        reject(localError);
-                    }
-                });
-                */
-            });
-        }
-
-        function generateSessionId() {
-            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        }
-
         function createExcelFile(userData) {
             // Create CSV content (Excel compatible)
             let csvContent = "Full Name,Email,Phone,Age,Gender,LoL Experience,Registration Date,Session ID\n";
@@ -2683,7 +2635,6 @@
             }
         }
 
-        }
 
         // Function to manually download user data (for admin use)
         function downloadUserData() {
@@ -3727,7 +3678,15 @@ function restartQuestionnaire() {
             const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
             const userCount = userData.length;
             
-            const message = `Admin Panel\n\nTotal registered users: ${userCount}\n\nOptions:\n- OK: Export CSV file\n- Cancel: Close panel\n\nNote: Data is stored locally. Press Ctrl+Shift+E anytime to export CSV.`;
+            const message = `Admin Panel
+
+Total registered users: ${userCount}
+
+Options:
+- OK: Export CSV file
+- Cancel: Close panel
+
+Note: Data is stored locally. Press Ctrl+Shift+E anytime to export CSV.`;
             
             if (confirm(message)) {
                 exportToCSV();
