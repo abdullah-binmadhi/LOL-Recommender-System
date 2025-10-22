@@ -1734,6 +1734,7 @@
             </div>
             <div class="buttons">
                 <button class="btn btn-primary" onclick="restartQuestionnaire()">Try Again</button>
+                <button class="btn btn-secondary" onclick="saveToSupabase()">Save to Database</button>
             </div>
         </div>
     </div>
@@ -3909,6 +3910,66 @@ Note: Press Ctrl+Shift+E to export CSV.`;
                 }).catch(function() {});
             }
         })();
+    </script>
+    
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://brshmbbohqcdseyirqsn.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJyc2htYmJvaHFjZHNleWlycXNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwOTYyNzAsImV4cCI6MjA3NjY3MjI3MH0.Yi-aWEuvArux0qRrEgnnzIljrsh5NnVBOxHlpBqbn2E';
+        const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
+        
+        // Function to save user data to Supabase
+        async function saveToSupabase() {
+            try {
+                // Generate a unique session ID
+                const sessionId = 'session_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+                
+                // Get the recommended champion from the analysis
+                const winner = findWinner(mlResults);
+                const recommendedChampion = mlResults[winner].champion;
+                
+                // Create the data object
+                const data = {
+                    session_id: sessionId,
+                    recommended_champion: recommendedChampion,
+                    winning_algorithm: winner,
+                    confidence_score: mlResults[winner].confidence,
+                    random_forest_champion: mlResults['random-forest'] ? mlResults['random-forest'].champion : '',
+                    random_forest_confidence: mlResults['random-forest'] ? mlResults['random-forest'].confidence : null,
+                    decision_tree_champion: mlResults['decision-tree'] ? mlResults['decision-tree'].champion : '',
+                    decision_tree_confidence: mlResults['decision-tree'] ? mlResults['decision-tree'].confidence : null,
+                    knn_champion: mlResults['knn'] ? mlResults['knn'].champion : '',
+                    knn_confidence: mlResults['knn'] ? mlResults['knn'].confidence : null,
+                    user_answers: JSON.stringify(answers),
+                    completion_date: new Date().toISOString(),
+                    // Psychological questions mapping (if available)
+                    pressure_response: answers[6] || null,
+                    aesthetic_preference: answers[7] || null,
+                    team_contribution: answers[8] || null,
+                    character_identity: answers[9] || null,
+                    problem_solving: answers[10] || null
+                };
+                
+                // Insert data into Supabase
+                const { data: result, error } = await supabase
+                    .from('questionnaire_results')
+                    .insert([data])
+                    .select();
+                
+                if (error) {
+                    console.error('Error saving to Supabase:', error);
+                    alert('Error saving to database: ' + error.message);
+                } else {
+                    console.log('Data saved successfully:', result);
+                    alert('Data saved to database successfully!');
+                }
+            } catch (error) {
+                console.error('Error saving to Supabase:', error);
+                alert('Error saving to database: ' + error.message);
+            }
+        }
     </script>
 </body>
 </html>
