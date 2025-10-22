@@ -3891,5 +3891,24 @@ Note: Press Ctrl+Shift+E to export CSV.`;
             }
         }, 60000); // Check every minute
     </script>
+    <script>
+        // Vercel Analytics
+        (function() {
+            if (typeof window !== 'undefined') {
+                fetch('https://vitals.vercel-insights.com/v1/vitals', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        dsn: 'https://vitals.vercel-insights.com/v1/vitals',
+                        id: window.location.hostname,
+                        page: window.location.pathname + window.location.search,
+                        href: window.location.href
+                    })
+                }).catch(function() {});
+            }
+        })();
+    </script>
 </body>
 </html>
