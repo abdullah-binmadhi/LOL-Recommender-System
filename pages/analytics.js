@@ -246,7 +246,8 @@ const AnalyticsPage = () => {
 
         // 5. Champions Released by Year (Line Chart) - Simulated data
         const years = ['2009', '2010', '2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024'];
-        const releases = [12, 15, 18, 14, 16, 13, 11, 17, 14, 12, 15, 13, 16, 14, 18, 15]; // Simulated data
+        // Adjusted values to make the line less steep
+        const releases = [5, 8, 12, 10, 14, 9, 7, 15, 11, 8, 12, 9, 13, 10, 16, 12]; // Simulated data
 
         if (releaseYearChartRef.current) {
           const releaseYearCtx = releaseYearChartRef.current.getContext('2d');
