@@ -17,6 +17,7 @@
   "author": "Abdullah Bin Madhi",
   "license": "MIT",
   "dependencies": {
+    "@supabase/supabase-js": "^2.76.1",
     "@vercel/analytics": "^1.5.0",
     "chart.js": "^4.5.1",
     "next": "^14.0.0",

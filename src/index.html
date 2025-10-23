@@ -3693,228 +3693,336 @@ function restartQuestionnaire() {
             document.querySelectorAll('[id^="next-"]').forEach(btn => btn.disabled = true);
         }
 
-        // Function to save the current recommendation to the CSV file
+        // Function to save the current recommendation and display all results on a web page
         function saveRecommendation() {
             // Get the current user data from localStorage
             const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
             
             if (userData.length > 0) {
-                // Get the most recent user entry
-                const currentUser = userData[userData.length - 1];
+                // Display all user data in a table format on the web page
+                displayAllResults(userData);
                 
-                // Create CSV content with headers matching the existing CSV file
-                const headers = [
-                    'ID', 'Full Name', 'Email', 'Phone', 'Age', 'Gender', 
-                    'LoL Experience', 'Registration Date', 'Session ID',
-                    'Recommended Champion', 'Winning Algorithm', 'Confidence Score',
-                    'Random Forest Champion', 'Random Forest Confidence',
-                    'Decision Tree Champion', 'Decision Tree Confidence',
-                    'KNN Champion', 'KNN Confidence', 'Consensus Level',
-                    'User Answers', 'Completion Date',
-                    'Pressure Response', 'Aesthetic Preference', 'Team Contribution',
-                    'Character Identity', 'Problem Solving Approach'
-                ];
-                
-                // Create a single row for the current recommendation
-                const row = [
-                    userData.length, // ID
-                    currentUser.fullName || '',
-                    currentUser.email || '',
-                    currentUser.phone || '',
-                    currentUser.age || '',
-                    currentUser.gender || '',
-                    currentUser.experience || '',
-                    currentUser.registrationDate || '',
-                    currentUser.sessionId || '',
-                    currentUser.recommendedChampion || '',
-                    currentUser.winningAlgorithm || '',
-                    currentUser.confidence || '',
-                    currentUser.randomForestChampion || '',
-                    currentUser.randomForestConfidence || '',
-                    currentUser.decisionTreeChampion || '',
-                    currentUser.decisionTreeConfidence || '',
-                    currentUser.knnChampion || '',
-                    currentUser.knnConfidence || '',
-                    currentUser.consensusLevel || '',
-                    currentUser.userAnswers || '',
-                    currentUser.completionDate || '',
-                    currentUser.pressureResponse || '',
-                    currentUser.aestheticPreference || '',
-                    currentUser.teamContribution || '',
-                    currentUser.characterIdentity || '',
-                    currentUser.problemSolving || ''
-                ].map(field => '"' + field + '"');
-                
-                // Create CSV content
-                const csvContent = headers.join(',') + '\n' + row.join(',') + '\n';
-                
-                // Download CSV
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                const url = URL.createObjectURL(blob);
-                link.setAttribute('href', url);
-                link.setAttribute('download', 'champion_recommendation_' + (currentUser.sessionId || 'latest') + '.csv');
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-                
-                console.log('✅ Recommendation saved to CSV file');
-                alert('Recommendation saved successfully!');
+                console.log('✅ Recommendation saved and results displayed on web page');
+                alert('Results displayed on web page!');
             } else {
-                alert('No user data available to save.');
+                alert('No user data available to display.');
             }
         }
 
-        // Function to manually download user data (for admin use)
-        function downloadUserData() {
-            const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
-            if (userData.length > 0) {
-                // Trigger download
-                const csvContent = "Full Name,Email,Phone,Age,Gender,LoL Experience,Registration Date,Session ID,Recommended Champion,Winning Algorithm,Confidence Score,Random Forest Champion,Random Forest Confidence,Decision Tree Champion,Decision Tree Confidence,KNN Champion,KNN Confidence,Consensus Level,User Answers,Completion Date,Pressure Response,Aesthetic Preference,Team Contribution,Character Identity,Problem Solving Approach\n";
-                let content = csvContent;
-                
-                userData.forEach(user => {
-                    const row = [
-                        user.fullName,
-                        user.email,
-                        user.phone,
-                        user.age,
-                        user.gender,
-                        user.experience,
-                        new Date(user.registrationDate).toLocaleString(),
-                        user.sessionId,
-                        user.recommendedChampion || '',
-                        user.winningAlgorithm || '',
-                        user.confidence || '',
-                        user.randomForestChampion || '',
-                        user.randomForestConfidence || '',
-                        user.decisionTreeChampion || '',
-                        user.decisionTreeConfidence || '',
-                        user.knnChampion || '',
-                        user.knnConfidence || '',
-                        user.consensusLevel || '',
-                        user.userAnswers || '',
-                        user.completionDate || '',
-                        user.pressureResponse || '',
-                        user.aestheticPreference || '',
-                        user.teamContribution || '',
-                        user.characterIdentity || '',
-                        user.problemSolving || ''
-                    ].map(field => `"${field}"`).join(',');
-                    
-                    content += row + "\n";
-                });
-                
-                const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                link.download = 'champion_recommender_users.csv';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-            } else {
-                alert('No user data available to download.');
-            }
-        }
-        
-        // Manual CSV export function
-        function exportToCSV() {
-            const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
-            if (userData.length === 0) {
-                alert('No user data to export');
-                return;
-            }
+        // Function to display all user results in a table format
+        function displayAllResults(userData) {
+            // Create a new div to display the results
+            const resultsContainer = document.createElement('div');
+            resultsContainer.id = 'results-display';
+            resultsContainer.className = 'card detailed-analysis';
+            resultsContainer.style.display = 'block';
+            resultsContainer.style.marginTop = '20px';
             
-            // Create CSV content
+            // Create the header
+            const header = document.createElement('h2');
+            header.innerHTML = '<i class="analysis-icon"></i> All Champion Recommendations';
+            resultsContainer.appendChild(header);
+            
+            // Create the table
+            const table = document.createElement('table');
+            table.style.width = '100%';
+            table.style.borderCollapse = 'collapse';
+            table.style.marginTop = '20px';
+            table.style.color = 'white';
+            
+            // Create table header
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
             const headers = [
-                'ID', 'Full Name', 'Email', 'Phone', 'Age', 'Gender', 
-                'LoL Experience', 'Registration Date', 'Session ID',
-                'Recommended Champion', 'Winning Algorithm', 'Confidence Score',
-                'Random Forest Champion', 'Random Forest Confidence',
-                'Decision Tree Champion', 'Decision Tree Confidence',
-                'KNN Champion', 'KNN Confidence', 'Consensus Level',
-                'User Answers', 'Completion Date',
-                'Pressure Response', 'Aesthetic Preference', 'Team Contribution',
-                'Character Identity', 'Problem Solving Approach'
+                'ID', 'Name', 'Email', 'Age', 'Gender', 'Experience',
+                'Recommended Champion', 'Algorithm', 'Confidence',
+                'Registration Date'
             ];
             
-            let csvContent = headers.join(',') + '\n';
+            headers.forEach(headerText => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                th.style.border = '1px solid #444';
+                th.style.padding = '10px';
+                th.style.backgroundColor = '#3E1E68';
+                th.style.textAlign = 'left';
+                headerRow.appendChild(th);
+            });
+            
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // Create table body
+            const tbody = document.createElement('tbody');
             
             userData.forEach((user, index) => {
-                const row = [
+                const row = document.createElement('tr');
+                
+                // Alternate row colors
+                if (index % 2 === 0) {
+                    row.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                } else {
+                    row.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                }
+                
+                const cells = [
                     index + 1,
                     user.fullName || '',
                     user.email || '',
-                    user.phone || '',
                     user.age || '',
                     user.gender || '',
                     user.experience || '',
-                    user.registrationDate || '',
-                    user.sessionId || '',
                     user.recommendedChampion || '',
                     user.winningAlgorithm || '',
                     user.confidence || '',
-                    user.randomForestChampion || '',
-                    user.randomForestConfidence || '',
-                    user.decisionTreeChampion || '',
-                    user.decisionTreeConfidence || '',
-                    user.knnChampion || '',
-                    user.knnConfidence || '',
-                    user.consensusLevel || '',
-                    user.userAnswers || '',
-                    user.completionDate || '',
-                    user.pressureResponse || '',
-                    user.aestheticPreference || '',
-                    user.teamContribution || '',
-                    user.characterIdentity || '',
-                    user.problemSolving || ''
-                ].map(field => '"' + field + '"');
+                    new Date(user.registrationDate).toLocaleDateString() || ''
+                ];
                 
-                csvContent += row.join(',') + '\n';
+                cells.forEach(cellText => {
+                    const td = document.createElement('td');
+                    td.textContent = cellText;
+                    td.style.border = '1px solid #444';
+                    td.style.padding = '8px';
+                    row.appendChild(td);
+                });
+                
+                tbody.appendChild(row);
             });
             
-            // Download CSV
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'champion_recommender_users.csv');
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+            table.appendChild(tbody);
             
-            console.log(`📊 Exported ${userData.length} users to CSV file`);
-            alert(`Successfully exported ${userData.length} users to CSV file!`);
+            // Add table to container
+            resultsContainer.appendChild(table);
+            
+            // Add a close button
+            const closeButton = document.createElement('button');
+            closeButton.textContent = 'Close Results';
+            closeButton.className = 'btn btn-primary';
+            closeButton.style.marginTop = '20px';
+            closeButton.onclick = function() {
+                resultsContainer.remove();
+                document.getElementById('detailed-analysis').style.display = 'block';
+            };
+            
+            resultsContainer.appendChild(closeButton);
+            
+            // Hide the detailed analysis and show results
+            document.getElementById('detailed-analysis').style.display = 'none';
+            document.querySelector('.container').appendChild(resultsContainer);
         }
+
+        // Function to download as CSV (fallback method)
+function downloadAsCSV(data) {
+    // Create CSV content with headers
+    const headers = [
+        'ID', 'Full Name', 'Email', 'Phone', 'Age', 'Gender', 
+        'LoL Experience', 'Registration Date', 'Session ID',
+        'Recommended Champion', 'Winning Algorithm', 'Confidence Score',
+        'Random Forest Champion', 'Random Forest Confidence',
+        'Decision Tree Champion', 'Decision Tree Confidence',
+        'KNN Champion', 'KNN Confidence', 'Consensus Level',
+        'User Answers', 'Completion Date',
+        'Pressure Response', 'Aesthetic Preference', 'Team Contribution',
+        'Character Identity', 'Problem Solving Approach'
+    ];
+    
+    // Create a single row for the current recommendation
+    const row = [
+        data.id,
+        data.fullName,
+        data.email,
+        data.phone,
+        data.age,
+        data.gender,
+        data.experience,
+        data.registrationDate,
+        data.sessionId,
+        data.recommendedChampion,
+        data.winningAlgorithm,
+        data.confidenceScore,
+        data.randomForestChampion,
+        data.randomForestConfidence,
+        data.decisionTreeChampion,
+        data.decisionTreeConfidence,
+        data.knnChampion,
+        data.knnConfidence,
+        data.consensusLevel,
+        data.userAnswers,
+        data.completionDate,
+        data.pressureResponse,
+        data.aestheticPreference,
+        data.teamContribution,
+        data.characterIdentity,
+        data.problemSolving
+    ].map(field => '"' + field + '"');
+    
+    // Create CSV content
+    const csvContent = headers.join(',') + '\n' + row.join(',') + '\n';
+    
+    // Download CSV
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'champion_recommendation_' + (data.sessionId || 'latest') + '.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    console.log('✅ Recommendation downloaded as CSV file');
+    alert('Recommendation saved as CSV file!');
+}
+
+// Function to manually download user data (for admin use)
+function downloadUserData() {
+    const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
+    if (userData.length > 0) {
+        // Trigger download
+        const csvContent = "Full Name,Email,Phone,Age,Gender,LoL Experience,Registration Date,Session ID,Recommended Champion,Winning Algorithm,Confidence Score,Random Forest Champion,Random Forest Confidence,Decision Tree Champion,Decision Tree Confidence,KNN Champion,KNN Confidence,Consensus Level,User Answers,Completion Date,Pressure Response,Aesthetic Preference,Team Contribution,Character Identity,Problem Solving Approach\n";
+        let content = csvContent;
         
-        // Keyboard shortcut for manual export
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.shiftKey && e.key === 'E') {
-                e.preventDefault();
-                exportToCSV();
-            }
-        });
-
-        console.log(`Multi-ML Champion Recommender loaded with ${Object.keys(allChampions).length} champions and 3 ML algorithms!`);
-
-        // Admin panel (hidden) - Press Ctrl+Shift+A to access
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.shiftKey && e.key === 'A') {
-                showEnhancedAdminPanel();
-            }
-        });
-
-        function showAdminPanel() {
-            const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
-            const userCount = userData.length;
+        userData.forEach(user => {
+            const row = [
+                user.fullName,
+                user.email,
+                user.phone,
+                user.age,
+                user.gender,
+                user.experience,
+                new Date(user.registrationDate).toLocaleString(),
+                user.sessionId,
+                user.recommendedChampion || '',
+                user.winningAlgorithm || '',
+                user.confidence || '',
+                user.randomForestChampion || '',
+                user.randomForestConfidence || '',
+                user.decisionTreeChampion || '',
+                user.decisionTreeConfidence || '',
+                user.knnChampion || '',
+                user.knnConfidence || '',
+                user.consensusLevel || '',
+                user.userAnswers || '',
+                user.completionDate || '',
+                user.pressureResponse || '',
+                user.aestheticPreference || '',
+                user.teamContribution || '',
+                user.characterIdentity || '',
+                user.problemSolving || ''
+            ].map(field => `"${field}"`).join(',');
             
-            const message = `Admin Panel
+            content += row + "\n";
+        });
+        
+        const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'champion_recommender_users.csv';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    } else {
+        alert('No user data available to download.');
+    }
+}
+        
+// Manual CSV export function
+function exportToCSV() {
+    const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
+    if (userData.length === 0) {
+        alert('No user data to export');
+        return;
+    }
+            
+    // Create CSV content
+    const headers = [
+        'ID', 'Full Name', 'Email', 'Phone', 'Age', 'Gender', 
+        'LoL Experience', 'Registration Date', 'Session ID',
+        'Recommended Champion', 'Winning Algorithm', 'Confidence Score',
+        'Random Forest Champion', 'Random Forest Confidence',
+        'Decision Tree Champion', 'Decision Tree Confidence',
+        'KNN Champion', 'KNN Confidence', 'Consensus Level',
+        'User Answers', 'Completion Date',
+        'Pressure Response', 'Aesthetic Preference', 'Team Contribution',
+        'Character Identity', 'Problem Solving Approach'
+    ];
+            
+    let csvContent = headers.join(',') + '\n';
+            
+    userData.forEach((user, index) => {
+        const row = [
+            index + 1,
+            user.fullName || '',
+            user.email || '',
+            user.phone || '',
+            user.age || '',
+            user.gender || '',
+            user.experience || '',
+            user.registrationDate || '',
+            user.sessionId || '',
+            user.recommendedChampion || '',
+            user.winningAlgorithm || '',
+            user.confidence || '',
+            user.randomForestChampion || '',
+            user.randomForestConfidence || '',
+            user.decisionTreeChampion || '',
+            user.decisionTreeConfidence || '',
+            user.knnChampion || '',
+            user.knnConfidence || '',
+            user.consensusLevel || '',
+            user.userAnswers || '',
+            user.completionDate || '',
+            user.pressureResponse || '',
+            user.aestheticPreference || '',
+            user.teamContribution || '',
+            user.characterIdentity || '',
+            user.problemSolving || ''
+        ].map(field => '"' + field + '"');
+                
+        csvContent += row.join(',') + '\n';
+    });
+            
+    // Download CSV
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'champion_recommender_users.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+            
+    console.log(`📊 Exported ${userData.length} users to CSV file`);
+    alert(`Successfully exported ${userData.length} users to CSV file!`);
+}
+        
+// Keyboard shortcut for manual export
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.shiftKey && e.key === 'E') {
+        e.preventDefault();
+        exportToCSV();
+    }
+});
+
+console.log(`Multi-ML Champion Recommender loaded with ${Object.keys(allChampions).length} champions and 3 ML algorithms!`);
+
+// Admin panel (hidden) - Press Ctrl+Shift+A to access
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+        showEnhancedAdminPanel();
+    }
+});
+
+function showAdminPanel() {
+    const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
+    const userCount = userData.length;
+            
+    const message = `Admin Panel
 
 Total registered users: ${userCount}
 
@@ -3924,17 +4032,17 @@ Options:
 
 Note: Data is stored locally. Press Ctrl+Shift+E anytime to export CSV.`;
             
-            if (confirm(message)) {
-                exportToCSV();
-            }
-        }
+    if (confirm(message)) {
+        exportToCSV();
+    }
+}
 
-        // Enhanced admin panel with Supabase data
-        async function showEnhancedAdminPanel() {
-            const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
-            const userCount = userData.length;
+// Enhanced admin panel with Supabase data
+async function showEnhancedAdminPanel() {
+    const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
+    const userCount = userData.length;
             
-            const message = `Enhanced Admin Panel
+    const message = `Enhanced Admin Panel
 
 Local storage users: ${userCount}
 
@@ -3944,18 +4052,18 @@ Options:
 
 Note: Press Ctrl+Shift+E to export CSV.`;
             
-            if (confirm(message)) {
-                exportToCSV();
-            }
-        }
+    if (confirm(message)) {
+        exportToCSV();
+    }
+}
 
-        // Auto-save user data periodically
-        setInterval(() => {
-            const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
-            if (userData.length > 0) {
-                console.log(userData.length + ' users registered so far');
-            }
-        }, 60000); // Check every minute
+// Auto-save user data periodically
+setInterval(() => {
+    const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
+    if (userData.length > 0) {
+        console.log(userData.length + ' users registered so far');
+    }
+}, 60000); // Check every minute
     </script>
     <script>
         // Vercel Analytics
