@@ -134,4 +134,4 @@ This project is for **educational purposes**. League of Legends is a trademark o
 
 <p align="center">
   <img src="https://img.shields.io/badge/Made_With_❤️_For-LoL_Community-blue?style=for-the-badge" alt="Made for LoL Community">
-</p>
+</p># Force redeploy
