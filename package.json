@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "A League of Legends champion recommendation system using AI-powered algorithms",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "dev": "echo 'Development server not configured'",
+    "build": "echo 'Build process not required for static deployment'",
+    "start": "echo 'Start command not required for static deployment'"
   },
   "keywords": [
     "league-of-legends",
