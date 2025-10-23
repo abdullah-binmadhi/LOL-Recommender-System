@@ -1737,6 +1737,7 @@
                 <!-- Detailed analysis will be populated here -->
             </div>
             <div class="buttons">
+                <button class="btn btn-primary" onclick="saveRecommendation()">Save</button>
                 <button class="btn btn-primary" onclick="restartQuestionnaire()">Try Again</button>
             </div>
         </div>
@@ -3690,6 +3691,80 @@ function restartQuestionnaire() {
             
             document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
             document.querySelectorAll('[id^="next-"]').forEach(btn => btn.disabled = true);
+        }
+
+        // Function to save the current recommendation to the CSV file
+        function saveRecommendation() {
+            // Get the current user data from localStorage
+            const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
+            
+            if (userData.length > 0) {
+                // Get the most recent user entry
+                const currentUser = userData[userData.length - 1];
+                
+                // Create CSV content with headers matching the existing CSV file
+                const headers = [
+                    'ID', 'Full Name', 'Email', 'Phone', 'Age', 'Gender', 
+                    'LoL Experience', 'Registration Date', 'Session ID',
+                    'Recommended Champion', 'Winning Algorithm', 'Confidence Score',
+                    'Random Forest Champion', 'Random Forest Confidence',
+                    'Decision Tree Champion', 'Decision Tree Confidence',
+                    'KNN Champion', 'KNN Confidence', 'Consensus Level',
+                    'User Answers', 'Completion Date',
+                    'Pressure Response', 'Aesthetic Preference', 'Team Contribution',
+                    'Character Identity', 'Problem Solving Approach'
+                ];
+                
+                // Create a single row for the current recommendation
+                const row = [
+                    userData.length, // ID
+                    currentUser.fullName || '',
+                    currentUser.email || '',
+                    currentUser.phone || '',
+                    currentUser.age || '',
+                    currentUser.gender || '',
+                    currentUser.experience || '',
+                    currentUser.registrationDate || '',
+                    currentUser.sessionId || '',
+                    currentUser.recommendedChampion || '',
+                    currentUser.winningAlgorithm || '',
+                    currentUser.confidence || '',
+                    currentUser.randomForestChampion || '',
+                    currentUser.randomForestConfidence || '',
+                    currentUser.decisionTreeChampion || '',
+                    currentUser.decisionTreeConfidence || '',
+                    currentUser.knnChampion || '',
+                    currentUser.knnConfidence || '',
+                    currentUser.consensusLevel || '',
+                    currentUser.userAnswers || '',
+                    currentUser.completionDate || '',
+                    currentUser.pressureResponse || '',
+                    currentUser.aestheticPreference || '',
+                    currentUser.teamContribution || '',
+                    currentUser.characterIdentity || '',
+                    currentUser.problemSolving || ''
+                ].map(field => '"' + field + '"');
+                
+                // Create CSV content
+                const csvContent = headers.join(',') + '\n' + row.join(',') + '\n';
+                
+                // Download CSV
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'champion_recommendation_' + (currentUser.sessionId || 'latest') + '.csv');
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                console.log('✅ Recommendation saved to CSV file');
+                alert('Recommendation saved successfully!');
+            } else {
+                alert('No user data available to save.');
+            }
         }
 
         // Function to manually download user data (for admin use)
