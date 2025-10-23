@@ -174,20 +174,53 @@
                 'https://raw.githubusercontent.com/abdullah-binmadhi/LOL-Recommender-System/main/data/champions.json'
             ];
             
+            // Try each URL with different approaches
             for (const url of urls) {
                 try {
-                    const response = await fetch(url);
-                    if (response.ok) {
-                        const data = await response.json();
-                        return data.champions || data;
+                    console.log(`Attempting to load data from: ${url}`);
+                    
+                    // For GitHub raw URLs, we can use them directly
+                    if (url.includes('raw.githubusercontent.com')) {
+                        const response = await fetch(url);
+                        if (response.ok) {
+                            const data = await response.json();
+                            console.log(`Successfully loaded data from GitHub: ${url}`);
+                            return data.champions || data;
+                        }
+                    } else {
+                        // For local URLs, try with credentials
+                        const response = await fetch(url, { 
+                            method: 'GET',
+                            mode: 'cors',
+                            cache: 'no-cache'
+                        });
+                        if (response.ok) {
+                            const data = await response.json();
+                            console.log(`Successfully loaded data from local: ${url}`);
+                            return data.champions || data;
+                        }
                     }
                 } catch (error) {
                     console.warn(`Failed to load data from ${url}:`, error);
+                    // Try alternative approach for local files
+                    if (!url.includes('raw.githubusercontent.com')) {
+                        try {
+                            // Try with a different approach
+                            const response = await fetch(url + '?t=' + new Date().getTime());
+                            if (response.ok) {
+                                const data = await response.json();
+                                console.log(`Successfully loaded data from local (with cache busting): ${url}`);
+                                return data.champions || data;
+                            }
+                        } catch (error2) {
+                            console.warn(`Also failed with cache busting for ${url}:`, error2);
+                        }
+                    }
                 }
             }
             
             // Fallback to sample data
-            console.error('Failed to load champion data, using sample data');
+            console.error('Failed to load champion data from all sources, using sample data');
             return [
                 { herotype: "Fighter", range_type: "Melee", difficulty: 2, name: "Aatrox" },
                 { herotype: "Mage", range_type: "Ranged", difficulty: 3, name: "Ahri" },
