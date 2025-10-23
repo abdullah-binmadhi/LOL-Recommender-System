@@ -39,6 +39,16 @@ export default function Navigation() {
             Dashboard
           </Link>
           
+          <Link href="/analytics" style={{ 
+            color: router.pathname === '/analytics' ? '#1e88e5' : 'white', 
+            textDecoration: 'none', 
+            padding: '5px 10px',
+            borderRadius: '3px',
+            marginRight: '20px'
+          }}>
+            Analytics
+          </Link>
+          
           <Link href="/add-user" style={{ 
             color: router.pathname === '/add-user' ? '#1e88e5' : 'white', 
             textDecoration: 'none', 
