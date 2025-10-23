@@ -1738,7 +1738,6 @@
             </div>
             <div class="buttons">
                 <button class="btn btn-primary" onclick="restartQuestionnaire()">Try Again</button>
-                <button class="btn btn-secondary" onclick="saveToSupabase()">Save to Database</button>
             </div>
         </div>
     </div>
@@ -2665,22 +2664,53 @@
             });
         }
 
-        // Save user data to Supabase
+        // Save user data to localStorage only (Supabase removed)
         async function saveUserToSupabase(userData) {
             try {
-                // Dynamically import Supabase client
-                const { insertUserData } = await import('./js/supabase.js');
-                
-                if (insertUserData) {
-                    const result = await insertUserData(userData);
-                    if (result.success) {
-                        console.log('✅ User data saved to Supabase successfully!');
-                    } else {
-                        console.log('⚠️ Failed to save user data to Supabase:', result.error);
-                    }
-                }
+                // Save to localStorage only
+                let existingData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
+                existingData.push(userData);
+                localStorage.setItem('championRecommenderUsers', JSON.stringify(existingData));
+                console.log('✅ User data saved to localStorage successfully!');
             } catch (error) {
-                console.log('⚠️ Supabase not available or error occurred:', error);
+                console.log('⚠️ Error occurred while saving user data:', error);
+            }
+        }
+
+        function generateSessionId() {
+            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function createExcelFile(userData) {
+            const worksheet = XLSX.utils.json_to_sheet(userData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'UserData');
+            XLSX.writeFile(workbook, 'userData.xlsx');
+        }
+
+        function saveSessionId(sessionId) {
+            return new Promise((resolve, reject) => {
+                try {
+                    localStorage.setItem('championRecommenderSessionId', sessionId);
+                    console.log('✅ Session ID saved to localStorage successfully!');
+                    resolve();
+                } catch (error) {
+                    console.error('❌ Failed to save to localStorage:', error);
+                    reject(error);
+                }
+            });
+        }
+
+        // Save user data to localStorage only (Supabase removed)
+        async function saveUserToSupabase(userData) {
+            try {
+                // Save to localStorage only
+                let existingData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
+                existingData.push(userData);
+                localStorage.setItem('championRecommenderUsers', JSON.stringify(existingData));
+                console.log('✅ User data saved to localStorage successfully!');
+            } catch (error) {
+                console.log('⚠️ Error occurred while saving user data:', error);
             }
         }
 
@@ -3018,39 +3048,31 @@
             }
         }
 
-        // Save questionnaire results to Supabase
+        // Save questionnaire results to localStorage only (Supabase removed)
         async function saveQuestionnaireResultsToSupabase(resultData) {
             try {
-                // Dynamically import Supabase client
-                const { insertUserData } = await import('./js/supabase.js');
+                // Save to localStorage only
+                let existingData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
+                const userIndex = existingData.findIndex(user => user.sessionId === resultData.sessionId);
                 
-                if (insertUserData) {
-                    // Get the full user data from localStorage to send complete information
-                    let existingData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
-                    const userIndex = existingData.findIndex(user => user.sessionId === resultData.sessionId);
+                if (userIndex !== -1) {
+                    // Update the existing user data with questionnaire results
+                    existingData[userIndex] = {
+                        ...existingData[userIndex],
+                        ...resultData,
+                        // Map psychological questions to dedicated fields
+                        pressure_response: answers[6] || '',
+                        aesthetic_preference: answers[7] || '',
+                        team_contribution: answers[8] || '',
+                        character_identity: answers[9] || '',
+                        problem_solving: answers[10] || ''
+                    };
                     
-                    if (userIndex !== -1) {
-                        const fullUserData = {
-                            ...existingData[userIndex],
-                            ...resultData,
-                            // Map psychological questions to dedicated fields
-                            pressure_response: answers[6] || '',
-                            aesthetic_preference: answers[7] || '',
-                            team_contribution: answers[8] || '',
-                            character_identity: answers[9] || '',
-                            problem_solving: answers[10] || ''
-                        };
-                        
-                        const result = await insertUserData(fullUserData);
-                        if (result.success) {
-                            console.log('✅ Questionnaire results saved to Supabase successfully!');
-                        } else {
-                            console.log('⚠️ Failed to save questionnaire results to Supabase:', result.error);
-                        }
-                    }
+                    localStorage.setItem('championRecommenderUsers', JSON.stringify(existingData));
+                    console.log('✅ Questionnaire results saved to localStorage successfully!');
                 }
             } catch (error) {
-                console.log('⚠️ Supabase not available or error occurred:', error);
+                console.log('⚠️ Error occurred while saving questionnaire results:', error);
             }
         }
 
@@ -3850,32 +3872,9 @@ Note: Data is stored locally. Press Ctrl+Shift+E anytime to export CSV.`;
             const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
             const userCount = userData.length;
             
-            let supabaseInfo = '';
-            try {
-                // Dynamically import Supabase client
-                const { getUserCount } = await import('./js/supabase.js');
-                
-                if (getUserCount) {
-                    // Try to fetch Supabase data
-                    const supabaseUsers = await getUserCount();
-                    if (supabaseUsers.success) {
-                        supabaseInfo = `
-Supabase users: ${supabaseUsers.count}
-Supabase data available for viewing.`;
-                    } else {
-                        supabaseInfo = 'Supabase connection established but unable to fetch data.';
-                    }
-                } else {
-                    supabaseInfo = 'Supabase not configured.';
-                }
-            } catch (error) {
-                supabaseInfo = 'Supabase not available or not configured.';
-            }
-            
             const message = `Enhanced Admin Panel
 
 Local storage users: ${userCount}
-${supabaseInfo}
 
 Options:
 - OK: Export CSV file
@@ -3916,23 +3915,9 @@ Note: Press Ctrl+Shift+E to export CSV.`;
         })();
     </script>
     
-    <!-- Supabase Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        // Initialize Supabase client
-        const supabaseUrl = 'https://brshmbbohqcdseyirqsn.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJyc2htYmJvaHFjZHNleWlycXNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwOTYyNzAsImV4cCI6MjA3NjY3MjI3MH0.Yi-aWEuvArux0qRrEgnnzIljrsh5NnVBOxHlpBqbn2E';
-        const supabase = supabase.createClient(supabaseUrl, supabaseAnonKey);
-        
-        // Function to save user data to Supabase
-        async function saveToSupabase() {
-            try {
-                // Generate a unique session ID
-                const sessionId = 'session_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
-                
-                // Get the recommended champion from the analysis
-                const winner = findWinner(mlResults);
-                const recommendedChampion = mlResults[winner].champion;
+</body>
+</html>
+
                 
                 // First, create a minimal user entry
                 const userData = {
@@ -3946,56 +3931,40 @@ Note: Press Ctrl+Shift+E to export CSV.`;
                     session_id: sessionId
                 };
                 
-                // Insert user data into Supabase
-                const { data: userResult, error: userError } = await supabase
-                    .from('users')
-                    .insert([userData])
-                    .select();
+                // Save to localStorage only
+                let existingData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
+                const userIndex = existingData.findIndex(user => user.sessionId === sessionId);
                 
-                if (userError) {
-                    console.error('Error saving user to Supabase:', userError);
-                    alert('Error saving user data: ' + userError.message);
-                    return;
-                }
-                
-                // Create the questionnaire results data object
-                const questionnaireData = {
-                    session_id: sessionId,
-                    recommended_champion: recommendedChampion,
-                    winning_algorithm: winner,
-                    confidence_score: mlResults[winner].confidence,
-                    random_forest_champion: mlResults['random-forest'] ? mlResults['random-forest'].champion : '',
-                    random_forest_confidence: mlResults['random-forest'] ? mlResults['random-forest'].confidence : null,
-                    decision_tree_champion: mlResults['decision-tree'] ? mlResults['decision-tree'].champion : '',
-                    decision_tree_confidence: mlResults['decision-tree'] ? mlResults['decision-tree'].confidence : null,
-                    knn_champion: mlResults['knn'] ? mlResults['knn'].champion : '',
-                    knn_confidence: mlResults['knn'] ? mlResults['knn'].confidence : null,
-                    user_answers: JSON.stringify(answers),
-                    completion_date: new Date().toISOString(),
-                    // Psychological questions mapping (if available)
-                    pressure_response: answers[6] || null,
-                    aesthetic_preference: answers[7] || null,
-                    team_contribution: answers[8] || null,
-                    character_identity: answers[9] || null,
-                    problem_solving: answers[10] || null
-                };
-                
-                // Insert questionnaire results into Supabase
-                const { data: result, error } = await supabase
-                    .from('questionnaire_results')
-                    .insert([questionnaireData])
-                    .select();
-                
-                if (error) {
-                    console.error('Error saving questionnaire results to Supabase:', error);
-                    alert('Error saving questionnaire results: ' + error.message);
-                } else {
-                    console.log('Data saved successfully:', result);
-                    alert('Data saved to database successfully!');
+                if (userIndex !== -1) {
+                    // Update the existing user data with questionnaire results
+                    existingData[userIndex] = {
+                        ...existingData[userIndex],
+                        recommended_champion: recommendedChampion,
+                        winning_algorithm: winner,
+                        confidence_score: mlResults[winner].confidence,
+                        random_forest_champion: mlResults['random-forest'] ? mlResults['random-forest'].champion : '',
+                        random_forest_confidence: mlResults['random-forest'] ? mlResults['random-forest'].confidence : null,
+                        decision_tree_champion: mlResults['decision-tree'] ? mlResults['decision-tree'].champion : '',
+                        decision_tree_confidence: mlResults['decision-tree'] ? mlResults['decision-tree'].confidence : null,
+                        knn_champion: mlResults['knn'] ? mlResults['knn'].champion : '',
+                        knn_confidence: mlResults['knn'] ? mlResults['knn'].confidence : null,
+                        user_answers: JSON.stringify(answers),
+                        completion_date: new Date().toISOString(),
+                        // Psychological questions mapping (if available)
+                        pressure_response: answers[6] || null,
+                        aesthetic_preference: answers[7] || null,
+                        team_contribution: answers[8] || null,
+                        character_identity: answers[9] || null,
+                        problem_solving: answers[10] || null
+                    };
+                    
+                    localStorage.setItem('championRecommenderUsers', JSON.stringify(existingData));
+                    console.log('✅ Data saved to localStorage successfully!');
+                    alert('Data saved successfully!');
                 }
             } catch (error) {
-                console.error('Error saving to Supabase:', error);
-                alert('Error saving to database: ' + error.message);
+                console.error('Error saving data:', error);
+                alert('Error saving data: ' + error.message);
             }
         }
     </script>
