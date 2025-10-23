@@ -2673,7 +2673,7 @@
         }
 
         // Save user data to localStorage only
-        async function saveUserToSupabase(userData) {
+        async function saveUserToLocalStorage(userData) {
             try {
                 // Save to localStorage only
                 let existingData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
@@ -3026,8 +3026,21 @@
             }
         }
 
+        // Save user data to localStorage only
+        async function saveUserToLocalStorage(userData) {
+            try {
+                // Save to localStorage only
+                let existingData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
+                existingData.push(userData);
+                localStorage.setItem('championRecommenderUsers', JSON.stringify(existingData));
+                console.log('✅ User data saved to localStorage successfully!');
+            } catch (error) {
+                console.log('⚠️ Error occurred while saving user data:', error);
+            }
+        }
+
         // Save questionnaire results to localStorage only
-        async function saveQuestionnaireResultsToSupabase(resultData) {
+        async function saveQuestionnaireResultsToLocalStorage(resultData) {
             try {
                 // Save to localStorage only
                 let existingData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
@@ -4037,7 +4050,7 @@ Note: Data is stored locally. Press Ctrl+Shift+E anytime to export CSV.`;
     }
 }
 
-// Enhanced admin panel with Supabase data
+// Enhanced admin panel with local data
 async function showEnhancedAdminPanel() {
     const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
     const userCount = userData.length;
