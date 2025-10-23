@@ -77,3 +77,13 @@ node_modules/
 .next/
 out/
 .vercel
+
+# Backup and corrupted files
+*.backup
+*.backup2
+*.backup3
+*.corrupted
+
+# Alternative save function implementations
+clean_save_function.js
+saveRecommendation.js
