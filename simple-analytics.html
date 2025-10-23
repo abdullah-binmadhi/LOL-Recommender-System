@@ -165,6 +165,53 @@
             console.log(message);
         }
         
+        // Function to load champion data with fallbacks
+        async function loadChampionData() {
+            const urls = [
+                './src/data/champions.json',
+                './data/champions.json',
+                'https://raw.githubusercontent.com/abdullah-binmadhi/LOL-Recommender-System/main/src/data/champions.json',
+                'https://raw.githubusercontent.com/abdullah-binmadhi/LOL-Recommender-System/main/data/champions.json'
+            ];
+            
+            for (const url of urls) {
+                try {
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data.champions || data;
+                    }
+                } catch (error) {
+                    console.warn(`Failed to load data from ${url}:`, error);
+                }
+            }
+            
+            // Fallback to sample data
+            console.error('Failed to load champion data, using sample data');
+            return [
+                { herotype: "Fighter", range_type: "Melee", difficulty: 2, name: "Aatrox" },
+                { herotype: "Mage", range_type: "Ranged", difficulty: 3, name: "Ahri" },
+                { herotype: "Assassin", range_type: "Melee", difficulty: 2, name: "Akali" },
+                { herotype: "Marksman", range_type: "Ranged", difficulty: 1, name: "Ashe" },
+                { herotype: "Tank", range_type: "Melee", difficulty: 1, name: "Alistar" },
+                { herotype: "Support", range_type: "Ranged", difficulty: 2, name: "Bard" },
+                { herotype: "Fighter", range_type: "Melee", difficulty: 3, name: "Darius" },
+                { herotype: "Mage", range_type: "Ranged", difficulty: 1, name: "Annie" },
+                { herotype: "Assassin", range_type: "Melee", difficulty: 3, name: "Zed" },
+                { herotype: "Marksman", range_type: "Ranged", difficulty: 2, name: "Ezreal" },
+                { herotype: "Tank", range_type: "Melee", difficulty: 2, name: "Garen" },
+                { herotype: "Support", range_type: "Ranged", difficulty: 1, name: "Thresh" },
+                { herotype: "Fighter", range_type: "Melee", difficulty: 2, name: "Fiora" },
+                { herotype: "Mage", range_type: "Ranged", difficulty: 3, name: "Lux" },
+                { herotype: "Assassin", range_type: "Melee", difficulty: 3, name: "Katarina" },
+                { herotype: "Fighter", range_type: "Melee", difficulty: 1, name: "Renekton" },
+                { herotype: "Mage", range_type: "Ranged", difficulty: 2, name: "Orianna" },
+                { herotype: "Assassin", range_type: "Melee", difficulty: 3, name: "Lee Sin" },
+                { herotype: "Marksman", range_type: "Ranged", difficulty: 2, name: "Jinx" },
+                { herotype: "Tank", range_type: "Melee", difficulty: 1, name: "Malphite" }
+            ];
+        }
+        
         updateStatus('Page loaded, initializing charts with sample data...');
         
         // Sample champion data
@@ -194,9 +241,39 @@
         updateStatus(`Loaded ${sampleChampions.length} sample champions, creating charts...`);
         
         // Wait for DOM to be fully loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            updateStatus('DOM loaded, initializing charts...');
-            initializeCharts(sampleChampions);
+        document.addEventListener('DOMContentLoaded', async function() {
+            updateStatus('DOM loaded, loading champion data...');
+            try {
+                const champions = await loadChampionData();
+                updateStatus(`Loaded ${champions.length} champions, initializing charts...`);
+                initializeCharts(champions);
+            } catch (error) {
+                updateStatus(`Error loading champion data: ${error.message}`);
+                console.error('Error loading champion data:', error);
+                // Fallback to sample data
+                initializeCharts([
+                    { herotype: "Fighter", range_type: "Melee", difficulty: 2, name: "Aatrox" },
+                    { herotype: "Mage", range_type: "Ranged", difficulty: 3, name: "Ahri" },
+                    { herotype: "Assassin", range_type: "Melee", difficulty: 2, name: "Akali" },
+                    { herotype: "Marksman", range_type: "Ranged", difficulty: 1, name: "Ashe" },
+                    { herotype: "Tank", range_type: "Melee", difficulty: 1, name: "Alistar" },
+                    { herotype: "Support", range_type: "Ranged", difficulty: 2, name: "Bard" },
+                    { herotype: "Fighter", range_type: "Melee", difficulty: 3, name: "Darius" },
+                    { herotype: "Mage", range_type: "Ranged", difficulty: 1, name: "Annie" },
+                    { herotype: "Assassin", range_type: "Melee", difficulty: 3, name: "Zed" },
+                    { herotype: "Marksman", range_type: "Ranged", difficulty: 2, name: "Ezreal" },
+                    { herotype: "Tank", range_type: "Melee", difficulty: 2, name: "Garen" },
+                    { herotype: "Support", range_type: "Ranged", difficulty: 1, name: "Thresh" },
+                    { herotype: "Fighter", range_type: "Melee", difficulty: 2, name: "Fiora" },
+                    { herotype: "Mage", range_type: "Ranged", difficulty: 3, name: "Lux" },
+                    { herotype: "Assassin", range_type: "Melee", difficulty: 3, name: "Katarina" },
+                    { herotype: "Fighter", range_type: "Melee", difficulty: 1, name: "Renekton" },
+                    { herotype: "Mage", range_type: "Ranged", difficulty: 2, name: "Orianna" },
+                    { herotype: "Assassin", range_type: "Melee", difficulty: 3, name: "Lee Sin" },
+                    { herotype: "Marksman", range_type: "Ranged", difficulty: 2, name: "Jinx" },
+                    { herotype: "Tank", range_type: "Melee", difficulty: 1, name: "Malphite" }
+                ]);
+            }
         });
         
         function initializeCharts(champions) {
