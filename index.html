@@ -10,10 +10,20 @@
 <body>
     <div class="container">
         <h1><i class="champion-finder-icon"></i> LoL Champion Recommender</h1>
-        <p>This website has been moved to our optimized version!</p>
-        <p>You will be redirected automatically...</p>
-        <a href="./src/index.html" class="btn">Go to Champion Recommender</a>
-        <a href="/analytics.html" class="btn" style="margin-left: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">View Analytics</a>
+        <p>Welcome to the League of Legends Champion Recommendation System!</p>
+        <p>Choose your preferred experience:</p>
+        
+        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 20px;">
+            <a href="./src/index.html" class="btn">Static Version</a>
+            <a href="/analytics.html" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">Analytics Dashboard</a>
+        </div>
+        
+        <div style="margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+            <h3>Next.js Version (Vercel Deployment)</h3>
+            <p>If you're viewing this on Vercel, you can access the enhanced Next.js version:</p>
+            <a href="/pages/index.html" class="btn" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);">Next.js Dashboard</a>
+            <a href="/pages/analytics.html" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-left: 10px;">Next.js Analytics</a>
+        </div>
     </div>
     
     <style>
@@ -34,12 +44,17 @@
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             text-align: center;
-            max-width: 500px;
+            max-width: 600px;
         }
         
         h1 {
             color: #333;
             margin-bottom: 20px;
+        }
+        
+        h3 {
+            color: #333;
+            margin-top: 0;
         }
         
         p {
@@ -55,7 +70,7 @@
             text-decoration: none;
             border-radius: 25px;
             font-weight: bold;
-            margin-top: 20px;
+            margin-top: 10px;
             transition: transform 0.3s ease;
         }
         
@@ -74,12 +89,5 @@
             vertical-align: middle;
         }
     </style>
-    
-    <script>
-        // Auto-redirect after 3 seconds
-        setTimeout(() => {
-            window.location.href = './src/index.html';
-        }, 3000);
-    </script>
 </body>
 </html>

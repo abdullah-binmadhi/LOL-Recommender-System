@@ -222,14 +222,6 @@ const AnalyticsPage = () => {
           }
         }
         
-        // 4. Champion Difficulty Distribution (Pie Chart)
-        // Count difficulty levels for the difficulty distribution chart
-        const difficultyData = {1: 0, 2: 0, 3: 0};
-        champions.forEach(champion => {
-          const difficulty = champion.difficulty || 2;
-          difficultyData[difficulty] = (difficultyData[difficulty] || 0) + 1;
-        });
-
         if (resourceTypeChartRef.current) {
           const resourceTypeCtx = resourceTypeChartRef.current.getContext('2d');
           new Chart(resourceTypeCtx, {
@@ -294,6 +286,13 @@ const AnalyticsPage = () => {
         }
 
         // 4. Champion Difficulty Distribution (Pie Chart)
+        // Count difficulty levels for the difficulty distribution chart
+        const difficultyData = {1: 0, 2: 0, 3: 0};
+        champions.forEach(champion => {
+          const difficulty = champion.difficulty || 2;
+          difficultyData[difficulty] = (difficultyData[difficulty] || 0) + 1;
+        });
+
         if (difficultyChartRef.current) {
           const difficultyCtx = difficultyChartRef.current.getContext('2d');
           new Chart(difficultyCtx, {
