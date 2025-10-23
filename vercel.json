@@ -1,17 +1,24 @@
 {
   "version": 2,
+  "builds": [
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "src/index.html", "use": "@vercel/static" },
+    { "src": "analytics.html", "use": "@vercel/static" },
+    { "src": "debug-analytics.html", "use": "@vercel/static" },
+    { "src": "simple-analytics.html", "use": "@vercel/static" },
+    { "src": "test-analytics.html", "use": "@vercel/static" },
+    { "src": "test-data-loading.html", "use": "@vercel/static" }
+  ],
   "routes": [
-    {
-      "src": "/",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/analytics",
-      "dest": "/analytics.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ]
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/src/(.*)", "dest": "/src/$1" },
+    { "src": "/analytics", "dest": "/analytics.html" },
+    { "src": "/debug-analytics", "dest": "/debug-analytics.html" },
+    { "src": "/simple-analytics", "dest": "/simple-analytics.html" },
+    { "src": "/test-analytics", "dest": "/test-analytics.html" },
+    { "src": "/test-data-loading", "dest": "/test-data-loading.html" }
+  ],
+  "github": {
+    "silent": true
+  }
 }
