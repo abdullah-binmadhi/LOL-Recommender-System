@@ -3808,21 +3808,73 @@ function restartQuestionnaire() {
             // Add table to container
             resultsContainer.appendChild(table);
             
-            // Add a close button
+            // Add buttons container
+            const buttonsContainer = document.createElement('div');
+            buttonsContainer.style.marginTop = '20px';
+            buttonsContainer.style.display = 'flex';
+            buttonsContainer.style.gap = '10px';
+            
+            // Add download CSV button
+            const downloadButton = document.createElement('button');
+            downloadButton.textContent = 'Download CSV';
+            downloadButton.className = 'btn btn-primary';
+            downloadButton.onclick = function() {
+                downloadTableAsCSV(userData);
+            };
+            
+            // Add close button
             const closeButton = document.createElement('button');
             closeButton.textContent = 'Close Results';
             closeButton.className = 'btn btn-primary';
-            closeButton.style.marginTop = '20px';
             closeButton.onclick = function() {
                 resultsContainer.remove();
                 document.getElementById('detailed-analysis').style.display = 'block';
             };
             
-            resultsContainer.appendChild(closeButton);
+            buttonsContainer.appendChild(downloadButton);
+            buttonsContainer.appendChild(closeButton);
+            resultsContainer.appendChild(buttonsContainer);
             
             // Hide the detailed analysis and show results
             document.getElementById('detailed-analysis').style.display = 'none';
             document.querySelector('.container').appendChild(resultsContainer);
+        }
+
+        // Function to download the table data as CSV
+        function downloadTableAsCSV(userData) {
+            // Create CSV content with headers
+            const headers = ['ID', 'Name', 'Email', 'Age', 'Gender', 'Experience', 'Recommended Champion', 'Registration Date'];
+            
+            let csvContent = headers.join(',') + '\n';
+            
+            userData.forEach((user, index) => {
+                const row = [
+                    index + 1,
+                    user.fullName || '',
+                    user.email || '',
+                    user.age || '',
+                    user.gender || '',
+                    user.experience || '',
+                    user.recommendedChampion || '',
+                    new Date(user.registrationDate).toLocaleDateString() || ''
+                ].map(field => `"${field}"`);
+                
+                csvContent += row.join(',') + '\n';
+            });
+            
+            // Download CSV
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'champion_recommendations.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            console.log('✅ Table downloaded as CSV file');
         }
 
         // Function to download as CSV (fallback method)
