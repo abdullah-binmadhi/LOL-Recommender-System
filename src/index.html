@@ -3728,17 +3728,16 @@ function restartQuestionnaire() {
 
         // Function to display all user results in a table format
         function displayAllResults(userData) {
-            // Create a new div to display the results
-            const resultsContainer = document.createElement('div');
-            resultsContainer.id = 'results-display';
-            resultsContainer.className = 'card detailed-analysis';
-            resultsContainer.style.display = 'block';
-            resultsContainer.style.marginTop = '20px';
+            // Get the detailed analysis container
+            const detailedAnalysis = document.getElementById('detailed-analysis');
             
-            // Create the header
-            const header = document.createElement('h2');
+            // Clear the existing content
+            const analysisContent = document.getElementById('analysis-content');
+            analysisContent.innerHTML = '';
+            
+            // Update the header
+            const header = detailedAnalysis.querySelector('h2');
             header.innerHTML = '<i class="analysis-icon"></i> All Champion Recommendations';
-            resultsContainer.appendChild(header);
             
             // Create the table
             const table = document.createElement('table');
@@ -3805,8 +3804,8 @@ function restartQuestionnaire() {
             
             table.appendChild(tbody);
             
-            // Add table to container
-            resultsContainer.appendChild(table);
+            // Add table to analysis content
+            analysisContent.appendChild(table);
             
             // Add buttons container
             const buttonsContainer = document.createElement('div');
@@ -3827,22 +3826,20 @@ function restartQuestionnaire() {
             closeButton.textContent = 'Close Results';
             closeButton.className = 'btn btn-primary';
             closeButton.onclick = function() {
-                resultsContainer.remove();
-                document.getElementById('detailed-analysis').style.display = 'block';
+                // Reset to show detailed analysis
+                header.innerHTML = '<i class="analysis-icon"></i> Detailed ML Analysis';
+                analysisContent.innerHTML = '';
+                detailedAnalysis.classList.remove('active');
             };
             
             buttonsContainer.appendChild(downloadButton);
             buttonsContainer.appendChild(closeButton);
-            resultsContainer.appendChild(buttonsContainer);
+            analysisContent.appendChild(buttonsContainer);
             
             // Debug logs
             console.log('Buttons container added to DOM');
             console.log('Download button:', downloadButton);
             console.log('Close button:', closeButton);
-            
-            // Hide the detailed analysis and show results
-            document.getElementById('detailed-analysis').style.display = 'none';
-            document.querySelector('.container').appendChild(resultsContainer);
         }
 
         // Function to download the table data as CSV
