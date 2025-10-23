@@ -3835,6 +3835,11 @@ function restartQuestionnaire() {
             buttonsContainer.appendChild(closeButton);
             resultsContainer.appendChild(buttonsContainer);
             
+            // Debug logs
+            console.log('Buttons container added to DOM');
+            console.log('Download button:', downloadButton);
+            console.log('Close button:', closeButton);
+            
             // Hide the detailed analysis and show results
             document.getElementById('detailed-analysis').style.display = 'none';
             document.querySelector('.container').appendChild(resultsContainer);
