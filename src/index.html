@@ -1741,7 +1741,6 @@
                 <!-- Detailed analysis will be populated here -->
             </div>
             <div class="buttons">
-                <button class="btn btn-primary" onclick="saveRecommendation()">Save</button>
                 <button class="btn btn-primary" onclick="restartQuestionnaire()">Try Again</button>
             </div>
         </div>
@@ -3807,13 +3806,7 @@ function restartQuestionnaire() {
             // Add table to analysis content
             analysisContent.appendChild(table);
             
-            // Add buttons container
-            const buttonsContainer = document.createElement('div');
-            buttonsContainer.style.marginTop = '20px';
-            buttonsContainer.style.display = 'flex';
-            buttonsContainer.style.gap = '10px';
-            
-            // Add download CSV button
+            // Add download CSV button only (no close button)
             const downloadButton = document.createElement('button');
             downloadButton.textContent = 'Download CSV';
             downloadButton.className = 'btn btn-primary';
@@ -3821,20 +3814,7 @@ function restartQuestionnaire() {
                 downloadTableAsCSV(userData);
             };
             
-            // Add close button
-            const closeButton = document.createElement('button');
-            closeButton.textContent = 'Close Results';
-            closeButton.className = 'btn btn-primary';
-            closeButton.onclick = function() {
-                // Reset to show detailed analysis
-                header.innerHTML = '<i class="analysis-icon"></i> Detailed ML Analysis';
-                analysisContent.innerHTML = '';
-                detailedAnalysis.classList.remove('active');
-            };
-            
-            buttonsContainer.appendChild(downloadButton);
-            buttonsContainer.appendChild(closeButton);
-            analysisContent.appendChild(buttonsContainer);
+            analysisContent.appendChild(downloadButton);
             
             // Debug logs
             console.log('Buttons container added to DOM');
