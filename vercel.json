@@ -9,6 +9,7 @@
     { "src": "test-analytics.html", "use": "@vercel/static" },
     { "src": "test-data-loading.html", "use": "@vercel/static" },
     { "src": "test-data-access.html", "use": "@vercel/static" },
+    { "src": "test-data-api.html", "use": "@vercel/static" },
     { "src": "data/champions.json", "use": "@vercel/static" },
     { "src": "src/data/champions.json", "use": "@vercel/static" },
     { "src": "src/data/questions.json", "use": "@vercel/static" },
