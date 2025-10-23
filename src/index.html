@@ -905,7 +905,9 @@
         }
 
         .alternatives-list {
-            space-y: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .alternative-item {
@@ -933,7 +935,9 @@
         }
 
         .meta-info {
-            space-y: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
         .meta-stat {
@@ -3748,8 +3752,7 @@ function restartQuestionnaire() {
             const headerRow = document.createElement('tr');
             const headers = [
                 'ID', 'Name', 'Email', 'Age', 'Gender', 'Experience',
-                'Recommended Champion', 'Algorithm', 'Confidence',
-                'Registration Date'
+                'Recommended Champion', 'Registration Date'
             ];
             
             headers.forEach(headerText => {
@@ -3786,8 +3789,6 @@ function restartQuestionnaire() {
                     user.gender || '',
                     user.experience || '',
                     user.recommendedChampion || '',
-                    user.winningAlgorithm || '',
-                    user.confidence || '',
                     new Date(user.registrationDate).toLocaleDateString() || ''
                 ];
                 
