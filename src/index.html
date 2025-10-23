@@ -2653,9 +2653,6 @@
                     console.log('✅ User data saved to localStorage successfully!');
                     console.log('📊 Press Ctrl+Shift+E to export your data as CSV');
                     
-                    // Also save to Supabase if available
-                    saveUserToSupabase(data);
-                    
                     resolve({ success: true, github_pages: true });
                 } catch (error) {
                     console.error('❌ Failed to save to localStorage:', error);
@@ -2664,44 +2661,7 @@
             });
         }
 
-        // Save user data to localStorage only (Supabase removed)
-        async function saveUserToSupabase(userData) {
-            try {
-                // Save to localStorage only
-                let existingData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
-                existingData.push(userData);
-                localStorage.setItem('championRecommenderUsers', JSON.stringify(existingData));
-                console.log('✅ User data saved to localStorage successfully!');
-            } catch (error) {
-                console.log('⚠️ Error occurred while saving user data:', error);
-            }
-        }
-
-        function generateSessionId() {
-            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        }
-
-        function createExcelFile(userData) {
-            const worksheet = XLSX.utils.json_to_sheet(userData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'UserData');
-            XLSX.writeFile(workbook, 'userData.xlsx');
-        }
-
-        function saveSessionId(sessionId) {
-            return new Promise((resolve, reject) => {
-                try {
-                    localStorage.setItem('championRecommenderSessionId', sessionId);
-                    console.log('✅ Session ID saved to localStorage successfully!');
-                    resolve();
-                } catch (error) {
-                    console.error('❌ Failed to save to localStorage:', error);
-                    reject(error);
-                }
-            });
-        }
-
-        // Save user data to localStorage only (Supabase removed)
+        // Save user data to localStorage only
         async function saveUserToSupabase(userData) {
             try {
                 // Save to localStorage only
@@ -3037,9 +2997,6 @@
                     localStorage.setItem('championRecommenderUsers', JSON.stringify(existingData));
                     console.log('✅ Results saved to localStorage successfully!');
                     console.log('📊 Press Ctrl+Shift+E to export complete data as CSV');
-                    
-                    // Also save to Supabase
-                    saveQuestionnaireResultsToSupabase(resultData);
                 } else {
                     console.log('⚠️ User not found in localStorage');
                 }
@@ -3048,7 +3005,7 @@
             }
         }
 
-        // Save questionnaire results to localStorage only (Supabase removed)
+        // Save questionnaire results to localStorage only
         async function saveQuestionnaireResultsToSupabase(resultData) {
             try {
                 // Save to localStorage only

@@ -32,7 +32,6 @@ export default function Navigation() {
           <Link href="/" style={{ 
             color: router.pathname === '/' ? '#1e88e5' : 'white', 
             textDecoration: 'none', 
-            marginRight: '20px',
             padding: '5px 10px',
             borderRadius: '3px'
           }}>
@@ -63,19 +62,9 @@ export default function Navigation() {
             color: router.pathname === '/init' ? '#1e88e5' : 'white', 
             textDecoration: 'none', 
             padding: '5px 10px',
-            borderRadius: '3px',
-            marginRight: '20px'
-          }}>
-            Initialize DB
-          </Link>
-          
-          <Link href="/test" style={{ 
-            color: router.pathname === '/test' ? '#1e88e5' : 'white', 
-            textDecoration: 'none', 
-            padding: '5px 10px',
             borderRadius: '3px'
           }}>
-            Test Supabase
+            Initialize DB
           </Link>
         </div>
       </div>
