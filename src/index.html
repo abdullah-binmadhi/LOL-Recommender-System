@@ -2658,15 +2658,7 @@
                     console.log('✅ User data saved to localStorage successfully!');
                     console.log('📊 Press Ctrl+Shift+E to export your data as CSV');
                     
-                    // Track user registration with Google Analytics
-                    if (typeof gtag !== 'undefined') {
-                        gtag('event', 'user_registered', {
-                            'user_age': data.age,
-                            'user_gender': data.gender,
-                            'user_experience': data.experience,
-                            'user_region': 'GitHub Pages' // Since we're using GitHub Pages
-                        });
-                    }
+                    // Google Analytics tracking removed as per user request
                     
                     resolve({ success: true, github_pages: true });
                 } catch (error) {
@@ -2959,15 +2951,7 @@
             const consensus = findConsensus(champions);
             const winner = findWinner(mlResults);
             
-            // Track questionnaire completion with Google Analytics
-            if (typeof gtag !== 'undefined') {
-                gtag('event', 'questionnaire_completed', {
-                    'number_of_questions': answers.length,
-                    'recommended_champion': consensus.champions[0],
-                    'winning_algorithm': winner,
-                    'confidence_score': Math.round(mlResults[winner].confidence * 10) / 10
-                });
-            }
+            // Google Analytics tracking removed as per user request
             
             // Update diversity tracking with new recommendations
             updateRecentRecommendations(champions);
@@ -3371,15 +3355,7 @@ function showDetailedAnalysis() {
             // Set the content
             analysisContent.innerHTML = content;
             
-            // Track champion recommendation view with Google Analytics
-            if (typeof gtag !== 'undefined') {
-                gtag('event', 'champion_recommendation_viewed', {
-                    'champion_name': mlResults[winner].champion,
-                    'algorithm_used': winner,
-                    'confidence_score': mlResults[winner].confidence.toFixed(1),
-                    'number_of_alternatives': altCount
-                });
-            }
+            // Google Analytics tracking removed as per user request
             
             // Show the detailed analysis section
             document.getElementById('detailed-analysis').classList.add('active');
@@ -4153,40 +4129,7 @@ setInterval(() => {
         })();
     </script>
     
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LYYHFNVJBP"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-LYYHFNVJBP');
-        
-        // Custom event tracking for champion recommendations
-        function trackRecommendation(champion, algorithm, confidence) {
-            gtag('event', 'champion_recommendation', {
-                'champion_name': champion,
-                'algorithm_used': algorithm,
-                'confidence_score': confidence
-            });
-        }
-        
-        // Custom event tracking for questionnaire completion
-        function trackQuestionnaireCompletion(answers) {
-            gtag('event', 'questionnaire_completed', {
-                'number_of_questions': answers.length,
-                'completion_time': new Date().toISOString()
-            });
-        }
-        
-        // Custom event tracking for user registration
-        function trackUserRegistration(userData) {
-            gtag('event', 'user_registered', {
-                'user_age': userData.age,
-                'user_gender': userData.gender,
-                'user_experience': userData.experience
-            });
-        }
-    </script>
+    <!-- Google Analytics removed as per user request -->
     
 </body>
 </html>
