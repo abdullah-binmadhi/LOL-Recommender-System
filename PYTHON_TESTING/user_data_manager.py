@@ -10,6 +10,9 @@ import os
 from datetime import datetime
 from pathlib import Path
 
+# Import the evaluation metrics module
+from evaluation_metrics import EvaluationMetrics
+
 class UserDataManager:
     def __init__(self, csv_file='champion_recommender_users.csv', json_backup='user_data_backup.json'):
         # Ensure we're working in the PYTHON_TESTING directory
@@ -56,7 +59,8 @@ class UserDataManager:
             'KNN Champion', 'KNN Confidence', 'Consensus Level',
             'User Answers', 'Completion Date',
             'Pressure Response', 'Aesthetic Preference', 'Team Contribution',
-            'Character Identity', 'Problem Solving Approach'
+            'Character Identity', 'Problem Solving Approach',
+            'Precision@1', 'Precision@3', 'Precision@5', 'MRR'
         ]
         
         # Write CSV file
@@ -64,7 +68,30 @@ class UserDataManager:
             writer = csv.DictWriter(csvfile, fieldnames=headers)
             writer.writeheader()
             
+            # Sample champions for relevance calculation
+            sample_champions = [
+                {'name': 'Ahri', 'role': 'Mage', 'difficulty': 6, 'damage': 8, 'toughness': 3},
+                {'name': 'Garen', 'role': 'Fighter', 'difficulty': 5, 'damage': 7, 'toughness': 7},
+                {'name': 'Thresh', 'role': 'Support', 'difficulty': 7, 'damage': 5, 'toughness': 6},
+                {'name': 'Jinx', 'role': 'Marksman', 'difficulty': 6, 'damage': 9, 'toughness': 3},
+                {'name': 'Malphite', 'role': 'Tank', 'difficulty': 4, 'damage': 6, 'toughness': 8},
+                {'name': 'Yasuo', 'role': 'Fighter', 'difficulty': 8, 'damage': 9, 'toughness': 4},
+                {'name': 'Lux', 'role': 'Mage', 'difficulty': 5, 'damage': 8, 'toughness': 3},
+                {'name': 'Braum', 'role': 'Support', 'difficulty': 3, 'damage': 3, 'toughness': 9},
+                {'name': 'Zed', 'role': 'Assassin', 'difficulty': 9, 'damage': 9, 'toughness': 3},
+                {'name': 'Leona', 'role': 'Support', 'difficulty': 5, 'damage': 5, 'toughness': 9}
+            ]
+            
             for user in self.users_data:
+                # Calculate evaluation metrics for this user
+                recommended_champions = EvaluationMetrics.get_recommended_champions(user)
+                relevant_champions = EvaluationMetrics.calculate_user_relevance(user, sample_champions)
+                
+                precision_at_1 = EvaluationMetrics.precision_at_k(recommended_champions, relevant_champions, 1)
+                precision_at_3 = EvaluationMetrics.precision_at_k(recommended_champions, relevant_champions, 3)
+                precision_at_5 = EvaluationMetrics.precision_at_k(recommended_champions, relevant_champions, 5)
+                mrr = EvaluationMetrics.mean_reciprocal_rank(recommended_champions, relevant_champions)
+                
                 row = {
                     'ID': user.get('id', ''),
                     'Full Name': user.get('full_name', ''),
@@ -91,7 +118,11 @@ class UserDataManager:
                     'Aesthetic Preference': user.get('aesthetic_preference', ''),
                     'Team Contribution': user.get('team_contribution', ''),
                     'Character Identity': user.get('character_identity', ''),
-                    'Problem Solving Approach': user.get('problem_solving', '')
+                    'Problem Solving Approach': user.get('problem_solving', ''),
+                    'Precision@1': f"{precision_at_1:.3f}",
+                    'Precision@3': f"{precision_at_3:.3f}",
+                    'Precision@5': f"{precision_at_5:.3f}",
+                    'MRR': f"{mrr:.3f}"
                 }
                 writer.writerow(row)
         
@@ -117,6 +148,17 @@ class UserDataManager:
     def get_csv_path(self):
         """Get the full path to the CSV file"""
         return str(self.csv_file.absolute())
+    
+    def calculate_evaluation_metrics(self):
+        """Calculate and display evaluation metrics for all users"""
+        try:
+            # Import here to avoid circular imports
+            from evaluation_metrics import evaluate_model_performance
+            results = evaluate_model_performance()
+            return results
+        except Exception as e:
+            print(f"Error calculating evaluation metrics: {e}")
+            return {}
 
 # Example usage and test functions
 def add_sample_user():
@@ -150,9 +192,10 @@ def main():
         print("2. View user count")
         print("3. Create/Update CSV file")
         print("4. Show CSV file path")
-        print("5. Exit")
+        print("5. Calculate evaluation metrics")
+        print("6. Exit")
         
-        choice = input("\nEnter your choice (1-5): ").strip()
+        choice = input("\nEnter your choice (1-6): ").strip()
         
         if choice == '1':
             manager = add_sample_user()
@@ -164,6 +207,8 @@ def main():
         elif choice == '4':
             print(f"CSV file location: {manager.get_csv_path()}")
         elif choice == '5':
+            manager.calculate_evaluation_metrics()
+        elif choice == '6':
             print("Goodbye!")
             break
         else:

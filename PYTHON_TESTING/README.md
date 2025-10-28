@@ -8,6 +8,9 @@ This folder contains the Python server and CSV file management system for the Ch
 - `requirements.txt` - Python dependencies
 - `champion_recommender_users.csv` - CSV file with all user data (auto-created)
 - `user_data_backup.json` - JSON backup of user data (auto-created)
+- `evaluation_metrics.py` - Implementation of Precision@K and MRR evaluation metrics
+- `test_evaluation_metrics.py` - Test suite for evaluation metrics
+- `evaluate_recommendations.py` - Command-line tool for evaluating recommendation performance
 
 ## 🚀 Quick Setup
 
@@ -60,6 +63,17 @@ The CSV file contains the following columns:
 - Consensus Level
 - User Answers
 - Completion Date
+- Pressure Response
+- Aesthetic Preference
+- Team Contribution
+- Character Identity
+- Problem Solving Approach
+
+### Evaluation Metrics (added automatically):
+- Precision@1
+- Precision@3
+- Precision@5
+- MRR
 
 ## 🔧 API Endpoints
 
@@ -74,7 +88,39 @@ The CSV file contains the following columns:
 1. **User Registration**: When someone fills out the form, data is sent to the server
 2. **CSV Update**: Server immediately updates the CSV file in this folder
 3. **Results Update**: When user completes questionnaire, results are added to the same CSV row
-4. **Real-time Updates**: CSV file is updated in real-time as users register and complete questionnaires
+4. **Evaluation Metrics**: Precision@K and MRR metrics are automatically calculated and added to the CSV
+5. **Real-time Updates**: CSV file is updated in real-time as users register and complete questionnaires
+
+## 📊 Evaluation Metrics
+
+The system automatically calculates two key evaluation metrics for each user:
+
+### Precision@K
+Measures the proportion of recommended champions in the top-K results that are actually relevant to the user.
+
+### Mean Reciprocal Rank (MRR)
+Measures how early the first relevant champion appears in the ranking.
+
+These metrics help evaluate:
+- Overall relevance of top-ranked champions for user preferences
+- How quickly relevant champions are recommended for faster adoption
+
+## 🧪 Testing Evaluation Metrics
+
+### Run Evaluation Tests:
+```bash
+python test_evaluation_metrics.py
+```
+
+### Evaluate Recommendation Performance:
+```bash
+python evaluate_recommendations.py
+```
+
+### Update Existing CSV with Metrics:
+```bash
+python update_csv_with_metrics.py
+```
 
 ## 🔍 Checking Your Data
 
@@ -87,6 +133,7 @@ python -c "from user_data_manager import UserDataManager; print(UserDataManager(
 ```bash
 python user_data_manager.py
 # Choose option 1 to add a sample user
+# Choose option 5 to calculate evaluation metrics
 ```
 
 ### Check User Count:
@@ -122,7 +169,7 @@ You can open this file in Excel, Google Sheets, or any CSV viewer to see all use
 When everything is working correctly, you should see:
 - ✅ "User data saved to PYTHON_TESTING folder successfully!" in browser console
 - ✅ "Results saved to PYTHON_TESTING CSV file successfully!" after completing questionnaire
-- 📊 CSV file in this folder with user data
+- 📊 CSV file in this folder with user data and evaluation metrics
 - 📁 File path shown in console messages
 
-The CSV file will be automatically updated every time a user registers or completes the questionnaire!
+The CSV file will be automatically updated every time a user registers or completes the questionnaire, including the evaluation metrics for each user!
