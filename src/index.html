@@ -1603,6 +1603,105 @@
             background-blend-mode: overlay;
             background-size: cover, 300px;
         }
+
+        /* Evaluation Metrics Section Styles */
+        .evaluation-metrics-section {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .evaluation-metrics-section h3 {
+            color: #2e7d32;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .metric-value.excellent {
+            color: #2e7d32;
+        }
+
+        .metric-value.good {
+            color: #f57c00;
+        }
+
+        .metric-value.poor {
+            color: #c62828;
+        }
+
+        .metric-description {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+
+        .performance-interpretation {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #2e7d32;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .performance-interpretation h4 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .performance-interpretation p {
+            color: #424242;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .metrics-icon {
+            font-size: 1.5rem;
+        }
     </style>
 </head>
 <body>
@@ -2535,6 +2634,279 @@
             }
         }
 
+        // Evaluation Metrics Class
+        class EvaluationMetrics {
+            /**
+             * Calculate Precision@K metric
+             * @param {Array<string>} recommendedChampions - Array of recommended champion names
+             * @param {Set<string>} relevantChampions - Set of relevant champion names
+             * @param {number} k - Number of top recommendations to consider
+             * @returns {number} - Precision value between 0.0 and 1.0
+             */
+            static precisionAtK(recommendedChampions, relevantChampions, k) {
+                // Handle edge cases
+                if (!recommendedChampions || recommendedChampions.length === 0 || k === 0) {
+                    return 0.0;
+                }
+                
+                // Get top K recommendations
+                const topK = recommendedChampions.slice(0, k);
+                
+                // Count how many are relevant
+                let relevantCount = 0;
+                for (const champion of topK) {
+                    if (relevantChampions.has(champion)) {
+                        relevantCount++;
+                    }
+                }
+                
+                // Calculate precision
+                return relevantCount / topK.length;
+            }
+            
+            /**
+             * Calculate Mean Reciprocal Rank metric
+             * @param {Array<string>} recommendedChampions - Array of recommended champion names
+             * @param {Set<string>} relevantChampions - Set of relevant champion names
+             * @returns {number} - MRR value between 0.0 and 1.0
+             */
+            static meanReciprocalRank(recommendedChampions, relevantChampions) {
+                // Handle edge cases
+                if (!recommendedChampions || recommendedChampions.length === 0) {
+                    return 0.0;
+                }
+                
+                // Find rank of first relevant champion (1-indexed)
+                for (let i = 0; i < recommendedChampions.length; i++) {
+                    if (relevantChampions.has(recommendedChampions[i])) {
+                        return 1.0 / (i + 1);
+                    }
+                }
+                
+                // No relevant champion found
+                return 0.0;
+            }
+            
+            /**
+             * Calculate user relevance based on questionnaire answers
+             * @param {Object} userAnswers - User's questionnaire answers
+             * @param {Object} allChampions - All available champions
+             * @returns {Set<string>} - Set of relevant champion names
+             */
+            static calculateUserRelevance(userAnswers, allChampions) {
+                const relevantChampions = new Set();
+                
+                // Extract user preferences
+                const userRole = userAnswers.role || 'No Preference';
+                const userDifficulty = this.mapDifficultyToNumeric(userAnswers.difficulty);
+                const { damage: userDamage, toughness: userToughness } = this.mapPlaystyleToAttributes(userAnswers.playstyle);
+                
+                // Iterate through all champions
+                for (const [championName, champion] of Object.entries(allChampions)) {
+                    let isRelevant = true;
+                    
+                    // Check role match (exact match OR user has no preference)
+                    if (userRole !== 'No Preference' && userRole !== champion.role) {
+                        isRelevant = false;
+                    }
+                    
+                    // Check difficulty match (within ±2 points)
+                    if (userDifficulty !== null && Math.abs(userDifficulty - champion.difficulty) > 2) {
+                        isRelevant = false;
+                    }
+                    
+                    // Check damage match (within ±2 points, if specified)
+                    if (userDamage !== null && Math.abs(userDamage - champion.damage) > 2) {
+                        isRelevant = false;
+                    }
+                    
+                    // Check toughness match (within ±2 points, if specified)
+                    if (userToughness !== null && Math.abs(userToughness - champion.toughness) > 2) {
+                        isRelevant = false;
+                    }
+                    
+                    if (isRelevant) {
+                        relevantChampions.add(championName);
+                    }
+                }
+                
+                return relevantChampions;
+            }
+            
+            /**
+             * Extract recommended champions from ML results
+             * @param {Object} mlResults - Results from all ML algorithms
+             * @returns {Array<string>} - Array of champion names sorted by confidence
+             */
+            static getRecommendedChampions(mlResults) {
+                const championScores = {};
+                
+                // Extract champions from each algorithm
+                for (const [algorithmName, result] of Object.entries(mlResults)) {
+                    if (result && result.champion) {
+                        const championName = result.champion;
+                        const confidence = result.confidence || 0;
+                        
+                        // Collect confidence scores (use max if champion appears multiple times)
+                        if (!championScores[championName] || championScores[championName] < confidence) {
+                            championScores[championName] = confidence;
+                        }
+                    }
+                }
+                
+                // Sort by confidence score descending
+                const sortedChampions = Object.entries(championScores)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(entry => entry[0]);
+                
+                return sortedChampions;
+            }
+            
+            /**
+             * Helper: Map difficulty string to numeric value
+             * @param {string} difficulty - Difficulty string from questionnaire
+             * @returns {number|null} - Numeric difficulty value or null
+             */
+            static mapDifficultyToNumeric(difficulty) {
+                const mapping = {
+                    'Easy (1-3)': 2,
+                    'Medium (4-6)': 5,
+                    'Hard (7-8)': 7.5,
+                    'Very Hard (9-10)': 9.5
+                };
+                return mapping[difficulty] !== undefined ? mapping[difficulty] : null;
+            }
+            
+            /**
+             * Helper: Map playstyle to damage/toughness attributes
+             * @param {string} playstyle - Playstyle string from questionnaire
+             * @returns {Object} - Object with damage and toughness values
+             */
+            static mapPlaystyleToAttributes(playstyle) {
+                const mapping = {
+                    'High Damage Output': { damage: 8, toughness: 3 },
+                    'Tanky and Durable': { damage: 4, toughness: 8 },
+                    'Support Team': { damage: 3, toughness: 5 },
+                    'Balanced/Hybrid': { damage: 5, toughness: 5 }
+                };
+                return mapping[playstyle] || { damage: null, toughness: null };
+            }
+        }
+
+        /**
+         * Display evaluation metrics in a visually appealing section
+         * @param {Object} metrics - Object containing p1, p3, p5, mrr values
+         * @param {number} relevantCount - Number of relevant champions
+         * @param {number} recommendedCount - Number of recommended champions
+         * @returns {string} - HTML string for metrics section
+         */
+        function displayEvaluationMetrics(metrics, relevantCount, recommendedCount) {
+            // Helper function to determine color class based on metric value
+            function getColorClass(value) {
+                if (value >= 0.7) return 'excellent';
+                if (value >= 0.4) return 'good';
+                return 'poor';
+            }
+
+            // Helper function to format percentage
+            function formatPercentage(value) {
+                return (value * 100).toFixed(1) + '%';
+            }
+
+            // Determine overall performance level
+            let performanceLevel = 'Needs Improvement';
+            let performanceMessage = 'The recommendations show room for improvement. Consider adjusting your preferences for better matches.';
+            let performanceColor = '#c62828';
+
+            if (metrics.p5 >= 0.6 && metrics.mrr >= 0.5) {
+                performanceLevel = 'Excellent';
+                performanceMessage = 'The recommendations are highly aligned with your preferences! The top suggestions should be great matches for your playstyle.';
+                performanceColor = '#2e7d32';
+            } else if (metrics.p5 >= 0.4 || metrics.mrr >= 0.3) {
+                performanceLevel = 'Good';
+                performanceMessage = 'The recommendations show good alignment with your preferences. You should find several suitable champions in the top suggestions.';
+                performanceColor = '#f57c00';
+            }
+
+            // Build the HTML structure
+            const html = `
+                <div class="evaluation-metrics-section">
+                    <h3>
+                        <span style="font-size: 1.8rem; margin-right: 10px;">📊</span>
+                        Recommendation Quality Metrics
+                    </h3>
+                    
+                    <div class="metrics-grid">
+                        <!-- Precision@1 Card -->
+                        <div class="metric-card">
+                            <div class="metric-label">Precision@1</div>
+                            <div class="metric-value ${getColorClass(metrics.p1)}">
+                                ${formatPercentage(metrics.p1)}
+                            </div>
+                            <div class="metric-description">
+                                Top recommendation relevance
+                            </div>
+                        </div>
+
+                        <!-- Precision@3 Card -->
+                        <div class="metric-card">
+                            <div class="metric-label">Precision@3</div>
+                            <div class="metric-value ${getColorClass(metrics.p3)}">
+                                ${formatPercentage(metrics.p3)}
+                            </div>
+                            <div class="metric-description">
+                                Top 3 recommendations relevance
+                            </div>
+                        </div>
+
+                        <!-- Precision@5 Card -->
+                        <div class="metric-card">
+                            <div class="metric-label">Precision@5</div>
+                            <div class="metric-value ${getColorClass(metrics.p5)}">
+                                ${formatPercentage(metrics.p5)}
+                            </div>
+                            <div class="metric-description">
+                                Top 5 recommendations relevance
+                            </div>
+                        </div>
+
+                        <!-- MRR Card -->
+                        <div class="metric-card">
+                            <div class="metric-label">Mean Reciprocal Rank</div>
+                            <div class="metric-value ${getColorClass(metrics.mrr)}">
+                                ${formatPercentage(metrics.mrr)}
+                            </div>
+                            <div class="metric-description">
+                                First relevant match position
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Interpretation -->
+                    <div class="performance-interpretation" style="border-left-color: ${performanceColor};">
+                        <h4 style="color: ${performanceColor}; margin-bottom: 10px; font-size: 1.2rem;">
+                            Overall Performance: ${performanceLevel}
+                        </h4>
+                        <p style="color: #424242; margin-bottom: 15px; line-height: 1.6;">
+                            ${performanceMessage}
+                        </p>
+                        <div style="display: flex; justify-content: space-around; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">Relevant Champions</div>
+                                <div style="font-size: 1.3rem; font-weight: bold; color: #2e7d32;">${relevantCount}</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">Recommended</div>
+                                <div style="font-size: 1.3rem; font-weight: bold; color: #1565c0;">${recommendedCount}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return html;
+        }
+
         // Application Logic
         let currentQuestion = 1;
         let answers = {};
@@ -3328,6 +3700,37 @@ function showDetailedAnalysis() {
             content += '</div>';
             content += '</div>';
             content += '</div>';
+            
+            // Calculate and display evaluation metrics
+            try {
+                // Calculate user relevance based on questionnaire answers
+                const relevantChampions = EvaluationMetrics.calculateUserRelevance(answers, allChampions);
+                
+                // Get recommended champions from ML results
+                const recommendedChampions = EvaluationMetrics.getRecommendedChampions(mlResults);
+                
+                // Calculate Precision@K metrics
+                const precision1 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 1);
+                const precision3 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 3);
+                const precision5 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 5);
+                
+                // Calculate Mean Reciprocal Rank
+                const mrr = EvaluationMetrics.meanReciprocalRank(recommendedChampions, relevantChampions);
+                
+                // Create metrics object
+                const metrics = {
+                    p1: precision1,
+                    p3: precision3,
+                    p5: precision5,
+                    mrr: mrr
+                };
+                
+                // Display metrics section
+                content += displayEvaluationMetrics(metrics, relevantChampions.size, recommendedChampions.length);
+            } catch (error) {
+                console.error('Error calculating evaluation metrics:', error);
+                // Continue without metrics if there's an error
+            }
             
             content += '<div class="final-tips">';
             content += '<h4><i class="sparkle-icon-sm"></i> Pro Tips</h4>';

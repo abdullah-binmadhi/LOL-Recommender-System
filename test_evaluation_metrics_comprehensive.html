@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Evaluation Metrics Tests</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 { color: #333; text-align: center; }
+        .test-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .pass { background: #d4edda; color: #155724; }
+        .fail { background: #f8d7da; color: #721c24; }
+        .summary {
+            background: #667eea;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2rem;
+            margin-top: 30px;
+        }
+        .metric-display {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin: 0 5px;
+            font-weight: bold;
+        }
+        .excellent { background: #d4edda; color: #155724; }
+        .good { background: #fff3cd; color: #856404; }
+        .poor { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Comprehensive Evaluation Metrics Test Suite</h1>
+    
+    <div id="test-results"></div>
+    
+    <div id="summary" class="summary"></div>
+
+    <script>
+        // Copy the EvaluationMetrics class from src/index.html
+        class EvaluationMetrics {
+            static precisionAtK(recommendedChampions, relevantChampions, k) {
+                if (!recommendedChampions || recommendedChampions.length === 0 || k === 0) {
+                    return 0.0;
+                }
+                const topK = recommendedChampions.slice(0, k);
+                let relevantCount = 0;
+                for (const champion of topK) {
+                    if (relevantChampions.has(champion)) {
+                        relevantCount++;
+                    }
+                }
+                return relevantCount / topK.length;
+            }
+            
+            static meanReciprocalRank(recommendedChampions, relevantChampions) {
+                if (!recommendedChampions || recommendedChampions.length === 0) {
+                    return 0.0;
+                }
+                for (let i = 0; i < recommendedChampions.length; i++) {
+                    if (relevantChampions.has(recommendedChampions[i])) {
+                        return 1.0 / (i + 1);
+                    }
+                }
+                return 0.0;
+            }
+            
+            static calculateUserRelevance(userAnswers, allChampions) {
+                const relevantChampions = new Set();
+                const userRole = userAnswers.role || 'No Preference';
+                const userDifficulty = this.mapDifficultyToNumeric(userAnswers.difficulty);
+                const { damage: userDamage, toughness: userToughness } = this.mapPlaystyleToAttributes(userAnswers.playstyle);
+                
+                for (const [championName, champion] of Object.entries(allChampions)) {
+                    let isRelevant = true;
+                    if (userRole !== 'No Preference' && userRole !== champion.role) {
+                        isRelevant = false;
+                    }
+                    if (userDifficulty !== null && Math.abs(userDifficulty - champion.difficulty) > 2) {
+                        isRelevant = false;
+                    }
+                    if (userDamage !== null && Math.abs(userDamage - champion.damage) > 2) {
+                        isRelevant = false;
+                    }
+                    if (userToughness !== null && Math.abs(userToughness - champion.toughness) > 2) {
+                        isRelevant = false;
+                    }
+                    if (isRelevant) {
+                        relevantChampions.add(championName);
+                    }
+                }
+                return relevantChampions;
+            }
+            
+            static getRecommendedChampions(mlResults) {
+                const championScores = {};
+                for (const [algorithmName, result] of Object.entries(mlResults)) {
+                    if (result && result.champion) {
+                        const championName = result.champion;
+                        const confidence = result.confidence || 0;
+                        if (!championScores[championName] || championScores[championName] < confidence) {
+                            championScores[championName] = confidence;
+                        }
+                    }
+                }
+                const sortedChampions = Object.entries(championScores)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(entry => entry[0]);
+                return sortedChampions;
+            }
+            
+            static mapDifficultyToNumeric(difficulty) {
+                const mapping = {
+                    'Easy (1-3)': 2,
+                    'Medium (4-6)': 5,
+                    'Hard (7-8)': 7.5,
+                    'Very Hard (9-10)': 9.5
+                };
+                return mapping[difficulty] !== undefined ? mapping[difficulty] : null;
+            }
+            
+            static mapPlaystyleToAttributes(playstyle) {
+                const mapping = {
+                    'High Damage Output': { damage: 8, toughness: 3 },
+                    'Tanky and Durable': { damage: 4, toughness: 8 },
+                    'Support Team': { damage: 3, toughness: 5 },
+                    'Balanced/Hybrid': { damage: 5, toughness: 5 }
+                };
+                return mapping[playstyle] || { damage: null, toughness: null };
+            }
+        }
+
+        // Test data - sample champions
+        const sampleChampions = {
+            'Ahri': { role: 'Mage', difficulty: 5, damage: 8, toughness: 3 },
+            'Lux': { role: 'Mage', difficulty: 4, damage: 9, toughness: 2 },
+            'Annie': { role: 'Mage', difficulty: 2, damage: 8, toughness: 3 },
+            'Garen': { role: 'Fighter', difficulty: 3, damage: 6, toughness: 8 },
+            'Darius': { role: 'Fighter', difficulty: 4, damage: 8, toughness: 7 },
+            'Zed': { role: 'Assassin', difficulty: 8, damage: 9, toughness: 2 },
+            'Yasuo': { role: 'Assassin', difficulty: 9, damage: 8, toughness: 4 },
+            'Leona': { role: 'Tank', difficulty: 3, damage: 4, toughness: 9 },
+            'Braum': { role: 'Tank', difficulty: 3, damage: 3, toughness: 9 },
+            'Janna': { role: 'Support', difficulty: 5, damage: 3, toughness: 4 }
+        };
+
+        // Test runner
+        const testResults = [];
+        let currentSection = '';
+
+        function startSection(name) {
+            currentSection = name;
+            testResults.push({ type: 'section', name });
+        }
+
+        function test(description, condition, details = '') {
+            const passed = condition;
+            testResults.push({
+                type: 'test',
+                section: currentSection,
+                description,
+                passed,
+                details
+            });
+            return passed;
+        }
+
+        // ===== TASK 5.1: Test with various user preferences =====
+        startSection('5.1 Test with Various User Preferences');
+
+        // Test 5.1.1: No Preference role selection
+        const noPreferenceAnswers = {
+            role: 'No Preference',
+            difficulty: 'Medium (4-6)',
+            playstyle: 'Balanced/Hybrid'
+        };
+        const noPreferenceRelevant = EvaluationMetrics.calculateUserRelevance(noPreferenceAnswers, sampleChampions);
+        test(
+            'No Preference role should match all roles',
+            noPreferenceRelevant.size > 5,
+            `Found ${noPreferenceRelevant.size} relevant champions: ${Array.from(noPreferenceRelevant).join(', ')}`
+        );
+
+        // Test 5.1.2: Specific role - Mage
+        const mageAnswers = {
+            role: 'Mage',
+            difficulty: 'Medium (4-6)',
+            playstyle: 'High Damage Output'
+        };
+        const mageRelevant = EvaluationMetrics.calculateUserRelevance(mageAnswers, sampleChampions);
+        test(
+            'Mage role should only match Mage champions',
+            mageRelevant.has('Ahri') && mageRelevant.has('Lux') && !mageRelevant.has('Garen'),
+            `Found ${mageRelevant.size} mages: ${Array.from(mageRelevant).join(', ')}`
+        );
+
+        // Test 5.1.3: Specific role - Fighter
+        const fighterAnswers = {
+            role: 'Fighter',
+            difficulty: 'Easy (1-3)',
+            playstyle: 'Tanky and Durable'
+        };
+        const fighterRelevant = EvaluationMetrics.calculateUserRelevance(fighterAnswers, sampleChampions);
+        test(
+            'Fighter role should only match Fighter champions',
+            fighterRelevant.has('Garen') && !fighterRelevant.has('Ahri'),
+            `Found ${fighterRelevant.size} fighters: ${Array.from(fighterRelevant).join(', ')}`
+        );
+
+        // Test 5.1.4: Easy difficulty level
+        const easyAnswers = {
+            role: 'No Preference',
+            difficulty: 'Easy (1-3)',
+            playstyle: 'Balanced/Hybrid'
+        };
+        const easyRelevant = EvaluationMetrics.calculateUserRelevance(easyAnswers, sampleChampions);
+        test(
+            'Easy difficulty should match champions with difficulty 1-5 (±2 from 2)',
+            easyRelevant.has('Annie') && easyRelevant.has('Garen') && !easyRelevant.has('Zed'),
+            `Found ${easyRelevant.size} easy champions: ${Array.from(easyRelevant).join(', ')}`
+        );
+
+        // Test 5.1.5: Very Hard difficulty level
+        const hardAnswers = {
+            role: 'No Preference',
+            difficulty: 'Very Hard (9-10)',
+            playstyle: 'High Damage Output'
+        };
+        const hardRelevant = EvaluationMetrics.calculateUserRelevance(hardAnswers, sampleChampions);
+        test(
+            'Very Hard difficulty should match champions with difficulty 7.5-10 (±2 from 9.5)',
+            hardRelevant.has('Yasuo') && !hardRelevant.has('Annie'),
+            `Found ${hardRelevant.size} hard champions: ${Array.from(hardRelevant).join(', ')}`
+        );
+
+        // ===== TASK 5.2: Verify metrics calculations =====
+        startSection('5.2 Verify Metrics Calculations');
+
+        // Test 5.2.1: Precision@K values are between 0.0 and 1.0
+        const testRecommended = ['Ahri', 'Lux', 'Zed', 'Garen', 'Darius'];
+        const testRelevant = new Set(['Ahri', 'Lux', 'Garen']);
+        
+        const p1 = EvaluationMetrics.precisionAtK(testRecommended, testRelevant, 1);
+        test(
+            'Precision@1 is between 0.0 and 1.0',
+            p1 >= 0.0 && p1 <= 1.0,
+            `P@1 = ${p1.toFixed(3)}`
+        );
+
+        const p3 = EvaluationMetrics.precisionAtK(testRecommended, testRelevant, 3);
+        test(
+            'Precision@3 is between 0.0 and 1.0',
+            p3 >= 0.0 && p3 <= 1.0,
+            `P@3 = ${p3.toFixed(3)}`
+        );
+
+        const p5 = EvaluationMetrics.precisionAtK(testRecommended, testRelevant, 5);
+        test(
+            'Precision@5 is between 0.0 and 1.0',
+            p5 >= 0.0 && p5 <= 1.0,
+            `P@5 = ${p5.toFixed(3)}`
+        );
+
+        // Test 5.2.2: MRR values are between 0.0 and 1.0
+        const mrr = EvaluationMetrics.meanReciprocalRank(testRecommended, testRelevant);
+        test(
+            'MRR is between 0.0 and 1.0',
+            mrr >= 0.0 && mrr <= 1.0,
+            `MRR = ${mrr.toFixed(3)}`
+        );
+
+        // Test 5.2.3: Metrics display with one decimal place
+        const formatPercentage = (value) => (value * 100).toFixed(1) + '%';
+        test(
+            'Metrics format correctly with one decimal place',
+            formatPercentage(0.667) === '66.7%' && formatPercentage(0.5) === '50.0%',
+            `66.7% and 50.0% formatted correctly`
+        );
+
+        // Test 5.2.4: Edge case - no relevant champions
+        const noRelevant = new Set();
+        const pNoRelevant = EvaluationMetrics.precisionAtK(testRecommended, noRelevant, 3);
+        const mrrNoRelevant = EvaluationMetrics.meanReciprocalRank(testRecommended, noRelevant);
+        test(
+            'Edge case: No relevant champions returns 0.0',
+            pNoRelevant === 0.0 && mrrNoRelevant === 0.0,
+            `P@3 = ${pNoRelevant}, MRR = ${mrrNoRelevant}`
+        );
+
+        // Test 5.2.5: Edge case - all relevant
+        const allRelevant = new Set(testRecommended);
+        const pAllRelevant = EvaluationMetrics.precisionAtK(testRecommended, allRelevant, 5);
+        test(
+            'Edge case: All relevant champions returns 1.0',
+            pAllRelevant === 1.0,
+            `P@5 = ${pAllRelevant.toFixed(3)}`
+        );
+
+        // Test 5.2.6: Edge case - empty recommended array
+        const pEmpty = EvaluationMetrics.precisionAtK([], testRelevant, 3);
+        const mrrEmpty = EvaluationMetrics.meanReciprocalRank([], testRelevant);
+        test(
+            'Edge case: Empty recommended array returns 0.0',
+            pEmpty === 0.0 && mrrEmpty === 0.0,
+            `P@3 = ${pEmpty}, MRR = ${mrrEmpty}`
+        );
+
+        // Test 5.2.7: Edge case - k = 0
+        const pZeroK = EvaluationMetrics.precisionAtK(testRecommended, testRelevant, 0);
+        test(
+            'Edge case: k=0 returns 0.0',
+            pZeroK === 0.0,
+            `P@0 = ${pZeroK}`
+        );
+
+        // ===== TASK 5.3: Validate visual integration =====
+        startSection('5.3 Validate Visual Integration');
+
+        // Test 5.3.1: Color coding function
+        function getColorClass(value) {
+            if (value >= 0.7) return 'excellent';
+            if (value >= 0.4) return 'good';
+            return 'poor';
+        }
+
+        test(
+            'Color coding: Excellent (≥0.7) returns "excellent"',
+            getColorClass(0.8) === 'excellent' && getColorClass(0.7) === 'excellent',
+            'Values 0.7 and 0.8 both return "excellent"'
+        );
+
+        test(
+            'Color coding: Good (0.4-0.69) returns "good"',
+            getColorClass(0.5) === 'good' && getColorClass(0.4) === 'good',
+            'Values 0.4 and 0.5 both return "good"'
+        );
+
+        test(
+            'Color coding: Poor (<0.4) returns "poor"',
+            getColorClass(0.3) === 'poor' && getColorClass(0.0) === 'poor',
+            'Values 0.0 and 0.3 both return "poor"'
+        );
+
+        // Test 5.3.2: Performance interpretation logic
+        function getPerformanceLevel(p5, mrr) {
+            if (p5 >= 0.6 && mrr >= 0.5) return 'Excellent';
+            if (p5 >= 0.4 || mrr >= 0.3) return 'Good';
+            return 'Needs Improvement';
+        }
+
+        test(
+            'Performance: Excellent when P@5≥0.6 AND MRR≥0.5',
+            getPerformanceLevel(0.6, 0.5) === 'Excellent' && getPerformanceLevel(0.8, 0.7) === 'Excellent',
+            'Both conditions met returns "Excellent"'
+        );
+
+        test(
+            'Performance: Good when P@5≥0.4 OR MRR≥0.3',
+            getPerformanceLevel(0.4, 0.2) === 'Good' && getPerformanceLevel(0.3, 0.3) === 'Good',
+            'Either condition met returns "Good"'
+        );
+
+        test(
+            'Performance: Needs Improvement otherwise',
+            getPerformanceLevel(0.2, 0.1) === 'Needs Improvement',
+            'Low values return "Needs Improvement"'
+        );
+
+        // Test 5.3.3: Metric display format
+        const testMetrics = { p1: 1.0, p3: 0.667, p5: 0.6, mrr: 0.5 };
+        test(
+            'Metrics display with percentage format',
+            formatPercentage(testMetrics.p1) === '100.0%' &&
+            formatPercentage(testMetrics.p3) === '66.7%' &&
+            formatPercentage(testMetrics.p5) === '60.0%' &&
+            formatPercentage(testMetrics.mrr) === '50.0%',
+            `P@1: ${formatPercentage(testMetrics.p1)}, P@3: ${formatPercentage(testMetrics.p3)}, P@5: ${formatPercentage(testMetrics.p5)}, MRR: ${formatPercentage(testMetrics.mrr)}`
+        );
+
+        // ===== TASK 5.4: Test error handling =====
+        startSection('5.4 Test Error Handling');
+
+        // Test 5.4.1: Missing user answers
+        try {
+            const missingAnswers = {};
+            const relevantMissing = EvaluationMetrics.calculateUserRelevance(missingAnswers, sampleChampions);
+            test(
+                'Missing user answers: Gracefully handles with defaults',
+                relevantMissing.size > 0,
+                `Found ${relevantMissing.size} champions with default preferences`
+            );
+        } catch (e) {
+            test(
+                'Missing user answers: Should not throw error',
+                false,
+                `Error: ${e.message}`
+            );
+        }
+
+        // Test 5.4.2: Empty mlResults
+        try {
+            const emptyML = {};
+            const recommendedEmpty = EvaluationMetrics.getRecommendedChampions(emptyML);
+            test(
+                'Empty mlResults: Returns empty array',
+                Array.isArray(recommendedEmpty) && recommendedEmpty.length === 0,
+                `Returned: ${JSON.stringify(recommendedEmpty)}`
+            );
+        } catch (e) {
+            test(
+                'Empty mlResults: Should not throw error',
+                false,
+                `Error: ${e.message}`
+            );
+        }
+
+        // Test 5.4.3: Null/undefined inputs
+        try {
+            const pNull = EvaluationMetrics.precisionAtK(null, new Set(['Ahri']), 3);
+            const mrrUndefined = EvaluationMetrics.meanReciprocalRank(undefined, new Set(['Ahri']));
+            test(
+                'Null/undefined inputs: Returns 0.0 without crashing',
+                pNull === 0.0 && mrrUndefined === 0.0,
+                `P@3 with null: ${pNull}, MRR with undefined: ${mrrUndefined}`
+            );
+        } catch (e) {
+            test(
+                'Null/undefined inputs: Should not throw error',
+                false,
+                `Error: ${e.message}`
+            );
+        }
+
+        // Test 5.4.4: Invalid champion data
+        try {
+            const invalidChampions = {
+                'Broken': { role: 'Mage' } // Missing difficulty, damage, toughness
+            };
+            const relevantInvalid = EvaluationMetrics.calculateUserRelevance(mageAnswers, invalidChampions);
+            test(
+                'Invalid champion data: Handles gracefully',
+                true,
+                `Processed ${Object.keys(invalidChampions).length} champion(s) without error`
+            );
+        } catch (e) {
+            test(
+                'Invalid champion data: Should not throw error',
+                false,
+                `Error: ${e.message}`
+            );
+        }
+
+        // Test 5.4.5: Malformed mlResults
+        try {
+            const malformedML = {
+                'algorithm1': null,
+                'algorithm2': { champion: 'Ahri' }, // Missing confidence
+                'algorithm3': { confidence: 85 } // Missing champion
+            };
+            const recommendedMalformed = EvaluationMetrics.getRecommendedChampions(malformedML);
+            test(
+                'Malformed mlResults: Extracts valid data only',
+                recommendedMalformed.includes('Ahri') && recommendedMalformed.length === 1,
+                `Extracted: ${JSON.stringify(recommendedMalformed)}`
+            );
+        } catch (e) {
+            test(
+                'Malformed mlResults: Should not throw error',
+                false,
+                `Error: ${e.message}`
+            );
+        }
+
+        // ===== Additional Integration Tests =====
+        startSection('Integration Tests');
+
+        // Test: Full workflow simulation
+        const fullWorkflowAnswers = {
+            role: 'Mage',
+            difficulty: 'Medium (4-6)',
+            playstyle: 'High Damage Output'
+        };
+        const fullWorkflowML = {
+            'random-forest': { champion: 'Ahri', confidence: 85 },
+            'decision-tree': { champion: 'Lux', confidence: 90 },
+            'knn': { champion: 'Zed', confidence: 75 }
+        };
+
+        try {
+            const relevant = EvaluationMetrics.calculateUserRelevance(fullWorkflowAnswers, sampleChampions);
+            const recommended = EvaluationMetrics.getRecommendedChampions(fullWorkflowML);
+            const p1Full = EvaluationMetrics.precisionAtK(recommended, relevant, 1);
+            const p3Full = EvaluationMetrics.precisionAtK(recommended, relevant, 3);
+            const p5Full = EvaluationMetrics.precisionAtK(recommended, relevant, 5);
+            const mrrFull = EvaluationMetrics.meanReciprocalRank(recommended, relevant);
+
+            test(
+                'Full workflow: All metrics calculated successfully',
+                p1Full >= 0 && p3Full >= 0 && p5Full >= 0 && mrrFull >= 0,
+                `P@1=${formatPercentage(p1Full)}, P@3=${formatPercentage(p3Full)}, P@5=${formatPercentage(p5Full)}, MRR=${formatPercentage(mrrFull)}`
+            );
+
+            test(
+                'Full workflow: Relevant champions identified',
+                relevant.size > 0,
+                `Found ${relevant.size} relevant champions: ${Array.from(relevant).join(', ')}`
+            );
+
+            test(
+                'Full workflow: Recommendations extracted and sorted',
+                recommended.length === 3 && recommended[0] === 'Lux',
+                `Recommendations: ${recommended.join(', ')} (sorted by confidence)`
+            );
+        } catch (e) {
+            test(
+                'Full workflow: Should complete without errors',
+                false,
+                `Error: ${e.message}`
+            );
+        }
+
+        // ===== Display Results =====
+        const resultsContainer = document.getElementById('test-results');
+        let html = '';
+        let currentSectionName = '';
+
+        testResults.forEach(result => {
+            if (result.type === 'section') {
+                if (currentSectionName) {
+                    html += '</div>';
+                }
+                html += `<div class="test-section"><h2>📋 ${result.name}</h2>`;
+                currentSectionName = result.name;
+            } else if (result.type === 'test') {
+                const statusIcon = result.passed ? '✅' : '❌';
+                const className = result.passed ? 'pass' : 'fail';
+                html += `<div class="test-result ${className}">
+                    ${statusIcon} ${result.description}
+                    ${result.details ? `<br><small>&nbsp;&nbsp;&nbsp;&nbsp;${result.details}</small>` : ''}
+                </div>`;
+            }
+        });
+
+        if (currentSectionName) {
+            html += '</div>';
+        }
+
+        resultsContainer.innerHTML = html;
+
+        // Summary
+        const totalTests = testResults.filter(r => r.type === 'test').length;
+        const passedTests = testResults.filter(r => r.type === 'test' && r.passed).length;
+        const failedTests = totalTests - passedTests;
+        const passRate = ((passedTests / totalTests) * 100).toFixed(1);
+
+        document.getElementById('summary').innerHTML = `
+            <h2>📊 Test Summary</h2>
+            <div style="font-size: 2rem; margin: 20px 0;">
+                ${passedTests} / ${totalTests} Tests Passed
+            </div>
+            <div style="font-size: 1.2rem;">
+                Pass Rate: ${passRate}%
+            </div>
+            ${failedTests > 0 ? `<div style="margin-top: 10px; color: #ffcccc;">⚠️ ${failedTests} test(s) failed</div>` : '<div style="margin-top: 10px;">🎉 All tests passed!</div>'}
+        `;
+
+        console.log(`Test Results: ${passedTests}/${totalTests} passed (${passRate}%)`);
+    </script>
+</body>
+</html>
