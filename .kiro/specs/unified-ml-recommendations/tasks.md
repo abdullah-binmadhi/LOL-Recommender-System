@@ -384,7 +384,7 @@
   
   - [x] 16.2 Deploy to production
     - Push to GitHub
-    - Deploy to Vercel
+    - Deploy to GitHub Pages
     - _Requirements: All_
   
   - [x] 16.3 Monitor for issues
