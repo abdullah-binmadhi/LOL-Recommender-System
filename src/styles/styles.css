@@ -833,3 +833,494 @@ select option {
         --text-light: #000000;
     }
 }
+
+/* ========================================
+   UNIFIED ML RECOMMENDATIONS STYLES
+   ======================================== */
+
+/* 6.1 Unified Recommendation Card */
+.unified-recommendation-card {
+    background: var(--bg-primary);
+    border-radius: 15px;
+    padding: 25px;
+    margin: 20px 0;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.unified-recommendation-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 6.2 Champion Header */
+.champion-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.champion-image-large {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.champion-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.champion-info .champion-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    text-shadow: none;
+}
+
+.champion-info .champion-role {
+    display: inline-block;
+    background: var(--accent-color);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.champion-tier {
+    display: inline-block;
+    background: var(--primary-color);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    width: fit-content;
+}
+
+/* 6.3 Aggregate Score */
+.aggregate-score {
+    margin-left: auto;
+    text-align: center;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+    min-width: 120px;
+}
+
+.aggregate-score .score-number {
+    font-size: 2rem;
+    font-weight: bold;
+    line-height: 1;
+    margin-bottom: 5px;
+}
+
+.aggregate-score .score-label {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+/* 6.4 ML Scores Section */
+.ml-scores-section {
+    margin: 20px 0;
+    padding: 15px 0;
+}
+
+.ml-scores-section h4 {
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+/* 6.5 Score Row */
+.score-row {
+    display: grid;
+    grid-template-columns: 200px 1fr 80px 80px;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.score-row:last-child {
+    border-bottom: none;
+}
+
+.score-label-col {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.algorithm-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.algorithm-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.score-bar-col {
+    flex: 1;
+}
+
+.score-value-col {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #495057;
+    text-align: right;
+}
+
+/* 6.6 Score Bar Container and Score Bar */
+.score-bar-container {
+    height: 24px;
+    background: #e9ecef;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+.score-bar {
+    height: 100%;
+    border-radius: 12px;
+    transition: width 0.5s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.score-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+/* Different colors for each algorithm */
+.rf-bar {
+    background: linear-gradient(90deg, #28a745, #20c997);
+}
+
+.dt-bar {
+    background: linear-gradient(90deg, #007bff, #17a2b8);
+}
+
+.knn-bar {
+    background: linear-gradient(90deg, #ffc107, #fd7e14);
+}
+
+/* 6.7 Details Button */
+.details-btn {
+    padding: 6px 12px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.details-btn:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.details-btn:active {
+    transform: translateY(0);
+}
+
+.details-btn:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+/* 6.8 Calculation Details */
+.calculation-details {
+    margin-top: 20px;
+    padding: 20px;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    border-left: 4px solid var(--primary-color);
+    display: none;
+}
+
+.calculation-details.show {
+    display: block;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.calculation-details-content h4 {
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.calculation-details-content h5 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.score-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.detail-item {
+    background: var(--bg-primary);
+    padding: 12px 15px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid var(--border-color);
+}
+
+.detail-item .label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.detail-item .value {
+    font-weight: bold;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+/* Factors Table */
+.factors-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.factors-table thead {
+    background: var(--primary-color);
+    color: white;
+}
+
+.factors-table th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.factors-table td {
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.factors-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.factors-table tbody tr:hover {
+    background: var(--bg-secondary);
+}
+
+/* Criteria List */
+.criteria-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+.criteria-list li {
+    padding: 8px 12px;
+    margin: 5px 0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.criteria-list li.matched {
+    background: rgba(72, 187, 120, 0.1);
+    color: var(--success-color);
+    border-left: 3px solid var(--success-color);
+}
+
+.criteria-list li.matched::before {
+    content: '✓';
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.criteria-list li.penalty {
+    background: rgba(245, 101, 101, 0.1);
+    color: var(--error-color);
+    border-left: 3px solid var(--error-color);
+}
+
+.criteria-list li.penalty::before {
+    content: '✗';
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+/* Close button for details */
+.details-close-btn {
+    float: right;
+    background: var(--error-color);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.details-close-btn:hover {
+    background: #e53e3e;
+    transform: scale(1.05);
+}
+
+/* Responsive Design for Unified Recommendations */
+@media (max-width: 768px) {
+    .champion-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .aggregate-score {
+        margin-left: 0;
+        width: 100%;
+    }
+    
+    .score-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 15px 0;
+    }
+    
+    .score-label-col {
+        justify-content: space-between;
+    }
+    
+    .score-value-col {
+        text-align: left;
+    }
+    
+    .score-bar-col {
+        order: 3;
+        grid-column: 1 / -1;
+    }
+    
+    .details-btn {
+        width: 100%;
+        margin-top: 10px;
+    }
+    
+    .score-summary {
+        grid-template-columns: 1fr;
+    }
+    
+    .factors-table {
+        font-size: 0.85rem;
+    }
+    
+    .factors-table th,
+    .factors-table td {
+        padding: 8px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .unified-recommendation-card {
+        padding: 15px;
+    }
+    
+    .champion-image-large {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .champion-info .champion-name {
+        font-size: 1.4rem;
+    }
+    
+    .aggregate-score .score-number {
+        font-size: 1.5rem;
+    }
+    
+    .ml-scores-section h4 {
+        font-size: 1rem;
+    }
+    
+    .algorithm-name {
+        font-size: 0.85rem;
+    }
+    
+    .calculation-details {
+        padding: 15px;
+    }
+}
+
+/* Print styles for unified recommendations */
+@media print {
+    .unified-recommendation-card {
+        page-break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid var(--border-color);
+    }
+    
+    .details-btn {
+        display: none;
+    }
+    
+    .calculation-details {
+        display: block !important;
+    }
+}

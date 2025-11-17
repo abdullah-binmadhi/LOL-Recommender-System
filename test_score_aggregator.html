@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScoreAggregator Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .test-section h2 {
+            color: #495057;
+            margin-top: 0;
+        }
+        .result {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .success {
+            border-left: 4px solid #28a745;
+            background: #d4edda;
+        }
+        .error {
+            border-left: 4px solid #dc3545;
+            background: #f8d7da;
+        }
+        .champion-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .champion-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .score-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .score-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .score-value {
+            color: #28a745;
+            font-weight: bold;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 ScoreAggregator Test Suite</h1>
+        
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        // Mock champion data for testing
+        const allChampions = {
+            "Ahri": { role: "Mage", difficulty: 5, damage: 8, toughness: 3, utility: 6, control: 7, mobility: 8 },
+            "Lux": { role: "Mage", difficulty: 4, damage: 7, toughness: 2, utility: 8, control: 9, mobility: 3 },
+            "Zed": { role: "Assassin", difficulty: 8, damage: 9, toughness: 2, utility: 3, control: 4, mobility: 9 },
+            "Garen": { role: "Fighter", difficulty: 3, damage: 6, toughness: 8, utility: 2, control: 3, mobility: 4 },
+            "Thresh": { role: "Support", difficulty: 7, damage: 3, toughness: 5, utility: 10, control: 8, mobility: 4 },
+            "Jinx": { role: "Marksman", difficulty: 6, damage: 9, toughness: 2, utility: 4, control: 5, mobility: 3 },
+            "Yasuo": { role: "Fighter", difficulty: 9, damage: 8, toughness: 4, utility: 3, control: 6, mobility: 9 },
+            "Leona": { role: "Tank", difficulty: 3, damage: 4, toughness: 9, utility: 7, control: 8, mobility: 3 }
+        };
+
+        // ScoreAggregator class (copied from implementation)
+        class ScoreAggregator {
+            static aggregateScores(rfScores, dtScores, knnScores) {
+                const aggregated = {};
+                
+                for (const championName of Object.keys(allChampions)) {
+                    const rf = rfScores[championName]?.score || 0;
+                    const dt = dtScores[championName]?.score || 0;
+                    const knn = knnScores[championName]?.score || 0;
+                    
+                    const average = (rf + dt + knn) / 3;
+                    const weighted = this.calculateWeightedScore(rf, dt, knn);
+                    
+                    aggregated[championName] = {
+                        championName: championName,
+                        randomForest: rf,
+                        decisionTree: dt,
+                        knn: knn,
+                        average: average,
+                        weighted: weighted,
+                        details: {
+                            randomForest: rfScores[championName]?.details || null,
+                            decisionTree: dtScores[championName]?.details || null,
+                            knn: knnScores[championName]?.details || null
+                        }
+                    };
+                }
+                
+                return aggregated;
+            }
+            
+            static calculateWeightedScore(rf, dt, knn) {
+                const weighted = (rf * 0.4) + (dt * 0.3) + (knn * 0.3);
+                return Math.max(0, Math.min(100, weighted));
+            }
+            
+            static selectTop5(aggregatedScores, diversityFilter = true) {
+                let champions = Object.values(aggregatedScores);
+                champions.sort((a, b) => b.average - a.average);
+                
+                if (diversityFilter) {
+                    champions = this.applyDiversityFilter(champions);
+                }
+                
+                const top5 = champions.slice(0, 5);
+                
+                const uniqueChampions = [];
+                const seenNames = new Set();
+                
+                for (const champion of top5) {
+                    if (!seenNames.has(champion.championName)) {
+                        uniqueChampions.push(champion);
+                        seenNames.add(champion.championName);
+                    }
+                }
+                
+                if (uniqueChampions.length < 5) {
+                    for (const champion of champions) {
+                        if (!seenNames.has(champion.championName)) {
+                            uniqueChampions.push(champion);
+                            seenNames.add(champion.championName);
+                            
+                            if (uniqueChampions.length >= 5) break;
+                        }
+                    }
+                }
+                
+                return uniqueChampions;
+            }
+            
+            static applyDiversityFilter(champions) {
+                const selected = [];
+                const roleCount = {};
+                
+                for (const champion of champions) {
+                    const championData = allChampions[champion.championName];
+                    const role = championData?.role || 'Unknown';
+                    
+                    if ((roleCount[role] || 0) < 2) {
+                        selected.push(champion);
+                        roleCount[role] = (roleCount[role] || 0) + 1;
+                    }
+                    
+                    if (selected.length >= 5) break;
+                }
+                
+                if (selected.length < 5) {
+                    for (const champion of champions) {
+                        if (!selected.find(c => c.championName === champion.championName)) {
+                            selected.push(champion);
+                            
+                            if (selected.length >= 5) break;
+                        }
+                    }
+                }
+                
+                return selected;
+            }
+        }
+
+        // Test functions
+        function runTests() {
+            const resultsDiv = document.getElementById('test-results');
+            let html = '';
+
+            // Test 1: aggregateScores()
+            html += '<div class="test-section">';
+            html += '<h2>Test 1: aggregateScores()</h2>';
+            
+            const mockRfScores = {
+                "Ahri": { score: 85.3, details: {} },
+                "Lux": { score: 78.2, details: {} },
+                "Zed": { score: 72.1, details: {} },
+                "Garen": { score: 65.5, details: {} },
+                "Thresh": { score: 70.0, details: {} },
+                "Jinx": { score: 80.5, details: {} },
+                "Yasuo": { score: 75.0, details: {} },
+                "Leona": { score: 68.0, details: {} }
+            };
+            
+            const mockDtScores = {
+                "Ahri": { score: 78.2, details: {} },
+                "Lux": { score: 84.1, details: {} },
+                "Zed": { score: 69.5, details: {} },
+                "Garen": { score: 70.0, details: {} },
+                "Thresh": { score: 75.5, details: {} },
+                "Jinx": { score: 77.0, details: {} },
+                "Yasuo": { score: 72.5, details: {} },
+                "Leona": { score: 73.0, details: {} }
+            };
+            
+            const mockKnnScores = {
+                "Ahri": { score: 82.1, details: {} },
+                "Lux": { score: 77.8, details: {} },
+                "Zed": { score: 75.3, details: {} },
+                "Garen": { score: 68.0, details: {} },
+                "Thresh": { score: 72.0, details: {} },
+                "Jinx": { score: 79.0, details: {} },
+                "Yasuo": { score: 74.0, details: {} },
+                "Leona": { score: 70.5, details: {} }
+            };
+            
+            const aggregated = ScoreAggregator.aggregateScores(mockRfScores, mockDtScores, mockKnnScores);
+            
+            if (Object.keys(aggregated).length === 8) {
+                html += '<div class="result success">✓ Aggregated all 8 champions</div>';
+            } else {
+                html += '<div class="result error">✗ Expected 8 champions, got ' + Object.keys(aggregated).length + '</div>';
+            }
+            
+            if (aggregated["Ahri"]) {
+                const ahri = aggregated["Ahri"];
+                const expectedAvg = (85.3 + 78.2 + 82.1) / 3;
+                if (Math.abs(ahri.average - expectedAvg) < 0.01) {
+                    html += '<div class="result success">✓ Average score calculated correctly for Ahri: ' + ahri.average.toFixed(2) + '</div>';
+                } else {
+                    html += '<div class="result error">✗ Average score incorrect for Ahri. Expected: ' + expectedAvg.toFixed(2) + ', Got: ' + ahri.average.toFixed(2) + '</div>';
+                }
+            }
+            
+            html += '</div>';
+
+            // Test 2: calculateWeightedScore()
+            html += '<div class="test-section">';
+            html += '<h2>Test 2: calculateWeightedScore()</h2>';
+            
+            const weighted = ScoreAggregator.calculateWeightedScore(85.3, 78.2, 82.1);
+            const expectedWeighted = (85.3 * 0.4) + (78.2 * 0.3) + (82.1 * 0.3);
+            
+            if (Math.abs(weighted - expectedWeighted) < 0.01) {
+                html += '<div class="result success">✓ Weighted score calculated correctly: ' + weighted.toFixed(2) + '</div>';
+            } else {
+                html += '<div class="result error">✗ Weighted score incorrect. Expected: ' + expectedWeighted.toFixed(2) + ', Got: ' + weighted.toFixed(2) + '</div>';
+            }
+            
+            html += '<div class="result">Formula: (RF × 0.4) + (DT × 0.3) + (KNN × 0.3)</div>';
+            html += '<div class="result">Example: (85.3 × 0.4) + (78.2 × 0.3) + (82.1 × 0.3) = ' + weighted.toFixed(2) + '</div>';
+            
+            html += '</div>';
+
+            // Test 3: selectTop5()
+            html += '<div class="test-section">';
+            html += '<h2>Test 3: selectTop5()</h2>';
+            
+            const top5 = ScoreAggregator.selectTop5(aggregated, false);
+            
+            if (top5.length === 5) {
+                html += '<div class="result success">✓ Returned exactly 5 champions</div>';
+            } else {
+                html += '<div class="result error">✗ Expected 5 champions, got ' + top5.length + '</div>';
+            }
+            
+            // Check if sorted by average score
+            let isSorted = true;
+            for (let i = 0; i < top5.length - 1; i++) {
+                if (top5[i].average < top5[i + 1].average) {
+                    isSorted = false;
+                    break;
+                }
+            }
+            
+            if (isSorted) {
+                html += '<div class="result success">✓ Champions sorted by average score (descending)</div>';
+            } else {
+                html += '<div class="result error">✗ Champions not properly sorted</div>';
+            }
+            
+            // Check uniqueness
+            const names = top5.map(c => c.championName);
+            const uniqueNames = new Set(names);
+            if (names.length === uniqueNames.size) {
+                html += '<div class="result success">✓ All champions are unique</div>';
+            } else {
+                html += '<div class="result error">✗ Duplicate champions found</div>';
+            }
+            
+            html += '<h3>Top 5 Champions (No Diversity Filter):</h3>';
+            top5.forEach((champion, index) => {
+                html += `
+                    <div class="champion-card">
+                        <div class="champion-name">${index + 1}. ${champion.championName}</div>
+                        <div class="score-row">
+                            <span class="score-label">Random Forest:</span>
+                            <span class="score-value">${champion.randomForest.toFixed(1)}%</span>
+                        </div>
+                        <div class="score-row">
+                            <span class="score-label">Decision Tree:</span>
+                            <span class="score-value">${champion.decisionTree.toFixed(1)}%</span>
+                        </div>
+                        <div class="score-row">
+                            <span class="score-label">KNN:</span>
+                            <span class="score-value">${champion.knn.toFixed(1)}%</span>
+                        </div>
+                        <div class="score-row">
+                            <span class="score-label">Average:</span>
+                            <span class="score-value">${champion.average.toFixed(1)}%</span>
+                        </div>
+                        <div class="score-row">
+                            <span class="score-label">Weighted:</span>
+                            <span class="score-value">${champion.weighted.toFixed(1)}%</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+
+            // Test 4: applyDiversityFilter()
+            html += '<div class="test-section">';
+            html += '<h2>Test 4: applyDiversityFilter()</h2>';
+            
+            const top5WithDiversity = ScoreAggregator.selectTop5(aggregated, true);
+            
+            // Count roles
+            const roleCounts = {};
+            top5WithDiversity.forEach(champion => {
+                const role = allChampions[champion.championName].role;
+                roleCounts[role] = (roleCounts[role] || 0) + 1;
+            });
+            
+            let maxRoleCount = Math.max(...Object.values(roleCounts));
+            if (maxRoleCount <= 2) {
+                html += '<div class="result success">✓ Diversity filter applied: max ' + maxRoleCount + ' champions per role</div>';
+            } else {
+                html += '<div class="result error">✗ Diversity filter failed: ' + maxRoleCount + ' champions in one role</div>';
+            }
+            
+            html += '<div class="result">Role distribution: ' + JSON.stringify(roleCounts) + '</div>';
+            
+            html += '<h3>Top 5 Champions (With Diversity Filter):</h3>';
+            top5WithDiversity.forEach((champion, index) => {
+                const role = allChampions[champion.championName].role;
+                html += `
+                    <div class="champion-card">
+                        <div class="champion-name">${index + 1}. ${champion.championName} (${role})</div>
+                        <div class="score-row">
+                            <span class="score-label">Average:</span>
+                            <span class="score-value">${champion.average.toFixed(1)}%</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+
+            // Test 5: Edge cases
+            html += '<div class="test-section">';
+            html += '<h2>Test 5: Edge Cases</h2>';
+            
+            // Test with missing scores
+            const partialRfScores = {
+                "Ahri": { score: 85.3, details: {} },
+                "Lux": { score: 78.2, details: {} }
+            };
+            
+            const partialDtScores = {
+                "Ahri": { score: 78.2, details: {} },
+                "Zed": { score: 69.5, details: {} }
+            };
+            
+            const partialKnnScores = {
+                "Lux": { score: 77.8, details: {} },
+                "Zed": { score: 75.3, details: {} }
+            };
+            
+            const partialAggregated = ScoreAggregator.aggregateScores(partialRfScores, partialDtScores, partialKnnScores);
+            
+            if (partialAggregated["Garen"].randomForest === 0 && 
+                partialAggregated["Garen"].decisionTree === 0 && 
+                partialAggregated["Garen"].knn === 0) {
+                html += '<div class="result success">✓ Missing scores default to 0</div>';
+            } else {
+                html += '<div class="result error">✗ Missing scores not handled correctly</div>';
+            }
+            
+            html += '</div>';
+
+            resultsDiv.innerHTML = html;
+        }
+
+        // Run tests on page load
+        window.addEventListener('DOMContentLoaded', runTests);
+    </script>
+</body>
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decision Tree predictAll() Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { color: #28a745; font-weight: bold; }
+        .error { color: #dc3545; font-weight: bold; }
+        .champion-score {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .details {
+            margin-left: 20px;
+            font-size: 0.9em;
+            color: #666;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Decision Tree predictAll() Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // Sample champion data
+        const allChampions = {
+            "Ahri": {
+                role: "Mage",
+                positions: ["Mid"],
+                difficulty: 5,
+                damage: 8,
+                toughness: 3,
+                control: 8,
+                mobility: 7,
+                utility: 5,
+                title: "the Nine-Tailed Fox"
+            },
+            "Garen": {
+                role: "Fighter",
+                positions: ["Top"],
+                difficulty: 3,
+                damage: 6,
+                toughness: 9,
+                control: 4,
+                mobility: 3,
+                utility: 3,
+                title: "the Might of Demacia"
+            },
+            "Lux": {
+                role: "Mage",
+                positions: ["Mid", "Support"],
+                difficulty: 4,
+                damage: 8,
+                toughness: 2,
+                control: 7,
+                mobility: 3,
+                utility: 7,
+                title: "the Lady of Luminosity"
+            },
+            "Zed": {
+                role: "Assassin",
+                positions: ["Mid"],
+                difficulty: 8,
+                damage: 9,
+                toughness: 2,
+                control: 3,
+                mobility: 9,
+                utility: 2,
+                title: "the Master of Shadows"
+            },
+            "Thresh": {
+                role: "Support",
+                positions: ["Support"],
+                difficulty: 7,
+                damage: 4,
+                toughness: 6,
+                control: 9,
+                mobility: 4,
+                utility: 9,
+                title: "the Chain Warden"
+            }
+        };
+
+        // SimpleDecisionTree class implementation
+        class SimpleDecisionTree {
+            // NEW: Score all champions for unified recommendations
+            predictAll(features) {
+                const scores = {};
+                
+                for (const [name, champion] of Object.entries(allChampions)) {
+                    const result = this.calculateChampionScore(features, champion);
+                    scores[name] = result;
+                }
+                
+                return scores;
+            }
+            
+            // NEW: Calculate detailed score for a single champion using hierarchical logic
+            calculateChampionScore(features, champion) {
+                let score = 0;
+                const details = {
+                    contributingFactors: [],
+                    matchedCriteria: [],
+                    penalties: []
+                };
+                
+                // Level 1: Role match (50 points)
+                if (features.role === 'No Preference' || features.role === champion.role) {
+                    score += 50;
+                    details.contributingFactors.push({
+                        factor: 'Role Match (Level 1)',
+                        weight: 50,
+                        contribution: 50
+                    });
+                    details.matchedCriteria.push(`Role: ${champion.role}`);
+                    
+                    // Level 2: Position match (40 points, only if role matches)
+                    const championPositions = champion.positions || [];
+                    if (features.position === 'No Preference' || 
+                        (championPositions.length > 0 && championPositions.includes(features.position))) {
+                        score += 40;
+                        details.contributingFactors.push({
+                            factor: 'Position Match (Level 2)',
+                            weight: 40,
+                            contribution: 40
+                        });
+                        details.matchedCriteria.push(`Position: ${features.position || 'Any'}`);
+                        
+                        // Level 3: Difficulty match (30 points, only if position matches)
+                        if (Math.abs(features.difficulty - champion.difficulty) <= 2) {
+                            score += 30;
+                            details.contributingFactors.push({
+                                factor: 'Difficulty Match (Level 3)',
+                                weight: 30,
+                                contribution: 30
+                            });
+                            details.matchedCriteria.push(`Difficulty within range (${champion.difficulty})`);
+                            
+                            // Level 4: Attribute matches (20 points each)
+                            if (Math.abs(features.damage - champion.damage) <= 2) {
+                                score += 20;
+                                details.contributingFactors.push({
+                                    factor: 'Damage Match (Level 4)',
+                                    weight: 20,
+                                    contribution: 20
+                                });
+                                details.matchedCriteria.push(`Damage matches (${champion.damage})`);
+                            }
+                            
+                            if (Math.abs(features.toughness - champion.toughness) <= 2) {
+                                score += 20;
+                                details.contributingFactors.push({
+                                    factor: 'Toughness Match (Level 4)',
+                                    weight: 20,
+                                    contribution: 20
+                                });
+                                details.matchedCriteria.push(`Toughness matches (${champion.toughness})`);
+                            }
+                        } else {
+                            details.penalties.push(`Difficulty mismatch: wanted ${features.difficulty}, got ${champion.difficulty}`);
+                        }
+                    } else if (features.position !== 'No Preference') {
+                        details.penalties.push(`Position mismatch: wanted ${features.position}`);
+                    }
+                } else {
+                    // Heavy penalty for wrong role
+                    score -= 30;
+                    details.contributingFactors.push({
+                        factor: 'Role Mismatch Penalty',
+                        weight: -30,
+                        contribution: -30
+                    });
+                    details.penalties.push(`Role mismatch: wanted ${features.role}, got ${champion.role}`);
+                }
+                
+                // Psychological bonuses (25 points each)
+                let psychScore = 0;
+                
+                // Pressure response
+                if (features.pressure_response === 'Stay calm and strategic' && champion.toughness >= 6) {
+                    psychScore += 25;
+                    details.matchedCriteria.push('Calm playstyle matches champion toughness');
+                }
+                
+                // Team contribution
+                if (features.team_contribution === 'Support and enable others' && champion.utility >= 7) {
+                    psychScore += 25;
+                    details.matchedCriteria.push('Support style matches champion utility');
+                }
+                
+                score += psychScore;
+                details.contributingFactors.push({
+                    factor: 'Psychological Bonuses',
+                    weight: 110,
+                    contribution: psychScore
+                });
+                
+                const rawScore = score;
+                const normalizedScore = this.normalizeScore(rawScore);
+                
+                return {
+                    score: normalizedScore,
+                    rawScore: rawScore,
+                    details: details
+                };
+            }
+            
+            // NEW: Normalize score to 0-100 range, accounting for negative penalties
+            normalizeScore(rawScore) {
+                const maxScore = 250;
+                const minScore = -50;
+                
+                const normalized = ((rawScore - minScore) / (maxScore - minScore)) * 100;
+                
+                return Math.max(0, Math.min(100, normalized));
+            }
+        }
+
+        // Run tests
+        function runTests() {
+            const resultsDiv = document.getElementById('results');
+            let html = '';
+            
+            // Test 1: Basic functionality
+            html += '<h3>Test 1: Basic predictAll() Functionality</h3>';
+            const dt = new SimpleDecisionTree();
+            const testFeatures = {
+                role: 'Mage',
+                position: 'Mid',
+                difficulty: 5,
+                damage: 8,
+                toughness: 3,
+                pressure_response: 'Stay calm and strategic',
+                team_contribution: 'Support and enable others'
+            };
+            
+            const scores = dt.predictAll(testFeatures);
+            
+            if (Object.keys(scores).length === 5) {
+                html += '<p class="success">✓ Returns scores for all 5 champions</p>';
+            } else {
+                html += '<p class="error">✗ Expected 5 champions, got ' + Object.keys(scores).length + '</p>';
+            }
+            
+            // Test 2: Score structure
+            html += '<h3>Test 2: Score Object Structure</h3>';
+            const ahriScore = scores['Ahri'];
+            if (ahriScore && typeof ahriScore.score === 'number' && 
+                typeof ahriScore.rawScore === 'number' && ahriScore.details) {
+                html += '<p class="success">✓ Score object has correct structure</p>';
+            } else {
+                html += '<p class="error">✗ Score object structure is incorrect</p>';
+            }
+            
+            // Test 3: Score normalization
+            html += '<h3>Test 3: Score Normalization (0-100 range)</h3>';
+            let allInRange = true;
+            for (const [name, result] of Object.entries(scores)) {
+                if (result.score < 0 || result.score > 100) {
+                    allInRange = false;
+                    html += `<p class="error">✗ ${name} score out of range: ${result.score}</p>`;
+                }
+            }
+            if (allInRange) {
+                html += '<p class="success">✓ All scores are in 0-100 range</p>';
+            }
+            
+            // Test 4: Hierarchical scoring
+            html += '<h3>Test 4: Hierarchical Scoring Logic</h3>';
+            html += '<p>Ahri (Mage, Mid) should score highest for Mage/Mid preference:</p>';
+            html += `<div class="champion-score">
+                <strong>Ahri:</strong> ${ahriScore.score.toFixed(2)}% (Raw: ${ahriScore.rawScore})
+                <div class="details">
+                    <strong>Matched Criteria:</strong> ${ahriScore.details.matchedCriteria.join(', ')}
+                </div>
+            </div>`;
+            
+            if (ahriScore.score > 50) {
+                html += '<p class="success">✓ Ahri scores well for matching preferences</p>';
+            }
+            
+            // Test 5: Display all scores
+            html += '<h3>Test 5: All Champion Scores</h3>';
+            html += '<table><thead><tr><th>Champion</th><th>Role</th><th>Score</th><th>Raw Score</th><th>Matched Criteria</th></tr></thead><tbody>';
+            
+            const sortedScores = Object.entries(scores).sort((a, b) => b[1].score - a[1].score);
+            for (const [name, result] of sortedScores) {
+                const champion = allChampions[name];
+                html += `<tr>
+                    <td>${name}</td>
+                    <td>${champion.role}</td>
+                    <td>${result.score.toFixed(2)}%</td>
+                    <td>${result.rawScore}</td>
+                    <td>${result.details.matchedCriteria.length} criteria</td>
+                </tr>`;
+            }
+            html += '</tbody></table>';
+            
+            // Test 6: Penalty handling
+            html += '<h3>Test 6: Penalty Handling</h3>';
+            const garenScore = scores['Garen'];
+            if (garenScore.details.penalties.length > 0) {
+                html += '<p class="success">✓ Penalties applied for mismatches</p>';
+                html += `<div class="details">Garen penalties: ${garenScore.details.penalties.join(', ')}</div>`;
+            }
+            
+            resultsDiv.innerHTML = html;
+        }
+
+        // Run tests on page load
+        window.onload = runTests;
+    </script>
+</body>
+</html>

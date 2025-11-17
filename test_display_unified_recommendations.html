@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test displayUnifiedRecommendations() Function</title>
+    <link rel="stylesheet" href="src/styles/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .info {
+            color: #007bff;
+        }
+        #detailed-analysis {
+            display: block !important;
+        }
+    </style>
+</head>
+<body>
+    <h1>Task 7: displayUnifiedRecommendations() Function - Test Results</h1>
+    
+    <div class="test-section">
+        <h2>Test Overview</h2>
+        <p>This test verifies that the <code>displayUnifiedRecommendations()</code> function correctly:</p>
+        <ol>
+            <li>Clears the existing results container</li>
+            <li>Loops through all 5 champions in mlResults.top5</li>
+            <li>Creates champion cards with all required elements</li>
+            <li>Appends cards to the container</li>
+            <li>Animates score bars</li>
+        </ol>
+    </div>
+
+    <div id="test-results" class="test-section"></div>
+
+    <!-- Container for displaying recommendations -->
+    <div id="detailed-analysis" class="card detailed-analysis" style="display: block;">
+        <h2><i class="analysis-icon"></i> Unified ML Recommendations</h2>
+        <div id="analysis-content">
+            <!-- Recommendations will be displayed here -->
+        </div>
+    </div>
+
+    <script>
+        // Mock champion database
+        const allChampions = {
+            'Ahri': { 
+                role: 'Mage', 
+                positions: ['Mid'], 
+                difficulty: 5, 
+                damage: 8, 
+                toughness: 3, 
+                control: 5, 
+                mobility: 7, 
+                utility: 6,
+                title: 'the Nine-Tailed Fox'
+            },
+            'Garen': { 
+                role: 'Fighter', 
+                positions: ['Top'], 
+                difficulty: 2, 
+                damage: 6, 
+                toughness: 7, 
+                control: 5, 
+                mobility: 5, 
+                utility: 5,
+                title: 'The Might of Demacia'
+            },
+            'Lux': { 
+                role: 'Mage', 
+                positions: ['Mid', 'Support'], 
+                difficulty: 5, 
+                damage: 7, 
+                toughness: 2, 
+                control: 8, 
+                mobility: 4, 
+                utility: 7,
+                title: 'the Lady of Luminosity'
+            },
+            'Jinx': { 
+                role: 'Marksman', 
+                positions: ['ADC'], 
+                difficulty: 6, 
+                damage: 9, 
+                toughness: 2, 
+                control: 7, 
+                mobility: 6, 
+                utility: 6,
+                title: 'the Loose Cannon'
+            },
+            'Thresh': { 
+                role: 'Support', 
+                positions: ['Support'], 
+                difficulty: 7, 
+                damage: 6, 
+                toughness: 6, 
+                control: 9, 
+                mobility: 5, 
+                utility: 9,
+                title: 'the Chain Warden'
+            }
+        };
+
+        // Mock mlResults with top 5 champions
+        let mlResults = {
+            scores: {
+                randomForest: {},
+                decisionTree: {},
+                knn: {}
+            },
+            aggregated: {},
+            top5: [
+                {
+                    championName: 'Ahri',
+                    randomForest: 85.3,
+                    decisionTree: 78.2,
+                    knn: 82.1,
+                    average: 81.9,
+                    weighted: 82.5,
+                    details: {
+                        randomForest: {
+                            rawScore: 145,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 40, contribution: 40 },
+                                { factor: 'Position Match', weight: 30, contribution: 30 },
+                                { factor: 'Difficulty Match', weight: 20, contribution: 18 }
+                            ],
+                            matchedCriteria: ['Role: Mage', 'Position: Mid', 'Difficulty close to preference'],
+                            penalties: []
+                        },
+                        decisionTree: {
+                            rawScore: 130,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 50, contribution: 50 },
+                                { factor: 'Position Match', weight: 40, contribution: 40 }
+                            ],
+                            matchedCriteria: ['Role: Mage', 'Position: Mid'],
+                            penalties: []
+                        },
+                        knn: {
+                            rawScore: 5.3,
+                            contributingFactors: [
+                                { factor: 'Role Distance', weight: 8, contribution: 0 },
+                                { factor: 'Difficulty Distance', weight: 0.5, contribution: 0.5 }
+                            ],
+                            matchedCriteria: ['Role: Mage', 'Difficulty close to preference'],
+                            penalties: []
+                        }
+                    }
+                },
+                {
+                    championName: 'Lux',
+                    randomForest: 78.2,
+                    decisionTree: 84.1,
+                    knn: 77.8,
+                    average: 80.0,
+                    weighted: 79.8,
+                    details: {
+                        randomForest: {
+                            rawScore: 133,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 40, contribution: 40 },
+                                { factor: 'Position Match', weight: 30, contribution: 30 }
+                            ],
+                            matchedCriteria: ['Role: Mage', 'Position: Mid'],
+                            penalties: ['Difficulty mismatch']
+                        },
+                        decisionTree: {
+                            rawScore: 140,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 50, contribution: 50 },
+                                { factor: 'Position Match', weight: 40, contribution: 40 }
+                            ],
+                            matchedCriteria: ['Role: Mage', 'Position: Mid'],
+                            penalties: []
+                        },
+                        knn: {
+                            rawScore: 6.6,
+                            contributingFactors: [
+                                { factor: 'Role Distance', weight: 8, contribution: 0 },
+                                { factor: 'Difficulty Distance', weight: 0.5, contribution: 0.5 }
+                            ],
+                            matchedCriteria: ['Role: Mage'],
+                            penalties: ['Position mismatch']
+                        }
+                    }
+                },
+                {
+                    championName: 'Jinx',
+                    randomForest: 72.1,
+                    decisionTree: 69.5,
+                    knn: 75.3,
+                    average: 72.3,
+                    weighted: 72.1,
+                    details: {
+                        randomForest: {
+                            rawScore: 122,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 40, contribution: 0 },
+                                { factor: 'Damage Match', weight: 15, contribution: 15 }
+                            ],
+                            matchedCriteria: ['High damage output'],
+                            penalties: ['Role mismatch: wanted Mage, got Marksman']
+                        },
+                        decisionTree: {
+                            rawScore: 115,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 50, contribution: 0 },
+                                { factor: 'Damage Match', weight: 20, contribution: 20 }
+                            ],
+                            matchedCriteria: ['High damage'],
+                            penalties: ['Role mismatch']
+                        },
+                        knn: {
+                            rawScore: 7.4,
+                            contributingFactors: [
+                                { factor: 'Role Distance', weight: 8, contribution: 8 },
+                                { factor: 'Damage Distance', weight: 0.3, contribution: 0.3 }
+                            ],
+                            matchedCriteria: ['Damage close to preference'],
+                            penalties: ['Role mismatch']
+                        }
+                    }
+                },
+                {
+                    championName: 'Garen',
+                    randomForest: 68.5,
+                    decisionTree: 71.2,
+                    knn: 70.1,
+                    average: 69.9,
+                    weighted: 69.7,
+                    details: {
+                        randomForest: {
+                            rawScore: 116,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 40, contribution: 0 },
+                                { factor: 'Toughness Match', weight: 15, contribution: 12 }
+                            ],
+                            matchedCriteria: ['High toughness'],
+                            penalties: ['Role mismatch: wanted Mage, got Fighter']
+                        },
+                        decisionTree: {
+                            rawScore: 118,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 50, contribution: 0 },
+                                { factor: 'Toughness Match', weight: 20, contribution: 18 }
+                            ],
+                            matchedCriteria: ['High toughness'],
+                            penalties: ['Role mismatch']
+                        },
+                        knn: {
+                            rawScore: 8.9,
+                            contributingFactors: [
+                                { factor: 'Role Distance', weight: 8, contribution: 8 },
+                                { factor: 'Toughness Distance', weight: 0.3, contribution: 1.2 }
+                            ],
+                            matchedCriteria: [],
+                            penalties: ['Role mismatch', 'Toughness mismatch']
+                        }
+                    }
+                },
+                {
+                    championName: 'Thresh',
+                    randomForest: 65.8,
+                    decisionTree: 67.3,
+                    knn: 68.9,
+                    average: 67.3,
+                    weighted: 67.1,
+                    details: {
+                        randomForest: {
+                            rawScore: 112,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 40, contribution: 0 },
+                                { factor: 'Control Match', weight: 15, contribution: 15 }
+                            ],
+                            matchedCriteria: ['High control'],
+                            penalties: ['Role mismatch: wanted Mage, got Support']
+                        },
+                        decisionTree: {
+                            rawScore: 112,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 50, contribution: 0 },
+                                { factor: 'Control Match', weight: 20, contribution: 20 }
+                            ],
+                            matchedCriteria: ['High control'],
+                            penalties: ['Role mismatch']
+                        },
+                        knn: {
+                            rawScore: 9.3,
+                            contributingFactors: [
+                                { factor: 'Role Distance', weight: 8, contribution: 8 },
+                                { factor: 'Control Distance', weight: 0.3, contribution: 0.8 }
+                            ],
+                            matchedCriteria: ['Control close to preference'],
+                            penalties: ['Role mismatch']
+                        }
+                    }
+                }
+            ]
+        };
+
+        // Copy the displayUnifiedRecommendations function from src/index.html
+        function displayUnifiedRecommendations() {
+            // Task 7.1: Clear existing results container
+            const analysisContent = document.getElementById('analysis-content');
+            if (!analysisContent) {
+                console.error('Analysis content container not found');
+                return;
+            }
+            analysisContent.innerHTML = '';
+            
+            // Verify mlResults structure
+            if (!mlResults || !mlResults.top5 || !Array.isArray(mlResults.top5)) {
+                console.error('Invalid mlResults structure:', mlResults);
+                analysisContent.innerHTML = '<p style="color: red;">Error: No recommendations available</p>';
+                return;
+            }
+            
+            // Add header
+            const header = document.createElement('div');
+            header.className = 'analysis-header';
+            header.innerHTML = `
+                <h2>Your Top 5 Champion Recommendations</h2>
+                <p>Each champion has been evaluated by all three ML algorithms</p>
+            `;
+            analysisContent.appendChild(header);
+            
+            // Task 7.2: Loop through top 5 champions
+            mlResults.top5.forEach((champion, index) => {
+                // Task 7.3: Create champion card HTML for each
+                const card = document.createElement('div');
+                card.className = 'unified-recommendation-card';
+                card.setAttribute('data-champion', champion.championName);
+                
+                // Get champion data
+                const championData = allChampions[champion.championName];
+                if (!championData) {
+                    console.warn(`Champion data not found for: ${champion.championName}`);
+                    return;
+                }
+                
+                // Build card HTML
+                card.innerHTML = `
+                    <div class="champion-header">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/champion/${champion.championName.replace(/[^a-zA-Z0-9]/g, '')}.png" 
+                             alt="${champion.championName}" 
+                             class="champion-image-large"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23667eea%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 font-size=%2240%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22%3E${champion.championName.charAt(0)}%3C/text%3E%3C/svg%3E'">
+                        <div class="champion-info">
+                            <h3 class="champion-name">${champion.championName}</h3>
+                            <span class="champion-role">${championData.role}</span>
+                            <span class="champion-tier">Rank #${index + 1}</span>
+                        </div>
+                        <div class="aggregate-score">
+                            <div class="score-number">${champion.average.toFixed(1)}%</div>
+                            <div class="score-label">Overall Match</div>
+                        </div>
+                    </div>
+                    
+                    <div class="ml-scores-section">
+                        <h4>ML Algorithm Scores</h4>
+                        
+                        <!-- Random Forest Score -->
+                        <div class="score-row">
+                            <div class="score-label-col">
+                                <span class="algorithm-icon">🌳</span>
+                                <span class="algorithm-name">Random Forest</span>
+                            </div>
+                            <div class="score-bar-col">
+                                <div class="score-bar-container">
+                                    <div class="score-bar rf-bar" data-width="${champion.randomForest}" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="score-value-col">${champion.randomForest.toFixed(1)}%</div>
+                            <button class="details-btn" onclick="showCalculationDetails('randomForest', '${champion.championName}')">
+                                Details
+                            </button>
+                        </div>
+                        
+                        <!-- Decision Tree Score -->
+                        <div class="score-row">
+                            <div class="score-label-col">
+                                <span class="algorithm-icon">🎯</span>
+                                <span class="algorithm-name">Decision Tree</span>
+                            </div>
+                            <div class="score-bar-col">
+                                <div class="score-bar-container">
+                                    <div class="score-bar dt-bar" data-width="${champion.decisionTree}" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="score-value-col">${champion.decisionTree.toFixed(1)}%</div>
+                            <button class="details-btn" onclick="showCalculationDetails('decisionTree', '${champion.championName}')">
+                                Details
+                            </button>
+                        </div>
+                        
+                        <!-- KNN Score -->
+                        <div class="score-row">
+                            <div class="score-label-col">
+                                <span class="algorithm-icon">⚡</span>
+                                <span class="algorithm-name">K-Nearest Neighbors</span>
+                            </div>
+                            <div class="score-bar-col">
+                                <div class="score-bar-container">
+                                    <div class="score-bar knn-bar" data-width="${champion.knn}" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="score-value-col">${champion.knn.toFixed(1)}%</div>
+                            <button class="details-btn" onclick="showCalculationDetails('knn', '${champion.championName}')">
+                                Details
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Expandable Details Section (initially hidden) -->
+                    <div class="calculation-details" id="details-${champion.championName.replace(/[^a-zA-Z0-9]/g, '')}">
+                        <!-- Details will be populated dynamically -->
+                    </div>
+                `;
+                
+                // Task 7.4: Append cards to container
+                analysisContent.appendChild(card);
+            });
+            
+            // Task 7.5: Animate score bars
+            setTimeout(() => {
+                document.querySelectorAll('.score-bar').forEach(bar => {
+                    const targetWidth = bar.getAttribute('data-width');
+                    bar.style.width = targetWidth + '%';
+                });
+            }, 100);
+            
+            console.log('✅ Unified recommendations displayed successfully');
+        }
+
+        function showCalculationDetails(algorithm, championName) {
+            // Task 8.1: Accept algorithm and championName parameters
+            if (!mlResults || !mlResults.top5) {
+                console.error('No ML results available');
+                return;
+            }
+            
+            // Task 8.2: Retrieve champion details
+            const champion = mlResults.top5.find(c => c.championName === championName);
+            if (!champion || !champion.details || !champion.details[algorithm]) {
+                console.error(`Details not found for ${algorithm} - ${championName}`);
+                return;
+            }
+            
+            const details = champion.details[algorithm];
+            const detailsContainer = document.getElementById(`details-${championName.replace(/[^a-zA-Z0-9]/g, '')}`);
+            
+            if (!detailsContainer) {
+                console.error(`Details container not found for ${championName}`);
+                return;
+            }
+            
+            // Toggle visibility
+            if (detailsContainer.classList.contains('show')) {
+                detailsContainer.classList.remove('show');
+                detailsContainer.style.display = 'none';
+                return;
+            }
+            
+            // Task 8.3: Build details HTML
+            const algorithmNames = {
+                'randomForest': 'Random Forest',
+                'decisionTree': 'Decision Tree',
+                'knn': 'K-Nearest Neighbors'
+            };
+            
+            let html = `
+                <div class="calculation-details-content">
+                    <button class="details-close-btn" onclick="showCalculationDetails('${algorithm}', '${championName}')">
+                        Close
+                    </button>
+                    <h4>${algorithmNames[algorithm]} Calculation for ${championName}</h4>
+                    
+                    <div class="score-summary">
+                        <div class="detail-item">
+                            <span class="label">Raw Score:</span>
+                            <span class="value">${details.rawScore ? details.rawScore.toFixed(2) : 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Normalized Score:</span>
+                            <span class="value">${champion[algorithm].toFixed(1)}%</span>
+                        </div>
+                    </div>
+            `;
+            
+            // Contributing Factors Table
+            if (details.contributingFactors && details.contributingFactors.length > 0) {
+                html += `
+                    <h5>Contributing Factors</h5>
+                    <table class="factors-table">
+                        <thead>
+                            <tr>
+                                <th>Factor</th>
+                                <th>Weight</th>
+                                <th>Contribution</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                details.contributingFactors.forEach(factor => {
+                    html += `
+                        <tr>
+                            <td>${factor.factor}</td>
+                            <td>${factor.weight}</td>
+                            <td>${typeof factor.contribution === 'number' ? factor.contribution.toFixed(2) : factor.contribution}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                        </tbody>
+                    </table>
+                `;
+            }
+            
+            // Matched Criteria
+            if (details.matchedCriteria && details.matchedCriteria.length > 0) {
+                html += `
+                    <h5>Matched Criteria</h5>
+                    <ul class="criteria-list">
+                `;
+                
+                details.matchedCriteria.forEach(criterion => {
+                    html += `<li class="matched">${criterion}</li>`;
+                });
+                
+                html += `</ul>`;
+            }
+            
+            // Penalties Applied
+            if (details.penalties && details.penalties.length > 0) {
+                html += `
+                    <h5>Penalties Applied</h5>
+                    <ul class="criteria-list">
+                `;
+                
+                details.penalties.forEach(penalty => {
+                    html += `<li class="penalty">${penalty}</li>`;
+                });
+                
+                html += `</ul>`;
+            }
+            
+            html += `</div>`;
+            
+            // Task 8.4: Display details
+            detailsContainer.innerHTML = html;
+            detailsContainer.style.display = 'block';
+            detailsContainer.classList.add('show');
+            
+            // Scroll to details
+            detailsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            console.log(`✅ Displayed calculation details for ${algorithmNames[algorithm]} - ${championName}`);
+        }
+
+        // Run tests
+        function runTests() {
+            const results = [];
+            let allPassed = true;
+
+            // Test 1: Function exists
+            if (typeof displayUnifiedRecommendations === 'function') {
+                results.push('<p class="success">✓ Test 1: displayUnifiedRecommendations function exists</p>');
+            } else {
+                results.push('<p class="error">✗ Test 1: displayUnifiedRecommendations function not found</p>');
+                allPassed = false;
+            }
+
+            // Test 2: Call the function
+            try {
+                displayUnifiedRecommendations();
+                results.push('<p class="success">✓ Test 2: Function executed without errors</p>');
+            } catch (error) {
+                results.push(`<p class="error">✗ Test 2: Function threw error: ${error.message}</p>`);
+                allPassed = false;
+            }
+
+            // Test 3: Check if cards were created
+            const cards = document.querySelectorAll('.unified-recommendation-card');
+            if (cards.length === 5) {
+                results.push('<p class="success">✓ Test 3: Created 5 champion cards</p>');
+            } else {
+                results.push(`<p class="error">✗ Test 3: Expected 5 cards, found ${cards.length}</p>`);
+                allPassed = false;
+            }
+
+            // Test 4: Check if score bars exist
+            const scoreBars = document.querySelectorAll('.score-bar');
+            if (scoreBars.length === 15) { // 3 algorithms × 5 champions
+                results.push('<p class="success">✓ Test 4: Created 15 score bars (3 per champion)</p>');
+            } else {
+                results.push(`<p class="error">✗ Test 4: Expected 15 score bars, found ${scoreBars.length}</p>`);
+                allPassed = false;
+            }
+
+            // Test 5: Check if details buttons exist
+            const detailsButtons = document.querySelectorAll('.details-btn');
+            if (detailsButtons.length === 15) {
+                results.push('<p class="success">✓ Test 5: Created 15 details buttons</p>');
+            } else {
+                results.push(`<p class="error">✗ Test 5: Expected 15 details buttons, found ${detailsButtons.length}</p>`);
+                allPassed = false;
+            }
+
+            // Test 6: Check if score bars animate
+            setTimeout(() => {
+                const animatedBars = Array.from(scoreBars).filter(bar => {
+                    const width = parseFloat(bar.style.width);
+                    return width > 0;
+                });
+                
+                if (animatedBars.length === 15) {
+                    results.push('<p class="success">✓ Test 6: All score bars animated</p>');
+                } else {
+                    results.push(`<p class="error">✗ Test 6: Expected 15 animated bars, found ${animatedBars.length}</p>`);
+                    allPassed = false;
+                }
+
+                // Test 7: Test showCalculationDetails function
+                if (typeof showCalculationDetails === 'function') {
+                    results.push('<p class="success">✓ Test 7: showCalculationDetails function exists</p>');
+                    
+                    // Test 8: Click a details button
+                    try {
+                        showCalculationDetails('randomForest', 'Ahri');
+                        const detailsContainer = document.getElementById('details-Ahri');
+                        if (detailsContainer && detailsContainer.classList.contains('show')) {
+                            results.push('<p class="success">✓ Test 8: Details display works correctly</p>');
+                        } else {
+                            results.push('<p class="error">✗ Test 8: Details did not display</p>');
+                            allPassed = false;
+                        }
+                    } catch (error) {
+                        results.push(`<p class="error">✗ Test 8: showCalculationDetails threw error: ${error.message}</p>`);
+                        allPassed = false;
+                    }
+                } else {
+                    results.push('<p class="error">✗ Test 7: showCalculationDetails function not found</p>');
+                    allPassed = false;
+                }
+
+                // Display results
+                const testResults = document.getElementById('test-results');
+                testResults.innerHTML = `
+                    <h2>Test Results</h2>
+                    ${results.join('')}
+                    <hr>
+                    ${allPassed ? 
+                        '<p class="success"><strong>✓ ALL TESTS PASSED</strong></p>' : 
+                        '<p class="error"><strong>✗ SOME TESTS FAILED</strong></p>'
+                    }
+                `;
+            }, 500);
+        }
+
+        // Run tests on page load
+        window.addEventListener('load', runTests);
+    </script>
+</body>
+</html>

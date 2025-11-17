@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test KNN predictAll() Method</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .champion-score {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .champion-name {
+            flex: 1;
+            font-weight: bold;
+        }
+        .score-bar {
+            flex: 2;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 10px;
+        }
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffc107, #fd7e14);
+            transition: width 0.3s ease;
+        }
+        .score-value {
+            width: 80px;
+            text-align: right;
+            font-weight: bold;
+            color: #495057;
+        }
+        .details {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fff3cd;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .matched { color: #28a745; }
+        .penalty { color: #dc3545; }
+        h1 { color: #333; }
+        h2 { color: #666; margin-top: 30px; }
+        .summary {
+            background: #d1ecf1;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test KNN predictAll() Method</h1>
+    
+    <div class="test-section">
+        <h2>Test Configuration</h2>
+        <p><strong>User Preferences:</strong></p>
+        <ul id="preferences"></ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>Top 10 Champions by KNN Score</h2>
+        <div id="top-champions"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Score Distribution</h2>
+        <div class="summary" id="summary"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Sample Champion Details</h2>
+        <div id="details"></div>
+    </div>
+
+    <script>
+        // Minimal champion data for testing
+        const allChampions = {
+            "Ahri": { role: "Mage", positions: ["Mid"], difficulty: 5, damage: 8, toughness: 3, control: 6, utility: 5, mobility: 8, title: "the Nine-Tailed Fox" },
+            "Lux": { role: "Mage", positions: ["Mid", "Support"], difficulty: 5, damage: 7, toughness: 2, control: 8, utility: 7, mobility: 3, title: "the Lady of Luminosity" },
+            "Zed": { role: "Assassin", positions: ["Mid"], difficulty: 7, damage: 9, toughness: 2, control: 4, utility: 2, mobility: 9, title: "the Master of Shadows" },
+            "Garen": { role: "Fighter", positions: ["Top"], difficulty: 3, damage: 6, toughness: 8, control: 3, utility: 2, mobility: 4, title: "the Might of Demacia" },
+            "Leona": { role: "Tank", positions: ["Support"], difficulty: 4, damage: 4, toughness: 9, control: 8, utility: 8, mobility: 3, title: "the Radiant Dawn" },
+            "Jinx": { role: "Marksman", positions: ["Bot"], difficulty: 6, damage: 9, toughness: 2, control: 5, utility: 3, mobility: 6, title: "the Loose Cannon" },
+            "Thresh": { role: "Support", positions: ["Support"], difficulty: 7, damage: 3, toughness: 5, control: 9, utility: 9, mobility: 4, title: "the Chain Warden" },
+            "Yasuo": { role: "Fighter", positions: ["Mid", "Top"], difficulty: 8, damage: 8, toughness: 4, control: 7, utility: 3, mobility: 9, title: "the Unforgiven" },
+            "Soraka": { role: "Support", positions: ["Support"], difficulty: 3, damage: 2, toughness: 3, control: 4, utility: 10, mobility: 3, title: "the Starchild" },
+            "Darius": { role: "Fighter", positions: ["Top"], difficulty: 4, damage: 9, toughness: 7, control: 5, utility: 2, mobility: 4, title: "the Hand of Noxus" }
+        };
+
+        // SimpleKNN class with new methods
+        class SimpleKNN {
+            // NEW: Score all champions for unified recommendations
+            predictAll(features) {
+                const scores = {};
+                
+                for (const [name, champion] of Object.entries(allChampions)) {
+                    const result = this.calculateChampionScore(features, champion);
+                    scores[name] = result;
+                }
+                
+                return scores;
+            }
+            
+            // NEW: Calculate detailed score for a single champion using distance-based scoring
+            calculateChampionScore(features, champion) {
+                let distance = 0;
+                const details = {
+                    contributingFactors: [],
+                    matchedCriteria: [],
+                    penalties: []
+                };
+                
+                // 1. Role distance (8 points penalty if mismatch)
+                if (features.role !== 'No Preference' && features.role !== champion.role) {
+                    distance += 8;
+                    details.penalties.push(`Role mismatch: wanted ${features.role}, got ${champion.role}`);
+                    details.contributingFactors.push({
+                        factor: 'Role Distance',
+                        weight: 8,
+                        contribution: 8
+                    });
+                } else {
+                    details.matchedCriteria.push(`Role: ${champion.role}`);
+                    details.contributingFactors.push({
+                        factor: 'Role Distance',
+                        weight: 8,
+                        contribution: 0
+                    });
+                }
+                
+                // 2. Position distance (6 points penalty if mismatch)
+                const championPositions = champion.positions || [];
+                if (features.position !== 'No Preference' && 
+                    championPositions.length > 0 && !championPositions.includes(features.position)) {
+                    distance += 6;
+                    details.penalties.push(`Position mismatch: wanted ${features.position}`);
+                    details.contributingFactors.push({
+                        factor: 'Position Distance',
+                        weight: 6,
+                        contribution: 6
+                    });
+                } else if (features.position !== 'No Preference') {
+                    details.matchedCriteria.push(`Position: ${features.position}`);
+                    details.contributingFactors.push({
+                        factor: 'Position Distance',
+                        weight: 6,
+                        contribution: 0
+                    });
+                }
+                
+                // 3. Numerical attribute distances (weighted)
+                const diffDist = Math.abs(features.difficulty - champion.difficulty) * 0.5;
+                const damageDist = Math.abs(features.damage - champion.damage) * 0.3;
+                const toughnessDist = Math.abs(features.toughness - champion.toughness) * 0.3;
+                
+                distance += diffDist + damageDist + toughnessDist;
+                
+                details.contributingFactors.push(
+                    { factor: 'Difficulty Distance', weight: 0.5, contribution: diffDist },
+                    { factor: 'Damage Distance', weight: 0.3, contribution: damageDist },
+                    { factor: 'Toughness Distance', weight: 0.3, contribution: toughnessDist }
+                );
+                
+                if (diffDist <= 1) {
+                    details.matchedCriteria.push(`Difficulty close to preference (${champion.difficulty})`);
+                }
+                if (damageDist <= 1) {
+                    details.matchedCriteria.push(`Damage close to preference (${champion.damage})`);
+                }
+                if (toughnessDist <= 1) {
+                    details.matchedCriteria.push(`Toughness close to preference (${champion.toughness})`);
+                }
+                
+                // 4. Psychological distances
+                let psychDistance = 0;
+                
+                // Pressure response
+                if (features.pressure_response === 'Stay calm and strategic' && champion.toughness < 6) {
+                    psychDistance += 2;
+                    details.penalties.push('Pressure response mismatch: low toughness for calm style');
+                } else if (features.pressure_response === 'Stay calm and strategic' && champion.toughness >= 6) {
+                    details.matchedCriteria.push('Calm playstyle matches champion toughness');
+                }
+                
+                distance += psychDistance;
+                details.contributingFactors.push({
+                    factor: 'Psychological Distance',
+                    weight: 'Variable',
+                    contribution: psychDistance
+                });
+                
+                const rawDistance = distance;
+                const normalizedScore = this.normalizeScore(rawDistance);
+                
+                return {
+                    score: normalizedScore,
+                    rawScore: rawDistance,
+                    details: details
+                };
+            }
+            
+            // NEW: Normalize distance to 0-100 score (lower distance = higher score)
+            normalizeScore(rawDistance) {
+                const maxDistance = 30;
+                const normalized = Math.max(0, 100 - ((rawDistance / maxDistance) * 100));
+                return Math.max(0, Math.min(100, normalized));
+            }
+        }
+
+        // Test the implementation
+        const knn = new SimpleKNN();
+        
+        // Test features
+        const testFeatures = {
+            role: 'Mage',
+            position: 'Mid',
+            difficulty: 5,
+            damage: 8,
+            toughness: 3,
+            pressure_response: 'Stay calm and strategic'
+        };
+        
+        // Display preferences
+        const prefsEl = document.getElementById('preferences');
+        prefsEl.innerHTML = `
+            <li>Role: ${testFeatures.role}</li>
+            <li>Position: ${testFeatures.position}</li>
+            <li>Difficulty: ${testFeatures.difficulty}</li>
+            <li>Damage: ${testFeatures.damage}</li>
+            <li>Toughness: ${testFeatures.toughness}</li>
+            <li>Pressure Response: ${testFeatures.pressure_response}</li>
+        `;
+        
+        // Run predictAll
+        console.log('Running KNN predictAll()...');
+        const scores = knn.predictAll(testFeatures);
+        console.log('Scores:', scores);
+        
+        // Sort champions by score
+        const sortedChampions = Object.entries(scores)
+            .map(([name, result]) => ({ name, ...result }))
+            .sort((a, b) => b.score - a.score);
+        
+        // Display top 10
+        const topEl = document.getElementById('top-champions');
+        sortedChampions.slice(0, 10).forEach(champ => {
+            topEl.innerHTML += `
+                <div class="champion-score">
+                    <div class="champion-name">${champ.name}</div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: ${champ.score}%"></div>
+                    </div>
+                    <div class="score-value">${champ.score.toFixed(1)}%</div>
+                </div>
+            `;
+        });
+        
+        // Display summary
+        const summaryEl = document.getElementById('summary');
+        const avgScore = sortedChampions.reduce((sum, c) => sum + c.score, 0) / sortedChampions.length;
+        const maxScore = sortedChampions[0].score;
+        const minScore = sortedChampions[sortedChampions.length - 1].score;
+        
+        summaryEl.innerHTML = `
+            <p><strong>Total Champions Scored:</strong> ${sortedChampions.length}</p>
+            <p><strong>Average Score:</strong> ${avgScore.toFixed(1)}%</p>
+            <p><strong>Highest Score:</strong> ${maxScore.toFixed(1)}% (${sortedChampions[0].name})</p>
+            <p><strong>Lowest Score:</strong> ${minScore.toFixed(1)}% (${sortedChampions[sortedChampions.length - 1].name})</p>
+        `;
+        
+        // Display details for top 3
+        const detailsEl = document.getElementById('details');
+        sortedChampions.slice(0, 3).forEach(champ => {
+            const details = champ.details;
+            detailsEl.innerHTML += `
+                <h3>${champ.name} - ${champ.score.toFixed(1)}%</h3>
+                <div class="details">
+                    <p><strong>Raw Distance:</strong> ${champ.rawScore.toFixed(2)}</p>
+                    <p><strong>Matched Criteria:</strong></p>
+                    <ul>
+                        ${details.matchedCriteria.map(c => `<li class="matched">✓ ${c}</li>`).join('')}
+                    </ul>
+                    ${details.penalties.length > 0 ? `
+                        <p><strong>Penalties:</strong></p>
+                        <ul>
+                            ${details.penalties.map(p => `<li class="penalty">✗ ${p}</li>`).join('')}
+                        </ul>
+                    ` : ''}
+                    <p><strong>Contributing Factors:</strong></p>
+                    <ul>
+                        ${details.contributingFactors.map(f => 
+                            `<li>${f.factor}: ${f.contribution.toFixed(2)} (weight: ${f.weight})</li>`
+                        ).join('')}
+                    </ul>
+                </div>
+            `;
+        });
+        
+        console.log('✅ Test complete!');
+    </script>
+</body>
+</html>

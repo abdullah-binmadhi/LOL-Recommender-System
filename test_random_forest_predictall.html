@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test SimpleRandomForest predictAll()</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .test-result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .pass {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .fail {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .champion-score {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-left: 3px solid #007bff;
+        }
+        h2 {
+            color: #333;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>SimpleRandomForest predictAll() Test</h1>
+    <div id="results"></div>
+
+    <script>
+        // Sample champion data
+        const allChampions = {
+            'Jinx': { role: 'Marksman', positions: ['ADC'], difficulty: 6, damage: 9, toughness: 2, control: 7, mobility: 6, utility: 6 },
+            'Ashe': { role: 'Marksman', positions: ['ADC'], difficulty: 4, damage: 7, toughness: 3, control: 8, mobility: 4, utility: 8 },
+            'Lux': { role: 'Mage', positions: ['Mid', 'Support'], difficulty: 5, damage: 7, toughness: 2, control: 8, mobility: 4, utility: 7 },
+            'Garen': { role: 'Fighter', positions: ['Top'], difficulty: 2, damage: 6, toughness: 7, control: 5, mobility: 5, utility: 5 },
+            'Ahri': { role: 'Mage', positions: ['Mid'], difficulty: 5, damage: 8, toughness: 3, control: 5, mobility: 7, utility: 6 },
+            'Zed': { role: 'Assassin', positions: ['Mid'], difficulty: 8, damage: 9, toughness: 2, control: 5, mobility: 8, utility: 4 }
+        };
+
+        // SimpleRandomForest class with new methods
+        class SimpleRandomForest {
+            // NEW: Score all champions for unified recommendations
+            predictAll(features) {
+                const scores = {};
+                
+                for (const [name, champion] of Object.entries(allChampions)) {
+                    const result = this.calculateChampionScore(features, champion);
+                    scores[name] = result;
+                }
+                
+                return scores;
+            }
+            
+            // NEW: Calculate detailed score for a single champion
+            calculateChampionScore(features, champion) {
+                let score = 0;
+                const details = {
+                    contributingFactors: [],
+                    matchedCriteria: [],
+                    penalties: []
+                };
+                
+                // 1. Role Match (40 points max)
+                if (features.role === 'No Preference' || features.role === champion.role) {
+                    score += 40;
+                    details.contributingFactors.push({
+                        factor: 'Role Match',
+                        weight: 40,
+                        contribution: 40
+                    });
+                    details.matchedCriteria.push(`Role: ${champion.role}`);
+                } else {
+                    details.penalties.push(`Role mismatch: wanted ${features.role}, got ${champion.role}`);
+                }
+                
+                // 2. Position Match (30 points max)
+                const championPositions = champion.positions || [];
+                if (features.position === 'No Preference' || 
+                    (championPositions.length > 0 && championPositions.includes(features.position))) {
+                    score += 30;
+                    details.contributingFactors.push({
+                        factor: 'Position Match',
+                        weight: 30,
+                        contribution: 30
+                    });
+                    details.matchedCriteria.push(`Position: ${features.position || 'Any'}`);
+                }
+                
+                // 3. Difficulty Match (20 points max)
+                const diffDelta = Math.abs(features.difficulty - champion.difficulty);
+                const diffScore = Math.max(0, 20 - (diffDelta * 2));
+                score += diffScore;
+                details.contributingFactors.push({
+                    factor: 'Difficulty Match',
+                    weight: 20,
+                    contribution: diffScore
+                });
+                
+                // 4. Damage Match (15 points max)
+                const damageDelta = Math.abs(features.damage - champion.damage);
+                const damageScore = Math.max(0, 15 - (damageDelta * 1.5));
+                score += damageScore;
+                details.contributingFactors.push({
+                    factor: 'Damage Match',
+                    weight: 15,
+                    contribution: damageScore
+                });
+                
+                // 5. Toughness Match (15 points max)
+                const toughnessDelta = Math.abs(features.toughness - champion.toughness);
+                const toughnessScore = Math.max(0, 15 - (toughnessDelta * 1.5));
+                score += toughnessScore;
+                details.contributingFactors.push({
+                    factor: 'Toughness Match',
+                    weight: 15,
+                    contribution: toughnessScore
+                });
+                
+                // 6. Playstyle Bonuses (20 points max)
+                let playstyleScore = 0;
+                if (features.playstyle === 'High Damage Output' && champion.damage >= 8) {
+                    playstyleScore += 20;
+                    details.matchedCriteria.push('High damage for aggressive playstyle');
+                }
+                score += playstyleScore;
+                details.contributingFactors.push({
+                    factor: 'Playstyle Bonus',
+                    weight: 20,
+                    contribution: playstyleScore
+                });
+                
+                // 7. Psychological Preferences (30 points max) - simplified for test
+                let psychScore = 0;
+                score += psychScore;
+                details.contributingFactors.push({
+                    factor: 'Psychological Match',
+                    weight: 30,
+                    contribution: psychScore
+                });
+                
+                const rawScore = score;
+                const normalizedScore = this.normalizeScore(rawScore);
+                
+                return {
+                    score: normalizedScore,
+                    rawScore: rawScore,
+                    details: details
+                };
+            }
+            
+            // NEW: Normalize score to 0-100 range
+            normalizeScore(rawScore) {
+                const maxScore = 170;
+                const minScore = 0;
+                const normalized = ((rawScore - minScore) / (maxScore - minScore)) * 100;
+                return Math.max(0, Math.min(100, normalized));
+            }
+        }
+
+        // Run tests
+        const resultsDiv = document.getElementById('results');
+        const rf = new SimpleRandomForest();
+
+        // Test 1: predictAll returns scores for all champions
+        resultsDiv.innerHTML += '<h2>Test 1: predictAll() returns scores for all champions</h2>';
+        const testFeatures = {
+            role: 'Mage',
+            position: 'Mid',
+            difficulty: 5,
+            damage: 8,
+            toughness: 3,
+            playstyle: 'High Damage Output'
+        };
+        
+        const allScores = rf.predictAll(testFeatures);
+        const championCount = Object.keys(allScores).length;
+        const expectedCount = Object.keys(allChampions).length;
+        
+        if (championCount === expectedCount) {
+            resultsDiv.innerHTML += `<div class="test-result pass">✓ PASS: Returned scores for ${championCount} champions</div>`;
+        } else {
+            resultsDiv.innerHTML += `<div class="test-result fail">✗ FAIL: Expected ${expectedCount} champions, got ${championCount}</div>`;
+        }
+
+        // Test 2: All scores are between 0 and 100
+        resultsDiv.innerHTML += '<h2>Test 2: All scores are normalized (0-100)</h2>';
+        let allNormalized = true;
+        for (const [name, result] of Object.entries(allScores)) {
+            if (result.score < 0 || result.score > 100) {
+                allNormalized = false;
+                resultsDiv.innerHTML += `<div class="test-result fail">✗ FAIL: ${name} has score ${result.score} (out of range)</div>`;
+            }
+        }
+        if (allNormalized) {
+            resultsDiv.innerHTML += '<div class="test-result pass">✓ PASS: All scores are between 0 and 100</div>';
+        }
+
+        // Test 3: Score details are present
+        resultsDiv.innerHTML += '<h2>Test 3: Score details are present</h2>';
+        const sampleChampion = allScores['Ahri'];
+        if (sampleChampion.details && 
+            sampleChampion.details.contributingFactors && 
+            sampleChampion.details.matchedCriteria && 
+            sampleChampion.details.penalties) {
+            resultsDiv.innerHTML += '<div class="test-result pass">✓ PASS: Score details structure is correct</div>';
+        } else {
+            resultsDiv.innerHTML += '<div class="test-result fail">✗ FAIL: Score details structure is missing or incorrect</div>';
+        }
+
+        // Test 4: Mage champions score higher for Mage preference
+        resultsDiv.innerHTML += '<h2>Test 4: Role matching works correctly</h2>';
+        const ahriScore = allScores['Ahri'].score;
+        const luxScore = allScores['Lux'].score;
+        const garenScore = allScores['Garen'].score;
+        
+        if (ahriScore > garenScore && luxScore > garenScore) {
+            resultsDiv.innerHTML += `<div class="test-result pass">✓ PASS: Mage champions (Ahri: ${ahriScore.toFixed(1)}, Lux: ${luxScore.toFixed(1)}) score higher than Fighter (Garen: ${garenScore.toFixed(1)})</div>`;
+        } else {
+            resultsDiv.innerHTML += `<div class="test-result fail">✗ FAIL: Role matching not working as expected</div>`;
+        }
+
+        // Display top 5 champions
+        resultsDiv.innerHTML += '<h2>Top 5 Champions for Test Features</h2>';
+        const sortedChampions = Object.entries(allScores)
+            .map(([name, result]) => ({ name, ...result }))
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 5);
+        
+        sortedChampions.forEach((champ, index) => {
+            resultsDiv.innerHTML += `
+                <div class="champion-score">
+                    <strong>${index + 1}. ${champ.name}</strong> - Score: ${champ.score.toFixed(1)}% (Raw: ${champ.rawScore})
+                    <br>Matched Criteria: ${champ.details.matchedCriteria.join(', ') || 'None'}
+                    <br>Penalties: ${champ.details.penalties.join(', ') || 'None'}
+                </div>
+            `;
+        });
+
+        // Display contributing factors for top champion
+        resultsDiv.innerHTML += '<h2>Contributing Factors for Top Champion</h2>';
+        const topChamp = sortedChampions[0];
+        resultsDiv.innerHTML += `<pre>${JSON.stringify(topChamp.details.contributingFactors, null, 2)}</pre>`;
+    </script>
+</body>
+</html>

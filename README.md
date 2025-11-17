@@ -37,10 +37,12 @@ An **AI-powered champion recommendation system** that uses **3 machine learning 
 | Feature | Description |
 |--------|-------------|
 | **Enhanced Questionnaire** | 10 questions (5 game-related + 5 psychological/behavioral) for deeper insights |
-| **3 ML Algorithms** | Random Forest, Decision Tree, and K-Nearest Neighbors working together |
-| **Smart Diversity** | Never get repetitive recommendations - explore all 150+ champions |
-| **Real-time Analysis** | See all algorithm results side-by-side with confidence scores |
-| **Consensus System** | Get the most agreed-upon recommendation from all algorithms |
+| **Unified ML System** | All 3 algorithms (Random Forest, Decision Tree, KNN) evaluate every champion |
+| **Top 5 Recommendations** | Get 5 unique champions, each scored by all 3 algorithms |
+| **Transparent Scoring** | See detailed breakdowns of how each algorithm calculated scores |
+| **Smart Diversity** | Max 2 champions per role ensures variety in recommendations |
+| **Visual Score Comparison** | Color-coded bars show algorithm scores side-by-side |
+| **Expandable Details** | Click to see contributing factors, matched criteria, and penalties |
 | **Data Export** | Export your results as CSV with Ctrl+Shift+E |
 | **Mobile Friendly** | Works perfectly on desktop, tablet, and mobile devices |
 
@@ -52,9 +54,111 @@ An **AI-powered champion recommendation system** that uses **3 machine learning 
 
 1. **Answer 10 Insightful Questions** - Tell us about your preferred role, position, difficulty level, playstyle, range, and psychological preferences
 2. **Enhanced Registration** - Provide additional personal information for better analysis
-3. **AI Analysis** - Our ML algorithms analyze your comprehensive preferences
-4. **Get Your Champion** - Receive a personalized champion recommendation with detailed analysis
-5. **Explore Alternatives** - See other great champion options that match your playstyle
+3. **AI Analysis** - Our 3 ML algorithms analyze your comprehensive preferences and score ALL 150+ champions
+4. **Get Top 5 Champions** - Receive 5 personalized champion recommendations, each evaluated by all 3 algorithms
+5. **Explore Detailed Scores** - See transparent scoring breakdowns showing how each algorithm evaluated each champion
+6. **View Alternatives** - Explore other great champion options that match your playstyle
+
+---
+
+## Unified ML Recommendation System
+
+### Overview
+
+The system uses a **unified scoring approach** where all 3 machine learning algorithms evaluate every champion in the database, providing transparent and comprehensive recommendations.
+
+### How It Works
+
+#### 1. **Comprehensive Scoring**
+Each of the 3 ML algorithms scores all 150+ champions based on your preferences:
+- **Random Forest**: Weighted feature scoring with playstyle bonuses
+- **Decision Tree**: Hierarchical decision-based scoring
+- **K-Nearest Neighbors**: Distance-based similarity scoring
+
+#### 2. **Score Aggregation**
+The system aggregates scores from all algorithms for each champion:
+```javascript
+Champion Score = {
+  randomForest: 85.3%,
+  decisionTree: 78.2%,
+  knn: 82.1%,
+  average: 81.9%,
+  weighted: 82.5%
+}
+```
+
+#### 3. **Top 5 Selection**
+- Champions are ranked by their aggregate scores
+- Top 5 unique champions are selected
+- Diversity filter ensures variety (max 2 per role)
+- All recommendations are backed by data from all 3 algorithms
+
+#### 4. **Transparent Display**
+Each recommended champion shows:
+- **Aggregate Score**: Overall match percentage
+- **Individual Algorithm Scores**: See how each ML algorithm rated the champion
+- **Visual Score Bars**: Color-coded bars for easy comparison
+- **Calculation Details**: Expandable breakdown of scoring factors
+
+### Algorithm Scoring Methods
+
+#### Random Forest Scoring
+- **Role Match**: 40 points (exact role match)
+- **Position Match**: 30 points (lane compatibility)
+- **Difficulty Match**: 20 points (skill level alignment)
+- **Damage Match**: 15 points (damage output preference)
+- **Toughness Match**: 15 points (survivability preference)
+- **Playstyle Bonus**: 20 points (aggressive/defensive/supportive)
+- **Psychological Match**: 30 points (behavioral preferences)
+- **Total**: Normalized to 0-100%
+
+#### Decision Tree Scoring
+- **Hierarchical Evaluation**: Top-down decision logic
+- **Level 1**: Role match (50 points)
+- **Level 2**: Position match (40 points, if role matches)
+- **Level 3**: Difficulty match (30 points, if position matches)
+- **Level 4**: Attribute matches (20 points each)
+- **Bonuses**: Psychological preferences (25 points each)
+- **Penalties**: Applied for mismatches
+- **Total**: Normalized to 0-100%
+
+#### K-Nearest Neighbors Scoring
+- **Distance-Based**: Lower distance = higher score
+- **Role Distance**: 8 points penalty for mismatch
+- **Position Distance**: 6 points penalty for mismatch
+- **Numerical Distances**: Weighted differences in attributes
+  - Difficulty: 0.5 weight
+  - Damage: 0.3 weight
+  - Toughness: 0.3 weight
+- **Psychological Distances**: 2 points each
+- **Total**: Distance converted to 0-100% score (inverse)
+
+### Example Output
+
+```
+Top 5 Recommended Champions:
+
+1. Ahri (81.9% Overall Match)
+   🌳 Random Forest: 85.3% ████████████████████
+   🎯 Decision Tree: 78.2% ███████████████
+   ⚡ KNN: 82.1% ████████████████
+   
+2. Lux (80.1% Overall Match)
+   🌳 Random Forest: 78.2% ███████████████
+   🎯 Decision Tree: 84.1% ████████████████████
+   ⚡ KNN: 77.8% ███████████████
+
+... (3 more champions)
+```
+
+### Benefits
+
+✅ **More Options**: 5 champions instead of 3  
+✅ **Transparency**: See exactly how each algorithm scored each champion  
+✅ **Confidence**: Multiple algorithms agreeing increases recommendation quality  
+✅ **Diversity**: Variety in roles and playstyles  
+✅ **Explainability**: Detailed breakdowns of scoring factors  
+✅ **Accuracy**: All 150+ champions evaluated, not just top picks from each algorithm
 
 ---
 
