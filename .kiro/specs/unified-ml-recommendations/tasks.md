@@ -377,17 +377,17 @@
     - Explain scoring logic
     - _Requirements: 3.5, 5.5_
 
-- [-] 16. Deploy to production
+- [x] 16. Deploy to production
   - [x] 16.1 Test on staging
     - Full end-to-end test
     - _Requirements: All_
   
-  - [-] 16.2 Deploy to production
+  - [x] 16.2 Deploy to production
     - Push to GitHub
     - Deploy to Vercel
     - _Requirements: All_
   
-  - [ ] 16.3 Monitor for issues
+  - [x] 16.3 Monitor for issues
     - Check error logs
     - Monitor user feedback
     - _Requirements: All_
