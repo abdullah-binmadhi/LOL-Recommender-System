@@ -4684,18 +4684,20 @@
         }
 
         function displayResults(performanceStats) {
-            // Find consensus and winner
-            const champions = Object.values(mlResults).map(r => r.champion);
-            const consensus = findConsensus(champions);
-            const winner = findWinner(mlResults);
+            // Check if mlResults has the new unified structure
+            if (!mlResults.top5 || !Array.isArray(mlResults.top5) || mlResults.top5.length === 0) {
+                console.error('Error: mlResults does not contain top5 recommendations');
+                alert('An error occurred while generating recommendations. Please try again.');
+                return;
+            }
+            
+            // Extract champion names from top5 for backward compatibility
+            const champions = mlResults.top5.map(c => c.championName);
             
             // Google Analytics tracking removed as per user request
             
             // Update diversity tracking with new recommendations
             updateRecentRecommendations(champions);
-            
-            // Save user's final results
-            saveUserResults(consensus, winner);
             
             // Skip the Multi-Algorithm Results page and go directly to detailed analysis
             showDetailedAnalysis();
@@ -4830,21 +4832,24 @@
 function showDetailedAnalysis() {
             const analysisContent = document.getElementById('analysis-content');
             
-            // Find the winner algorithm
-            const winner = findWinner(mlResults);
+            // Check if mlResults has the new unified structure
+            if (!mlResults.top5 || !Array.isArray(mlResults.top5) || mlResults.top5.length === 0) {
+                console.error('Error: mlResults does not contain top5 recommendations');
+                analysisContent.innerHTML = '<p style="color: white; text-align: center; padding: 40px;">An error occurred while generating recommendations. Please try again.</p>';
+                document.getElementById('detailed-analysis').classList.add('active');
+                return;
+            }
+            
+            // Get top 5 champions from unified structure
+            const top5Champions = mlResults.top5;
+            const topChampion = top5Champions[0];
             
             // Define algorithm names for consistent use throughout
             const algorithmNames = {
-                'random-forest': { name: 'Random Forest', icon: '<i class="ai-brain-icon"></i>' },
-                'decision-tree': { name: 'Decision Tree', icon: '<i class="target-icon"></i>' },
+                'randomForest': { name: 'Random Forest', icon: '<i class="ai-brain-icon"></i>' },
+                'decisionTree': { name: 'Decision Tree', icon: '<i class="target-icon"></i>' },
                 'knn': { name: 'K-Nearest Neighbors', icon: '<i class="lightning-icon"></i>' }
             };
-            
-            // Add missing properties if needed for backward compatibility
-            Object.values(mlResults).forEach(result => {
-                if (!result.synergy) result.synergy = 75 + Math.random() * 20;
-                if (!result.counters) result.counters = 70 + Math.random() * 25;
-            });
             
             // Generate the detailed analysis content using string concatenation instead of template literals
             var content = '';
@@ -4856,54 +4861,49 @@ function showDetailedAnalysis() {
             content += '<div class="champion-analysis-section">';
             content += '<h3><i class="champion-finder-icon"></i> Champion Match Analysis</h3>';
             content += '<div class="analysis-explanation">';
-            content += '<p>Based on your preferences, here\'s how each recommended champion aligns with your playstyle:</p>';
+            content += '<p>Based on your preferences, here are your top ' + top5Champions.length + ' champion recommendations:</p>';
             content += '</div>';
             
             content += '<div class="match-analysis-grid">';
             
-            // Add match cards for each algorithm result
-            Object.entries(mlResults).forEach(([algorithm, result]) => {
-                const champion = allChampions[result.champion];
-                const isWinner = algorithm === winner;
-                const algInfo = algorithmNames[algorithm];
-                const roleMatch = answers[1] === 'No Preference' || champion.role === answers[1] ? 100 : 70;
-                const difficultyMatch = Math.max(0, 100 - Math.abs(champion.difficulty - (parseInt(answers[3]) || 5)) * 10);
+            // Add match cards for each top5 champion
+            top5Champions.forEach((championResult, index) => {
+                const champion = allChampions[championResult.championName];
+                const isTopPick = index === 0;
+                const roleMatch = answers[2] === 'No Preference' || champion.role === answers[2] ? 100 : 70;
+                const difficultyMatch = Math.max(0, 100 - Math.abs(champion.difficulty - mapDifficulty(answers[1])) * 10);
                 const toughnessMatch = Math.max(0, 100 - Math.abs(champion.toughness - 5) * 8);
                 
-                content += '<div class="match-card ' + (isWinner ? 'winner' : '') + '">';
+                content += '<div class="match-card ' + (isTopPick ? 'winner' : '') + '">';
                 content += '<div class="match-header">';
-                content += '<img src="' + getChampionImageUrl(result.champion) + '" alt="' + result.champion + '" class="match-champion-img" ';
-                content += 'onerror="console.log(\'Failed to load image for champion:\', \'' + result.champion + '\', \'Generated URL:\', this.src); ';
-                content += 'this.src=\'https://via.placeholder.com/80x80/667eea/white?text=' + encodeURIComponent(result.champion.length > 3 ? result.champion.substring(0, 3) : result.champion) + '\'; ';
+                content += '<img src="' + getChampionImageUrl(championResult.championName) + '" alt="' + championResult.championName + '" class="match-champion-img" ';
+                content += 'onerror="console.log(\'Failed to load image for champion:\', \'' + championResult.championName + '\', \'Generated URL:\', this.src); ';
+                content += 'this.src=\'https://via.placeholder.com/80x80/667eea/white?text=' + encodeURIComponent(championResult.championName.length > 3 ? championResult.championName.substring(0, 3) : championResult.championName) + '\'; ';
                 content += 'this.onerror=null;">';
                 content += '<div class="match-info">';
-                content += '<h4>' + result.champion + ' ' + (isWinner ? '<span class="winner-badge"><i class="league-icon"></i> TOP PICK</span>' : '') + '</h4>';
+                content += '<h4>' + championResult.championName + ' ' + (isTopPick ? '<span class="winner-badge"><i class="league-icon"></i> TOP PICK</span>' : '') + '</h4>';
                 content += '<div class="match-tier">Tier ' + (champion.stats?.tier || 'B') + ' • ' + (champion.stats?.winRate || '50.0') + '% WR</div>';
-                content += '<div class="algorithm-info">' + algInfo.icon + ' ' + algInfo.name + ' • ' + result.confidence.toFixed(1) + '% confidence</div>';
+                content += '<div class="algorithm-info">🎯 Unified ML Score • ' + championResult.average.toFixed(1) + '% match</div>';
                 content += '</div>';
                 content += '</div>';
                 
                 content += '<div class="compatibility-score">';
                 content += '<div class="score-label">Compatibility Score</div>';
-                content += '<div class="score-value">' + result.confidence.toFixed(0) + '%</div>';
+                content += '<div class="score-value">' + championResult.average.toFixed(0) + '%</div>';
                 content += '</div>';
                 
                 content += '<div class="match-breakdown">';
                 content += '<div class="breakdown-item">';
-                content += '<div class="breakdown-label">Toughness</div>';
-                content += '<div class="breakdown-value">' + toughnessMatch + '%</div>';
+                content += '<div class="breakdown-label">Random Forest</div>';
+                content += '<div class="breakdown-value">' + championResult.randomForest.toFixed(0) + '%</div>';
                 content += '</div>';
                 content += '<div class="breakdown-item">';
-                content += '<div class="breakdown-label">Role</div>';
-                content += '<div class="breakdown-value">' + champion.role + '</div>';
+                content += '<div class="breakdown-label">Decision Tree</div>';
+                content += '<div class="breakdown-value">' + championResult.decisionTree.toFixed(0) + '%</div>';
                 content += '</div>';
                 content += '<div class="breakdown-item">';
-                content += '<div class="breakdown-label">Synergy</div>';
-                content += '<div class="breakdown-value">' + result.synergy.toFixed(0) + '%</div>';
-                content += '</div>';
-                content += '<div class="breakdown-item">';
-                content += '<div class="breakdown-label">Counters</div>';
-                content += '<div class="breakdown-value">' + result.counters.toFixed(0) + '%</div>';
+                content += '<div class="breakdown-label">KNN</div>';
+                content += '<div class="breakdown-value">' + championResult.knn.toFixed(0) + '%</div>';
                 content += '</div>';
                 content += '<div class="breakdown-item">';
                 content += '<span class="breakdown-label">Role Match</span>';
@@ -4931,6 +4931,7 @@ function showDetailedAnalysis() {
                 content += '</div>';
                 
                 content += '<div class="champion-stats-grid">';
+                content += '<div class="stat-item"><span class="stat-label">Damage</span><span class="stat-value">' + champion.damage + '/10</span></div>';
                 content += '<div class="stat-item"><span class="stat-label">Toughness</span><span class="stat-value">' + champion.toughness + '/10</span></div>';
                 content += '<div class="stat-item"><span class="stat-label">Mobility</span><span class="stat-value">' + champion.mobility + '/10</span></div>';
                 content += '<div class="stat-item"><span class="stat-label">Control</span><span class="stat-value">' + champion.control + '/10</span></div>';
@@ -4962,11 +4963,11 @@ function showDetailedAnalysis() {
             content += '<div class="recommendation-card primary-rec">';
             content += '<div class="rec-icon"><i class="league-icon"></i></div>';
             content += '<h4>Primary Recommendation</h4>';
-            content += '<div class="primary-champion">' + mlResults[winner].champion + '</div>';
-            content += '<p style="color: #333; text-align: center; margin-bottom: 15px; font-size: 0.95rem;">Recommended by ' + algorithmNames[winner].name + ' (' + (winner === 'random-forest' ? '92%' : winner === 'decision-tree' ? '87%' : '89%') + ' accuracy) with ' + mlResults[winner].confidence.toFixed(1) + '% confidence.</p>';
+            content += '<div class="primary-champion">' + topChampion.championName + '</div>';
+            content += '<p style="color: #333; text-align: center; margin-bottom: 15px; font-size: 0.95rem;">Top recommendation based on unified ML analysis with ' + topChampion.average.toFixed(1) + '% average match score.</p>';
             content += '<div class="action-buttons">';
-            content += '<button class="action-btn" onclick="window.open(\'https://www.mobafire.com/league-of-legends/' + mlResults[winner].champion.toLowerCase() + '-guide\', \'_blank\')">📚 View Guide</button>';
-            content += '<button class="action-btn" onclick="window.open(\'https://u.gg/lol/champions/' + mlResults[winner].champion.toLowerCase() + '/build\', \'_blank\')">⚙️ Build Guide</button>';
+            content += '<button class="action-btn" onclick="window.open(\'https://www.mobafire.com/league-of-legends/' + topChampion.championName.toLowerCase() + '-guide\', \'_blank\')">📚 View Guide</button>';
+            content += '<button class="action-btn" onclick="window.open(\'https://u.gg/lol/champions/' + topChampion.championName.toLowerCase() + '/build\', \'_blank\')">⚙️ Build Guide</button>';
             content += '</div>';
             content += '</div>';
             
@@ -4999,23 +5000,20 @@ function showDetailedAnalysis() {
             content += '<h4>Alternative Champions</h4>';
             content += '<div class="alternatives-list">';
             
-            // Add alternative champions
-            var altCount = 0;
-            Object.values(mlResults).forEach(result => {
-                if (result.champion !== mlResults[winner].champion && altCount < 2) {
-                    content += '<div class="alternative-item">';
-                    content += '<img src="' + getChampionImageUrl(result.champion) + '" alt="' + result.champion + '" class="alt-champion-img" ';
-                    content += 'onerror="console.log(\'Failed to load image for alternative champion:\', \'' + result.champion + '\', \'Generated URL:\', this.src); ';
-                    content += 'this.src=\'https://via.placeholder.com/40x40/667eea/white?text=' + encodeURIComponent(result.champion.length > 2 ? result.champion.substring(0, 2) : result.champion) + '\'; ';
-                    content += 'this.onerror=null;">';
-                    content += '<div class="alt-info">';
-                    content += '<div class="alt-name">' + result.champion + '</div>';
-                    content += '<div class="alt-reason">' + result.confidence.toFixed(0) + '% match • ' + allChampions[result.champion].role + '</div>';
-                    content += '</div>';
-                    content += '</div>';
-                    altCount++;
-                }
-            });
+            // Add alternative champions (skip the first one which is the top pick)
+            for (var i = 1; i < Math.min(3, top5Champions.length); i++) {
+                var altChampion = top5Champions[i];
+                content += '<div class="alternative-item">';
+                content += '<img src="' + getChampionImageUrl(altChampion.championName) + '" alt="' + altChampion.championName + '" class="alt-champion-img" ';
+                content += 'onerror="console.log(\'Failed to load image for alternative champion:\', \'' + altChampion.championName + '\', \'Generated URL:\', this.src); ';
+                content += 'this.src=\'https://via.placeholder.com/40x40/667eea/white?text=' + encodeURIComponent(altChampion.championName.length > 2 ? altChampion.championName.substring(0, 2) : altChampion.championName) + '\'; ';
+                content += 'this.onerror=null;">';
+                content += '<div class="alt-info">';
+                content += '<div class="alt-name">' + altChampion.championName + '</div>';
+                content += '<div class="alt-reason">' + altChampion.average.toFixed(0) + '% match • ' + allChampions[altChampion.championName].role + '</div>';
+                content += '</div>';
+                content += '</div>';
+            }
             
             content += '</div>';
             content += '</div>';
@@ -5025,21 +5023,19 @@ function showDetailedAnalysis() {
             content += '<h4>Current Meta Insights</h4>';
             content += '<div class="meta-info">';
             
-            // Calculate average win rate
+            // Calculate average win rate from top5
             var totalWinRate = 0;
-            var resultCount = 0;
-            Object.values(mlResults).forEach(result => {
-                totalWinRate += (allChampions[result.champion].stats?.winRate || 50);
-                resultCount++;
+            top5Champions.forEach(championResult => {
+                totalWinRate += (allChampions[championResult.championName].stats?.winRate || 50);
             });
-            var avgWinRate = resultCount > 0 ? Math.round(totalWinRate / resultCount * 10) / 10 : 50;
+            var avgWinRate = top5Champions.length > 0 ? Math.round(totalWinRate / top5Champions.length * 10) / 10 : 50;
             
             // Calculate average difficulty
             var totalDifficulty = 0;
-            Object.values(mlResults).forEach(result => {
-                totalDifficulty += allChampions[result.champion].difficulty;
+            top5Champions.forEach(championResult => {
+                totalDifficulty += allChampions[championResult.championName].difficulty;
             });
-            var avgDifficulty = resultCount > 0 ? Math.round(totalDifficulty / resultCount * 10) / 10 : 5;
+            var avgDifficulty = top5Champions.length > 0 ? Math.round(totalDifficulty / top5Champions.length * 10) / 10 : 5;
             
             content += '<div class="meta-stat">';
             content += '<span class="meta-label">Average Win Rate:</span>';
@@ -5052,8 +5048,8 @@ function showDetailedAnalysis() {
             
             // Check if all champions have positive win rates
             var allPositive = true;
-            Object.values(mlResults).forEach(result => {
-                if ((allChampions[result.champion].stats?.winRate || 50) < 50) {
+            top5Champions.forEach(championResult => {
+                if ((allChampions[championResult.championName].stats?.winRate || 50) < 50) {
                     allPositive = false;
                 }
             });
@@ -5102,9 +5098,8 @@ function showDetailedAnalysis() {
             content += '<h4><i class="sparkle-icon-sm"></i> Pro Tips</h4>';
             content += '<div class="tips-grid">';
             
-            // Add pro tips
-            const topChampion = mlResults[winner].champion;
-            const proTips = getChampionProTips(topChampion);
+            // Add pro tips for top champion
+            const proTips = getChampionProTips(topChampion.championName);
             
             // Show up to 6 tips
             for (var i = 0; i < Math.min(6, proTips.length); i++) {
@@ -5116,7 +5111,7 @@ function showDetailedAnalysis() {
             
             content += '</div>';
             content += '<div class="champion-tip-source">';
-            content += '<small>&#127919; Pro tips for ' + mlResults[winner].champion + ' - Master these fundamentals to excel with your recommended champion!</small>';
+            content += '<small>&#127919; Pro tips for ' + topChampion.championName + ' - Master these fundamentals to excel with your recommended champion!</small>';
             content += '</div>';
             content += '</div>';
             content += '</div>';
@@ -5130,7 +5125,7 @@ function showDetailedAnalysis() {
             document.getElementById('detailed-analysis').classList.add('active');
             
             // Load counter data for the recommended champion
-            loadCounterData(mlResults[winner].champion.toLowerCase());
+            loadCounterData(topChampion.championName.toLowerCase());
         }
         
         // Load counter data for a champion
