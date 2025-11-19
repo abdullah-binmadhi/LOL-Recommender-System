@@ -3944,12 +3944,12 @@
                 // Sort champions by score descending
                 championScores.sort((a, b) => b.score - a.score);
                 
-                // Very strict: 75% threshold, but allow all champions with min/max constraints
-                const minRelevantCount = Math.ceil(championScores.length * 0.20); // At least 20%
-                const maxRelevantCount = Math.floor(championScores.length * 0.80); // At most 80%
+                // Allow more champions: 70% threshold with 15-95% constraints
+                const minRelevantCount = Math.ceil(championScores.length * 0.15); // At least 15%
+                const maxRelevantCount = Math.floor(championScores.length * 0.95); // At most 95%
                 
                 const relevantChampions = new Set();
-                let threshold = 0.75; // Very strict threshold to prevent 100% scores
+                let threshold = 0.70; // Lowered threshold to allow more champions (was 0.75)
                 
                 // First pass: add champions above threshold
                 for (const champ of championScores) {
