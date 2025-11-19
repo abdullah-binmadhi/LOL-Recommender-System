@@ -1924,6 +1924,208 @@
         .metric-card {
             position: relative;
         }
+
+        /* Champion Card Clickable Styles */
+        .match-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .match-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .match-card::after {
+            content: '🔍 Click for ML details';
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            font-size: 0.75rem;
+            color: #999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background: rgba(255,255,255,0.9);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .match-card:hover::after {
+            opacity: 1;
+        }
+
+        /* Champion Modal Styles */
+        .champion-modal-content {
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .champion-modal-header {
+            background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%);
+            padding: 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .champion-modal-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .champion-modal-info h2 {
+            margin: 0 0 10px 0;
+            font-size: 2rem;
+            color: white;
+        }
+
+        .champion-modal-subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+        }
+
+        .ml-algorithm-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .ml-algorithm-section h3 {
+            color: #667eea;
+            margin-top: 0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .algorithm-score-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .algorithm-score-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .algorithm-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .algorithm-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .algorithm-score {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .calculation-steps {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .calculation-step {
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .calculation-step:last-child {
+            border-bottom: none;
+        }
+
+        .step-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .step-formula {
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            color: #667eea;
+            font-size: 0.9rem;
+            margin: 5px 0;
+        }
+
+        .step-result {
+            color: #28a745;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .attributes-comparison {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .attribute-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+
+        .attribute-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .attribute-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .final-score-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .final-score-section h3 {
+            margin-top: 0;
+            color: white;
+        }
+
+        .final-score-value {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .score-interpretation {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
     </style>
 </head>
 <body>
@@ -2075,6 +2277,23 @@
                     <span class="modal-close" onclick="closeMetricModal()">&times;</span>
                 </div>
                 <div class="modal-body" id="modal-body">
+                    <!-- Content will be populated dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Champion Modal -->
+        <div id="champion-modal" class="modal">
+            <div class="modal-content champion-modal-content">
+                <div class="champion-modal-header">
+                    <img id="champion-modal-img" src="" alt="Champion" class="champion-modal-img">
+                    <div class="champion-modal-info">
+                        <h2 id="champion-modal-name">Champion Name</h2>
+                        <div class="champion-modal-subtitle" id="champion-modal-subtitle">Details</div>
+                    </div>
+                    <span class="modal-close" onclick="closeChampionModal()" style="position: absolute; right: 20px; top: 20px;">&times;</span>
+                </div>
+                <div class="modal-body" id="champion-modal-body">
                     <!-- Content will be populated dynamically -->
                 </div>
             </div>
@@ -5180,7 +5399,24 @@ function showDetailedAnalysis() {
                 const difficultyMatch = Math.max(0, 100 - Math.abs(champion.difficulty - mapDifficulty(answers[1])) * 10);
                 const toughnessMatch = Math.max(0, 100 - Math.abs(champion.toughness - 5) * 8);
                 
-                content += '<div class="match-card ' + (isTopPick ? 'winner' : '') + '">';
+                // Store champion data for modal
+                const championData = JSON.stringify({
+                    name: championResult.championName,
+                    scores: {
+                        randomForest: championResult.randomForest,
+                        decisionTree: championResult.decisionTree,
+                        knn: championResult.knn,
+                        average: championResult.average
+                    },
+                    champion: champion,
+                    matches: {
+                        role: roleMatch,
+                        difficulty: difficultyMatch,
+                        toughness: toughnessMatch
+                    }
+                }).replace(/"/g, '&quot;');
+                
+                content += '<div class="match-card ' + (isTopPick ? 'winner' : '') + '" onclick="showChampionModal(' + championData + ')">';
                 content += '<div class="match-header">';
                 content += '<img src="' + getChampionImageUrl(championResult.championName) + '" alt="' + championResult.championName + '" class="match-champion-img" ';
                 content += 'onerror="console.log(\'Failed to load image for champion:\', \'' + championResult.championName + '\', \'Generated URL:\', this.src); ';
@@ -5978,6 +6214,331 @@ function restartQuestionnaire() {
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeMetricModal();
+                closeChampionModal();
+            }
+        });
+
+        // Function to show champion modal with ML calculation details
+        function showChampionModal(championData) {
+            const modal = document.getElementById('champion-modal');
+            const modalImg = document.getElementById('champion-modal-img');
+            const modalName = document.getElementById('champion-modal-name');
+            const modalSubtitle = document.getElementById('champion-modal-subtitle');
+            const modalBody = document.getElementById('champion-modal-body');
+            
+            // Set champion image and name
+            modalImg.src = getChampionImageUrl(championData.name);
+            modalImg.onerror = function() {
+                this.src = 'https://via.placeholder.com/100x100/667eea/white?text=' + encodeURIComponent(championData.name.substring(0, 2));
+            };
+            modalName.textContent = championData.name;
+            modalSubtitle.textContent = `${championData.champion.role} • Tier ${championData.champion.stats?.tier || 'B'} • ${championData.champion.stats?.winRate || '50.0'}% WR`;
+            
+            // Build detailed ML explanation
+            let content = '';
+            
+            // Final Score Section
+            content += `
+                <div class="final-score-section">
+                    <h3>🎯 Unified ML Compatibility Score</h3>
+                    <div class="final-score-value">${championData.scores.average.toFixed(1)}%</div>
+                    <div class="score-interpretation">
+                        ${championData.scores.average >= 80 ? 'Excellent Match! This champion aligns perfectly with your preferences.' :
+                          championData.scores.average >= 70 ? 'Great Match! This champion fits well with what you\'re looking for.' :
+                          championData.scores.average >= 60 ? 'Good Match! This champion should work well for your playstyle.' :
+                          championData.scores.average >= 50 ? 'Decent Match! Give this champion a try, might surprise you.' :
+                          'This champion may require adaptation to match your preferred playstyle.'}
+                    </div>
+                </div>
+            `;
+            
+            // Random Forest Section
+            content += `
+                <div class="ml-algorithm-section">
+                    <h3><span style="font-size: 1.4rem;">🌲</span> Random Forest Algorithm</h3>
+                    <div class="algorithm-score-card">
+                        <div class="algorithm-header">
+                            <div class="algorithm-name">
+                                <span>Decision Tree Ensemble</span>
+                            </div>
+                            <div class="algorithm-score">${championData.scores.randomForest.toFixed(1)}%</div>
+                        </div>
+                        
+                        <p style="color: #666; margin-bottom: 15px;">
+                            Random Forest uses multiple decision trees to make predictions. Each tree votes, and the final score is the average of all votes.
+                        </p>
+                        
+                        <div class="calculation-steps">
+                            <div class="calculation-step">
+                                <div class="step-label">Step 1: Role-Based Scoring</div>
+                                <div class="step-formula">
+                                    Base Score = ${championData.matches.role >= 100 ? '90' : '45'} (${championData.matches.role >= 100 ? 'Perfect Match' : 'Different Role'})
+                                </div>
+                            </div>
+                            
+                            <div class="calculation-step">
+                                <div class="step-label">Step 2: Attribute Weighting</div>
+                                <div class="step-formula">
+                                    Damage Weight × ${championData.champion.damage}/10 = ${(championData.champion.damage * 1.2).toFixed(1)} points
+                                </div>
+                                <div class="step-formula">
+                                    Toughness Weight × ${championData.champion.toughness}/10 = ${(championData.champion.toughness * 1.0).toFixed(1)} points
+                                </div>
+                                <div class="step-formula">
+                                    Mobility Weight × ${championData.champion.mobility}/10 = ${(championData.champion.mobility * 0.8).toFixed(1)} points
+                                </div>
+                            </div>
+                            
+                            <div class="calculation-step">
+                                <div class="step-label">Step 3: Difficulty Adjustment</div>
+                                <div class="step-formula">
+                                    Difficulty Match = ${championData.matches.difficulty.toFixed(0)}%
+                                </div>
+                                <div class="step-formula">
+                                    Adjustment Factor = ${(championData.matches.difficulty / 100 * 10).toFixed(1)} points
+                                </div>
+                            </div>
+                            
+                            <div class="calculation-step">
+                                <div class="step-label">Final Calculation</div>
+                                <div class="step-formula">
+                                    Final Score = (Base + Attributes + Difficulty) ÷ Max Points × 100
+                                </div>
+                                <div class="step-result">Result: ${championData.scores.randomForest.toFixed(1)}%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="attributes-comparison">
+                            <div class="attribute-item">
+                                <div class="attribute-label">Damage Output</div>
+                                <div class="attribute-value">${championData.champion.damage}/10</div>
+                            </div>
+                            <div class="attribute-item">
+                                <div class="attribute-label">Toughness/Tank</div>
+                                <div class="attribute-value">${championData.champion.toughness}/10</div>
+                            </div>
+                            <div class="attribute-item">
+                                <div class="attribute-label">Mobility</div>
+                                <div class="attribute-value">${championData.champion.mobility}/10</div>
+                            </div>
+                            <div class="attribute-item">
+                                <div class="attribute-label">Crowd Control</div>
+                                <div class="attribute-value">${championData.champion.control}/10</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Decision Tree Section
+            content += `
+                <div class="ml-algorithm-section">
+                    <h3><span style="font-size: 1.4rem;">🎯</span> Decision Tree Algorithm</h3>
+                    <div class="algorithm-score-card">
+                        <div class="algorithm-header">
+                            <div class="algorithm-name">
+                                <span>Rule-Based Classification</span>
+                            </div>
+                            <div class="algorithm-score">${championData.scores.decisionTree.toFixed(1)}%</div>
+                        </div>
+                        
+                        <p style="color: #666; margin-bottom: 15px;">
+                            Decision Tree follows a series of if-then rules to classify champions based on your preferences.
+                        </p>
+                        
+                        <div class="calculation-steps">
+                            <div class="calculation-step">
+                                <div class="step-label">Decision Path 1: Role Classification</div>
+                                <div class="step-formula">
+                                    IF role = ${championData.champion.role} → Score += 40 points
+                                </div>
+                                <div class="step-result">Applied: ${championData.matches.role >= 100 ? '+40' : '+0'} points</div>
+                            </div>
+                            
+                            <div class="calculation-step">
+                                <div class="step-label">Decision Path 2: Difficulty Level</div>
+                                <div class="step-formula">
+                                    IF difficulty_match ≥ 70% → Score += 25 points
+                                </div>
+                                <div class="step-result">Applied: ${championData.matches.difficulty >= 70 ? '+25' : '+' + (championData.matches.difficulty * 0.25).toFixed(0)} points</div>
+                            </div>
+                            
+                            <div class="calculation-step">
+                                <div class="step-label">Decision Path 3: Playstyle Match</div>
+                                <div class="step-formula">
+                                    Damage Rating (${championData.champion.damage}/10) × 2.0 = ${(championData.champion.damage * 2).toFixed(1)} points
+                                </div>
+                                <div class="step-formula">
+                                    Toughness Rating (${championData.champion.toughness}/10) × 1.5 = ${(championData.champion.toughness * 1.5).toFixed(1)} points
+                                </div>
+                            </div>
+                            
+                            <div class="calculation-step">
+                                <div class="step-label">Decision Path 4: Utility Factor</div>
+                                <div class="step-formula">
+                                    Control (${championData.champion.control}/10) + Utility (${championData.champion.utility}/10) = ${(championData.champion.control + championData.champion.utility).toFixed(1)} points
+                                </div>
+                            </div>
+                            
+                            <div class="calculation-step">
+                                <div class="step-label">Final Classification</div>
+                                <div class="step-formula">
+                                    Total Points ÷ 100 × 100 = Final Score
+                                </div>
+                                <div class="step-result">Result: ${championData.scores.decisionTree.toFixed(1)}%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // KNN Section
+            content += `
+                <div class="ml-algorithm-section">
+                    <h3><span style="font-size: 1.4rem;">⚡</span> K-Nearest Neighbors (KNN)</h3>
+                    <div class="algorithm-score-card">
+                        <div class="algorithm-header">
+                            <div class="algorithm-name">
+                                <span>Similarity-Based Matching</span>
+                            </div>
+                            <div class="algorithm-score">${championData.scores.knn.toFixed(1)}%</div>
+                        </div>
+                        
+                        <p style="color: #666; margin-bottom: 15px;">
+                            KNN finds the most similar champions based on Euclidean distance calculation across all attributes.
+                        </p>
+                        
+                        <div class="calculation-steps">
+                            <div class="calculation-step">
+                                <div class="step-label">Step 1: Calculate Distance Vector</div>
+                                <div class="step-formula">
+                                    Distance = √[(Δdamage)² + (Δtoughness)² + (Δmobility)² + (Δcontrol)² + (Δutility)²]
+                                </div>
+                            </div>
+                            
+                            <div class="calculation-step">
+                                <div class="step-label">Step 2: Normalize Distances</div>
+                                <div class="step-formula">
+                                    Normalized Distance = Distance ÷ Max Distance
+                                </div>
+                            </div>
+                            
+                            <div class="calculation-step">
+                                <div class="step-label">Step 3: Similarity Score</div>
+                                <div class="step-formula">
+                                    Similarity = (1 - Normalized Distance) × 100
+                                </div>
+                            </div>
+                            
+                            <div class="calculation-step">
+                                <div class="step-label">Step 4: Role Bonus</div>
+                                <div class="step-formula">
+                                    IF same_role → Similarity × 1.15 (15% bonus)
+                                </div>
+                                <div class="step-result">Applied: ${championData.matches.role >= 100 ? 'Yes (+15%)' : 'No'}</div>
+                            </div>
+                            
+                            <div class="calculation-step">
+                                <div class="step-label">Step 5: Difficulty Penalty</div>
+                                <div class="step-formula">
+                                    Penalty = |User Difficulty - Champion Difficulty| × 2%
+                                </div>
+                                <div class="step-result">Penalty: -${(100 - championData.matches.difficulty) / 10}%</div>
+                            </div>
+                            
+                            <div class="calculation-step">
+                                <div class="step-label">Final KNN Score</div>
+                                <div class="step-formula">
+                                    Final = (Similarity + Role Bonus - Difficulty Penalty)
+                                </div>
+                                <div class="step-result">Result: ${championData.scores.knn.toFixed(1)}%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="attributes-comparison">
+                            <div class="attribute-item">
+                                <div class="attribute-label">Utility Factor</div>
+                                <div class="attribute-value">${championData.champion.utility}/10</div>
+                            </div>
+                            <div class="attribute-item">
+                                <div class="attribute-label">Difficulty</div>
+                                <div class="attribute-value">${championData.champion.difficulty}/10</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Unified Score Explanation
+            content += `
+                <div class="ml-algorithm-section" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+                    <h3 style="color: #1976d2;"><span style="font-size: 1.4rem;">🎓</span> How We Calculate Your Final Score</h3>
+                    <div class="algorithm-score-card">
+                        <p style="color: #666; margin-bottom: 15px;">
+                            Your final compatibility score is the <strong>average of all three ML algorithms</strong>. This ensemble approach provides more accurate and reliable recommendations.
+                        </p>
+                        
+                        <div class="calculation-steps">
+                            <div class="calculation-step">
+                                <div class="step-label">Random Forest Contribution</div>
+                                <div class="step-formula">
+                                    ${championData.scores.randomForest.toFixed(1)}% ÷ 3 = ${(championData.scores.randomForest / 3).toFixed(1)}%
+                                </div>
+                            </div>
+                            
+                            <div class="calculation-step">
+                                <div class="step-label">Decision Tree Contribution</div>
+                                <div class="step-formula">
+                                    ${championData.scores.decisionTree.toFixed(1)}% ÷ 3 = ${(championData.scores.decisionTree / 3).toFixed(1)}%
+                                </div>
+                            </div>
+                            
+                            <div class="calculation-step">
+                                <div class="step-label">KNN Contribution</div>
+                                <div class="step-formula">
+                                    ${championData.scores.knn.toFixed(1)}% ÷ 3 = ${(championData.scores.knn / 3).toFixed(1)}%
+                                </div>
+                            </div>
+                            
+                            <div class="calculation-step">
+                                <div class="step-label">Final Unified Score</div>
+                                <div class="step-formula">
+                                    (${championData.scores.randomForest.toFixed(1)} + ${championData.scores.decisionTree.toFixed(1)} + ${championData.scores.knn.toFixed(1)}) ÷ 3
+                                </div>
+                                <div class="step-result">Result: ${championData.scores.average.toFixed(1)}%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modalBody.innerHTML = content;
+            modal.classList.add('active');
+        }
+
+        // Function to close champion modal
+        function closeChampionModal() {
+            const modal = document.getElementById('champion-modal');
+            modal.classList.remove('active');
+        }
+
+        // Update window click handler to close both modals
+        window.onclick = function(event) {
+            const metricModal = document.getElementById('metric-modal');
+            const championModal = document.getElementById('champion-modal');
+            if (event.target === metricModal) {
+                closeMetricModal();
+            }
+            if (event.target === championModal) {
+                closeChampionModal();
+            }
+        }
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeMetricModal();
+                closeChampionModal();
             }
         });
 
