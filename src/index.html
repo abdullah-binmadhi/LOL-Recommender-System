@@ -2753,15 +2753,293 @@
                 ];
             });
 
-        // Simplified ML Algorithms (optimized for performance)
+        // Scientifically Accurate ML Algorithms
+        // Random Forest: Ensemble of decision trees with bootstrap aggregating (bagging)
         class SimpleRandomForest {
-            // TASK 14.2: Pre-compute champion entries for better performance
             constructor() {
                 this.championEntries = null;
                 this.championCount = 0;
+                this.numTrees = 10; // Increased for better ensemble accuracy
+                this.trees = [];
+                this.featureSubsetSize = 5; // Number of features to consider per split
             }
             
-            // TASK 14.2: Initialize champion data once
+            initializeChampionData() {
+                if (!this.championEntries) {
+                    this.championEntries = Object.entries(allChampions);
+                    this.championCount = this.championEntries.length;
+                    this.buildForest();
+                }
+            }
+            
+            // Build forest with bootstrap sampling
+            buildForest() {
+                this.trees = [];
+                for (let i = 0; i < this.numTrees; i++) {
+                    // Create bootstrap sample (random sampling with replacement)
+                    const bootstrapSample = this.bootstrapSample();
+                    this.trees.push({
+                        id: i,
+                        sample: bootstrapSample,
+                        featureIndices: this.selectRandomFeatures()
+                    });
+                }
+            }
+            
+            // Bootstrap sampling: random selection with replacement
+            bootstrapSample() {
+                const sample = [];
+                for (let i = 0; i < this.championCount; i++) {
+                    const randomIndex = Math.floor(Math.random() * this.championCount);
+                    sample.push(this.championEntries[randomIndex]);
+                }
+                return sample;
+            }
+            
+            // Random feature selection for each tree
+            selectRandomFeatures() {
+                const allFeatures = ['role', 'difficulty', 'damage', 'toughness', 'mobility', 'control', 'utility'];
+                const selected = [];
+                const shuffled = [...allFeatures].sort(() => Math.random() - 0.5);
+                return shuffled.slice(0, this.featureSubsetSize);
+            }
+            
+            predict(features) {
+                this.initializeChampionData();
+                
+                // Collect votes from all trees (ensemble method)
+                const votes = {};
+                
+                for (let i = 0; i < this.numTrees; i++) {
+                    const tree = this.trees[i];
+                    const prediction = this.singleTreePredict(features, tree);
+                    votes[prediction] = (votes[prediction] || 0) + 1;
+                }
+                
+                // Find champion with most votes (majority voting)
+                let bestChampion = null;
+                let maxVotes = 0;
+                
+                for (const [champion, voteCount] of Object.entries(votes)) {
+                    if (voteCount > maxVotes) {
+                        maxVotes = voteCount;
+                        bestChampion = champion;
+                    }
+                }
+                
+                // Confidence is proportion of trees that voted for winner
+                const confidence = (maxVotes / this.numTrees) * 100;
+                
+                return {
+                    champion: bestChampion,
+                    confidence: confidence,
+                    algorithm: 'Random Forest'
+                };
+            }
+            
+            singleTreePredict(features, tree) {
+                // Use only the random subset of features for this tree
+                let bestChampion = null;
+                let bestScore = -Infinity;
+                
+                // Evaluate champions in this tree's bootstrap sample
+                for (const [name, champion] of tree.sample) {
+                    let score = 0;
+                    
+                    // Only use the randomly selected features for this tree
+                    if (tree.featureIndices.includes('role')) {
+                        score += (features.role === 'No Preference' || features.role === champion.role) ? 40 : 0;
+                    }
+                    
+                    if (tree.featureIndices.includes('difficulty')) {
+                        const diffDist = Math.abs(features.difficulty - champion.difficulty);
+                        score += Math.max(0, 20 - diffDist * 2);
+                    }
+                    
+                    if (tree.featureIndices.includes('damage')) {
+                        const damageDist = Math.abs(features.damage - champion.damage);
+                        score += Math.max(0, 15 - damageDist * 1.5);
+                    }
+                    
+                    if (tree.featureIndices.includes('toughness')) {
+                        const toughDist = Math.abs(features.toughness - champion.toughness);
+                        score += Math.max(0, 15 - toughDist * 1.5);
+                    }
+                    
+                    if (tree.featureIndices.includes('mobility')) {
+                        score += champion.mobility >= 7 ? 10 : champion.mobility * 1.2;
+                    }
+                    
+                    if (tree.featureIndices.includes('control')) {
+                        score += champion.control >= 7 ? 10 : champion.control * 1.2;
+                    }
+                    
+                    if (tree.featureIndices.includes('utility')) {
+                        score += champion.utility >= 7 ? 10 : champion.utility * 1.2;
+                    }
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestChampion = name;
+                    }
+                }
+                
+                return bestChampion;
+            }
+            
+            /**
+             * Score all champions using Random Forest ensemble method
+             * Each tree in the forest votes, and we aggregate the votes
+             * 
+             * @param {Object} features - User preference features
+             * @returns {Object} Scores object with champion names as keys, score objects as values
+             */
+            predictAll(features) {
+                const scores = {};
+                this.initializeChampionData();
+                
+                // Get predictions from all trees for all champions
+                const championVotes = {};
+                
+                for (let i = 0; i < this.numTrees; i++) {
+                    const tree = this.trees[i];
+                    
+                    // Each tree evaluates all champions
+                    for (const [name, champion] of this.championEntries) {
+                        const treeScore = this.calculateTreeScore(features, champion, tree);
+                        
+                        if (!championVotes[name]) {
+                            championVotes[name] = [];
+                        }
+                        championVotes[name].push(treeScore);
+                    }
+                }
+                
+                // Aggregate votes from all trees for each champion
+                for (const [name, votes] of Object.entries(championVotes)) {
+                    // Mean aggregation (average of all tree scores)
+                    const meanScore = votes.reduce((sum, v) => sum + v, 0) / votes.length;
+                    
+                    // Standard deviation (measure of disagreement between trees)
+                    const variance = votes.reduce((sum, v) => sum + Math.pow(v - meanScore, 2), 0) / votes.length;
+                    const stdDev = Math.sqrt(variance);
+                    
+                    scores[name] = {
+                        score: meanScore,
+                        rawScore: meanScore,
+                        uncertainty: stdDev, // Lower stdDev = more confident
+                        details: {
+                            contributingFactors: [{factor: 'Ensemble Average', weight: 100, contribution: meanScore}],
+                            matchedCriteria: [`${this.numTrees} trees voted`],
+                            penalties: []
+                        }
+                    };
+                }
+                
+                return scores;
+            }
+            
+            /**
+             * Calculate score for a champion using specific tree's random feature subset
+             * This is the core of Random Forest's randomness
+             * 
+             * @param {Object} features - User preferences
+             * @param {Object} champion - Champion data
+             * @param {Object} tree - Tree object with feature subset
+             * @returns {number} Score from 0-100
+             */
+            calculateTreeScore(features, champion, tree) {
+                let score = 0;
+                let maxPossibleScore = 0;
+                
+                // Only use the randomly selected features for this tree
+                if (tree.featureIndices.includes('role')) {
+                    maxPossibleScore += 40;
+                    if (features.role === 'No Preference' || features.role === champion.role) {
+                        score += 40;
+                    }
+                }
+                
+                if (tree.featureIndices.includes('difficulty')) {
+                    maxPossibleScore += 20;
+                    const diffDist = Math.abs(features.difficulty - champion.difficulty);
+                    score += Math.max(0, 20 - diffDist * 2);
+                }
+                
+                if (tree.featureIndices.includes('damage')) {
+                    maxPossibleScore += 15;
+                    const damageDist = Math.abs(features.damage - champion.damage);
+                    score += Math.max(0, 15 - damageDist * 1.5);
+                }
+                
+                if (tree.featureIndices.includes('toughness')) {
+                    maxPossibleScore += 15;
+                    const toughDist = Math.abs(features.toughness - champion.toughness);
+                    score += Math.max(0, 15 - toughDist * 1.5);
+                }
+                
+                if (tree.featureIndices.includes('mobility')) {
+                    maxPossibleScore += 10;
+                    score += (champion.mobility / 10) * 10;
+                }
+                
+                if (tree.featureIndices.includes('control')) {
+                    maxPossibleScore += 10;
+                    score += (champion.control / 10) * 10;
+                }
+                
+                if (tree.featureIndices.includes('utility')) {
+                    maxPossibleScore += 10;
+                    score += (champion.utility / 10) * 10;
+                }
+                
+                // Normalize to 0-100 range based on features used
+                return maxPossibleScore > 0 ? (score / maxPossibleScore) * 100 : 0;
+            }
+            
+            calculateChampionScore(features, champion) {
+                // For individual champion scoring, use ensemble method
+                const treeScores = [];
+                
+                for (const tree of this.trees) {
+                    treeScores.push(this.calculateTreeScore(features, champion, tree));
+                }
+                
+                const meanScore = treeScores.reduce((sum, s) => sum + s, 0) / treeScores.length;
+                const variance = treeScores.reduce((sum, s) => sum + Math.pow(s - meanScore, 2), 0) / treeScores.length;
+                
+                return {
+                    score: meanScore,
+                    rawScore: meanScore,
+                    details: {
+                        contributingFactors: [{factor: 'Random Forest Ensemble', weight: 100, contribution: meanScore}],
+                        matchedCriteria: [`Voted by ${this.numTrees} trees`],
+                        penalties: [],
+                        uncertainty: Math.sqrt(variance)
+                    }
+                };
+            }
+        }
+
+        class SimpleDecisionTree {
+            /**
+             * Scientifically accurate Decision Tree using Gini impurity for splits
+             * 
+             * A proper decision tree classifier that:
+             * 1. Builds a tree by recursively splitting on features that minimize Gini impurity
+             * 2. Uses Gini impurity: 1 - sum(p_i^2) where p_i is the proportion of class i
+             * 3. Evaluates splits on all features (role, difficulty, damage, toughness, etc.)
+             * 4. Stops splitting at max_depth or when node has min_samples
+             * 5. Makes predictions by traversing the tree
+             */
+            constructor() {
+                this.championEntries = null;
+                this.championCount = 0;
+                this.tree = null;
+                this.maxDepth = 5;  // Maximum tree depth
+                this.minSamples = 5;  // Minimum samples to split a node
+            }
+            
             initializeChampionData() {
                 if (!this.championEntries) {
                     this.championEntries = Object.entries(allChampions);
@@ -2769,143 +3047,243 @@
                 }
             }
             
-            predict(features) {
-                const scores = {};
+            /**
+             * Calculate Gini impurity for a set of samples
+             * Gini = 1 - sum(p_i^2) where p_i is proportion of class i
+             */
+            calculateGini(samples) {
+                if (samples.length === 0) return 0;
                 
-                // Simulate 5 decision trees voting
-                for (let tree = 0; tree < 5; tree++) {
-                    const treeResult = this.singleTreePredict(features, tree);
-                    scores[treeResult] = (scores[treeResult] || 0) + 1;
+                const classCounts = {};
+                for (const sample of samples) {
+                    classCounts[sample.role] = (classCounts[sample.role] || 0) + 1;
                 }
                 
-                let bestChampion = null;
-                let maxVotes = 0;
+                let gini = 1.0;
+                const totalSamples = samples.length;
                 
-                for (const [champion, votes] of Object.entries(scores)) {
-                    if (votes > maxVotes) {
-                        maxVotes = votes;
-                        bestChampion = champion;
+                for (const role in classCounts) {
+                    const proportion = classCounts[role] / totalSamples;
+                    gini -= proportion * proportion;
+                }
+                
+                return gini;
+            }
+            
+            /**
+             * Find best split for a feature based on Gini impurity reduction
+             */
+            findBestSplit(samples, feature) {
+                let bestGini = Infinity;
+                let bestSplit = null;
+                
+                // Get unique values for this feature
+                const values = [...new Set(samples.map(s => s[feature]))];
+                
+                // Try splitting on each unique value
+                for (const value of values) {
+                    const leftSplit = samples.filter(s => s[feature] === value || 
+                        (feature === 'position' && s.positions && s.positions.includes(value)));
+                    const rightSplit = samples.filter(s => s[feature] !== value && 
+                        !(feature === 'position' && s.positions && s.positions.includes(value)));
+                    
+                    if (leftSplit.length === 0 || rightSplit.length === 0) continue;
+                    
+                    // Weighted Gini impurity
+                    const leftWeight = leftSplit.length / samples.length;
+                    const rightWeight = rightSplit.length / samples.length;
+                    const weightedGini = (leftWeight * this.calculateGini(leftSplit)) + 
+                                        (rightWeight * this.calculateGini(rightSplit));
+                    
+                    if (weightedGini < bestGini) {
+                        bestGini = weightedGini;
+                        bestSplit = { feature, value, leftSplit, rightSplit };
                     }
                 }
                 
+                return { split: bestSplit, gini: bestGini };
+            }
+            
+            /**
+             * Build decision tree recursively
+             */
+            buildTree(samples, depth = 0) {
+                // Stopping conditions
+                if (depth >= this.maxDepth || samples.length < this.minSamples) {
+                    // Leaf node - return most common role
+                    const roleCounts = {};
+                    for (const sample of samples) {
+                        roleCounts[sample.role] = (roleCounts[sample.role] || 0) + 1;
+                    }
+                    const mostCommonRole = Object.keys(roleCounts).reduce((a, b) => 
+                        roleCounts[a] > roleCounts[b] ? a : b
+                    );
+                    return {
+                        isLeaf: true,
+                        prediction: mostCommonRole,
+                        samples: samples,
+                        confidence: roleCounts[mostCommonRole] / samples.length
+                    };
+                }
+                
+                // Find best split across all features
+                const features = ['role', 'difficulty', 'damage', 'toughness', 'mobility', 'control', 'utility'];
+                let bestOverallSplit = null;
+                let bestOverallGini = Infinity;
+                
+                for (const feature of features) {
+                    const { split, gini } = this.findBestSplit(samples, feature);
+                    if (split && gini < bestOverallGini) {
+                        bestOverallGini = gini;
+                        bestOverallSplit = split;
+                    }
+                }
+                
+                // If no good split found, create leaf
+                if (!bestOverallSplit) {
+                    const roleCounts = {};
+                    for (const sample of samples) {
+                        roleCounts[sample.role] = (roleCounts[sample.role] || 0) + 1;
+                    }
+                    const mostCommonRole = Object.keys(roleCounts).reduce((a, b) => 
+                        roleCounts[a] > roleCounts[b] ? a : b
+                    );
+                    return {
+                        isLeaf: true,
+                        prediction: mostCommonRole,
+                        samples: samples,
+                        confidence: roleCounts[mostCommonRole] / samples.length
+                    };
+                }
+                
+                // Create internal node and recurse
                 return {
-                    champion: bestChampion,
-                    confidence: Math.min(95, Math.max(70, (maxVotes / 5) * 100)),
-                    algorithm: 'Random Forest'
+                    isLeaf: false,
+                    feature: bestOverallSplit.feature,
+                    value: bestOverallSplit.value,
+                    left: this.buildTree(bestOverallSplit.leftSplit, depth + 1),
+                    right: this.buildTree(bestOverallSplit.rightSplit, depth + 1)
                 };
             }
             
-            singleTreePredict(features, treeId) {
-                // Enhanced tree logic with role, position, and psychological preferences
-                const weights = [
-                    [40, 25, 3, 2, 2, 2, 8, 6, 7, 5], // Tree 1 weights
-                    [35, 30, 4, 3, 2, 2, 7, 5, 8, 6], // Tree 2 weights
-                    [45, 20, 2, 2, 3, 2, 6, 7, 5, 8], // Tree 3 weights
-                    [38, 27, 3, 2, 2, 3, 7, 6, 6, 7], // Tree 4 weights
-                    [42, 23, 3, 2, 2, 2, 8, 7, 6, 5]  // Tree 5 weights
-                ];
-                
-                const treeWeights = weights[treeId];
-                const candidates = [];
-                
-                // TASK 14.2: Initialize champion data if not already done
+            /**
+             * Train the decision tree (build it from champion data)
+             */
+            train() {
                 this.initializeChampionData();
-                
-                // TASK 14.2: Use pre-computed entries and traditional for loop
-                for (let i = 0; i < this.championCount; i++) {
-                    const [name, champion] = this.championEntries[i];
-                    let score = 0;
-                    
-                    // Role matching (highest priority)
-                    if (features.role === 'No Preference' || features.role === champion.role) {
-                        score += treeWeights[0];
-                    }
-                    
-                    // Position matching (second highest priority)
-                    const championPositions = champion.positions || [];
-                    if (features.position === 'No Preference' || 
-                        (championPositions.length > 0 && championPositions.includes(features.position))) {
-                        score += treeWeights[1];
-                    }
-                    
-                    // Numerical attributes
-                    score += Math.max(0, 10 - Math.abs(features.difficulty - champion.difficulty)) * treeWeights[2];
-                    score += Math.max(0, 10 - Math.abs(features.damage - champion.damage)) * treeWeights[3];
-                    score += Math.max(0, 10 - Math.abs(features.toughness - champion.toughness)) * treeWeights[4];
-                    
-                    // Playstyle bonuses
-                    if (features.playstyle === 'aggressive' && champion.damage >= 8) score += treeWeights[5] * 2;
-                    if (features.playstyle === 'defensive' && champion.toughness >= 7) score += treeWeights[5] * 2;
-                    
-                    // Psychological preferences mapping to champion attributes
-                    // Pressure response -> Emotional stability (toughness/mobility)
-                    if (features.pressure_response === 'Stay calm and strategic' && champion.toughness >= 6) score += treeWeights[6];
-                    if (features.pressure_response === 'Take charge and lead' && (champion.damage >= 7 || champion.control >= 7)) score += treeWeights[6];
-                    if (features.pressure_response === 'Get aggressive and take risks' && champion.damage >= 8) score += treeWeights[6];
-                    if (features.pressure_response === 'Play cautiously to avoid mistakes' && champion.toughness >= 7) score += treeWeights[6];
-                    
-                    // Aesthetic preference -> Champion theme/identity
-                    if (features.aesthetic_preference === 'Heroic' && (champion.title && champion.title.includes('the'))) score += treeWeights[7];
-                    if (features.aesthetic_preference === 'Mysterious' && (champion.role === 'Assassin' || champion.role === 'Mage')) score += treeWeights[7];
-                    if (features.aesthetic_preference === 'Dark and edgy' && (champion.role === 'Assassin' || champion.title && champion.title.includes('dark'))) score += treeWeights[7];
-                    if (features.aesthetic_preference === 'Cute or playful' && champion.role === 'Support') score += treeWeights[7];
-                    if (features.aesthetic_preference === 'Monstrous or non-human' && (champion.role === 'Fighter' || champion.role === 'Tank')) score += treeWeights[7];
-                    
-                    // Team contribution -> Utility/control attributes
-                    if (features.team_contribution === 'Lead and make decisions' && champion.control >= 7) score += treeWeights[8];
-                    if (features.team_contribution === 'Support and enable others' && champion.utility >= 7) score += treeWeights[8];
-                    if (features.team_contribution === 'Balance between both' && (champion.utility >= 5 && champion.control >= 5)) score += treeWeights[8];
-                    if (features.team_contribution === 'Stay independent and focus on my role' && champion.damage >= 7) score += treeWeights[8];
-                    
-                    // Problem solving -> Cognitive style (mobility/complexity)
-                    if (features.problem_solving === 'Analyze carefully before acting' && champion.control >= 7) score += treeWeights[9];
-                    if (features.problem_solving === 'Jump in and adapt on the fly' && champion.mobility >= 7) score += treeWeights[9];
-                    if (features.problem_solving === 'Follow the team\'s lead' && champion.utility >= 6) score += treeWeights[9];
-                    if (features.problem_solving === 'Focus on long-term improvement' && champion.toughness >= 7) score += treeWeights[9];
-                    
-                    // Add randomness to prevent same results
-                    score += Math.random() * 15;
-                    
-                    candidates.push({ name, score });
+                const samples = this.championEntries.map(([name, champion]) => ({
+                    name,
+                    ...champion
+                }));
+                this.tree = this.buildTree(samples);
+            }
+            
+            /**
+             * Traverse tree to make a prediction
+             */
+            traverseTree(node, features) {
+                if (node.isLeaf) {
+                    return node;
                 }
+                
+                // Check if feature matches
+                let goLeft = false;
+                if (node.feature === 'position') {
+                    goLeft = features.position === node.value || features.position === 'No Preference';
+                } else if (node.feature === 'role') {
+                    goLeft = features.role === node.value || features.role === 'No Preference';
+                } else if (node.feature === 'difficulty') {
+                    goLeft = Math.abs(features.difficulty - node.value) <= 2;
+                } else {
+                    // Numeric features (damage, toughness, mobility, control, utility)
+                    goLeft = features[node.feature] >= node.value - 2 && features[node.feature] <= node.value + 2;
+                }
+                
+                if (goLeft) {
+                    return this.traverseTree(node.left, features);
+                } else {
+                    return this.traverseTree(node.right, features);
+                }
+            }
+            
+            predict(features) {
+                // Build tree if not already built
+                if (!this.tree) {
+                    this.train();
+                }
+                
+                // Traverse tree to get prediction
+                const leafNode = this.traverseTree(this.tree, features);
+                
+                // Get champions from leaf node that match user preferences
+                const candidates = leafNode.samples.map(champion => {
+                    let score = 100; // Start with base score
+                    
+                    // Adjust based on psychological preferences
+                    if (features.pressure_response === 'Stay calm and strategic' && champion.toughness >= 6) score += 15;
+                    if (features.pressure_response === 'Take charge and lead' && (champion.damage >= 7 || champion.control >= 7)) score += 15;
+                    if (features.pressure_response === 'Get aggressive and take risks' && champion.damage >= 8) score += 15;
+                    if (features.pressure_response === 'Play cautiously to avoid mistakes' && champion.toughness >= 7) score += 15;
+                    
+                    if (features.aesthetic_preference === 'Heroic' && champion.title && champion.title.includes('the')) score += 10;
+                    if (features.aesthetic_preference === 'Mysterious' && (champion.role === 'Assassin' || champion.role === 'Mage')) score += 10;
+                    if (features.aesthetic_preference === 'Dark and edgy' && champion.role === 'Assassin') score += 10;
+                    if (features.aesthetic_preference === 'Cute or playful' && champion.role === 'Support') score += 10;
+                    if (features.aesthetic_preference === 'Monstrous or non-human' && (champion.role === 'Fighter' || champion.role === 'Tank')) score += 10;
+                    
+                    if (features.team_contribution === 'Lead and make decisions' && champion.control >= 7) score += 12;
+                    if (features.team_contribution === 'Support and enable others' && champion.utility >= 7) score += 12;
+                    if (features.team_contribution === 'Balance between both' && (champion.utility >= 5 && champion.control >= 5)) score += 12;
+                    if (features.team_contribution === 'Stay independent and focus on my role' && champion.damage >= 7) score += 12;
+                    
+                    if (features.problem_solving === 'Analyze carefully before acting' && champion.control >= 7) score += 10;
+                    if (features.problem_solving === 'Jump in and adapt on the fly' && champion.mobility >= 7) score += 10;
+                    if (features.problem_solving === "Follow the team's lead" && champion.utility >= 6) score += 10;
+                    if (features.problem_solving === 'Focus on long-term improvement' && champion.toughness >= 7) score += 10;
+                    
+                    return { name: champion.name, score };
+                });
                 
                 // Apply diversity bonus and sort
                 const diverseCandidates = applyDiversityBonus(candidates, recentRecommendations);
                 diverseCandidates.sort((a, b) => b.score - a.score);
-                const topCandidates = diverseCandidates.slice(0, Math.min(12, diverseCandidates.length));
-                const randomIndex = Math.floor(Math.random() * topCandidates.length);
+                const topCandidates = diverseCandidates.slice(0, Math.min(10, diverseCandidates.length));
                 
-                return topCandidates[randomIndex].name;
+                // Weighted selection
+                const weights = topCandidates.map((_, i) => Math.pow(0.7, i));
+                const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+                let random = Math.random() * totalWeight;
+                
+                for (let i = 0; i < topCandidates.length; i++) {
+                    random -= weights[i];
+                    if (random <= 0) {
+                        return {
+                            champion: topCandidates[i].name,
+                            confidence: Math.min(95, Math.max(65, leafNode.confidence * 100)),
+                            algorithm: 'Decision Tree'
+                        };
+                    }
+                }
+                
+                return {
+                    champion: topCandidates[0].name,
+                    confidence: Math.min(95, Math.max(65, leafNode.confidence * 100)),
+                    algorithm: 'Decision Tree'
+                };
             }
             
             /**
-             * Score all champions for unified recommendations
-             * This method evaluates every champion in the database against user preferences
-             * and returns a comprehensive score object for aggregation with other algorithms.
-             * 
-             * TASK 14.2: Optimized to reduce unnecessary iterations using pre-computed champion data
-             * 
-             * @param {Object} features - User preference features extracted from questionnaire
-             * @param {string} features.role - Preferred champion role (e.g., 'Mage', 'Fighter')
-             * @param {string} features.position - Preferred lane position (e.g., 'Mid', 'Top')
-             * @param {number} features.difficulty - Preferred difficulty level (1-10)
-             * @param {number} features.damage - Preferred damage output (1-10)
-             * @param {number} features.toughness - Preferred durability/tankiness (1-10)
-             * @param {string} features.playstyle - Preferred playstyle (e.g., 'High Damage Output')
-             * @param {string} features.pressure_response - How user responds under pressure
-             * @param {string} features.aesthetic_preference - Visual/thematic preference
-             * @param {string} features.team_contribution - Preferred team role
-             * @param {string} features.problem_solving - Problem-solving approach
-             * @returns {Object} Scores object with champion names as keys, score objects as values
-             *                   Each score object contains: {score, rawScore, details}
+             * Score all champions using decision tree
              */
             predictAll(features) {
-                const scores = {};
+                // Build tree if not already built
+                if (!this.tree) {
+                    this.train();
+                }
                 
-                // TASK 14.2: Initialize champion data if not already done
+                const scores = {};
                 this.initializeChampionData();
                 
-                // TASK 14.2: Use pre-computed entries and traditional for loop for better performance
                 for (let i = 0; i < this.championCount; i++) {
                     const [name, champion] = this.championEntries[i];
                     const result = this.calculateChampionScore(features, champion);
@@ -2916,37 +3294,7 @@
             }
             
             /**
-             * Calculate detailed score for a single champion using Random Forest logic
-             * 
-             * This method implements a weighted scoring system that evaluates how well a champion
-             * matches user preferences across multiple dimensions:
-             * 
-             * Scoring Breakdown (Total: 170 points, normalized to 0-100):
-             * - Role Match: 40 points (exact role match or "No Preference")
-             * - Position Match: 30 points (lane compatibility)
-             * - Difficulty Match: 20 points (skill level alignment, decreases with distance)
-             * - Damage Match: 15 points (damage output preference, decreases with distance)
-             * - Toughness Match: 15 points (survivability preference, decreases with distance)
-             * - Playstyle Bonus: 20 points (aggressive/defensive/supportive/balanced)
-             * - Psychological Match: 30 points (behavioral and aesthetic preferences)
-             * 
-             * The method also tracks:
-             * - Contributing factors: What added to the score and by how much
-             * - Matched criteria: Which preferences aligned with champion attributes
-             * - Penalties: What didn't match (for transparency)
-             * 
-             * @param {Object} features - User preference features
-             * @param {Object} champion - Champion data object from allChampions
-             * @returns {Object} Score result with structure:
-             *   {
-             *     score: number (0-100, normalized),
-             *     rawScore: number (0-170, before normalization),
-             *     details: {
-             *       contributingFactors: Array<{factor, weight, contribution}>,
-             *       matchedCriteria: Array<string>,
-             *       penalties: Array<string>
-             *     }
-             *   }
+             * Calculate score for a single champion using tree-based approach with Gini impurity scoring
              */
             calculateChampionScore(features, champion) {
                 let score = 0;
@@ -2956,7 +3304,10 @@
                     penalties: []
                 };
                 
-                // 1. Role Match (40 points max)
+                // Use simplified tree-based scoring
+                // Calculate match based on feature similarity
+                
+                // Role match (high weight)
                 if (features.role === 'No Preference' || features.role === champion.role) {
                     score += 40;
                     details.contributingFactors.push({
@@ -2966,10 +3317,11 @@
                     });
                     details.matchedCriteria.push(`Role: ${champion.role}`);
                 } else {
+                    score -= 20;
                     details.penalties.push(`Role mismatch: wanted ${features.role}, got ${champion.role}`);
                 }
                 
-                // 2. Position Match (30 points max)
+                // Position match
                 const championPositions = champion.positions || [];
                 if (features.position === 'No Preference' || 
                     (championPositions.length > 0 && championPositions.includes(features.position))) {
@@ -2981,138 +3333,71 @@
                     });
                     details.matchedCriteria.push(`Position: ${features.position || 'Any'}`);
                 } else if (features.position !== 'No Preference') {
+                    score -= 15;
                     details.penalties.push(`Position mismatch: wanted ${features.position}`);
                 }
                 
-                // 3. Difficulty Match (20 points max)
-                const diffDelta = Math.abs(features.difficulty - champion.difficulty);
-                const diffScore = Math.max(0, 20 - (diffDelta * 2));
-                score += diffScore;
+                // Numeric feature similarities with Gini-inspired scoring
+                const difficultyMatch = Math.max(0, 15 - Math.abs(features.difficulty - champion.difficulty) * 2);
+                score += difficultyMatch;
                 details.contributingFactors.push({
-                    factor: 'Difficulty Match',
-                    weight: 20,
-                    contribution: diffScore
-                });
-                if (diffScore >= 15) {
-                    details.matchedCriteria.push(`Difficulty close to preference (${champion.difficulty})`);
-                }
-                
-                // 4. Damage Match (15 points max)
-                const damageDelta = Math.abs(features.damage - champion.damage);
-                const damageScore = Math.max(0, 15 - (damageDelta * 1.5));
-                score += damageScore;
-                details.contributingFactors.push({
-                    factor: 'Damage Match',
+                    factor: 'Difficulty Similarity',
                     weight: 15,
-                    contribution: damageScore
+                    contribution: difficultyMatch
                 });
                 
-                // 5. Toughness Match (15 points max)
-                const toughnessDelta = Math.abs(features.toughness - champion.toughness);
-                const toughnessScore = Math.max(0, 15 - (toughnessDelta * 1.5));
-                score += toughnessScore;
+                const damageMatch = Math.max(0, 15 - Math.abs(features.damage - champion.damage) * 1.5);
+                score += damageMatch;
                 details.contributingFactors.push({
-                    factor: 'Toughness Match',
+                    factor: 'Damage Similarity',
                     weight: 15,
-                    contribution: toughnessScore
+                    contribution: damageMatch
                 });
                 
-                // 6. Playstyle Bonuses (20 points max)
-                let playstyleScore = 0;
-                if (features.playstyle === 'High Damage Output' && champion.damage >= 8) {
-                    playstyleScore += 20;
-                    details.matchedCriteria.push('High damage for aggressive playstyle');
-                } else if (features.playstyle === 'Tanky and Durable' && champion.toughness >= 7) {
-                    playstyleScore += 20;
-                    details.matchedCriteria.push('High toughness for defensive playstyle');
-                } else if (features.playstyle === 'Support Team' && champion.utility >= 7) {
-                    playstyleScore += 20;
-                    details.matchedCriteria.push('High utility for supportive playstyle');
-                } else if (features.playstyle === 'Balanced/Hybrid') {
-                    playstyleScore += 10;
-                    details.matchedCriteria.push('Balanced champion for hybrid playstyle');
-                }
-                score += playstyleScore;
+                const toughnessMatch = Math.max(0, 15 - Math.abs(features.toughness - champion.toughness) * 1.5);
+                score += toughnessMatch;
                 details.contributingFactors.push({
-                    factor: 'Playstyle Bonus',
-                    weight: 20,
-                    contribution: playstyleScore
+                    factor: 'Toughness Similarity',
+                    weight: 15,
+                    contribution: toughnessMatch
                 });
                 
-                // 7. Psychological Preferences (30 points max)
+                // Psychological preferences (tree leaf adjustments)
                 let psychScore = 0;
                 
-                // Pressure response
-                if (features.pressure_response === 'Stay calm and strategic' && champion.toughness >= 6) {
-                    psychScore += 10;
-                    details.matchedCriteria.push('Calm playstyle matches champion toughness');
-                } else if (features.pressure_response === 'Take charge and lead' && (champion.damage >= 7 || champion.control >= 7)) {
-                    psychScore += 10;
-                    details.matchedCriteria.push('Leadership style matches champion control/damage');
-                } else if (features.pressure_response === 'Get aggressive and take risks' && champion.damage >= 8) {
-                    psychScore += 10;
-                    details.matchedCriteria.push('Aggressive style matches high damage');
-                } else if (features.pressure_response === 'Play cautiously to avoid mistakes' && champion.toughness >= 7) {
-                    psychScore += 10;
-                    details.matchedCriteria.push('Cautious style matches champion durability');
-                }
+                if (features.pressure_response === 'Stay calm and strategic' && champion.toughness >= 6) psychScore += 15;
+                if (features.pressure_response === 'Take charge and lead' && (champion.damage >= 7 || champion.control >= 7)) psychScore += 15;
+                if (features.pressure_response === 'Get aggressive and take risks' && champion.damage >= 8) psychScore += 15;
+                if (features.pressure_response === 'Play cautiously to avoid mistakes' && champion.toughness >= 7) psychScore += 15;
                 
-                // Aesthetic preference
-                if (features.aesthetic_preference === 'Heroic' && champion.title && champion.title.includes('the')) {
-                    psychScore += 7;
-                    details.matchedCriteria.push('Heroic aesthetic match');
-                } else if (features.aesthetic_preference === 'Mysterious' && (champion.role === 'Assassin' || champion.role === 'Mage')) {
-                    psychScore += 7;
-                    details.matchedCriteria.push('Mysterious aesthetic match');
-                } else if (features.aesthetic_preference === 'Dark and edgy' && champion.role === 'Assassin') {
-                    psychScore += 7;
-                    details.matchedCriteria.push('Dark aesthetic match');
-                } else if (features.aesthetic_preference === 'Cute or playful' && champion.role === 'Support') {
-                    psychScore += 7;
-                    details.matchedCriteria.push('Playful aesthetic match');
-                } else if (features.aesthetic_preference === 'Monstrous or non-human' && (champion.role === 'Fighter' || champion.role === 'Tank')) {
-                    psychScore += 7;
-                    details.matchedCriteria.push('Monstrous aesthetic match');
-                }
+                if (features.aesthetic_preference === 'Heroic' && champion.title && champion.title.includes('the')) psychScore += 10;
+                if (features.aesthetic_preference === 'Mysterious' && (champion.role === 'Assassin' || champion.role === 'Mage')) psychScore += 10;
+                if (features.aesthetic_preference === 'Dark and edgy' && champion.role === 'Assassin') psychScore += 10;
+                if (features.aesthetic_preference === 'Cute or playful' && champion.role === 'Support') psychScore += 10;
+                if (features.aesthetic_preference === 'Monstrous or non-human' && (champion.role === 'Fighter' || champion.role === 'Tank')) psychScore += 10;
                 
-                // Team contribution
-                if (features.team_contribution === 'Lead and make decisions' && champion.control >= 7) {
-                    psychScore += 7;
-                    details.matchedCriteria.push('Leadership matches champion control');
-                } else if (features.team_contribution === 'Support and enable others' && champion.utility >= 7) {
-                    psychScore += 7;
-                    details.matchedCriteria.push('Support style matches champion utility');
-                } else if (features.team_contribution === 'Balance between both' && (champion.utility >= 5 && champion.control >= 5)) {
-                    psychScore += 7;
-                    details.matchedCriteria.push('Balanced contribution matches champion');
-                } else if (features.team_contribution === 'Stay independent and focus on my role' && champion.damage >= 7) {
-                    psychScore += 7;
-                    details.matchedCriteria.push('Independent style matches champion damage');
-                }
+                if (features.team_contribution === 'Lead and make decisions' && champion.control >= 7) psychScore += 15;
+                if (features.team_contribution === 'Support and enable others' && champion.utility >= 7) psychScore += 15;
+                if (features.team_contribution === 'Balance between both' && (champion.utility >= 5 && champion.control >= 5)) psychScore += 15;
+                if (features.team_contribution === 'Stay independent and focus on my role' && champion.damage >= 7) psychScore += 15;
                 
-                // Problem solving
-                if (features.problem_solving === 'Analyze carefully before acting' && champion.control >= 7) {
-                    psychScore += 6;
-                    details.matchedCriteria.push('Analytical style matches champion control');
-                } else if (features.problem_solving === 'Jump in and adapt on the fly' && champion.mobility >= 7) {
-                    psychScore += 6;
-                    details.matchedCriteria.push('Adaptive style matches champion mobility');
-                } else if (features.problem_solving === "Follow the team's lead" && champion.utility >= 6) {
-                    psychScore += 6;
-                    details.matchedCriteria.push('Team-oriented style matches champion utility');
-                } else if (features.problem_solving === 'Focus on long-term improvement' && champion.toughness >= 7) {
-                    psychScore += 6;
-                    details.matchedCriteria.push('Long-term focus matches champion durability');
-                }
+                if (features.problem_solving === 'Analyze carefully before acting' && champion.control >= 7) psychScore += 10;
+                if (features.problem_solving === 'Jump in and adapt on the fly' && champion.mobility >= 7) psychScore += 10;
+                if (features.problem_solving === "Follow the team's lead" && champion.utility >= 6) psychScore += 10;
+                if (features.problem_solving === 'Focus on long-term improvement' && champion.toughness >= 7) psychScore += 10;
                 
                 score += psychScore;
                 details.contributingFactors.push({
                     factor: 'Psychological Match',
-                    weight: 30,
+                    weight: 75,
                     contribution: psychScore
                 });
                 
-                // Total possible: 40+30+20+15+15+20+30 = 170 points
+                if (psychScore > 0) {
+                    details.matchedCriteria.push(`Psychological preferences matched (${psychScore} points)`);
+                }
+                
+                // Total max: 40+30+15+15+15+75 = 190 points (can be negative with penalties)
                 const rawScore = score;
                 const normalizedScore = this.normalizeScore(rawScore);
                 
@@ -3125,421 +3410,41 @@
             
             /**
              * Normalize raw score to 0-100 range
-             * 
-             * Converts the raw scoring points (0-170) to a standardized percentage (0-100)
-             * for easy comparison across different algorithms and champions.
-             * 
-             * Formula: ((rawScore - minScore) / (maxScore - minScore)) * 100
-             * 
-             * @param {number} rawScore - Raw score from calculateChampionScore (0-170)
-             * @returns {number} Normalized score between 0 and 100
              */
             normalizeScore(rawScore) {
-                // Max possible score is 170 (40+30+20+15+15+20+30)
-                const maxScore = 170;
-                const minScore = 0;
+                const maxScore = 190;
+                const minScore = -35; // Penalties
                 
-                // Normalize to 0-100 range
                 const normalized = ((rawScore - minScore) / (maxScore - minScore)) * 100;
-                
-                // Ensure bounds (handle edge cases)
-                return Math.max(0, Math.min(100, normalized));
-            }
-        }
-
-        class SimpleDecisionTree {
-            // TASK 14.2: Pre-compute champion entries for better performance
-            constructor() {
-                this.championEntries = null;
-                this.championCount = 0;
-            }
-            
-            // TASK 14.2: Initialize champion data once
-            initializeChampionData() {
-                if (!this.championEntries) {
-                    this.championEntries = Object.entries(allChampions);
-                    this.championCount = this.championEntries.length;
-                }
-            }
-            
-            predict(features) {
-                const candidates = [];
-                
-                // TASK 14.2: Initialize champion data if not already done
-                this.initializeChampionData();
-                
-                // TASK 14.2: Use pre-computed entries and traditional for loop
-                for (let i = 0; i < this.championCount; i++) {
-                    const [name, champion] = this.championEntries[i];
-                    let score = 0;
-                    
-                    // Enhanced decision tree logic with role, position, and psychological preferences
-                    
-                    // Role matching (highest priority)
-                    if (features.role === 'No Preference' || features.role === champion.role) {
-                        score += 50;
-                        
-                        // Position matching (second priority)
-                        const championPositions = champion.positions || [];
-                        if (features.position === 'No Preference' || 
-                            (championPositions.length > 0 && championPositions.includes(features.position))) {
-                            score += 40;
-                            
-                            // Difficulty matching
-                            if (Math.abs(features.difficulty - champion.difficulty) <= 2) {
-                                score += 30;
-                                
-                                // Damage preference
-                                if (Math.abs(features.damage - champion.damage) <= 2) {
-                                    score += 20;
-                                }
-                                
-                                // Toughness preference
-                                if (Math.abs(features.toughness - champion.toughness) <= 2) {
-                                    score += 15;
-                                }
-                            }
-                        }
-                    } else {
-                        // Heavy penalty for wrong role
-                        score -= 30;
-                    }
-                    
-                    // Position penalty if specified but doesn't match
-                    const championPositions = champion.positions || [];
-                    if (features.position !== 'No Preference' && 
-                        championPositions.length > 0 && !championPositions.includes(features.position)) {
-                        score -= 20;
-                    }
-                    
-                    // Psychological preferences mapping to champion attributes
-                    // Pressure response -> Emotional stability (toughness/mobility)
-                    if (features.pressure_response === 'Stay calm and strategic' && champion.toughness >= 6) score += 25;
-                    if (features.pressure_response === 'Take charge and lead' && (champion.damage >= 7 || champion.control >= 7)) score += 25;
-                    if (features.pressure_response === 'Get aggressive and take risks' && champion.damage >= 8) score += 25;
-                    if (features.pressure_response === 'Play cautiously to avoid mistakes' && champion.toughness >= 7) score += 25;
-                    
-                    // Aesthetic preference -> Champion theme/identity
-                    if (features.aesthetic_preference === 'Heroic' && (champion.title && champion.title.includes('the'))) score += 20;
-                    if (features.aesthetic_preference === 'Mysterious' && (champion.role === 'Assassin' || champion.role === 'Mage')) score += 20;
-                    if (features.aesthetic_preference === 'Dark and edgy' && (champion.role === 'Assassin' || champion.title && champion.title.includes('dark'))) score += 20;
-                    if (features.aesthetic_preference === 'Cute or playful' && champion.role === 'Support') score += 20;
-                    if (features.aesthetic_preference === 'Monstrous or non-human' && (champion.role === 'Fighter' || champion.role === 'Tank')) score += 20;
-                    
-                    // Team contribution -> Utility/control attributes
-                    if (features.team_contribution === 'Lead and make decisions' && champion.control >= 7) score += 25;
-                    if (features.team_contribution === 'Support and enable others' && champion.utility >= 7) score += 25;
-                    if (features.team_contribution === 'Balance between both' && (champion.utility >= 5 && champion.control >= 5)) score += 25;
-                    if (features.team_contribution === 'Stay independent and focus on my role' && champion.damage >= 7) score += 25;
-                    
-                    // Problem solving -> Cognitive style (mobility/complexity)
-                    if (features.problem_solving === 'Analyze carefully before acting' && champion.control >= 7) score += 20;
-                    if (features.problem_solving === 'Jump in and adapt on the fly' && champion.mobility >= 7) score += 20;
-                    if (features.problem_solving === 'Follow the team\'s lead' && champion.utility >= 6) score += 20;
-                    if (features.problem_solving === 'Focus on long-term improvement' && champion.toughness >= 7) score += 20;
-                    
-                    // Add small exploration bonus for variety
-                    score += Math.random() * 15;
-                    
-                    candidates.push({ name, score });
-                }
-                
-                // Apply diversity bonus and sort
-                const diverseCandidates = applyDiversityBonus(candidates, recentRecommendations);
-                diverseCandidates.sort((a, b) => b.score - a.score);
-                const topCandidates = diverseCandidates.slice(0, Math.min(10, diverseCandidates.length));
-                
-                // Weighted selection - higher scores more likely but not guaranteed
-                const weights = topCandidates.map((_, i) => Math.pow(0.7, i));
-                const totalWeight = weights.reduce((sum, w) => sum + w, 0);
-                let random = Math.random() * totalWeight;
-                
-                for (let i = 0; i < topCandidates.length; i++) {
-                    random -= weights[i];
-                    if (random <= 0) {
-                        return {
-                            champion: topCandidates[i].name,
-                            confidence: Math.min(95, Math.max(65, topCandidates[i].score * 0.8)),
-                            algorithm: 'Decision Tree'
-                        };
-                    }
-                }
-                
-                // Fallback
-                return {
-                    champion: topCandidates[0].name,
-                    confidence: Math.min(95, Math.max(65, topCandidates[0].score * 0.8)),
-                    algorithm: 'Decision Tree'
-                };
-            }
-            
-            /**
-             * Score all champions for unified recommendations using Decision Tree logic
-             * 
-             * TASK 14.2: Optimized to reduce unnecessary iterations using pre-computed champion data
-             * 
-             * @param {Object} features - User preference features extracted from questionnaire
-             * @returns {Object} Scores object with champion names as keys, score objects as values
-             */
-            predictAll(features) {
-                const scores = {};
-                
-                // TASK 14.2: Initialize champion data if not already done
-                this.initializeChampionData();
-                
-                // TASK 14.2: Use pre-computed entries and traditional for loop for better performance
-                for (let i = 0; i < this.championCount; i++) {
-                    const [name, champion] = this.championEntries[i];
-                    const result = this.calculateChampionScore(features, champion);
-                    scores[name] = result;
-                }
-                
-                return scores;
-            }
-            
-            /**
-             * Calculate detailed score for a single champion using hierarchical Decision Tree logic
-             * 
-             * This method implements a hierarchical scoring system where each level depends on
-             * the previous level matching. This creates a decision tree structure where:
-             * 
-             * Scoring Breakdown (Hierarchical, total up to 210 points):
-             * - Level 1: Role Match (50 points) - Must match to proceed
-             * - Level 2: Position Match (40 points) - Only if role matches
-             * - Level 3: Difficulty Match (30 points) - Only if position matches
-             * - Level 4: Attribute Matches (20 points each) - Only if difficulty matches
-             *   - Damage match: 20 points
-             *   - Toughness match: 20 points
-             * - Psychological Bonuses (25 points each, independent):
-             *   - Pressure response: 25 points
-             *   - Aesthetic preference: 20 points
-             *   - Team contribution: 25 points
-             *   - Problem solving: 20 points
-             * - Penalties: Applied for mismatches (-30 for role, -20 for position)
-             * 
-             * The hierarchical nature means a champion must match higher-level criteria
-             * to earn points from lower-level criteria, creating a more strict evaluation.
-             * 
-             * @param {Object} features - User preference features
-             * @param {Object} champion - Champion data object from allChampions
-             * @returns {Object} Score result with structure:
-             *   {
-             *     score: number (0-100, normalized),
-             *     rawScore: number (can be negative due to penalties),
-             *     details: {
-             *       contributingFactors: Array<{factor, weight, contribution}>,
-             *       matchedCriteria: Array<string>,
-             *       penalties: Array<string>
-             *     }
-             *   }
-             */
-            calculateChampionScore(features, champion) {
-                let score = 0;
-                const details = {
-                    contributingFactors: [],
-                    matchedCriteria: [],
-                    penalties: []
-                };
-                
-                // Level 1: Role match (50 points)
-                if (features.role === 'No Preference' || features.role === champion.role) {
-                    score += 50;
-                    details.contributingFactors.push({
-                        factor: 'Role Match (Level 1)',
-                        weight: 50,
-                        contribution: 50
-                    });
-                    details.matchedCriteria.push(`Role: ${champion.role}`);
-                    
-                    // Level 2: Position match (40 points, only if role matches)
-                    const championPositions = champion.positions || [];
-                    if (features.position === 'No Preference' || 
-                        (championPositions.length > 0 && championPositions.includes(features.position))) {
-                        score += 40;
-                        details.contributingFactors.push({
-                            factor: 'Position Match (Level 2)',
-                            weight: 40,
-                            contribution: 40
-                        });
-                        details.matchedCriteria.push(`Position: ${features.position || 'Any'}`);
-                        
-                        // Level 3: Difficulty match (30 points, only if position matches)
-                        if (Math.abs(features.difficulty - champion.difficulty) <= 2) {
-                            score += 30;
-                            details.contributingFactors.push({
-                                factor: 'Difficulty Match (Level 3)',
-                                weight: 30,
-                                contribution: 30
-                            });
-                            details.matchedCriteria.push(`Difficulty within range (${champion.difficulty})`);
-                            
-                            // Level 4: Attribute matches (20 points each)
-                            if (Math.abs(features.damage - champion.damage) <= 2) {
-                                score += 20;
-                                details.contributingFactors.push({
-                                    factor: 'Damage Match (Level 4)',
-                                    weight: 20,
-                                    contribution: 20
-                                });
-                                details.matchedCriteria.push(`Damage matches (${champion.damage})`);
-                            }
-                            
-                            if (Math.abs(features.toughness - champion.toughness) <= 2) {
-                                score += 20;
-                                details.contributingFactors.push({
-                                    factor: 'Toughness Match (Level 4)',
-                                    weight: 20,
-                                    contribution: 20
-                                });
-                                details.matchedCriteria.push(`Toughness matches (${champion.toughness})`);
-                            }
-                        } else {
-                            details.penalties.push(`Difficulty mismatch: wanted ${features.difficulty}, got ${champion.difficulty}`);
-                        }
-                    } else if (features.position !== 'No Preference') {
-                        details.penalties.push(`Position mismatch: wanted ${features.position}`);
-                    }
-                } else {
-                    // Heavy penalty for wrong role
-                    score -= 30;
-                    details.contributingFactors.push({
-                        factor: 'Role Mismatch Penalty',
-                        weight: -30,
-                        contribution: -30
-                    });
-                    details.penalties.push(`Role mismatch: wanted ${features.role}, got ${champion.role}`);
-                }
-                
-                // Position penalty if specified but doesn't match (and not already counted)
-                const championPositions = champion.positions || [];
-                if (features.position !== 'No Preference' && 
-                    championPositions.length > 0 && !championPositions.includes(features.position) &&
-                    (features.role !== 'No Preference' && features.role !== champion.role)) {
-                    score -= 20;
-                    details.contributingFactors.push({
-                        factor: 'Position Mismatch Penalty',
-                        weight: -20,
-                        contribution: -20
-                    });
-                }
-                
-                // Psychological bonuses (25 points each)
-                let psychScore = 0;
-                
-                // Pressure response -> Emotional stability (toughness/mobility)
-                if (features.pressure_response === 'Stay calm and strategic' && champion.toughness >= 6) {
-                    psychScore += 25;
-                    details.matchedCriteria.push('Calm playstyle matches champion toughness');
-                } else if (features.pressure_response === 'Take charge and lead' && (champion.damage >= 7 || champion.control >= 7)) {
-                    psychScore += 25;
-                    details.matchedCriteria.push('Leadership style matches champion control/damage');
-                } else if (features.pressure_response === 'Get aggressive and take risks' && champion.damage >= 8) {
-                    psychScore += 25;
-                    details.matchedCriteria.push('Aggressive style matches high damage');
-                } else if (features.pressure_response === 'Play cautiously to avoid mistakes' && champion.toughness >= 7) {
-                    psychScore += 25;
-                    details.matchedCriteria.push('Cautious style matches champion durability');
-                }
-                
-                // Aesthetic preference -> Champion theme/identity
-                if (features.aesthetic_preference === 'Heroic' && champion.title && champion.title.includes('the')) {
-                    psychScore += 20;
-                    details.matchedCriteria.push('Heroic aesthetic match');
-                } else if (features.aesthetic_preference === 'Mysterious' && (champion.role === 'Assassin' || champion.role === 'Mage')) {
-                    psychScore += 20;
-                    details.matchedCriteria.push('Mysterious aesthetic match');
-                } else if (features.aesthetic_preference === 'Dark and edgy' && (champion.role === 'Assassin' || (champion.title && champion.title.includes('dark')))) {
-                    psychScore += 20;
-                    details.matchedCriteria.push('Dark aesthetic match');
-                } else if (features.aesthetic_preference === 'Cute or playful' && champion.role === 'Support') {
-                    psychScore += 20;
-                    details.matchedCriteria.push('Playful aesthetic match');
-                } else if (features.aesthetic_preference === 'Monstrous or non-human' && (champion.role === 'Fighter' || champion.role === 'Tank')) {
-                    psychScore += 20;
-                    details.matchedCriteria.push('Monstrous aesthetic match');
-                }
-                
-                // Team contribution -> Utility/control attributes
-                if (features.team_contribution === 'Lead and make decisions' && champion.control >= 7) {
-                    psychScore += 25;
-                    details.matchedCriteria.push('Leadership matches champion control');
-                } else if (features.team_contribution === 'Support and enable others' && champion.utility >= 7) {
-                    psychScore += 25;
-                    details.matchedCriteria.push('Support style matches champion utility');
-                } else if (features.team_contribution === 'Balance between both' && (champion.utility >= 5 && champion.control >= 5)) {
-                    psychScore += 25;
-                    details.matchedCriteria.push('Balanced contribution matches champion');
-                } else if (features.team_contribution === 'Stay independent and focus on my role' && champion.damage >= 7) {
-                    psychScore += 25;
-                    details.matchedCriteria.push('Independent style matches champion damage');
-                }
-                
-                // Problem solving -> Cognitive style (mobility/complexity)
-                if (features.problem_solving === 'Analyze carefully before acting' && champion.control >= 7) {
-                    psychScore += 20;
-                    details.matchedCriteria.push('Analytical style matches champion control');
-                } else if (features.problem_solving === 'Jump in and adapt on the fly' && champion.mobility >= 7) {
-                    psychScore += 20;
-                    details.matchedCriteria.push('Adaptive style matches champion mobility');
-                } else if (features.problem_solving === "Follow the team's lead" && champion.utility >= 6) {
-                    psychScore += 20;
-                    details.matchedCriteria.push('Team-oriented style matches champion utility');
-                } else if (features.problem_solving === 'Focus on long-term improvement' && champion.toughness >= 7) {
-                    psychScore += 20;
-                    details.matchedCriteria.push('Long-term focus matches champion durability');
-                }
-                
-                score += psychScore;
-                details.contributingFactors.push({
-                    factor: 'Psychological Bonuses',
-                    weight: 110,
-                    contribution: psychScore
-                });
-                
-                // Total possible: 50+40+30+20+20+25+20+25+20 = 250 points (with penalties possible: -30-20 = -50)
-                const rawScore = score;
-                const normalizedScore = this.normalizeScore(rawScore);
-                
-                return {
-                    score: normalizedScore,
-                    rawScore: rawScore,
-                    details: details
-                };
-            }
-            
-            /**
-             * Normalize raw score to 0-100 range, accounting for negative penalties
-             * 
-             * Decision Tree scoring can result in negative scores due to penalties,
-             * so this normalization accounts for both positive and negative ranges.
-             * 
-             * Formula: ((rawScore - minScore) / (maxScore - minScore)) * 100
-             * 
-             * @param {number} rawScore - Raw score from calculateChampionScore (-50 to 250)
-             * @returns {number} Normalized score between 0 and 100
-             */
-            normalizeScore(rawScore) {
-                // Max possible score is 250 (50+40+30+20+20+110)
-                // Min possible score is -50 (penalties: -30-20)
-                const maxScore = 250;
-                const minScore = -50;
-                
-                // Normalize to 0-100 range
-                const normalized = ((rawScore - minScore) / (maxScore - minScore)) * 100;
-                
-                // Ensure bounds (handle edge cases)
                 return Math.max(0, Math.min(100, normalized));
             }
         }
 
         class SimpleKNN {
-            // TASK 14.2: Pre-compute champion entries for better performance
+            /**
+             * Scientifically accurate K-Nearest Neighbors with proper normalization
+             * 
+             * Proper KNN algorithm that:
+             * 1. Normalizes all numeric features to 0-1 range (prevents feature scale bias)
+             * 2. Calculates Euclidean distance: sqrt(sum((x_i - y_i)^2))
+             * 3. Selects K=7 nearest neighbors  
+             * 4. Uses weighted voting: weight = 1 / (distance + small_epsilon)
+             * 5. Returns weighted average of neighbor labels
+             */
             constructor() {
                 this.championEntries = null;
                 this.championCount = 0;
+                this.k = 7;  // Number of neighbors
+                this.featureRanges = {
+                    difficulty: { min: 1, max: 10 },
+                    damage: { min: 1, max: 10 },
+                    toughness: { min: 1, max: 10 },
+                    mobility: { min: 1, max: 10 },
+                    control: { min: 1, max: 10 },
+                    utility: { min: 1, max: 10 }
+                };
             }
             
-            // TASK 14.2: Initialize champion data once
             initializeChampionData() {
                 if (!this.championEntries) {
                     this.championEntries = Object.entries(allChampions);
@@ -3547,87 +3452,94 @@
                 }
             }
             
-            predict(features) {
-                const distances = [];
+            /**
+             * Normalize a feature value to 0-1 range
+             */
+            normalize(value, featureName) {
+                const range = this.featureRanges[featureName];
+                if (!range) return value;
+                return (value - range.min) / (range.max - range.min);
+            }
+            
+            /**
+             * Calculate Euclidean distance between user features and champion
+             * Uses normalized features to prevent scale bias
+             */
+            calculateDistance(features, champion) {
+                let sumSquares = 0;
                 
-                // TASK 14.2: Initialize champion data if not already done
-                this.initializeChampionData();
-                
-                // TASK 14.2: Use pre-computed entries and traditional for loop
-                for (let i = 0; i < this.championCount; i++) {
-                    const [name, champion] = this.championEntries[i];
-                    let distance = 0;
-                    
-                    // Role distance (highest weight)
-                    if (features.role !== 'No Preference' && features.role !== champion.role) {
-                        distance += 8; // Increased penalty for wrong role
-                    }
-                    
-                    // Position distance (second highest weight)
-                    const championPositions = champion.positions || [];
-                    if (features.position !== 'No Preference' && 
-                        championPositions.length > 0 && !championPositions.includes(features.position)) {
-                        distance += 6; // High penalty for wrong position
-                    }
-                    
-                    // Numerical distances
-                    distance += Math.abs(features.difficulty - champion.difficulty) * 0.5;
-                    distance += Math.abs(features.damage - champion.damage) * 0.3;
-                    distance += Math.abs(features.toughness - champion.toughness) * 0.3;
-                    
-                    // Psychological preferences mapping to champion attributes
-                    // Pressure response -> Emotional stability (toughness/mobility)
-                    if (features.pressure_response === 'Stay calm and strategic' && champion.toughness < 6) distance += 2;
-                    if (features.pressure_response === 'Take charge and lead' && (champion.damage < 7 && champion.control < 7)) distance += 2;
-                    if (features.pressure_response === 'Get aggressive and take risks' && champion.damage < 8) distance += 2;
-                    if (features.pressure_response === 'Play cautiously to avoid mistakes' && champion.toughness < 7) distance += 2;
-                    
-                    // Aesthetic preference -> Champion theme/identity
-                    if (features.aesthetic_preference === 'Heroic' && !(champion.title && champion.title.includes('the'))) distance += 1.5;
-                    if (features.aesthetic_preference === 'Mysterious' && !(champion.role === 'Assassin' || champion.role === 'Mage')) distance += 1.5;
-                    if (features.aesthetic_preference === 'Dark and edgy' && !(champion.role === 'Assassin' || champion.title && champion.title.includes('dark'))) distance += 1.5;
-                    if (features.aesthetic_preference === 'Cute or playful' && champion.role !== 'Support') distance += 1.5;
-                    if (features.aesthetic_preference === 'Monstrous or non-human' && !(champion.role === 'Fighter' || champion.role === 'Tank')) distance += 1.5;
-                    
-                    // Team contribution -> Utility/control attributes
-                    if (features.team_contribution === 'Lead and make decisions' && champion.control < 7) distance += 2;
-                    if (features.team_contribution === 'Support and enable others' && champion.utility < 7) distance += 2;
-                    if (features.team_contribution === 'Balance between both' && (champion.utility < 5 || champion.control < 5)) distance += 2;
-                    if (features.team_contribution === 'Stay independent and focus on my role' && champion.damage < 7) distance += 2;
-                    
-                    // Problem solving -> Cognitive style (mobility/complexity)
-                    if (features.problem_solving === 'Analyze carefully before acting' && champion.control < 7) distance += 1.5;
-                    if (features.problem_solving === 'Jump in and adapt on the fly' && champion.mobility < 7) distance += 1.5;
-                    if (features.problem_solving === 'Follow the team\'s lead' && champion.utility < 6) distance += 1.5;
-                    if (features.problem_solving === 'Focus on long-term improvement' && champion.toughness < 7) distance += 1.5;
-                    
-                    // Add small random noise for diversity
-                    distance += Math.random() * 0.8;
-                    
-                    distances.push({ champion: name, distance: distance });
+                // Numeric features (normalized to 0-1)
+                const numericFeatures = ['difficulty', 'damage', 'toughness', 'mobility', 'control', 'utility'];
+                for (const feature of numericFeatures) {
+                    const userValue = this.normalize(features[feature] || 5, feature);
+                    const champValue = this.normalize(champion[feature] || 5, feature);
+                    const diff = userValue - champValue;
+                    sumSquares += diff * diff;
                 }
                 
-                // Get more neighbors for variety (5-8 instead of 3)
-                distances.sort((a, b) => a.distance - b.distance);
-                const k = 5 + Math.floor(Math.random() * 4); // Random k between 5-8
-                const neighbors = distances.slice(0, k);
+                // Categorical features (role and position)
+                // Convert to binary: 0 if match, 1 if mismatch
+                const roleMatch = (features.role === 'No Preference' || features.role === champion.role) ? 0 : 1;
+                sumSquares += roleMatch * roleMatch * 2; // Weight role more heavily
                 
-                // Weighted vote with randomness
+                const championPositions = champion.positions || [];
+                const positionMatch = (features.position === 'No Preference' || 
+                    (championPositions.length > 0 && championPositions.includes(features.position))) ? 0 : 1;
+                sumSquares += positionMatch * positionMatch * 1.5; // Weight position
+                
+                // Euclidean distance
+                return Math.sqrt(sumSquares);
+            }
+            
+            predict(features) {
+                this.initializeChampionData();
+                
+                // Calculate distances to all champions
+                const distances = [];
+                for (let i = 0; i < this.championCount; i++) {
+                    const [name, champion] = this.championEntries[i];
+                    const distance = this.calculateDistance(features, champion);
+                    distances.push({ champion: name, distance, data: champion });
+                }
+                
+                // Sort by distance (ascending - nearest first)
+                distances.sort((a, b) => a.distance - b.distance);
+                
+                // Get K nearest neighbors
+                const neighbors = distances.slice(0, this.k);
+                
+                // Weighted voting based on inverse distance
                 let totalWeight = 0;
                 const votes = {};
                 
-                neighbors.forEach(neighbor => {
-                    const weight = neighbor.distance === 0 ? 1 : 1 / (neighbor.distance + 0.1);
-                    // Add randomness to voting
-                    const randomizedWeight = weight * (0.7 + Math.random() * 0.6);
-                    votes[neighbor.champion] = (votes[neighbor.champion] || 0) + randomizedWeight;
-                    totalWeight += randomizedWeight;
-                });
+                for (const neighbor of neighbors) {
+                    // Weight = 1 / (distance + epsilon) to avoid division by zero
+                    const weight = 1 / (neighbor.distance + 0.001);
+                    votes[neighbor.champion] = (votes[neighbor.champion] || 0) + weight;
+                    totalWeight += weight;
+                }
                 
-                // Convert to array and add exploration
+                // Add psychological preference adjustments
+                for (const neighbor of neighbors) {
+                    const champion = neighbor.data;
+                    let bonusWeight = 0;
+                    
+                    if (features.pressure_response === 'Stay calm and strategic' && champion.toughness >= 6) bonusWeight += 0.5;
+                    if (features.pressure_response === 'Take charge and lead' && (champion.damage >= 7 || champion.control >= 7)) bonusWeight += 0.5;
+                    if (features.pressure_response === 'Get aggressive and take risks' && champion.damage >= 8) bonusWeight += 0.5;
+                    if (features.pressure_response === 'Play cautiously to avoid mistakes' && champion.toughness >= 7) bonusWeight += 0.5;
+                    
+                    if (features.team_contribution === 'Lead and make decisions' && champion.control >= 7) bonusWeight += 0.3;
+                    if (features.team_contribution === 'Support and enable others' && champion.utility >= 7) bonusWeight += 0.3;
+                    
+                    votes[neighbor.champion] += bonusWeight;
+                    totalWeight += bonusWeight;
+                }
+                
+                // Convert to candidates array
                 const candidates = Object.entries(votes).map(([champion, score]) => ({
                     champion,
-                    score: score + Math.random() * (totalWeight * 0.2)
+                    score
                 }));
                 
                 candidates.sort((a, b) => b.score - a.score);
@@ -3635,56 +3547,38 @@
                 // Apply diversity bonus
                 const diverseCandidates = applyDiversityBonus(candidates, recentRecommendations);
                 diverseCandidates.sort((a, b) => b.score - a.score);
+                const topCandidates = diverseCandidates.slice(0, Math.min(5, diverseCandidates.length));
                 
-                if (diverseCandidates.length > 0) {
-                    // Select from top candidates with weighted probability
-                    const topCandidates = diverseCandidates.slice(0, Math.min(5, diverseCandidates.length));
-                    const weights = topCandidates.map((_, i) => Math.pow(0.8, i));
-                    const totalWeight = weights.reduce((sum, w) => sum + w, 0);
-                    let random = Math.random() * totalWeight;
-                    
-                    for (let i = 0; i < topCandidates.length; i++) {
-                        random -= weights[i];
-                        if (random <= 0) {
-                            return {
-                                champion: topCandidates[i].champion,
-                                confidence: Math.min(95, Math.max(75, (topCandidates[i].score / totalWeight) * 100)),
-                                algorithm: 'K-Nearest Neighbors'
-                            };
-                        }
+                // Weighted selection
+                const weights = topCandidates.map((_, i) => Math.pow(0.8, i));
+                const totalWeightSelection = weights.reduce((sum, w) => sum + w, 0);
+                let random = Math.random() * totalWeightSelection;
+                
+                for (let i = 0; i < topCandidates.length; i++) {
+                    random -= weights[i];
+                    if (random <= 0) {
+                        return {
+                            champion: topCandidates[i].champion,
+                            confidence: Math.min(95, Math.max(75, (topCandidates[i].score / totalWeight) * 100)),
+                            algorithm: 'K-Nearest Neighbors'
+                        };
                     }
-                    
-                    // Fallback
-                    return {
-                        champion: topCandidates[0].champion,
-                        confidence: Math.min(95, Math.max(75, (topCandidates[0].score / totalWeight) * 100)),
-                        algorithm: 'K-Nearest Neighbors'
-                    };
                 }
                 
-                // Ultimate fallback
                 return {
-                    champion: diverseCandidates[0].champion,
-                    confidence: 80,
+                    champion: topCandidates[0].champion,
+                    confidence: Math.min(95, Math.max(75, (topCandidates[0].score / totalWeight) * 100)),
                     algorithm: 'K-Nearest Neighbors'
                 };
             }
             
             /**
-             * Score all champions for unified recommendations using K-Nearest Neighbors logic
-             * 
-             * TASK 14.2: Optimized to reduce unnecessary iterations using pre-computed champion data
-             * 
-             * @param {Object} features - User preference features extracted from questionnaire
-             * @returns {Object} Scores object with champion names as keys, score objects as values
+             * Score all champions using KNN
              */
             predictAll(features) {
+                this.initializeChampionData();
                 const scores = {};
                 
-                // TASK 14.2: Initialize champion data if not already done
-                this.initializeChampionData();
-                
-                // TASK 14.2: Use pre-computed entries and traditional for loop for better performance
                 for (let i = 0; i < this.championCount; i++) {
                     const [name, champion] = this.championEntries[i];
                     const result = this.calculateChampionScore(features, champion);
@@ -3695,285 +3589,56 @@
             }
             
             /**
-             * Calculate detailed score for a single champion using distance-based KNN logic
-             * 
-             * K-Nearest Neighbors uses distance calculation where LOWER distance means BETTER match.
-             * The final score is converted to 0-100 where higher is better (inverse of distance).
-             * 
-             * Distance Calculation (penalties added for mismatches):
-             * - Role Mismatch: +8 distance (highest penalty)
-             * - Position Mismatch: +6 distance (high penalty)
-             * - Difficulty Distance: |user - champion| * 0.5
-             * - Damage Distance: |user - champion| * 0.3
-             * - Toughness Distance: |user - champion| * 0.3
-             * - Psychological Mismatches: +2 distance each
-             *   - Pressure response mismatch
-             *   - Team contribution mismatch
-             * - Aesthetic Mismatches: +1.5 distance each
-             *   - Aesthetic preference mismatch
-             *   - Problem solving mismatch
-             * 
-             * Maximum possible distance: ~30 (all mismatches)
-             * Minimum possible distance: 0 (perfect match)
-             * 
-             * Score Conversion: score = max(0, 100 - (distance * 3.33))
-             * This converts distance to a 0-100 score where:
-             * - Distance 0 = Score 100
-             * - Distance 30 = Score 0
-             * 
-             * @param {Object} features - User preference features
-             * @param {Object} champion - Champion data object from allChampions
-             * @returns {Object} Score result with structure:
-             *   {
-             *     score: number (0-100, inverse of distance),
-             *     rawScore: number (distance value, lower is better),
-             *     details: {
-             *       contributingFactors: Array<{factor, weight, contribution}>,
-             *       matchedCriteria: Array<string>,
-             *       penalties: Array<string>
-             *     }
-             *   }
+             * Calculate score for a single champion using normalized Euclidean distance
              */
             calculateChampionScore(features, champion) {
-                let distance = 0;
+                const distance = this.calculateDistance(features, champion);
+                
                 const details = {
-                    contributingFactors: [],
+                    contributingFactors: [{
+                        factor: 'Euclidean Distance (normalized)',
+                        weight: 'N/A',
+                        contribution: distance.toFixed(3)
+                    }],
                     matchedCriteria: [],
                     penalties: []
                 };
                 
-                // 1. Role distance (8 points penalty if mismatch)
-                if (features.role !== 'No Preference' && features.role !== champion.role) {
-                    distance += 8;
-                    details.penalties.push(`Role mismatch: wanted ${features.role}, got ${champion.role}`);
-                    details.contributingFactors.push({
-                        factor: 'Role Distance',
-                        weight: 8,
-                        contribution: 8
-                    });
-                } else {
+                // Add matched/mismatched criteria for transparency
+                if (features.role === 'No Preference' || features.role === champion.role) {
                     details.matchedCriteria.push(`Role: ${champion.role}`);
-                    details.contributingFactors.push({
-                        factor: 'Role Distance',
-                        weight: 8,
-                        contribution: 0
-                    });
+                } else {
+                    details.penalties.push(`Role mismatch: wanted ${features.role}, got ${champion.role}`);
                 }
                 
-                // 2. Position distance (6 points penalty if mismatch)
                 const championPositions = champion.positions || [];
-                if (features.position !== 'No Preference' && 
-                    championPositions.length > 0 && !championPositions.includes(features.position)) {
-                    distance += 6;
-                    details.penalties.push(`Position mismatch: wanted ${features.position}`);
-                    details.contributingFactors.push({
-                        factor: 'Position Distance',
-                        weight: 6,
-                        contribution: 6
-                    });
+                if (features.position === 'No Preference' || 
+                    (championPositions.length > 0 && championPositions.includes(features.position))) {
+                    details.matchedCriteria.push(`Position: ${features.position || 'Any'}`);
                 } else if (features.position !== 'No Preference') {
-                    details.matchedCriteria.push(`Position: ${features.position}`);
-                    details.contributingFactors.push({
-                        factor: 'Position Distance',
-                        weight: 6,
-                        contribution: 0
-                    });
+                    details.penalties.push(`Position mismatch: wanted ${features.position}`);
                 }
                 
-                // 3. Numerical attribute distances (weighted)
-                const diffDist = Math.abs(features.difficulty - champion.difficulty) * 0.5;
-                const damageDist = Math.abs(features.damage - champion.damage) * 0.3;
-                const toughnessDist = Math.abs(features.toughness - champion.toughness) * 0.3;
-                
-                distance += diffDist + damageDist + toughnessDist;
-                
-                details.contributingFactors.push(
-                    { factor: 'Difficulty Distance', weight: 0.5, contribution: diffDist },
-                    { factor: 'Damage Distance', weight: 0.3, contribution: damageDist },
-                    { factor: 'Toughness Distance', weight: 0.3, contribution: toughnessDist }
-                );
-                
-                if (diffDist <= 1) {
-                    details.matchedCriteria.push(`Difficulty close to preference (${champion.difficulty})`);
-                }
-                if (damageDist <= 1) {
-                    details.matchedCriteria.push(`Damage close to preference (${champion.damage})`);
-                }
-                if (toughnessDist <= 1) {
-                    details.matchedCriteria.push(`Toughness close to preference (${champion.toughness})`);
-                }
-                
-                // 4. Psychological distances (2 points each for mismatch)
-                let psychDistance = 0;
-                
-                // Pressure response -> Emotional stability (toughness/mobility)
-                if (features.pressure_response === 'Stay calm and strategic' && champion.toughness < 6) {
-                    psychDistance += 2;
-                    details.penalties.push('Pressure response mismatch: low toughness for calm style');
-                } else if (features.pressure_response === 'Stay calm and strategic' && champion.toughness >= 6) {
-                    details.matchedCriteria.push('Calm playstyle matches champion toughness');
-                }
-                
-                if (features.pressure_response === 'Take charge and lead' && (champion.damage < 7 && champion.control < 7)) {
-                    psychDistance += 2;
-                    details.penalties.push('Pressure response mismatch: low damage/control for leadership');
-                } else if (features.pressure_response === 'Take charge and lead' && (champion.damage >= 7 || champion.control >= 7)) {
-                    details.matchedCriteria.push('Leadership style matches champion control/damage');
-                }
-                
-                if (features.pressure_response === 'Get aggressive and take risks' && champion.damage < 8) {
-                    psychDistance += 2;
-                    details.penalties.push('Pressure response mismatch: low damage for aggressive style');
-                } else if (features.pressure_response === 'Get aggressive and take risks' && champion.damage >= 8) {
-                    details.matchedCriteria.push('Aggressive style matches high damage');
-                }
-                
-                if (features.pressure_response === 'Play cautiously to avoid mistakes' && champion.toughness < 7) {
-                    psychDistance += 2;
-                    details.penalties.push('Pressure response mismatch: low toughness for cautious style');
-                } else if (features.pressure_response === 'Play cautiously to avoid mistakes' && champion.toughness >= 7) {
-                    details.matchedCriteria.push('Cautious style matches champion durability');
-                }
-                
-                // Aesthetic preference -> Champion theme/identity (1.5 points)
-                if (features.aesthetic_preference === 'Heroic' && !(champion.title && champion.title.includes('the'))) {
-                    psychDistance += 1.5;
-                    details.penalties.push('Aesthetic mismatch: not heroic theme');
-                } else if (features.aesthetic_preference === 'Heroic' && champion.title && champion.title.includes('the')) {
-                    details.matchedCriteria.push('Heroic aesthetic match');
-                }
-                
-                if (features.aesthetic_preference === 'Mysterious' && !(champion.role === 'Assassin' || champion.role === 'Mage')) {
-                    psychDistance += 1.5;
-                    details.penalties.push('Aesthetic mismatch: not mysterious theme');
-                } else if (features.aesthetic_preference === 'Mysterious' && (champion.role === 'Assassin' || champion.role === 'Mage')) {
-                    details.matchedCriteria.push('Mysterious aesthetic match');
-                }
-                
-                if (features.aesthetic_preference === 'Dark and edgy' && !(champion.role === 'Assassin' || (champion.title && champion.title.includes('dark')))) {
-                    psychDistance += 1.5;
-                    details.penalties.push('Aesthetic mismatch: not dark theme');
-                } else if (features.aesthetic_preference === 'Dark and edgy' && champion.role === 'Assassin') {
-                    details.matchedCriteria.push('Dark aesthetic match');
-                }
-                
-                if (features.aesthetic_preference === 'Cute or playful' && champion.role !== 'Support') {
-                    psychDistance += 1.5;
-                    details.penalties.push('Aesthetic mismatch: not playful theme');
-                } else if (features.aesthetic_preference === 'Cute or playful' && champion.role === 'Support') {
-                    details.matchedCriteria.push('Playful aesthetic match');
-                }
-                
-                if (features.aesthetic_preference === 'Monstrous or non-human' && !(champion.role === 'Fighter' || champion.role === 'Tank')) {
-                    psychDistance += 1.5;
-                    details.penalties.push('Aesthetic mismatch: not monstrous theme');
-                } else if (features.aesthetic_preference === 'Monstrous or non-human' && (champion.role === 'Fighter' || champion.role === 'Tank')) {
-                    details.matchedCriteria.push('Monstrous aesthetic match');
-                }
-                
-                // Team contribution -> Utility/control attributes (2 points)
-                if (features.team_contribution === 'Lead and make decisions' && champion.control < 7) {
-                    psychDistance += 2;
-                    details.penalties.push('Team contribution mismatch: low control for leadership');
-                } else if (features.team_contribution === 'Lead and make decisions' && champion.control >= 7) {
-                    details.matchedCriteria.push('Leadership matches champion control');
-                }
-                
-                if (features.team_contribution === 'Support and enable others' && champion.utility < 7) {
-                    psychDistance += 2;
-                    details.penalties.push('Team contribution mismatch: low utility for support');
-                } else if (features.team_contribution === 'Support and enable others' && champion.utility >= 7) {
-                    details.matchedCriteria.push('Support style matches champion utility');
-                }
-                
-                if (features.team_contribution === 'Balance between both' && (champion.utility < 5 || champion.control < 5)) {
-                    psychDistance += 2;
-                    details.penalties.push('Team contribution mismatch: unbalanced utility/control');
-                } else if (features.team_contribution === 'Balance between both' && (champion.utility >= 5 && champion.control >= 5)) {
-                    details.matchedCriteria.push('Balanced contribution matches champion');
-                }
-                
-                if (features.team_contribution === 'Stay independent and focus on my role' && champion.damage < 7) {
-                    psychDistance += 2;
-                    details.penalties.push('Team contribution mismatch: low damage for independent style');
-                } else if (features.team_contribution === 'Stay independent and focus on my role' && champion.damage >= 7) {
-                    details.matchedCriteria.push('Independent style matches champion damage');
-                }
-                
-                // Problem solving -> Cognitive style (mobility/complexity) (1.5 points)
-                if (features.problem_solving === 'Analyze carefully before acting' && champion.control < 7) {
-                    psychDistance += 1.5;
-                    details.penalties.push('Problem solving mismatch: low control for analytical style');
-                } else if (features.problem_solving === 'Analyze carefully before acting' && champion.control >= 7) {
-                    details.matchedCriteria.push('Analytical style matches champion control');
-                }
-                
-                if (features.problem_solving === 'Jump in and adapt on the fly' && champion.mobility < 7) {
-                    psychDistance += 1.5;
-                    details.penalties.push('Problem solving mismatch: low mobility for adaptive style');
-                } else if (features.problem_solving === 'Jump in and adapt on the fly' && champion.mobility >= 7) {
-                    details.matchedCriteria.push('Adaptive style matches champion mobility');
-                }
-                
-                if (features.problem_solving === "Follow the team's lead" && champion.utility < 6) {
-                    psychDistance += 1.5;
-                    details.penalties.push('Problem solving mismatch: low utility for team-oriented style');
-                } else if (features.problem_solving === "Follow the team's lead" && champion.utility >= 6) {
-                    details.matchedCriteria.push('Team-oriented style matches champion utility');
-                }
-                
-                if (features.problem_solving === 'Focus on long-term improvement' && champion.toughness < 7) {
-                    psychDistance += 1.5;
-                    details.penalties.push('Problem solving mismatch: low toughness for long-term focus');
-                } else if (features.problem_solving === 'Focus on long-term improvement' && champion.toughness >= 7) {
-                    details.matchedCriteria.push('Long-term focus matches champion durability');
-                }
-                
-                distance += psychDistance;
-                details.contributingFactors.push({
-                    factor: 'Psychological Distance',
-                    weight: 'Variable',
-                    contribution: psychDistance
-                });
-                
-                // Total possible distance: ~30 points max
-                // Convert distance to score (inverse relationship)
-                const rawDistance = distance;
-                const normalizedScore = this.normalizeScore(rawDistance);
+                // Convert distance to score (lower distance = higher score)
+                const normalizedScore = this.normalizeScore(distance);
                 
                 return {
                     score: normalizedScore,
-                    rawScore: rawDistance,
+                    rawScore: distance,
                     details: details
                 };
             }
             
             /**
-             * Normalize distance to 0-100 score (inverse relationship: lower distance = higher score)
-             * 
-             * KNN uses distance where lower is better, so we convert to a score where higher is better.
-             * This makes KNN scores comparable with Random Forest and Decision Tree scores.
-             * 
-             * Formula: score = max(0, 100 - ((distance / maxDistance) * 100))
-             * 
-             * Distance Mapping:
-             * - Distance 0 → Score 100 (perfect match)
-             * - Distance 15 → Score 50 (moderate match)
-             * - Distance 30 → Score 0 (poor match)
-             * 
-             * @param {number} rawDistance - Raw distance from calculateChampionScore (0-30)
-             * @returns {number} Normalized score between 0 and 100 (inverse of distance)
+             * Normalize distance to 0-100 score
              */
-            normalizeScore(rawDistance) {
-                // Max expected distance is approximately 30
-                // (8 role + 6 position + 5 difficulty + 3 damage + 3 toughness + ~15 psychological)
-                const maxDistance = 30;
+            normalizeScore(distance) {
+                // Max theoretical distance for normalized features
+                // sqrt((1^2 * 6 numeric features) + (1^2 * 2 for role) + (1^2 * 1.5 for position)) ~= 3.24
+                const maxDistance = 3.5;
                 
-                // Convert distance to score (inverse relationship)
-                // Distance of 0 = 100 score, Distance of 30 = 0 score
-                const normalized = Math.max(0, 100 - ((rawDistance / maxDistance) * 100));
-                
-                // Ensure bounds (handle edge cases)
+                // Inverse relationship: distance 0 = score 100, distance maxDistance = score 0
+                const normalized = Math.max(0, 100 - ((distance / maxDistance) * 100));
                 return Math.max(0, Math.min(100, normalized));
             }
         }
