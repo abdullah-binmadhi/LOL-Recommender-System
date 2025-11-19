@@ -42,6 +42,22 @@
     },
     {
       "id": 6,
+      "text": "What is your preferred champion resource?",
+      "type": "multiple_choice",
+      "options": ["Energy", "Mana", "Ferocity", "Fury", "Rage", "Heat", "No Preference"],
+      "weight": 0.7,
+      "feature_mapping": "resource_type"
+    },
+    {
+      "id": 7,
+      "text": "What is your preferred damage type?",
+      "type": "multiple_choice",
+      "options": ["Physical", "Magic", "No Preference"],
+      "weight": 0.8,
+      "feature_mapping": "damage_type"
+    },
+    {
+      "id": 8,
       "text": "How do you usually respond under pressure in a game?",
       "type": "multiple_choice",
       "options": ["Stay calm and strategic", "Take charge and lead", "Get aggressive and take risks", "Play cautiously to avoid mistakes"],
@@ -50,7 +66,7 @@
       "dimension": "Emotional stability & risk-taking"
     },
     {
-      "id": 7,
+      "id": 9,
       "text": "What type of character aesthetic appeals to you most?",
       "type": "multiple_choice",
       "options": ["Heroic", "Mysterious", "Dark and edgy", "Cute or playful", "Monstrous or non-human"],
@@ -59,7 +75,7 @@
       "dimension": "Aesthetic & identity preference"
     },
     {
-      "id": 8,
+      "id": 10,
       "text": "When cooperating with others, how do you prefer to contribute to the team?",
       "type": "multiple_choice",
       "options": ["Lead and make decisions", "Support and enable others", "Balance between both", "Stay independent and focus on my role"],
@@ -68,7 +84,7 @@
       "dimension": "Teamwork & leadership orientation"
     },
     {
-      "id": 9,
+      "id": 11,
       "text": "Which character identity do you usually prefer?",
       "type": "multiple_choice",
       "options": ["Male", "Female", "Non-human", "No preference"],
@@ -77,7 +93,7 @@
       "dimension": "Character identity & self-expression"
     },
     {
-      "id": 10,
+      "id": 12,
       "text": "When faced with a difficult challenge, what best describes your approach?",
       "type": "multiple_choice",
       "options": ["Analyze carefully before acting", "Jump in and adapt on the fly", "Follow the team's lead", "Focus on long-term improvement"],
