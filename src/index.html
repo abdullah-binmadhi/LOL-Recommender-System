@@ -3737,31 +3737,59 @@
                 const userDifficulty = this.mapDifficultyToNumeric(userAnswers.difficulty);
                 const { damage: userDamage, toughness: userToughness } = this.mapPlaystyleToAttributes(userAnswers.playstyle);
                 
-                // Iterate through all champions
+                // Iterate through all champions and calculate match score
                 for (const [championName, champion] of Object.entries(allChampions)) {
-                    let isRelevant = true;
+                    let matchScore = 0;
+                    let totalCriteria = 0;
                     
-                    // Check role match (exact match OR user has no preference)
-                    if (userRole !== 'No Preference' && userRole !== champion.role) {
-                        isRelevant = false;
+                    // Role match (most important - 40% weight)
+                    if (userRole !== 'No Preference') {
+                        totalCriteria += 4;
+                        if (userRole === champion.role) {
+                            matchScore += 4;
+                        }
                     }
                     
-                    // Check difficulty match (within ±2 points)
-                    if (userDifficulty !== null && Math.abs(userDifficulty - champion.difficulty) > 2) {
-                        isRelevant = false;
+                    // Difficulty match (25% weight) - strict matching
+                    if (userDifficulty !== null) {
+                        totalCriteria += 2.5;
+                        const difficultyDiff = Math.abs(userDifficulty - champion.difficulty);
+                        if (difficultyDiff <= 1) {
+                            matchScore += 2.5; // Exact or very close match
+                        } else if (difficultyDiff <= 2) {
+                            matchScore += 1.25; // Close match
+                        }
                     }
                     
-                    // Check damage match (within ±2 points, if specified)
-                    if (userDamage !== null && Math.abs(userDamage - champion.damage) > 2) {
-                        isRelevant = false;
+                    // Damage match (20% weight)
+                    if (userDamage !== null) {
+                        totalCriteria += 2;
+                        const damageDiff = Math.abs(userDamage - champion.damage);
+                        if (damageDiff <= 1) {
+                            matchScore += 2; // Exact or very close match
+                        } else if (damageDiff <= 2) {
+                            matchScore += 1; // Close match
+                        } else if (damageDiff <= 3) {
+                            matchScore += 0.5; // Somewhat close
+                        }
                     }
                     
-                    // Check toughness match (within ±2 points, if specified)
-                    if (userToughness !== null && Math.abs(userToughness - champion.toughness) > 2) {
-                        isRelevant = false;
+                    // Toughness match (15% weight)
+                    if (userToughness !== null) {
+                        totalCriteria += 1.5;
+                        const toughnessDiff = Math.abs(userToughness - champion.toughness);
+                        if (toughnessDiff <= 1) {
+                            matchScore += 1.5; // Exact or very close match
+                        } else if (toughnessDiff <= 2) {
+                            matchScore += 0.75; // Close match
+                        } else if (toughnessDiff <= 3) {
+                            matchScore += 0.25; // Somewhat close
+                        }
                     }
                     
-                    if (isRelevant) {
+                    // A champion is relevant if it scores at least 60% match
+                    const matchPercentage = totalCriteria > 0 ? (matchScore / totalCriteria) : 0;
+                    if (matchPercentage >= 0.6) {
                         relevantChampions.add(championName);
                     }
                 }
