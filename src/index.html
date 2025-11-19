@@ -3858,17 +3858,22 @@
                 
                 // Iterate through all champions and calculate match score
                 for (const [championName, champion] of Object.entries(allChampions)) {
-                    // STRICTER: Skip champions with wrong role entirely (unless "No Preference")
-                    if (userRole !== 'No Preference' && userRole !== champion.role) {
-                        continue; // Don't consider champions from wrong role
+                    // Get champion's primary position (first in positions array, fallback to role)
+                    const championPosition = (champion.positions && champion.positions.length > 0) 
+                        ? champion.positions[0] 
+                        : champion.role;
+                    
+                    // STRICTER: Skip champions with wrong position entirely (unless "No Preference")
+                    if (userRole !== 'No Preference' && userRole !== championPosition) {
+                        continue; // Don't consider champions from wrong position
                     }
                     
                     let matchScore = 0;
                     let totalCriteria = 0;
                     
-                    // Role match (most important - 40% weight)
+                    // Position match (most important - 40% weight)
                     totalCriteria += 4;
-                    matchScore += 4; // Full credit since we filtered by role
+                    matchScore += 4; // Full credit since we filtered by position
                     
                     // Difficulty match (25% weight) - STRICTER tolerance
                     if (userDifficulty !== null) {
@@ -3917,9 +3922,9 @@
                 // Sort champions by score descending
                 championScores.sort((a, b) => b.score - a.score);
                 
-                // STRICTER: Use 60% threshold and cap at 15% of champions (down from 45% and 35%)
+                // Use 60% threshold and cap at 60 champions
                 const minRelevantCount = Math.max(8, Math.floor(championScores.length * 0.10));
-                const maxRelevantCount = Math.ceil(championScores.length * 0.15);
+                const maxRelevantCount = 60; // Fixed cap at 60 champions
                 
                 const relevantChampions = new Set();
                 let threshold = 0.60; // Increased from 0.45 to 0.60
