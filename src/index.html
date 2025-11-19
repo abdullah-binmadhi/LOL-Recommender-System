@@ -3730,7 +3730,7 @@
              * @returns {Set<string>} - Set of relevant champion names
              */
             static calculateUserRelevance(userAnswers, allChampions) {
-                const relevantChampions = new Set();
+                const championScores = [];
                 
                 // Extract user preferences
                 const userRole = userAnswers.role || 'No Preference';
@@ -3743,21 +3743,25 @@
                     let totalCriteria = 0;
                     
                     // Role match (most important - 40% weight)
-                    if (userRole !== 'No Preference') {
-                        totalCriteria += 4;
-                        if (userRole === champion.role) {
-                            matchScore += 4;
-                        }
+                    totalCriteria += 4;
+                    if (userRole === 'No Preference' || userRole === champion.role) {
+                        matchScore += 4;
+                    } else {
+                        matchScore += 0.5; // Small partial credit for wrong role
                     }
                     
-                    // Difficulty match (25% weight) - strict matching
+                    // Difficulty match (25% weight)
                     if (userDifficulty !== null) {
                         totalCriteria += 2.5;
                         const difficultyDiff = Math.abs(userDifficulty - champion.difficulty);
                         if (difficultyDiff <= 1) {
                             matchScore += 2.5; // Exact or very close match
-                        } else if (difficultyDiff <= 2) {
-                            matchScore += 1.25; // Close match
+                        } else if (difficultyDiff <= 2.5) {
+                            matchScore += 1.5; // Close match
+                        } else if (difficultyDiff <= 4) {
+                            matchScore += 0.75; // Somewhat close
+                        } else {
+                            matchScore += 0.25; // Far but some credit
                         }
                     }
                     
@@ -3767,10 +3771,12 @@
                         const damageDiff = Math.abs(userDamage - champion.damage);
                         if (damageDiff <= 1) {
                             matchScore += 2; // Exact or very close match
-                        } else if (damageDiff <= 2) {
-                            matchScore += 1; // Close match
-                        } else if (damageDiff <= 3) {
+                        } else if (damageDiff <= 2.5) {
+                            matchScore += 1.25; // Close match
+                        } else if (damageDiff <= 4) {
                             matchScore += 0.5; // Somewhat close
+                        } else {
+                            matchScore += 0.2; // Far but some credit
                         }
                     }
                     
@@ -3780,18 +3786,55 @@
                         const toughnessDiff = Math.abs(userToughness - champion.toughness);
                         if (toughnessDiff <= 1) {
                             matchScore += 1.5; // Exact or very close match
-                        } else if (toughnessDiff <= 2) {
-                            matchScore += 0.75; // Close match
-                        } else if (toughnessDiff <= 3) {
-                            matchScore += 0.25; // Somewhat close
+                        } else if (toughnessDiff <= 2.5) {
+                            matchScore += 0.9; // Close match
+                        } else if (toughnessDiff <= 4) {
+                            matchScore += 0.4; // Somewhat close
+                        } else {
+                            matchScore += 0.15; // Far but some credit
                         }
                     }
                     
-                    // A champion is relevant if it scores at least 60% match
+                    // Calculate match percentage
                     const matchPercentage = totalCriteria > 0 ? (matchScore / totalCriteria) : 0;
-                    if (matchPercentage >= 0.6) {
-                        relevantChampions.add(championName);
+                    championScores.push({ name: championName, score: matchPercentage });
+                }
+                
+                // Sort champions by score descending
+                championScores.sort((a, b) => b.score - a.score);
+                
+                // Use adaptive threshold: start at 45%, but ensure at least top 20-30% of champions are relevant
+                const minRelevantCount = Math.max(10, Math.floor(championScores.length * 0.15));
+                const maxRelevantCount = Math.ceil(championScores.length * 0.35);
+                
+                const relevantChampions = new Set();
+                let threshold = 0.45;
+                
+                // First pass: add champions above threshold
+                for (const champ of championScores) {
+                    if (champ.score >= threshold) {
+                        relevantChampions.add(champ.name);
                     }
+                }
+                
+                // Ensure we have at least minimum relevant champions
+                if (relevantChampions.size < minRelevantCount) {
+                    for (let i = 0; i < minRelevantCount && i < championScores.length; i++) {
+                        relevantChampions.add(championScores[i].name);
+                    }
+                }
+                
+                // Cap at maximum to maintain quality standards
+                if (relevantChampions.size > maxRelevantCount) {
+                    const cappedSet = new Set();
+                    let count = 0;
+                    for (const champ of championScores) {
+                        if (relevantChampions.has(champ.name) && count < maxRelevantCount) {
+                            cappedSet.add(champ.name);
+                            count++;
+                        }
+                    }
+                    return cappedSet;
                 }
                 
                 return relevantChampions;
