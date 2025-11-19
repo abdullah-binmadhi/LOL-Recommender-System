@@ -1,5 +1,9 @@
 {
   "version": 2,
+  "buildCommand": null,
+  "devCommand": null,
+  "installCommand": null,
+  "outputDirectory": ".",
   "public": true,
   "cleanUrls": true,
   "trailingSlash": false,
@@ -9,12 +13,8 @@
       "destination": "/index.html"
     },
     {
-      "source": "/src/:path*",
-      "destination": "/src/:path*"
-    },
-    {
-      "source": "/data/:path*",
-      "destination": "/data/:path*"
+      "source": "/src/(.*)",
+      "destination": "/src/$1"
     }
   ],
   "headers": [
@@ -28,20 +28,13 @@
       ]
     },
     {
-      "source": "/src/data/:path*",
+      "source": "/src/data/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
           "value": "public, max-age=3600, immutable"
         }
       ]
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/analytics.html",
-      "destination": "/src/analytics/analytics.html",
-      "permanent": true
     }
   ]
 }

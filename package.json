@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "A League of Legends champion recommendation system using AI-powered algorithms",
   "scripts": {
-    "dev": "echo 'Development server not configured'",
-    "build": "echo 'Build process not required for static deployment'",
-    "start": "echo 'Start command not required for static deployment'"
+    "dev": "echo 'This is a static site. Open index.html in a browser.'",
+    "build": "echo 'No build required - static HTML site'",
+    "start": "echo 'No start command required - static HTML site'"
   },
   "keywords": [
     "league-of-legends",
@@ -15,12 +15,5 @@
     "web-app"
   ],
   "author": "Abdullah Bin Madhi",
-  "license": "MIT",
-  "dependencies": {
-    "chart.js": "^4.5.1",
-    "next": "^14.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "vercel": "^48.6.0"
-  }
+  "license": "MIT"
 }
