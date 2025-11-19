@@ -4763,6 +4763,11 @@
             answers[questionId] = value;
             
             document.getElementById(`next-${questionId}`).disabled = false;
+            
+            // Rebuild next question with filtered options based on this answer
+            if (questionId < questionsDatabase.length) {
+                rebuildQuestionWithFilters(questionId + 1);
+            }
         }
 
         function nextQuestion(currentNum) {
@@ -4777,6 +4782,135 @@
         function previousQuestion(currentNum) {
             if (currentNum > 1) {
                 showQuestion(currentNum - 1);
+            }
+        }
+        
+        /**
+         * Get filtered options for a question based on previous answers
+         */
+        function getFilteredOptions(questionId, baseOptions) {
+            // Question 3 (Position) - Filter based on Question 2 (Role)
+            if (questionId === 3 && answers[2]) {
+                const roleToPositions = {
+                    'Tank': ['Top', 'Jungle', 'Support'],
+                    'Fighter': ['Top', 'Jungle', 'Mid'],
+                    'Assassin': ['Mid', 'Jungle'],
+                    'Marksman': ['Bot'],
+                    'Mage': ['Mid', 'Support'],
+                    'Support': ['Support']
+                };
+                const allowedPositions = roleToPositions[answers[2]];
+                if (allowedPositions) {
+                    return baseOptions.filter(opt => allowedPositions.includes(opt.value));
+                }
+            }
+            
+            // Question 4 (Playstyle) - Filter based on Question 2 (Role)
+            if (questionId === 4 && answers[2]) {
+                const roleToPlaystyles = {
+                    'Tank': ['Tanky and Durable', 'Support Team', 'Balanced/Hybrid'],
+                    'Fighter': ['High Damage Output', 'Tanky and Durable', 'Balanced/Hybrid'],
+                    'Assassin': ['High Damage Output'],
+                    'Marksman': ['High Damage Output'],
+                    'Mage': ['High Damage Output', 'Support Team', 'Balanced/Hybrid'],
+                    'Support': ['Support Team', 'Balanced/Hybrid']
+                };
+                const allowedPlaystyles = roleToPlaystyles[answers[2]];
+                if (allowedPlaystyles) {
+                    return baseOptions.filter(opt => allowedPlaystyles.includes(opt.value));
+                }
+            }
+            
+            // Question 5 (Range) - Filter based on Question 2 (Role)
+            if (questionId === 5 && answers[2]) {
+                const roleToRange = {
+                    'Marksman': ['Ranged'],
+                    'Mage': ['Ranged'],
+                    'Assassin': ['Melee', 'No Preference'],
+                    'Tank': ['Melee', 'No Preference'],
+                    'Fighter': ['Melee', 'No Preference'],
+                    'Support': ['Ranged', 'Melee', 'No Preference']
+                };
+                const allowedRange = roleToRange[answers[2]];
+                if (allowedRange) {
+                    return baseOptions.filter(opt => allowedRange.includes(opt.value));
+                }
+            }
+            
+            // Question 7 (Damage Type) - Filter based on Question 2 (Role) and Question 4 (Playstyle)
+            if (questionId === 7) {
+                // If Tank or Support role, filter out damage type options (they don't focus on damage)
+                if (answers[2] === 'Tank') {
+                    return baseOptions.filter(opt => opt.value === 'Physical' || opt.value === 'No Preference');
+                }
+                if (answers[2] === 'Support') {
+                    return baseOptions.filter(opt => opt.value === 'Magic' || opt.value === 'No Preference');
+                }
+                if (answers[2] === 'Mage') {
+                    return baseOptions.filter(opt => opt.value === 'Magic' || opt.value === 'No Preference');
+                }
+                if (answers[2] === 'Marksman' || answers[2] === 'Fighter') {
+                    return baseOptions.filter(opt => opt.value === 'Physical' || opt.value === 'No Preference');
+                }
+            }
+            
+            // Question 1 (Difficulty) - Filter based on psychological answers if available
+            if (questionId === 1 && answers[10]) {
+                // If "Focus on long-term improvement" was selected, suggest harder champions
+                if (answers[10] === 'Focus on long-term improvement') {
+                    return baseOptions.filter(opt => 
+                        opt.value === 'Medium (4-6)' || 
+                        opt.value === 'Hard (7-8)' || 
+                        opt.value === 'Very Hard (9-10)'
+                    );
+                }
+                // If "Play cautiously to avoid mistakes", suggest easier champions
+                if (answers[10] === 'Play cautiously to avoid mistakes') {
+                    return baseOptions.filter(opt => 
+                        opt.value === 'Easy (1-3)' || 
+                        opt.value === 'Medium (4-6)'
+                    );
+                }
+            }
+            
+            return baseOptions; // No filtering
+        }
+        
+        /**
+         * Rebuild a question's options based on filter logic
+         */
+        function rebuildQuestionWithFilters(questionId) {
+            const questionCard = document.getElementById(`question-${questionId}`);
+            if (!questionCard) return;
+            
+            const question = questionsDatabase.find(q => q.id === questionId);
+            if (!question) return;
+            
+            // Get filtered options
+            const filteredOptions = getFilteredOptions(questionId, question.options);
+            
+            // Find the options container in this question
+            const optionsContainer = questionCard.querySelector('.options');
+            if (!optionsContainer) return;
+            
+            // Rebuild options HTML
+            let optionsHTML = '';
+            filteredOptions.forEach(option => {
+                const isSelected = answers[questionId] === option.value ? 'selected' : '';
+                optionsHTML += `
+                    <div class="option ${isSelected}" onclick="selectOption(${questionId}, '${option.value}', this)">
+                        ${option.text}
+                        ${option.description ? `<p style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">${option.description}</p>` : ''}
+                    </div>
+                `;
+            });
+            
+            optionsContainer.innerHTML = optionsHTML;
+            
+            // If current answer is no longer valid, clear it
+            if (answers[questionId] && !filteredOptions.find(opt => opt.value === answers[questionId])) {
+                delete answers[questionId];
+                document.getElementById(`next-${questionId}`).disabled = true;
             }
         }  
       function runAllAlgorithms() {
