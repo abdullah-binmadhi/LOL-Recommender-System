@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task 14: Performance Optimization Tests</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .test-section h2 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .test-result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .test-result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .test-result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .test-result.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .test-result.warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .metrics-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .metrics-table th,
+        .metrics-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .metrics-table th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .metrics-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .performance-chart {
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+
+        .bar {
+            height: 30px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px;
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            color: white;
+            font-weight: 600;
+            transition: width 0.5s ease;
+        }
+
+        .optimization-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .optimization-badge.optimized {
+            background: #28a745;
+            color: white;
+        }
+
+        .optimization-badge.baseline {
+            background: #6c757d;
+            color: white;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Task 14: Performance Optimization Tests</h1>
+        <p class="subtitle">Testing performance profiling and loop optimizations for ML algorithms</p>
+
+        <div style="margin-bottom: 20px;">
+            <button onclick="runAllTests()">Run All Tests</button>
+            <button onclick="runPerformanceTest()">Run Performance Test</button>
+            <button onclick="showMetrics()">Show Metrics</button>
+            <button onclick="showBottlenecks()">Show Bottlenecks</button>
+            <button onclick="clearResults()">Clear Results</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // Mock champion data for testing
+        const allChampions = {
+            'Ahri': { role: 'Mage', positions: ['Mid'], difficulty: 5, damage: 8, toughness: 3, control: 7, mobility: 8, utility: 5, title: 'the Nine-Tailed Fox' },
+            'Lux': { role: 'Mage', positions: ['Mid', 'Support'], difficulty: 4, damage: 8, toughness: 2, control: 8, mobility: 3, utility: 7, title: 'the Lady of Luminosity' },
+            'Zed': { role: 'Assassin', positions: ['Mid'], difficulty: 8, damage: 9, toughness: 2, control: 5, mobility: 9, utility: 3, title: 'the Master of Shadows' },
+            'Garen': { role: 'Fighter', positions: ['Top'], difficulty: 3, damage: 6, toughness: 8, control: 4, mobility: 4, utility: 4, title: 'the Might of Demacia' },
+            'Jinx': { role: 'Marksman', positions: ['Bot'], difficulty: 6, damage: 9, toughness: 2, control: 5, mobility: 6, utility: 4, title: 'the Loose Cannon' }
+        };
+
+        // Include the optimized ML algorithm classes from src/index.html
+        class SimpleRandomForest {
+            constructor() {
+                this.championEntries = null;
+                this.championCount = 0;
+            }
+            
+            initializeChampionData() {
+                if (!this.championEntries) {
+                    this.championEntries = Object.entries(allChampions);
+                    this.championCount = this.championEntries.length;
+                }
+            }
+            
+            predictAll(features) {
+                const scores = {};
+                this.initializeChampionData();
+                
+                for (let i = 0; i < this.championCount; i++) {
+                    const [name, champion] = this.championEntries[i];
+                    const result = this.calculateChampionScore(features, champion);
+                    scores[name] = result;
+                }
+                
+                return scores;
+            }
+            
+            calculateChampionScore(features, champion) {
+                let score = 0;
+                const details = { contributingFactors: [], matchedCriteria: [], penalties: [] };
+                
+                if (features.role === 'No Preference' || features.role === champion.role) {
+                    score += 40;
+                }
+                
+                const championPositions = champion.positions || [];
+                if (features.position === 'No Preference' || championPositions.includes(features.position)) {
+                    score += 30;
+                }
+                
+                score += Math.max(0, 20 - (Math.abs(features.difficulty - champion.difficulty) * 2));
+                score += Math.max(0, 15 - (Math.abs(features.damage - champion.damage) * 1.5));
+                score += Math.max(0, 15 - (Math.abs(features.toughness - champion.toughness) * 1.5));
+                
+                const normalizedScore = (score / 170) * 100;
+                return { score: Math.max(0, Math.min(100, normalizedScore)), rawScore: score, details };
+            }
+        }
+
+        class SimpleDecisionTree {
+            constructor() {
+                this.championEntries = null;
+                this.championCount = 0;
+            }
+            
+            initializeChampionData() {
+                if (!this.championEntries) {
+                    this.championEntries = Object.entries(allChampions);
+                    this.championCount = this.championEntries.length;
+                }
+            }
+            
+            predictAll(features) {
+                const scores = {};
+                this.initializeChampionData();
+                
+                for (let i = 0; i < this.championCount; i++) {
+                    const [name, champion] = this.championEntries[i];
+                    const result = this.calculateChampionScore(features, champion);
+                    scores[name] = result;
+                }
+                
+                return scores;
+            }
+            
+            calculateChampionScore(features, champion) {
+                let score = 0;
+                const details = { contributingFactors: [], matchedCriteria: [], penalties: [] };
+                
+                if (features.role === 'No Preference' || features.role === champion.role) {
+                    score += 50;
+                    
+                    const championPositions = champion.positions || [];
+                    if (features.position === 'No Preference' || championPositions.includes(features.position)) {
+                        score += 40;
+                    }
+                } else {
+                    score -= 30;
+                }
+                
+                const normalizedScore = ((score + 30) / 240) * 100;
+                return { score: Math.max(0, Math.min(100, normalizedScore)), rawScore: score, details };
+            }
+        }
+
+        class SimpleKNN {
+            constructor() {
+                this.championEntries = null;
+                this.championCount = 0;
+            }
+            
+            initializeChampionData() {
+                if (!this.championEntries) {
+                    this.championEntries = Object.entries(allChampions);
+                    this.championCount = this.championEntries.length;
+                }
+            }
+            
+            predictAll(features) {
+                const scores = {};
+                this.initializeChampionData();
+                
+                for (let i = 0; i < this.championCount; i++) {
+                    const [name, champion] = this.championEntries[i];
+                    const result = this.calculateChampionScore(features, champion);
+                    scores[name] = result;
+                }
+                
+                return scores;
+            }
+            
+            calculateChampionScore(features, champion) {
+                let distance = 0;
+                const details = { contributingFactors: [], matchedCriteria: [], penalties: [] };
+                
+                if (features.role !== 'No Preference' && features.role !== champion.role) {
+                    distance += 8;
+                }
+                
+                const championPositions = champion.positions || [];
+                if (features.position !== 'No Preference' && !championPositions.includes(features.position)) {
+                    distance += 6;
+                }
+                
+                distance += Math.abs(features.difficulty - champion.difficulty) * 0.5;
+                distance += Math.abs(features.damage - champion.damage) * 0.3;
+                distance += Math.abs(features.toughness - champion.toughness) * 0.3;
+                
+                const normalizedScore = Math.max(0, 100 - (distance * 3.33));
+                return { score: normalizedScore, rawScore: distance, details };
+            }
+        }
+
+        // Performance profiling system
+        const performanceMetrics = {
+            'random-forest': { calls: 0, totalTime: 0, avgTime: 0, minTime: Infinity, maxTime: 0, lastTime: 0 },
+            'decision-tree': { calls: 0, totalTime: 0, avgTime: 0, minTime: Infinity, maxTime: 0, lastTime: 0 },
+            'knn': { calls: 0, totalTime: 0, avgTime: 0, minTime: Infinity, maxTime: 0, lastTime: 0 }
+        };
+
+        function profilePredictAll(algorithmName, algorithm, features) {
+            const startTime = performance.now();
+            const scores = algorithm.predictAll(features);
+            const endTime = performance.now();
+            const executionTime = endTime - startTime;
+            
+            const metrics = performanceMetrics[algorithmName];
+            metrics.calls++;
+            metrics.totalTime += executionTime;
+            metrics.avgTime = metrics.totalTime / metrics.calls;
+            metrics.minTime = Math.min(metrics.minTime, executionTime);
+            metrics.maxTime = Math.max(metrics.maxTime, executionTime);
+            metrics.lastTime = executionTime;
+            
+            return { scores, executionTime, metrics: { ...metrics } };
+        }
+
+        function getPerformanceStats() {
+            const stats = {};
+            for (const [algorithmName, metrics] of Object.entries(performanceMetrics)) {
+                stats[algorithmName] = {
+                    calls: metrics.calls,
+                    avgTime: metrics.avgTime.toFixed(3) + 'ms',
+                    minTime: metrics.minTime === Infinity ? 'N/A' : metrics.minTime.toFixed(3) + 'ms',
+                    maxTime: metrics.maxTime === 0 ? 'N/A' : metrics.maxTime.toFixed(3) + 'ms',
+                    lastTime: metrics.lastTime.toFixed(3) + 'ms',
+                    totalTime: metrics.totalTime.toFixed(3) + 'ms'
+                };
+            }
+            return stats;
+        }
+
+        function identifyBottlenecks() {
+            const analysis = { slowest: null, fastest: null, recommendations: [] };
+            let slowestTime = 0;
+            let fastestTime = Infinity;
+            
+            for (const [algorithmName, metrics] of Object.entries(performanceMetrics)) {
+                if (metrics.calls === 0) continue;
+                
+                if (metrics.avgTime > slowestTime) {
+                    slowestTime = metrics.avgTime;
+                    analysis.slowest = { algorithm: algorithmName, avgTime: metrics.avgTime };
+                }
+                
+                if (metrics.avgTime < fastestTime) {
+                    fastestTime = metrics.avgTime;
+                    analysis.fastest = { algorithm: algorithmName, avgTime: metrics.avgTime };
+                }
+            }
+            
+            if (analysis.slowest && analysis.slowest.avgTime > 50) {
+                analysis.recommendations.push({
+                    algorithm: analysis.slowest.algorithm,
+                    issue: 'High execution time (>50ms)',
+                    suggestion: 'Consider optimizing loop iterations or using more efficient data structures'
+                });
+            }
+            
+            return analysis;
+        }
+
+        function resetPerformanceMetrics() {
+            for (const algorithmName in performanceMetrics) {
+                performanceMetrics[algorithmName] = {
+                    calls: 0, totalTime: 0, avgTime: 0, minTime: Infinity, maxTime: 0, lastTime: 0
+                };
+            }
+        }
+
+        // Initialize algorithms
+        const algorithms = {
+            'random-forest': new SimpleRandomForest(),
+            'decision-tree': new SimpleDecisionTree(),
+            'knn': new SimpleKNN()
+        };
+
+        // Test functions
+        function addResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.innerHTML = message;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        function testOptimizationPresence() {
+            addResult('<h2>Test 1: Verify Optimization Implementation</h2>', 'info');
+            
+            let passed = 0;
+            let total = 0;
+            
+            // Test 1.1: Check if algorithms have constructor
+            total++;
+            if (algorithms['random-forest'].constructor.name === 'SimpleRandomForest') {
+                addResult('✓ Random Forest has constructor', 'success');
+                passed++;
+            } else {
+                addResult('✗ Random Forest missing constructor', 'error');
+            }
+            
+            // Test 1.2: Check if algorithms have initializeChampionData method
+            total++;
+            if (typeof algorithms['random-forest'].initializeChampionData === 'function') {
+                addResult('✓ Random Forest has initializeChampionData() method', 'success');
+                passed++;
+            } else {
+                addResult('✗ Random Forest missing initializeChampionData() method', 'error');
+            }
+            
+            // Test 1.3: Check if championEntries is initialized
+            total++;
+            algorithms['random-forest'].initializeChampionData();
+            if (algorithms['random-forest'].championEntries !== null) {
+                addResult('✓ Champion entries are pre-computed', 'success');
+                passed++;
+            } else {
+                addResult('✗ Champion entries not pre-computed', 'error');
+            }
+            
+            // Test 1.4: Check if championCount is set
+            total++;
+            if (algorithms['random-forest'].championCount === Object.keys(allChampions).length) {
+                addResult(`✓ Champion count correctly set to ${algorithms['random-forest'].championCount}`, 'success');
+                passed++;
+            } else {
+                addResult('✗ Champion count not set correctly', 'error');
+            }
+            
+            addResult(`<strong>Test 1 Results: ${passed}/${total} passed</strong>`, passed === total ? 'success' : 'warning');
+        }
+
+        function testPerformanceProfiling() {
+            addResult('<h2>Test 2: Performance Profiling System</h2>', 'info');
+            
+            resetPerformanceMetrics();
+            
+            const testFeatures = {
+                role: 'Mage',
+                position: 'Mid',
+                difficulty: 5,
+                damage: 8,
+                toughness: 3
+            };
+            
+            let passed = 0;
+            let total = 0;
+            
+            // Test 2.1: Profile Random Forest
+            total++;
+            const rfResult = profilePredictAll('random-forest', algorithms['random-forest'], testFeatures);
+            if (rfResult.executionTime >= 0) {
+                addResult(`✓ Random Forest profiled: ${rfResult.executionTime.toFixed(3)}ms`, 'success');
+                passed++;
+            } else {
+                addResult('✗ Random Forest profiling failed', 'error');
+            }
+            
+            // Test 2.2: Profile Decision Tree
+            total++;
+            const dtResult = profilePredictAll('decision-tree', algorithms['decision-tree'], testFeatures);
+            if (dtResult.executionTime >= 0) {
+                addResult(`✓ Decision Tree profiled: ${dtResult.executionTime.toFixed(3)}ms`, 'success');
+                passed++;
+            } else {
+                addResult('✗ Decision Tree profiling failed', 'error');
+            }
+            
+            // Test 2.3: Profile KNN
+            total++;
+            const knnResult = profilePredictAll('knn', algorithms['knn'], testFeatures);
+            if (knnResult.executionTime >= 0) {
+                addResult(`✓ KNN profiled: ${knnResult.executionTime.toFixed(3)}ms`, 'success');
+                passed++;
+            } else {
+                addResult('✗ KNN profiling failed', 'error');
+            }
+            
+            // Test 2.4: Check metrics are updated
+            total++;
+            const stats = getPerformanceStats();
+            if (stats['random-forest'].calls === '1') {
+                addResult('✓ Performance metrics updated correctly', 'success');
+                passed++;
+            } else {
+                addResult('✗ Performance metrics not updated', 'error');
+            }
+            
+            addResult(`<strong>Test 2 Results: ${passed}/${total} passed</strong>`, passed === total ? 'success' : 'warning');
+        }
+
+        function testBottleneckIdentification() {
+            addResult('<h2>Test 3: Bottleneck Identification</h2>', 'info');
+            
+            let passed = 0;
+            let total = 0;
+            
+            // Test 3.1: Identify bottlenecks
+            total++;
+            const analysis = identifyBottlenecks();
+            if (analysis.slowest && analysis.fastest) {
+                addResult(`✓ Bottleneck analysis complete`, 'success');
+                addResult(`  Slowest: ${analysis.slowest.algorithm} (${analysis.slowest.avgTime.toFixed(3)}ms)`, 'info');
+                addResult(`  Fastest: ${analysis.fastest.algorithm} (${analysis.fastest.avgTime.toFixed(3)}ms)`, 'info');
+                passed++;
+            } else {
+                addResult('✗ Bottleneck analysis failed', 'error');
+            }
+            
+            // Test 3.2: Check recommendations
+            total++;
+            if (Array.isArray(analysis.recommendations)) {
+                addResult(`✓ Recommendations generated: ${analysis.recommendations.length} items`, 'success');
+                passed++;
+            } else {
+                addResult('✗ Recommendations not generated', 'error');
+            }
+            
+            addResult(`<strong>Test 3 Results: ${passed}/${total} passed</strong>`, passed === total ? 'success' : 'warning');
+        }
+
+        function runPerformanceTest() {
+            addResult('<h2>Performance Benchmark Test</h2>', 'info');
+            
+            resetPerformanceMetrics();
+            
+            const testFeatures = {
+                role: 'Mage',
+                position: 'Mid',
+                difficulty: 5,
+                damage: 8,
+                toughness: 3,
+                playstyle: 'aggressive',
+                range: 'ranged',
+                pressure_response: 'Get aggressive and take risks',
+                aesthetic_preference: 'Mysterious',
+                team_contribution: 'Stay independent and focus on my role',
+                problem_solving: 'Jump in and adapt on the fly'
+            };
+            
+            // Run multiple iterations
+            const iterations = 10;
+            addResult(`Running ${iterations} iterations for each algorithm...`, 'info');
+            
+            for (let i = 0; i < iterations; i++) {
+                profilePredictAll('random-forest', algorithms['random-forest'], testFeatures);
+                profilePredictAll('decision-tree', algorithms['decision-tree'], testFeatures);
+                profilePredictAll('knn', algorithms['knn'], testFeatures);
+            }
+            
+            const stats = getPerformanceStats();
+            
+            // Display results in a table
+            let tableHTML = '<table class="metrics-table"><thead><tr><th>Algorithm</th><th>Avg Time</th><th>Min Time</th><th>Max Time</th><th>Total Time</th><th>Calls</th></tr></thead><tbody>';
+            
+            for (const [algorithm, metrics] of Object.entries(stats)) {
+                tableHTML += `<tr>
+                    <td><strong>${algorithm}</strong></td>
+                    <td>${metrics.avgTime}</td>
+                    <td>${metrics.minTime}</td>
+                    <td>${metrics.maxTime}</td>
+                    <td>${metrics.totalTime}</td>
+                    <td>${metrics.calls}</td>
+                </tr>`;
+            }
+            
+            tableHTML += '</tbody></table>';
+            addResult(tableHTML, 'info');
+            
+            // Visual performance chart
+            const chartHTML = `
+                <div class="performance-chart">
+                    <h3>Average Execution Time Comparison</h3>
+                    <div class="bar" style="width: ${parseFloat(stats['random-forest'].avgTime) * 10}%">
+                        Random Forest: ${stats['random-forest'].avgTime}
+                    </div>
+                    <div class="bar" style="width: ${parseFloat(stats['decision-tree'].avgTime) * 10}%">
+                        Decision Tree: ${stats['decision-tree'].avgTime}
+                    </div>
+                    <div class="bar" style="width: ${parseFloat(stats['knn'].avgTime) * 10}%">
+                        KNN: ${stats['knn'].avgTime}
+                    </div>
+                </div>
+            `;
+            addResult(chartHTML, 'info');
+        }
+
+        function showMetrics() {
+            const stats = getPerformanceStats();
+            const metricsHTML = `<pre>${JSON.stringify(stats, null, 2)}</pre>`;
+            addResult('<h2>Current Performance Metrics</h2>' + metricsHTML, 'info');
+        }
+
+        function showBottlenecks() {
+            const analysis = identifyBottlenecks();
+            const bottlenecksHTML = `<pre>${JSON.stringify(analysis, null, 2)}</pre>`;
+            addResult('<h2>Bottleneck Analysis</h2>' + bottlenecksHTML, 'info');
+        }
+
+        function runAllTests() {
+            clearResults();
+            addResult('<h1>🚀 Running All Performance Optimization Tests</h1>', 'info');
+            
+            testOptimizationPresence();
+            testPerformanceProfiling();
+            testBottleneckIdentification();
+            runPerformanceTest();
+            
+            addResult('<h2>✅ All Tests Complete!</h2>', 'success');
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            addResult('Page loaded. Click "Run All Tests" to begin testing.', 'info');
+        });
+    </script>
+</body>
+</html>

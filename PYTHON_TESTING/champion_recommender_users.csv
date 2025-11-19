@@ -1,4 +1,0 @@
-ID,Full Name,Email,Phone,Age,Gender,LoL Experience,Registration Date,Session ID,Recommended Champion,Winning Algorithm,Confidence Score,Random Forest Champion,Random Forest Confidence,Decision Tree Champion,Decision Tree Confidence,KNN Champion,KNN Confidence,Consensus Level,User Answers,Completion Date,Pressure Response,Aesthetic Preference,Team Contribution,Character Identity,Problem Solving Approach,Precision@1,Precision@3,Precision@5,MRR
-1,Alice Johnson,,,,,,,,Ahri,,0.85,Lux,0.78,Ahri,0.92,Zed,0.71,,,,,,,,,1.000,1.000,0.750,1.000
-2,Bob Smith,,,,,,,,Yasuo,,0.88,Garen,0.72,Yasuo,0.91,Jinx,0.69,,,,,,,,,1.000,1.000,0.750,1.000
-3,Carol Williams,,,,,,,,Thresh,,0.82,Braum,0.75,Leona,0.79,Thresh,0.88,,,,,,,,,0.000,0.333,0.500,0.333

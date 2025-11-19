@@ -1,117 +1,154 @@
-# Project Structure Documentation
+# Project Structure
 
-This document provides a comprehensive overview of the current project structure and organization.
+This document describes the organization of the League of Legends Champion Recommender System.
 
-## Current Structure
+## Root Directory Structure
 
 ```
-├── .github/
-│   └── workflows/
-│       └── pages.yml
-├── archive/                   # Historical files (not used in production)
-├── docs/                      # Comprehensive documentation
-│   ├── api_documentation.md
-│   ├── deployment_guide.md
-│   ├── setup_guide.md
-│   ├── troubleshooting_guide.md
-│   ├── user_guide.md
-│   ├── README.md
-│   └── repository_structure.md
-├── src/                       # Source code (production files)
-│   ├── index.html             # Main application
-│   ├── data/                  # JSON data files
-│   │   ├── champion_counters.json
-│   │   ├── champion_guides.json
-│   │   ├── champion_tips.json
-│   │   ├── champions.json
-│   │   └── questions.json
-│   ├── assets/                # Images and media
-│   ├── components/            # (Future use)
-│   ├── styles/                # CSS files
-│   │   └── styles.css
-│   └── README.md              # Source code documentation
-├── PYTHON_TESTING/            # Python development environment
-├── .gitignore
-├── .env.example
-├── README.md                  # Project overview
-└── index.html                 # Redirect to src/index.html
+LOL-Recommender-System/
+├── .github/                 # GitHub Actions and workflows
+├── .git/                    # Git repository data
+├── .vscode/                 # VS Code settings
+├── src/                     # Main application source code
+├── docs/                    # GitHub Pages documentation
+├── docs-archive/            # Archived development documentation
+├── components/              # Legacy components (can be removed)
+├── data/                    # Root-level data (legacy)
+├── lib/                     # Libraries (legacy)
+├── pages/                   # Next.js pages (legacy)
+├── public/                  # Public assets (legacy)
+├── node_modules/            # npm dependencies
+├── index.html               # GitHub Pages entry point
+├── README.md                # Project overview and setup
+├── USAGE_GUIDE.md          # User guide
+├── package.json            # npm dependencies and scripts
+├── _config.yml             # GitHub Pages Jekyll configuration
+└── .gitignore              # Git ignore rules
+
 ```
 
-## Key Directories Explained
+## Source Code (`/src/`)
 
-### src/ - Source Code (Production)
+**Main application files - This is the active codebase**
 
-This is where all the production code lives:
+```
+src/
+├── index.html              # Main application (Single Page App)
+├── data/                   # Application data
+│   ├── questions.json      # Questionnaire questions
+│   └── champion_counters.json  # Champion matchup data
+├── analytics/              # Analytics dashboards and tests
+│   ├── analytics.html      # Main analytics dashboard
+│   ├── debug-analytics.html
+│   ├── simple-analytics.html
+│   ├── test_*.html         # Various test files
+│   └── README.md
+├── assets/                 # Images, icons, etc.
+├── components/             # Reusable components
+└── styles/                 # CSS stylesheets
+```
 
-- **index.html**: The main application file containing all HTML, CSS, and JavaScript
-- **data/**: JSON files containing champion data, questions, and other information
-- **assets/**: Images, icons, and other media files
-- **styles/**: CSS files for styling
-- **components/**: Reserved for future component-based organization
+## Documentation (`/docs/`)
 
-### docs/ - Documentation
+**GitHub Pages documentation site**
 
-Comprehensive documentation for all aspects of the project:
+- Used for project documentation visible at: https://abdullah-binmadhi.github.io/LOL-Recommender-System/
 
-- User guides
-- Developer documentation
-- Deployment instructions
-- Troubleshooting guides
-- API documentation
+## Archive (`/docs-archive/`)
 
-### archive/ - Historical Files
+**Development documentation and test data**
 
-Files that are no longer used but kept for reference:
+Contains:
+- TASK_*.md - Task completion summaries
+- DEPLOYMENT_*.md - Deployment documentation
+- ML_*.md - ML implementation docs
+- TEST_*.md - Test results
+- test_dataset_sample.* - Sample test data
+- LoL_champion_data.csv - Original data backup
 
-- Previous versions of the application
-- Old implementation attempts
-- Data files in different formats
-- Experimental features
-- Development environment files
+These files are kept for reference but are not needed for the application to run.
 
-### PYTHON_TESTING/ - Development Environment
+## Key Files
 
-Python scripts and server files for local development:
+### Application Files
+- **`/src/index.html`** - Main application file (7000+ lines)
+  - Contains all HTML, CSS, and JavaScript
+  - Includes 3 ML algorithms (Random Forest, Decision Tree, KNN)
+  - Includes questionnaire system
+  - Includes recommendation display
 
-- Data collection scripts
-- Testing utilities
-- Local server implementations
+### Configuration Files
+- **`package.json`** - npm dependencies
+- **`_config.yml`** - GitHub Pages configuration
+- **`.gitignore`** - Git ignore rules
 
-## File Management Guidelines
+### Documentation
+- **`README.md`** - Project setup and overview
+- **`USAGE_GUIDE.md`** - How to use the application
 
-### Adding New Files
+## Data Flow
 
-1. **Production Code**: Add to appropriate directory in `src/`
-2. **Documentation**: Add to `docs/` with clear naming
-3. **Development Tools**: Add to `scripts/` or `PYTHON_TESTING/`
-4. **Tests**: Add to `tests/`
+1. User opens `/index.html` (GitHub Pages entry)
+2. Redirects to `/src/index.html` (main app)
+3. User completes questionnaire (data from `/src/data/questions.json`)
+4. ML algorithms process answers
+5. Recommendations displayed with champion data
+6. Results can be saved to localStorage
+7. Analytics available at `/src/analytics/analytics.html`
 
-### Updating Existing Files
+## Legacy Folders (Can be removed)
 
-1. Make changes in feature branches
-2. Update documentation when making significant changes
-3. Test thoroughly before committing
-4. Follow existing naming and organization conventions
+- `/components/` - Old component structure
+- `/lib/` - Old libraries
+- `/pages/` - Next.js pages (project no longer uses Next.js)
+- `/public/` - Old public assets
+- `/data/` - Root-level data (moved to `/src/data/`)
 
-### Removing Files
+## Development vs Production
 
-1. Move to `archive/` instead of deleting if there's any potential future use
-2. Update documentation if removing key files
-3. Ensure no references to removed files remain in the codebase
+### Development
+- Edit `/src/index.html` for main application
+- Edit `/src/data/*.json` for data changes
+- Test using local file or live server
 
-## Best Practices
+### Production (GitHub Pages)
+- Push to `main` branch
+- GitHub Pages automatically deploys
+- Live at: https://abdullah-binmadhi.github.io/LOL-Recommender-System/
 
-1. **Keep it Clean**: Only essential files in root directory
-2. **Organize by Purpose**: Group files by their function
-3. **Document Everything**: Maintain up-to-date documentation
-4. **Use Descriptive Names**: Clear, consistent naming conventions
-5. **Version Control**: Use Git effectively with meaningful commit messages
+## File Organization Summary
 
-## Deployment Considerations
+| Location | Purpose | Status |
+|----------|---------|--------|
+| `/src/` | Main application | **Active** |
+| `/docs/` | GitHub Pages docs | **Active** |
+| `/index.html` | Entry point | **Active** |
+| `README.md` | Documentation | **Active** |
+| `USAGE_GUIDE.md` | User guide | **Active** |
+| `/docs-archive/` | Dev documentation | Archived |
+| `/src/analytics/` | Analytics & tests | Development only |
+| `/components/`, `/lib/`, `/pages/`, `/public/` | Legacy code | Can be removed |
 
-For GitHub Pages deployment:
+## Maintenance
 
-1. Only files in the repository are deployed
-2. The `src/index.html` is the main entry point
-3. All data files must be in the repository
-4. No server-side processing is available (static site only)
+### To clean up further:
+```bash
+# Remove legacy folders
+rm -rf components lib pages public data
+
+# Keep only essential files for production
+```
+
+### To add new features:
+1. Edit `/src/index.html`
+2. Update `/src/data/` if needed
+3. Test locally
+4. Commit and push to deploy
+
+## Notes
+
+- Application is a single-page app (SPA) - everything in `/src/index.html`
+- No build process required - pure HTML/CSS/JavaScript
+- GitHub Pages serves static files
+- Analytics and tests are in `/src/analytics/` but not deployed
+- All development documentation moved to `/docs-archive/`

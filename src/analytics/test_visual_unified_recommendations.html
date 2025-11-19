@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task 12: Visual Tests - Unified ML Recommendations</title>
+    <link rel="stylesheet" href="src/styles/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .warning {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        .info {
+            color: #007bff;
+        }
+        .test-controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .test-btn {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .test-btn:hover {
+            background: #0056b3;
+        }
+        .test-btn.active {
+            background: #28a745;
+        }
+        .viewport-simulator {
+            border: 2px solid #007bff;
+            margin: 20px 0;
+            overflow: auto;
+            transition: all 0.3s ease;
+        }
+        .viewport-simulator.desktop {
+            width: 100%;
+            min-height: 600px;
+        }
+        .viewport-simulator.tablet {
+            width: 768px;
+            min-height: 600px;
+            margin: 20px auto;
+        }
+        .viewport-simulator.mobile {
+            width: 375px;
+            min-height: 600px;
+            margin: 20px auto;
+        }
+        #detailed-analysis {
+            display: block !important;
+        }
+        .test-result-item {
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+        }
+        .test-result-item.pass {
+            border-left-color: #28a745;
+        }
+        .test-result-item.fail {
+            border-left-color: #dc3545;
+        }
+        .test-result-item.warn {
+            border-left-color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <h1>Task 12: Visual Tests - Unified ML Recommendations</h1>
+    
+    <div class="test-section">
+        <h2>Test Overview</h2>
+        <p>This comprehensive test suite validates the visual presentation of the unified ML recommendations system across:</p>
+        <ul>
+            <li><strong>Task 12.1:</strong> Champion cards display on desktop, tablet, and mobile</li>
+            <li><strong>Task 12.2:</strong> Score bars display, colors, and animations</li>
+            <li><strong>Task 12.3:</strong> Expandable details functionality</li>
+            <li><strong>Task 12.4:</strong> Responsive design across screen sizes</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <div class="test-controls">
+            <button class="test-btn active" onclick="setViewport('desktop')">Desktop View</button>
+            <button class="test-btn" onclick="setViewport('tablet')">Tablet View (768px)</button>
+            <button class="test-btn" onclick="setViewport('mobile')">Mobile View (375px)</button>
+            <button class="test-btn" onclick="runAllTests()">Run All Tests</button>
+            <button class="test-btn" onclick="testScoreBars()">Test Score Bars</button>
+            <button class="test-btn" onclick="testExpandableDetails()">Test Details</button>
+        </div>
+    </div>
+
+    <div id="test-results" class="test-section">
+        <h2>Test Results</h2>
+        <div id="test-results-content">
+            <p class="info">Click "Run All Tests" to begin testing...</p>
+        </div>
+    </div>
+
+    <!-- Viewport Simulator -->
+    <div id="viewport-simulator" class="viewport-simulator desktop">
+        <div id="detailed-analysis" class="card detailed-analysis" style="display: block;">
+            <h2><i class="analysis-icon"></i> Unified ML Recommendations</h2>
+            <div id="analysis-content">
+                <!-- Recommendations will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock champion database
+        const allChampions = {
+            'Ahri': { 
+                role: 'Mage', 
+                positions: ['Mid'], 
+                difficulty: 5, 
+                damage: 8, 
+                toughness: 3, 
+                control: 5, 
+                mobility: 7, 
+                utility: 6,
+                title: 'the Nine-Tailed Fox'
+            },
+            'Garen': { 
+                role: 'Fighter', 
+                positions: ['Top'], 
+                difficulty: 2, 
+                damage: 6, 
+                toughness: 7, 
+                control: 5, 
+                mobility: 5, 
+                utility: 5,
+                title: 'The Might of Demacia'
+            },
+            'Lux': { 
+                role: 'Mage', 
+                positions: ['Mid', 'Support'], 
+                difficulty: 5, 
+                damage: 7, 
+                toughness: 2, 
+                control: 8, 
+                mobility: 4, 
+                utility: 7,
+                title: 'the Lady of Luminosity'
+            },
+            'Jinx': { 
+                role: 'Marksman', 
+                positions: ['ADC'], 
+                difficulty: 6, 
+                damage: 9, 
+                toughness: 2, 
+                control: 7, 
+                mobility: 6, 
+                utility: 6,
+                title: 'the Loose Cannon'
+            },
+            'Thresh': { 
+                role: 'Support', 
+                positions: ['Support'], 
+                difficulty: 7, 
+                damage: 6, 
+                toughness: 6, 
+                control: 9, 
+                mobility: 5, 
+                utility: 9,
+                title: 'the Chain Warden'
+            }
+        };
+
+        // Mock mlResults with top 5 champions
+        let mlResults = {
+            scores: {
+                randomForest: {},
+                decisionTree: {},
+                knn: {}
+            },
+            aggregated: {},
+            top5: [
+                {
+                    championName: 'Ahri',
+                    randomForest: 85.3,
+                    decisionTree: 78.2,
+                    knn: 82.1,
+                    average: 81.9,
+                    weighted: 82.5,
+                    details: {
+                        randomForest: {
+                            rawScore: 145,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 40, contribution: 40 },
+                                { factor: 'Position Match', weight: 30, contribution: 30 },
+                                { factor: 'Difficulty Match', weight: 20, contribution: 18 }
+                            ],
+                            matchedCriteria: ['Role: Mage', 'Position: Mid', 'Difficulty close to preference'],
+                            penalties: []
+                        },
+                        decisionTree: {
+                            rawScore: 130,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 50, contribution: 50 },
+                                { factor: 'Position Match', weight: 40, contribution: 40 }
+                            ],
+                            matchedCriteria: ['Role: Mage', 'Position: Mid'],
+                            penalties: []
+                        },
+                        knn: {
+                            rawScore: 5.3,
+                            contributingFactors: [
+                                { factor: 'Role Distance', weight: 8, contribution: 0 },
+                                { factor: 'Difficulty Distance', weight: 0.5, contribution: 0.5 }
+                            ],
+                            matchedCriteria: ['Role: Mage', 'Difficulty close to preference'],
+                            penalties: []
+                        }
+                    }
+                },
+                {
+                    championName: 'Lux',
+                    randomForest: 78.2,
+                    decisionTree: 84.1,
+                    knn: 77.8,
+                    average: 80.0,
+                    weighted: 79.8,
+                    details: {
+                        randomForest: {
+                            rawScore: 133,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 40, contribution: 40 },
+                                { factor: 'Position Match', weight: 30, contribution: 30 }
+                            ],
+                            matchedCriteria: ['Role: Mage', 'Position: Mid'],
+                            penalties: ['Difficulty mismatch']
+                        },
+                        decisionTree: {
+                            rawScore: 140,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 50, contribution: 50 },
+                                { factor: 'Position Match', weight: 40, contribution: 40 }
+                            ],
+                            matchedCriteria: ['Role: Mage', 'Position: Mid'],
+                            penalties: []
+                        },
+                        knn: {
+                            rawScore: 6.6,
+                            contributingFactors: [
+                                { factor: 'Role Distance', weight: 8, contribution: 0 },
+                                { factor: 'Difficulty Distance', weight: 0.5, contribution: 0.5 }
+                            ],
+                            matchedCriteria: ['Role: Mage'],
+                            penalties: ['Position mismatch']
+                        }
+                    }
+                },
+                {
+                    championName: 'Jinx',
+                    randomForest: 72.1,
+                    decisionTree: 69.5,
+                    knn: 75.3,
+                    average: 72.3,
+                    weighted: 72.1,
+                    details: {
+                        randomForest: {
+                            rawScore: 122,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 40, contribution: 0 },
+                                { factor: 'Damage Match', weight: 15, contribution: 15 }
+                            ],
+                            matchedCriteria: ['High damage output'],
+                            penalties: ['Role mismatch: wanted Mage, got Marksman']
+                        },
+                        decisionTree: {
+                            rawScore: 115,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 50, contribution: 0 },
+                                { factor: 'Damage Match', weight: 20, contribution: 20 }
+                            ],
+                            matchedCriteria: ['High damage'],
+                            penalties: ['Role mismatch']
+                        },
+                        knn: {
+                            rawScore: 7.4,
+                            contributingFactors: [
+                                { factor: 'Role Distance', weight: 8, contribution: 8 },
+                                { factor: 'Damage Distance', weight: 0.3, contribution: 0.3 }
+                            ],
+                            matchedCriteria: ['Damage close to preference'],
+                            penalties: ['Role mismatch']
+                        }
+                    }
+                },
+                {
+                    championName: 'Garen',
+                    randomForest: 68.5,
+                    decisionTree: 71.2,
+                    knn: 70.1,
+                    average: 69.9,
+                    weighted: 69.7,
+                    details: {
+                        randomForest: {
+                            rawScore: 116,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 40, contribution: 0 },
+                                { factor: 'Toughness Match', weight: 15, contribution: 12 }
+                            ],
+                            matchedCriteria: ['High toughness'],
+                            penalties: ['Role mismatch: wanted Mage, got Fighter']
+                        },
+                        decisionTree: {
+                            rawScore: 118,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 50, contribution: 0 },
+                                { factor: 'Toughness Match', weight: 20, contribution: 18 }
+                            ],
+                            matchedCriteria: ['High toughness'],
+                            penalties: ['Role mismatch']
+                        },
+                        knn: {
+                            rawScore: 8.9,
+                            contributingFactors: [
+                                { factor: 'Role Distance', weight: 8, contribution: 8 },
+                                { factor: 'Toughness Distance', weight: 0.3, contribution: 1.2 }
+                            ],
+                            matchedCriteria: [],
+                            penalties: ['Role mismatch', 'Toughness mismatch']
+                        }
+                    }
+                },
+                {
+                    championName: 'Thresh',
+                    randomForest: 65.8,
+                    decisionTree: 67.3,
+                    knn: 68.9,
+                    average: 67.3,
+                    weighted: 67.1,
+                    details: {
+                        randomForest: {
+                            rawScore: 112,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 40, contribution: 0 },
+                                { factor: 'Control Match', weight: 15, contribution: 15 }
+                            ],
+                            matchedCriteria: ['High control'],
+                            penalties: ['Role mismatch: wanted Mage, got Support']
+                        },
+                        decisionTree: {
+                            rawScore: 112,
+                            contributingFactors: [
+                                { factor: 'Role Match', weight: 50, contribution: 0 },
+                                { factor: 'Control Match', weight: 20, contribution: 20 }
+                            ],
+                            matchedCriteria: ['High control'],
+                            penalties: ['Role mismatch']
+                        },
+                        knn: {
+                            rawScore: 9.3,
+                            contributingFactors: [
+                                { factor: 'Role Distance', weight: 8, contribution: 8 },
+                                { factor: 'Control Distance', weight: 0.3, contribution: 0.8 }
+                            ],
+                            matchedCriteria: ['Control close to preference'],
+                            penalties: ['Role mismatch']
+                        }
+                    }
+                }
+            ]
+        };
+
+        // Display function from the main implementation
+        function displayUnifiedRecommendations() {
+            const analysisContent = document.getElementById('analysis-content');
+            if (!analysisContent) {
+                console.error('Analysis content container not found');
+                return;
+            }
+            analysisContent.innerHTML = '';
+            
+            if (!mlResults || !mlResults.top5 || !Array.isArray(mlResults.top5)) {
+                console.error('Invalid mlResults structure:', mlResults);
+                analysisContent.innerHTML = '<p style="color: red;">Error: No recommendations available</p>';
+                return;
+            }
+            
+            const header = document.createElement('div');
+            header.className = 'analysis-header';
+            header.innerHTML = `
+                <h2>Your Top 5 Champion Recommendations</h2>
+                <p>Each champion has been evaluated by all three ML algorithms</p>
+            `;
+            analysisContent.appendChild(header);
+            
+            mlResults.top5.forEach((champion, index) => {
+                const card = document.createElement('div');
+                card.className = 'unified-recommendation-card';
+                card.setAttribute('data-champion', champion.championName);
+                
+                const championData = allChampions[champion.championName];
+                if (!championData) {
+                    console.warn(`Champion data not found for: ${champion.championName}`);
+                    return;
+                }
+                
+                card.innerHTML = `
+                    <div class="champion-header">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/13.24.1/img/champion/${champion.championName.replace(/[^a-zA-Z0-9]/g, '')}.png" 
+                             alt="${champion.championName}" 
+                             class="champion-image-large"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23667eea%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 font-size=%2240%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22%3E${champion.championName.charAt(0)}%3C/text%3E%3C/svg%3E'">
+                        <div class="champion-info">
+                            <h3 class="champion-name">${champion.championName}</h3>
+                            <span class="champion-role">${championData.role}</span>
+                            <span class="champion-tier">Rank #${index + 1}</span>
+                        </div>
+                        <div class="aggregate-score">
+                            <div class="score-number">${champion.average.toFixed(1)}%</div>
+                            <div class="score-label">Overall Match</div>
+                        </div>
+                    </div>
+                    
+                    <div class="ml-scores-section">
+                        <h4>ML Algorithm Scores</h4>
+                        
+                        <div class="score-row">
+                            <div class="score-label-col">
+                                <span class="algorithm-icon">🌳</span>
+                                <span class="algorithm-name">Random Forest</span>
+                            </div>
+                            <div class="score-bar-col">
+                                <div class="score-bar-container">
+                                    <div class="score-bar rf-bar" data-width="${champion.randomForest}" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="score-value-col">${champion.randomForest.toFixed(1)}%</div>
+                            <button class="details-btn" onclick="showCalculationDetails('randomForest', '${champion.championName}')">
+                                Details
+                            </button>
+                        </div>
+                        
+                        <div class="score-row">
+                            <div class="score-label-col">
+                                <span class="algorithm-icon">🎯</span>
+                                <span class="algorithm-name">Decision Tree</span>
+                            </div>
+                            <div class="score-bar-col">
+                                <div class="score-bar-container">
+                                    <div class="score-bar dt-bar" data-width="${champion.decisionTree}" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="score-value-col">${champion.decisionTree.toFixed(1)}%</div>
+                            <button class="details-btn" onclick="showCalculationDetails('decisionTree', '${champion.championName}')">
+                                Details
+                            </button>
+                        </div>
+                        
+                        <div class="score-row">
+                            <div class="score-label-col">
+                                <span class="algorithm-icon">⚡</span>
+                                <span class="algorithm-name">K-Nearest Neighbors</span>
+                            </div>
+                            <div class="score-bar-col">
+                                <div class="score-bar-container">
+                                    <div class="score-bar knn-bar" data-width="${champion.knn}" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="score-value-col">${champion.knn.toFixed(1)}%</div>
+                            <button class="details-btn" onclick="showCalculationDetails('knn', '${champion.championName}')">
+                                Details
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="calculation-details" id="details-${champion.championName.replace(/[^a-zA-Z0-9]/g, '')}">
+                    </div>
+                `;
+                
+                analysisContent.appendChild(card);
+            });
+            
+            setTimeout(() => {
+                document.querySelectorAll('.score-bar').forEach(bar => {
+                    const targetWidth = bar.getAttribute('data-width');
+                    bar.style.width = targetWidth + '%';
+                });
+            }, 100);
+            
+            console.log('✅ Unified recommendations displayed successfully');
+        }
+
+        function showCalculationDetails(algorithm, championName) {
+            if (!mlResults || !mlResults.top5) {
+                console.error('No ML results available');
+                return;
+            }
+            
+            const champion = mlResults.top5.find(c => c.championName === championName);
+            if (!champion || !champion.details || !champion.details[algorithm]) {
+                console.error(`Details not found for ${algorithm} - ${championName}`);
+                return;
+            }
+            
+            const details = champion.details[algorithm];
+            const detailsContainer = document.getElementById(`details-${championName.replace(/[^a-zA-Z0-9]/g, '')}`);
+            
+            if (!detailsContainer) {
+                console.error(`Details container not found for ${championName}`);
+                return;
+            }
+            
+            if (detailsContainer.classList.contains('show')) {
+                detailsContainer.classList.remove('show');
+                detailsContainer.style.display = 'none';
+                return;
+            }
+            
+            const algorithmNames = {
+                'randomForest': 'Random Forest',
+                'decisionTree': 'Decision Tree',
+                'knn': 'K-Nearest Neighbors'
+            };
+            
+            let html = `
+                <div class="calculation-details-content">
+                    <button class="details-close-btn" onclick="showCalculationDetails('${algorithm}', '${championName}')">
+                        Close
+                    </button>
+                    <h4>${algorithmNames[algorithm]} Calculation for ${championName}</h4>
+                    
+                    <div class="score-summary">
+                        <div class="detail-item">
+                            <span class="label">Raw Score:</span>
+                            <span class="value">${details.rawScore ? details.rawScore.toFixed(2) : 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label">Normalized Score:</span>
+                            <span class="value">${champion[algorithm].toFixed(1)}%</span>
+                        </div>
+                    </div>
+            `;
+            
+            if (details.contributingFactors && details.contributingFactors.length > 0) {
+                html += `
+                    <h5>Contributing Factors</h5>
+                    <table class="factors-table">
+                        <thead>
+                            <tr>
+                                <th>Factor</th>
+                                <th>Weight</th>
+                                <th>Contribution</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                details.contributingFactors.forEach(factor => {
+                    html += `
+                        <tr>
+                            <td>${factor.factor}</td>
+                            <td>${factor.weight}</td>
+                            <td>${typeof factor.contribution === 'number' ? factor.contribution.toFixed(2) : factor.contribution}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                        </tbody>
+                    </table>
+                `;
+            }
+            
+            if (details.matchedCriteria && details.matchedCriteria.length > 0) {
+                html += `
+                    <h5>Matched Criteria</h5>
+                    <ul class="criteria-list">
+                `;
+                
+                details.matchedCriteria.forEach(criterion => {
+                    html += `<li class="matched">${criterion}</li>`;
+                });
+                
+                html += `</ul>`;
+            }
+            
+            if (details.penalties && details.penalties.length > 0) {
+                html += `
+                    <h5>Penalties Applied</h5>
+                    <ul class="criteria-list">
+                `;
+                
+                details.penalties.forEach(penalty => {
+                    html += `<li class="penalty">${penalty}</li>`;
+                });
+                
+                html += `</ul>`;
+            }
+            
+            html += `</div>`;
+            
+            detailsContainer.innerHTML = html;
+            detailsContainer.style.display = 'block';
+            detailsContainer.classList.add('show');
+            
+            detailsContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            
+            console.log(`✅ Displayed calculation details for ${algorithmNames[algorithm]} - ${championName}`);
+        }
+
+        // Viewport control
+        function setViewport(size) {
+            const simulator = document.getElementById('viewport-simulator');
+            simulator.className = 'viewport-simulator ' + size;
+            
+            document.querySelectorAll('.test-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            addTestResult(`Viewport changed to ${size}`, 'info');
+        }
+
+        // Test result helper
+        function addTestResult(message, status = 'pass') {
+            const resultsContent = document.getElementById('test-results-content');
+            const resultItem = document.createElement('div');
+            resultItem.className = `test-result-item ${status}`;
+            
+            const icon = status === 'pass' ? '✓' : status === 'fail' ? '✗' : status === 'warn' ? '⚠' : 'ℹ';
+            resultItem.innerHTML = `<strong>${icon}</strong> ${message}`;
+            
+            resultsContent.appendChild(resultItem);
+        }
+
+        function clearTestResults() {
+            document.getElementById('test-results-content').innerHTML = '';
+        }
+
+        // Task 12.1: Test champion cards display
+        function testChampionCardsDisplay() {
+            clearTestResults();
+            addTestResult('Task 12.1: Testing Champion Cards Display', 'info');
+            
+            // Display recommendations
+            displayUnifiedRecommendations();
+            
+            setTimeout(() => {
+                const cards = document.querySelectorAll('.unified-recommendation-card');
+                
+                // Test 1: Verify 5 cards created
+                if (cards.length === 5) {
+                    addTestResult('✓ Created exactly 5 champion cards', 'pass');
+                } else {
+                    addTestResult(`✗ Expected 5 cards, found ${cards.length}`, 'fail');
+                }
+                
+                // Test 2: Verify card structure
+                let structureValid = true;
+                cards.forEach((card, index) => {
+                    const header = card.querySelector('.champion-header');
+                    const image = card.querySelector('.champion-image-large');
+                    const name = card.querySelector('.champion-name');
+                    const role = card.querySelector('.champion-role');
+                    const aggregateScore = card.querySelector('.aggregate-score');
+                    const scoresSection = card.querySelector('.ml-scores-section');
+                    
+                    if (!header || !image || !name || !role || !aggregateScore || !scoresSection) {
+                        structureValid = false;
+                        addTestResult(`✗ Card ${index + 1} missing required elements`, 'fail');
+                    }
+                });
+                
+                if (structureValid) {
+                    addTestResult('✓ All cards have correct structure', 'pass');
+                }
+                
+                // Test 3: Desktop layout
+                setViewport('desktop');
+                setTimeout(() => {
+                    const firstCard = cards[0];
+                    const cardWidth = firstCard.offsetWidth;
+                    if (cardWidth > 600) {
+                        addTestResult('✓ Desktop layout: Cards display at full width', 'pass');
+                    } else {
+                        addTestResult('⚠ Desktop layout: Card width may be constrained', 'warn');
+                    }
+                }, 100);
+                
+                // Test 4: Tablet layout
+                setTimeout(() => {
+                    setViewport('tablet');
+                    setTimeout(() => {
+                        const simulator = document.getElementById('viewport-simulator');
+                        if (simulator.offsetWidth === 768) {
+                            addTestResult('✓ Tablet layout: Viewport set to 768px', 'pass');
+                        } else {
+                            addTestResult('✗ Tablet layout: Viewport width incorrect', 'fail');
+                        }
+                        
+                        // Check if cards fit
+                        const firstCard = cards[0];
+                        if (firstCard.offsetWidth <= 768) {
+                            addTestResult('✓ Tablet layout: Cards fit within viewport', 'pass');
+                        } else {
+                            addTestResult('✗ Tablet layout: Cards overflow viewport', 'fail');
+                        }
+                    }, 100);
+                }, 500);
+                
+                // Test 5: Mobile layout
+                setTimeout(() => {
+                    setViewport('mobile');
+                    setTimeout(() => {
+                        const simulator = document.getElementById('viewport-simulator');
+                        if (simulator.offsetWidth === 375) {
+                            addTestResult('✓ Mobile layout: Viewport set to 375px', 'pass');
+                        } else {
+                            addTestResult('✗ Mobile layout: Viewport width incorrect', 'fail');
+                        }
+                        
+                        // Check if cards fit
+                        const firstCard = cards[0];
+                        if (firstCard.offsetWidth <= 375) {
+                            addTestResult('✓ Mobile layout: Cards fit within viewport', 'pass');
+                        } else {
+                            addTestResult('✗ Mobile layout: Cards overflow viewport', 'fail');
+                        }
+                        
+                        // Check if score rows stack properly
+                        const scoreRow = firstCard.querySelector('.score-row');
+                        if (scoreRow) {
+                            const computedStyle = window.getComputedStyle(scoreRow);
+                            addTestResult(`ℹ Mobile layout: Score row display is ${computedStyle.display}`, 'info');
+                        }
+                    }, 100);
+                }, 1000);
+                
+            }, 200);
+        }
+
+        // Task 12.2: Test score bars
+        function testScoreBars() {
+            clearTestResults();
+            addTestResult('Task 12.2: Testing Score Bars', 'info');
+            
+            displayUnifiedRecommendations();
+            
+            setTimeout(() => {
+                const scoreBars = document.querySelectorAll('.score-bar');
+                
+                // Test 1: Verify 15 score bars (3 per champion × 5 champions)
+                if (scoreBars.length === 15) {
+                    addTestResult('✓ Created 15 score bars (3 per champion)', 'pass');
+                } else {
+                    addTestResult(`✗ Expected 15 score bars, found ${scoreBars.length}`, 'fail');
+                }
+                
+                // Test 2: Verify bars display correctly
+                let barsDisplayCorrectly = true;
+                scoreBars.forEach((bar, index) => {
+                    const container = bar.parentElement;
+                    if (!container || !container.classList.contains('score-bar-container')) {
+                        barsDisplayCorrectly = false;
+                    }
+                });
+                
+                if (barsDisplayCorrectly) {
+                    addTestResult('✓ All score bars are in correct containers', 'pass');
+                } else {
+                    addTestResult('✗ Some score bars have incorrect structure', 'fail');
+                }
+                
+                // Test 3: Verify colors are distinct
+                const rfBars = document.querySelectorAll('.rf-bar');
+                const dtBars = document.querySelectorAll('.dt-bar');
+                const knnBars = document.querySelectorAll('.knn-bar');
+                
+                if (rfBars.length === 5 && dtBars.length === 5 && knnBars.length === 5) {
+                    addTestResult('✓ All three algorithm types have correct color classes', 'pass');
+                } else {
+                    addTestResult('✗ Score bar color classes are incorrect', 'fail');
+                }
+                
+                // Test 4: Verify animation works
+                setTimeout(() => {
+                    let animatedCount = 0;
+                    scoreBars.forEach(bar => {
+                        const width = parseFloat(bar.style.width);
+                        if (width > 0) {
+                            animatedCount++;
+                        }
+                    });
+                    
+                    if (animatedCount === 15) {
+                        addTestResult('✓ All score bars animated successfully', 'pass');
+                    } else {
+                        addTestResult(`⚠ Only ${animatedCount}/15 score bars animated`, 'warn');
+                    }
+                    
+                    // Test 5: Verify widths match scores
+                    let widthsCorrect = true;
+                    scoreBars.forEach(bar => {
+                        const targetWidth = parseFloat(bar.getAttribute('data-width'));
+                        const actualWidth = parseFloat(bar.style.width);
+                        
+                        if (Math.abs(targetWidth - actualWidth) > 0.1) {
+                            widthsCorrect = false;
+                        }
+                    });
+                    
+                    if (widthsCorrect) {
+                        addTestResult('✓ Score bar widths match target scores', 'pass');
+                    } else {
+                        addTestResult('✗ Some score bar widths are incorrect', 'fail');
+                    }
+                }, 600);
+                
+            }, 200);
+        }
+
+        // Task 12.3: Test expandable details
+        function testExpandableDetails() {
+            clearTestResults();
+            addTestResult('Task 12.3: Testing Expandable Details', 'info');
+            
+            displayUnifiedRecommendations();
+            
+            setTimeout(() => {
+                const detailsButtons = document.querySelectorAll('.details-btn');
+                
+                // Test 1: Verify details buttons exist
+                if (detailsButtons.length === 15) {
+                    addTestResult('✓ Created 15 details buttons', 'pass');
+                } else {
+                    addTestResult(`✗ Expected 15 details buttons, found ${detailsButtons.length}`, 'fail');
+                }
+                
+                // Test 2: Click first details button
+                if (detailsButtons.length > 0) {
+                    const firstButton = detailsButtons[0];
+                    firstButton.click();
+                    
+                    setTimeout(() => {
+                        const detailsContainer = document.querySelector('.calculation-details.show');
+                        
+                        if (detailsContainer) {
+                            addTestResult('✓ Details display when button clicked', 'pass');
+                            
+                            // Test 3: Verify details content
+                            const detailsContent = detailsContainer.querySelector('.calculation-details-content');
+                            const closeBtn = detailsContainer.querySelector('.details-close-btn');
+                            const factorsTable = detailsContainer.querySelector('.factors-table');
+                            const criteriaList = detailsContainer.querySelector('.criteria-list');
+                            
+                            if (detailsContent) {
+                                addTestResult('✓ Details content structure is correct', 'pass');
+                            } else {
+                                addTestResult('✗ Details content structure is missing', 'fail');
+                            }
+                            
+                            if (closeBtn) {
+                                addTestResult('✓ Close button exists', 'pass');
+                                
+                                // Test 4: Test close functionality
+                                closeBtn.click();
+                                
+                                setTimeout(() => {
+                                    const stillVisible = detailsContainer.classList.contains('show');
+                                    if (!stillVisible) {
+                                        addTestResult('✓ Close button hides details', 'pass');
+                                    } else {
+                                        addTestResult('✗ Close button does not hide details', 'fail');
+                                    }
+                                }, 100);
+                            } else {
+                                addTestResult('✗ Close button not found', 'fail');
+                            }
+                            
+                            if (factorsTable) {
+                                addTestResult('✓ Contributing factors table displayed', 'pass');
+                            } else {
+                                addTestResult('⚠ Contributing factors table not found', 'warn');
+                            }
+                            
+                            if (criteriaList) {
+                                addTestResult('✓ Matched criteria list displayed', 'pass');
+                            } else {
+                                addTestResult('⚠ Matched criteria list not found', 'warn');
+                            }
+                            
+                        } else {
+                            addTestResult('✗ Details did not display', 'fail');
+                        }
+                    }, 100);
+                }
+                
+            }, 200);
+        }
+
+        // Task 12.4: Test responsive design
+        function testResponsiveDesign() {
+            clearTestResults();
+            addTestResult('Task 12.4: Testing Responsive Design', 'info');
+            
+            displayUnifiedRecommendations();
+            
+            setTimeout(() => {
+                const cards = document.querySelectorAll('.unified-recommendation-card');
+                
+                if (cards.length === 0) {
+                    addTestResult('✗ No cards found to test', 'fail');
+                    return;
+                }
+                
+                // Test desktop
+                setViewport('desktop');
+                setTimeout(() => {
+                    addTestResult('Testing desktop layout (full width)...', 'info');
+                    
+                    const firstCard = cards[0];
+                    const scoreRow = firstCard.querySelector('.score-row');
+                    
+                    if (scoreRow) {
+                        const computedStyle = window.getComputedStyle(scoreRow);
+                        const gridColumns = computedStyle.gridTemplateColumns;
+                        
+                        if (gridColumns && gridColumns !== 'none') {
+                            addTestResult('✓ Desktop: Score rows use grid layout', 'pass');
+                        } else {
+                            addTestResult('⚠ Desktop: Grid layout not detected', 'warn');
+                        }
+                    }
+                    
+                    // Check for overflow
+                    const hasOverflow = Array.from(cards).some(card => {
+                        return card.scrollWidth > card.clientWidth;
+                    });
+                    
+                    if (!hasOverflow) {
+                        addTestResult('✓ Desktop: No horizontal overflow', 'pass');
+                    } else {
+                        addTestResult('✗ Desktop: Horizontal overflow detected', 'fail');
+                    }
+                }, 100);
+                
+                // Test tablet
+                setTimeout(() => {
+                    setViewport('tablet');
+                    setTimeout(() => {
+                        addTestResult('Testing tablet layout (768px)...', 'info');
+                        
+                        const simulator = document.getElementById('viewport-simulator');
+                        const hasOverflow = Array.from(cards).some(card => {
+                            return card.scrollWidth > simulator.clientWidth;
+                        });
+                        
+                        if (!hasOverflow) {
+                            addTestResult('✓ Tablet: No horizontal overflow', 'pass');
+                        } else {
+                            addTestResult('✗ Tablet: Horizontal overflow detected', 'fail');
+                        }
+                        
+                        // Check if text is readable
+                        const scoreValues = document.querySelectorAll('.score-value-col');
+                        let allReadable = true;
+                        scoreValues.forEach(val => {
+                            const fontSize = parseFloat(window.getComputedStyle(val).fontSize);
+                            if (fontSize < 10) {
+                                allReadable = false;
+                            }
+                        });
+                        
+                        if (allReadable) {
+                            addTestResult('✓ Tablet: Text remains readable', 'pass');
+                        } else {
+                            addTestResult('✗ Tablet: Text too small', 'fail');
+                        }
+                    }, 100);
+                }, 500);
+                
+                // Test mobile
+                setTimeout(() => {
+                    setViewport('mobile');
+                    setTimeout(() => {
+                        addTestResult('Testing mobile layout (375px)...', 'info');
+                        
+                        const simulator = document.getElementById('viewport-simulator');
+                        const hasOverflow = Array.from(cards).some(card => {
+                            return card.scrollWidth > simulator.clientWidth;
+                        });
+                        
+                        if (!hasOverflow) {
+                            addTestResult('✓ Mobile: No horizontal overflow', 'pass');
+                        } else {
+                            addTestResult('✗ Mobile: Horizontal overflow detected', 'fail');
+                        }
+                        
+                        // Check if buttons are tappable (min 44px)
+                        const buttons = document.querySelectorAll('.details-btn');
+                        let allTappable = true;
+                        buttons.forEach(btn => {
+                            const height = btn.offsetHeight;
+                            if (height < 44) {
+                                allTappable = false;
+                            }
+                        });
+                        
+                        if (allTappable) {
+                            addTestResult('✓ Mobile: Buttons meet minimum tap target size', 'pass');
+                        } else {
+                            addTestResult('⚠ Mobile: Some buttons may be too small for touch', 'warn');
+                        }
+                        
+                        // Check if score bars are visible
+                        const scoreBars = document.querySelectorAll('.score-bar');
+                        let allVisible = true;
+                        scoreBars.forEach(bar => {
+                            const height = bar.offsetHeight;
+                            if (height < 10) {
+                                allVisible = false;
+                            }
+                        });
+                        
+                        if (allVisible) {
+                            addTestResult('✓ Mobile: Score bars remain visible', 'pass');
+                        } else {
+                            addTestResult('✗ Mobile: Score bars too small', 'fail');
+                        }
+                        
+                        addTestResult('✓ Responsive design testing complete', 'pass');
+                    }, 100);
+                }, 1000);
+                
+            }, 200);
+        }
+
+        // Run all tests sequentially
+        function runAllTests() {
+            clearTestResults();
+            addTestResult('=== Running All Visual Tests ===', 'info');
+            
+            // Test 12.1: Champion cards display
+            testChampionCardsDisplay();
+            
+            // Test 12.2: Score bars (after 2 seconds)
+            setTimeout(() => {
+                addTestResult('', 'info');
+                testScoreBars();
+            }, 2000);
+            
+            // Test 12.3: Expandable details (after 4 seconds)
+            setTimeout(() => {
+                addTestResult('', 'info');
+                testExpandableDetails();
+            }, 4000);
+            
+            // Test 12.4: Responsive design (after 6 seconds)
+            setTimeout(() => {
+                addTestResult('', 'info');
+                testResponsiveDesign();
+            }, 6000);
+            
+            // Final summary (after 10 seconds)
+            setTimeout(() => {
+                addTestResult('', 'info');
+                addTestResult('=== All Visual Tests Complete ===', 'info');
+                
+                const results = document.querySelectorAll('.test-result-item');
+                const passCount = document.querySelectorAll('.test-result-item.pass').length;
+                const failCount = document.querySelectorAll('.test-result-item.fail').length;
+                const warnCount = document.querySelectorAll('.test-result-item.warn').length;
+                
+                addTestResult(`Summary: ${passCount} passed, ${failCount} failed, ${warnCount} warnings`, 'info');
+                
+                if (failCount === 0) {
+                    addTestResult('✓ ALL VISUAL TESTS PASSED', 'pass');
+                } else {
+                    addTestResult(`✗ ${failCount} tests failed - review results above`, 'fail');
+                }
+            }, 10000);
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            displayUnifiedRecommendations();
+            addTestResult('Page loaded. Click "Run All Tests" to begin comprehensive testing.', 'info');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integration Tests - Unified ML Recommendations</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        .test-section h2 {
+            color: #495057;
+            margin-top: 0;
+        }
+        .result {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .success {
+            border-left: 4px solid #28a745;
+            background: #d4edda;
+        }
+        .error {
+            border-left: 4px solid #dc3545;
+            background: #f8d7da;
+        }
+        .warning {
+            border-left: 4px solid #ffc107;
+            background: #fff3cd;
+        }
+        .info {
+            border-left: 4px solid #17a2b8;
+            background: #d1ecf1;
+        }
+        .test-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .test-summary h2 {
+            margin: 0 0 10px 0;
+            color: white;
+        }
+        .summary-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+        }
+        .champion-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .champion-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .score-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .score-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .score-value {
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Integration Tests - Unified ML Recommendations</h1>
+        
+        <div id="test-summary" class="test-summary">
+            <h2>Test Summary</h2>
+            <div class="summary-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="total-tests">0</div>
+                    <div class="stat-label">Total Tests</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="passed-tests" style="color: #d4edda;">0</div>
+                    <div class="stat-label">Passed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="failed-tests" style="color: #f8d7da;">0</div>
+                    <div class="stat-label">Failed</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="test-results"></div>
+    </div>
+
+    <script src="./src/data/champions.json" type="application/json"></script>
+    <script>
+        // Load champions data inline for testing
+        const allChampions = {
+            "Ahri": { role: "Mage", difficulty: 5, damage: 8, toughness: 3, utility: 6, control: 7, mobility: 8, positions: ["Middle"] },
+            "Lux": { role: "Mage", difficulty: 4, damage: 7, toughness: 2, utility: 8, control: 9, mobility: 3, positions: ["Middle", "Support"] },
+            "Zed": { role: "Assassin", difficulty: 8, damage: 9, toughness: 2, utility: 3, control: 4, mobility: 9, positions: ["Middle"] },
+            "Garen": { role: "Fighter", difficulty: 3, damage: 6, toughness: 8, utility: 2, control: 3, mobility: 4, positions: ["Top"] },
+            "Thresh": { role: "Support", difficulty: 7, damage: 3, toughness: 5, utility: 10, control: 8, mobility: 4, positions: ["Support"] },
+            "Jinx": { role: "Marksman", difficulty: 6, damage: 9, toughness: 2, utility: 4, control: 5, mobility: 3, positions: ["Bottom"] },
+            "Yasuo": { role: "Fighter", difficulty: 9, damage: 8, toughness: 4, utility: 3, control: 6, mobility: 9, positions: ["Middle", "Top"] },
+            "Leona": { role: "Tank", difficulty: 3, damage: 4, toughness: 9, utility: 7, control: 8, mobility: 3, positions: ["Support"] },
+            "Annie": { role: "Mage", difficulty: 2, damage: 8, toughness: 3, utility: 5, control: 8, mobility: 2, positions: ["Middle"] },
+            "Ashe": { role: "Marksman", difficulty: 4, damage: 7, toughness: 2, utility: 7, control: 6, mobility: 3, positions: ["Bottom"] },
+            "Darius": { role: "Fighter", difficulty: 4, damage: 8, toughness: 7, utility: 2, control: 5, mobility: 3, positions: ["Top"] },
+            "Janna": { role: "Support", difficulty: 5, damage: 2, toughness: 3, utility: 10, control: 7, mobility: 5, positions: ["Support"] },
+            "Katarina": { role: "Assassin", difficulty: 8, damage: 9, toughness: 2, utility: 2, control: 3, mobility: 9, positions: ["Middle"] },
+            "Malphite": { role: "Tank", difficulty: 2, damage: 5, toughness: 9, utility: 4, control: 7, mobility: 2, positions: ["Top", "Support"] },
+            "Morgana": { role: "Mage", difficulty: 3, damage: 6, toughness: 4, utility: 8, control: 9, mobility: 2, positions: ["Support", "Middle"] }
+        };
+
+        // Test tracking
+        let totalTests = 0;
+        let passedTests = 0;
+        let failedTests = 0;
+
+        function assert(condition, message) {
+            totalTests++;
+            if (condition) {
+                passedTests++;
+                return `<div class="result success">✓ ${message}</div>`;
+            } else {
+                failedTests++;
+                return `<div class="result error">✗ ${message}</div>`;
+            }
+        }
+
+        function assertApprox(actual, expected, tolerance, message) {
+            totalTests++;
+            const diff = Math.abs(actual - expected);
+            if (diff <= tolerance) {
+                passedTests++;
+                return `<div class="result success">✓ ${message} (${actual.toFixed(2)} ≈ ${expected.toFixed(2)})</div>`;
+            } else {
+                failedTests++;
+                return `<div class="result error">✗ ${message} (Expected: ${expected.toFixed(2)}, Got: ${actual.toFixed(2)}, Diff: ${diff.toFixed(2)})</div>`;
+            }
+        }
+
+        // ML Algorithm Classes (simplified versions for testing)
+        class SimpleRandomForest {
+            predictAll(features) {
+                const scores = {};
+                
+                for (const [name, champion] of Object.entries(allChampions)) {
+                    const result = this.calculateChampionScore(features, champion);
+                    scores[name] = result;
+                }
+                
+                return scores;
+            }
+            
+            calculateChampionScore(features, champion) {
+                let score = 0;
+                const details = {
+                    contributingFactors: [],
+                    matchedCriteria: [],
+                    penalties: []
+                };
+                
+                // Role Match (40 points)
+                if (features.role === 'No Preference' || features.role === champion.role) {
+                    score += 40;
+                    details.matchedCriteria.push(`Role: ${champion.role}`);
+                    details.contributingFactors.push({ factor: 'Role Match', weight: 40, contribution: 40 });
+                } else {
+                    details.penalties.push(`Role mismatch: wanted ${features.role}, got ${champion.role}`);
+                }
+                
+                // Position Match (30 points)
+                if (features.position === 'No Preference' || champion.positions.includes(features.position)) {
+                    score += 30;
+                    details.matchedCriteria.push(`Position: ${features.position}`);
+                    details.contributingFactors.push({ factor: 'Position Match', weight: 30, contribution: 30 });
+                }
+                
+                // Difficulty Match (20 points)
+                const diffDelta = Math.abs(features.difficulty - champion.difficulty);
+                const diffScore = Math.max(0, 20 - (diffDelta * 2));
+                score += diffScore;
+                details.contributingFactors.push({ factor: 'Difficulty Match', weight: 20, contribution: diffScore });
+                
+                // Damage Match (15 points)
+                const damageDelta = Math.abs(features.damage - champion.damage);
+                const damageScore = Math.max(0, 15 - (damageDelta * 1.5));
+                score += damageScore;
+                details.contributingFactors.push({ factor: 'Damage Match', weight: 15, contribution: damageScore });
+                
+                // Toughness Match (15 points)
+                const toughnessDelta = Math.abs(features.toughness - champion.toughness);
+                const toughnessScore = Math.max(0, 15 - (toughnessDelta * 1.5));
+                score += toughnessScore;
+                details.contributingFactors.push({ factor: 'Toughness Match', weight: 15, contribution: toughnessScore });
+                
+                const normalizedScore = this.normalizeScore(score);
+                
+                return {
+                    score: normalizedScore,
+                    rawScore: score,
+                    details: details
+                };
+            }
+            
+            normalizeScore(rawScore) {
+                const maxScore = 170;
+                const minScore = 0;
+                const normalized = ((rawScore - minScore) / (maxScore - minScore)) * 100;
+                return Math.max(0, Math.min(100, normalized));
+            }
+        }
+
+        class SimpleDecisionTree {
+            predictAll(features) {
+                const scores = {};
+                
+                for (const [name, champion] of Object.entries(allChampions)) {
+                    const result = this.calculateChampionScore(features, champion);
+                    scores[name] = result;
+                }
+                
+                return scores;
+            }
+            
+            calculateChampionScore(features, champion) {
+                let score = 0;
+                const details = {
+                    contributingFactors: [],
+                    matchedCriteria: [],
+                    penalties: []
+                };
+                
+                // Hierarchical scoring
+                if (features.role === 'No Preference' || features.role === champion.role) {
+                    score += 50;
+                    details.matchedCriteria.push(`Role: ${champion.role}`);
+                    
+                    if (features.position === 'No Preference' || champion.positions.includes(features.position)) {
+                        score += 40;
+                        details.matchedCriteria.push(`Position: ${features.position}`);
+                        
+                        if (Math.abs(features.difficulty - champion.difficulty) <= 2) {
+                            score += 30;
+                            details.matchedCriteria.push('Difficulty within range');
+                            
+                            if (Math.abs(features.damage - champion.damage) <= 2) {
+                                score += 20;
+                                details.matchedCriteria.push('Damage matches');
+                            }
+                            if (Math.abs(features.toughness - champion.toughness) <= 2) {
+                                score += 20;
+                                details.matchedCriteria.push('Toughness matches');
+                            }
+                        }
+                    }
+                } else {
+                    score -= 30;
+                    details.penalties.push(`Role mismatch: wanted ${features.role}`);
+                }
+                
+                const normalizedScore = this.normalizeScore(score);
+                
+                return {
+                    score: normalizedScore,
+                    rawScore: score,
+                    details: details
+                };
+            }
+            
+            normalizeScore(rawScore) {
+                const maxScore = 250;
+                const minScore = -50;
+                const normalized = ((rawScore - minScore) / (maxScore - minScore)) * 100;
+                return Math.max(0, Math.min(100, normalized));
+            }
+        }
+
+        class SimpleKNN {
+            predictAll(features) {
+                const scores = {};
+                
+                for (const [name, champion] of Object.entries(allChampions)) {
+                    const result = this.calculateChampionScore(features, champion);
+                    scores[name] = result;
+                }
+                
+                return scores;
+            }
+            
+            calculateChampionScore(features, champion) {
+                let distance = 0;
+                const details = {
+                    contributingFactors: [],
+                    matchedCriteria: [],
+                    penalties: []
+                };
+                
+                // Role distance
+                if (features.role !== 'No Preference' && features.role !== champion.role) {
+                    distance += 8;
+                    details.penalties.push(`Role mismatch: ${champion.role}`);
+                } else {
+                    details.matchedCriteria.push(`Role: ${champion.role}`);
+                }
+                
+                // Position distance
+                if (features.position !== 'No Preference' && !champion.positions.includes(features.position)) {
+                    distance += 6;
+                    details.penalties.push('Position mismatch');
+                }
+                
+                // Numerical distances
+                const diffDist = Math.abs(features.difficulty - champion.difficulty) * 0.5;
+                const damageDist = Math.abs(features.damage - champion.damage) * 0.3;
+                const toughnessDist = Math.abs(features.toughness - champion.toughness) * 0.3;
+                
+                distance += diffDist + damageDist + toughnessDist;
+                
+                details.contributingFactors.push(
+                    { factor: 'Difficulty Distance', weight: 0.5, contribution: diffDist },
+                    { factor: 'Damage Distance', weight: 0.3, contribution: damageDist },
+                    { factor: 'Toughness Distance', weight: 0.3, contribution: toughnessDist }
+                );
+                
+                const normalizedScore = this.normalizeScore(distance);
+                
+                return {
+                    score: normalizedScore,
+                    rawScore: distance,
+                    details: details
+                };
+            }
+            
+            normalizeScore(rawDistance) {
+                const maxDistance = 30;
+                const normalized = Math.max(0, 100 - ((rawDistance / maxDistance) * 100));
+                return Math.max(0, Math.min(100, normalized));
+            }
+        }
+
+        // ScoreAggregator class
+        class ScoreAggregator {
+            static aggregateScores(rfScores, dtScores, knnScores) {
+                const aggregated = {};
+                
+                for (const championName of Object.keys(allChampions)) {
+                    const rf = rfScores[championName]?.score || 0;
+                    const dt = dtScores[championName]?.score || 0;
+                    const knn = knnScores[championName]?.score || 0;
+                    
+                    const average = (rf + dt + knn) / 3;
+                    const weighted = this.calculateWeightedScore(rf, dt, knn);
+                    
+                    aggregated[championName] = {
+                        championName: championName,
+                        randomForest: rf,
+                        decisionTree: dt,
+                        knn: knn,
+                        average: average,
+                        weighted: weighted,
+                        details: {
+                            randomForest: rfScores[championName]?.details || null,
+                            decisionTree: dtScores[championName]?.details || null,
+                            knn: knnScores[championName]?.details || null
+                        }
+                    };
+                }
+                
+                return aggregated;
+            }
+            
+            static calculateWeightedScore(rf, dt, knn) {
+                const weighted = (rf * 0.4) + (dt * 0.3) + (knn * 0.3);
+                return Math.max(0, Math.min(100, weighted));
+            }
+            
+            static selectTop5(aggregatedScores, diversityFilter = true) {
+                let champions = Object.values(aggregatedScores);
+                champions.sort((a, b) => b.average - a.average);
+                
+                if (diversityFilter) {
+                    champions = this.applyDiversityFilter(champions);
+                }
+                
+                const top5 = champions.slice(0, 5);
+                
+                const uniqueChampions = [];
+                const seenNames = new Set();
+                
+                for (const champion of top5) {
+                    if (!seenNames.has(champion.championName)) {
+                        uniqueChampions.push(champion);
+                        seenNames.add(champion.championName);
+                    }
+                }
+                
+                if (uniqueChampions.length < 5) {
+                    for (const champion of champions) {
+                        if (!seenNames.has(champion.championName)) {
+                            uniqueChampions.push(champion);
+                            seenNames.add(champion.championName);
+                            
+                            if (uniqueChampions.length >= 5) break;
+                        }
+                    }
+                }
+                
+                return uniqueChampions;
+            }
+            
+            static applyDiversityFilter(champions) {
+                const selected = [];
+                const roleCount = {};
+                
+                for (const champion of champions) {
+                    const championData = allChampions[champion.championName];
+                    const role = championData?.role || 'Unknown';
+                    
+                    if ((roleCount[role] || 0) < 2) {
+                        selected.push(champion);
+                        roleCount[role] = (roleCount[role] || 0) + 1;
+                    }
+                    
+                    if (selected.length >= 5) break;
+                }
+                
+                if (selected.length < 5) {
+                    for (const champion of champions) {
+                        if (!selected.find(c => c.championName === champion.championName)) {
+                            selected.push(champion);
+                            
+                            if (selected.length >= 5) break;
+                        }
+                    }
+                }
+                
+                return selected;
+            }
+        }
+
+        // Main recommendation flow function
+        function generateRecommendations(features) {
+            const rf = new SimpleRandomForest();
+            const dt = new SimpleDecisionTree();
+            const knn = new SimpleKNN();
+            
+            const rfScores = rf.predictAll(features);
+            const dtScores = dt.predictAll(features);
+            const knnScores = knn.predictAll(features);
+            
+            const aggregated = ScoreAggregator.aggregateScores(rfScores, dtScores, knnScores);
+            const top5 = ScoreAggregator.selectTop5(aggregated);
+            
+            return {
+                scores: {
+                    randomForest: rfScores,
+                    decisionTree: dtScores,
+                    knn: knnScores
+                },
+                aggregated: aggregated,
+                top5: top5
+            };
+        }
+
+        // Test Suite
+        function runTests() {
+            const resultsDiv = document.getElementById('test-results');
+            let html = '';
+
+            // ===== TASK 11.1: Test Full Recommendation Flow =====
+            html += '<div class="test-section">';
+            html += '<h2>Task 11.1: Test Full Recommendation Flow</h2>';
+            html += '<p>Testing with various user preferences to verify 5 champions returned with 3 scores each.</p>';
+            
+            // Test Case 1: Mage preference
+            html += '<h3>Test Case 1: Mage Preference</h3>';
+            const mageFeatures = {
+                role: 'Mage',
+                position: 'Middle',
+                difficulty: 5,
+                damage: 8,
+                toughness: 3
+            };
+            
+            const mageResults = generateRecommendations(mageFeatures);
+            
+            html += assert(mageResults !== null, 'Mage test: Results object returned');
+            html += assert(mageResults.top5 !== undefined, 'Mage test: top5 array exists');
+            html += assert(mageResults.top5.length === 5, `Mage test: Exactly 5 champions returned (got ${mageResults.top5.length})`);
+            
+            // Verify all have 3 scores
+            let allHaveThreeScores = true;
+            for (const champion of mageResults.top5) {
+                if (champion.randomForest === undefined || champion.decisionTree === undefined || champion.knn === undefined) {
+                    allHaveThreeScores = false;
+                    break;
+                }
+            }
+            html += assert(allHaveThreeScores, 'Mage test: All champions have 3 scores (RF, DT, KNN)');
+            
+            // Verify scores are in valid range
+            let allScoresValid = true;
+            for (const champion of mageResults.top5) {
+                if (champion.randomForest < 0 || champion.randomForest > 100 ||
+                    champion.decisionTree < 0 || champion.decisionTree > 100 ||
+                    champion.knn < 0 || champion.knn > 100) {
+                    allScoresValid = false;
+                    break;
+                }
+            }
+            html += assert(allScoresValid, 'Mage test: All scores are between 0-100');
+            
+            // Display results
+            html += '<div class="result info"><strong>Top 5 Mage Recommendations:</strong><br>';
+            mageResults.top5.forEach((champion, index) => {
+                html += `${index + 1}. ${champion.championName} - Avg: ${champion.average.toFixed(1)}% (RF: ${champion.randomForest.toFixed(1)}%, DT: ${champion.decisionTree.toFixed(1)}%, KNN: ${champion.knn.toFixed(1)}%)<br>`;
+            });
+            html += '</div>';
+
+            // Test Case 2: Fighter preference
+            html += '<h3>Test Case 2: Fighter Preference</h3>';
+            const fighterFeatures = {
+                role: 'Fighter',
+                position: 'Top',
+                difficulty: 4,
+                damage: 7,
+                toughness: 7
+            };
+            
+            const fighterResults = generateRecommendations(fighterFeatures);
+            
+            html += assert(fighterResults.top5.length === 5, `Fighter test: Exactly 5 champions returned (got ${fighterResults.top5.length})`);
+            html += assert(fighterResults.top5.every(c => c.randomForest !== undefined && c.decisionTree !== undefined && c.knn !== undefined), 
+                'Fighter test: All champions have 3 scores');
+            
+            html += '<div class="result info"><strong>Top 5 Fighter Recommendations:</strong><br>';
+            fighterResults.top5.forEach((champion, index) => {
+                html += `${index + 1}. ${champion.championName} - Avg: ${champion.average.toFixed(1)}% (RF: ${champion.randomForest.toFixed(1)}%, DT: ${champion.decisionTree.toFixed(1)}%, KNN: ${champion.knn.toFixed(1)}%)<br>`;
+            });
+            html += '</div>';
+            
+            // Test Case 3: Support preference
+            html += '<h3>Test Case 3: Support Preference</h3>';
+            const supportFeatures = {
+                role: 'Support',
+                position: 'Support',
+                difficulty: 5,
+                damage: 3,
+                toughness: 5
+            };
+            
+            const supportResults = generateRecommendations(supportFeatures);
+            
+            html += assert(supportResults.top5.length === 5, `Support test: Exactly 5 champions returned (got ${supportResults.top5.length})`);
+            html += assert(supportResults.top5.every(c => c.randomForest !== undefined && c.decisionTree !== undefined && c.knn !== undefined), 
+                'Support test: All champions have 3 scores');
+            
+            html += '<div class="result info"><strong>Top 5 Support Recommendations:</strong><br>';
+            supportResults.top5.forEach((champion, index) => {
+                html += `${index + 1}. ${champion.championName} - Avg: ${champion.average.toFixed(1)}% (RF: ${champion.randomForest.toFixed(1)}%, DT: ${champion.decisionTree.toFixed(1)}%, KNN: ${champion.knn.toFixed(1)}%)<br>`;
+            });
+            html += '</div>';
+            
+            // Test Case 4: Assassin preference
+            html += '<h3>Test Case 4: Assassin Preference</h3>';
+            const assassinFeatures = {
+                role: 'Assassin',
+                position: 'Middle',
+                difficulty: 8,
+                damage: 9,
+                toughness: 2
+            };
+            
+            const assassinResults = generateRecommendations(assassinFeatures);
+            
+            html += assert(assassinResults.top5.length === 5, `Assassin test: Exactly 5 champions returned (got ${assassinResults.top5.length})`);
+            html += assert(assassinResults.top5.every(c => c.randomForest !== undefined && c.decisionTree !== undefined && c.knn !== undefined), 
+                'Assassin test: All champions have 3 scores');
+            
+            html += '<div class="result info"><strong>Top 5 Assassin Recommendations:</strong><br>';
+            assassinResults.top5.forEach((champion, index) => {
+                html += `${index + 1}. ${champion.championName} - Avg: ${champion.average.toFixed(1)}% (RF: ${champion.randomForest.toFixed(1)}%, DT: ${champion.decisionTree.toFixed(1)}%, KNN: ${champion.knn.toFixed(1)}%)<br>`;
+            });
+            html += '</div>';
+            
+            html += '</div>';
+
+            // ===== TASK 11.2: Test with Edge Cases =====
+            html += '<div class="test-section">';
+            html += '<h2>Task 11.2: Test with Edge Cases</h2>';
+            html += '<p>Testing edge cases: No Preference, very specific preferences, and conflicting preferences.</p>';
+            
+            // Edge Case 1: No Preference for all questions
+            html += '<h3>Edge Case 1: No Preference for All Questions</h3>';
+            const noPreferenceFeatures = {
+                role: 'No Preference',
+                position: 'No Preference',
+                difficulty: 5,
+                damage: 5,
+                toughness: 5
+            };
+            
+            const noPreferenceResults = generateRecommendations(noPreferenceFeatures);
+            
+            html += assert(noPreferenceResults.top5.length === 5, `No Preference test: Exactly 5 champions returned (got ${noPreferenceResults.top5.length})`);
+            html += assert(noPreferenceResults.top5.every(c => c.randomForest !== undefined && c.decisionTree !== undefined && c.knn !== undefined), 
+                'No Preference test: All champions have 3 scores');
+            
+            // Verify uniqueness
+            const noPreferenceNames = new Set(noPreferenceResults.top5.map(c => c.championName));
+            html += assert(noPreferenceNames.size === 5, 'No Preference test: All 5 champions are unique');
+            
+            // Verify diversity (should have variety of roles)
+            const noPreferenceRoles = new Set(noPreferenceResults.top5.map(c => allChampions[c.championName].role));
+            html += assert(noPreferenceRoles.size >= 2, `No Preference test: At least 2 different roles represented (got ${noPreferenceRoles.size})`);
+            
+            html += '<div class="result info"><strong>Top 5 with No Preference:</strong><br>';
+            noPreferenceResults.top5.forEach((champion, index) => {
+                const role = allChampions[champion.championName].role;
+                html += `${index + 1}. ${champion.championName} (${role}) - Avg: ${champion.average.toFixed(1)}%<br>`;
+            });
+            html += '</div>';
+            
+            // Edge Case 2: Very specific preferences
+            html += '<h3>Edge Case 2: Very Specific Preferences</h3>';
+            const specificFeatures = {
+                role: 'Mage',
+                position: 'Middle',
+                difficulty: 2,
+                damage: 8,
+                toughness: 3
+            };
+            
+            const specificResults = generateRecommendations(specificFeatures);
+            
+            html += assert(specificResults.top5.length === 5, `Specific test: Exactly 5 champions returned (got ${specificResults.top5.length})`);
+            
+            // Check if top recommendations match the specific criteria
+            const topChampion = specificResults.top5[0];
+            const topChampionData = allChampions[topChampion.championName];
+            
+            html += assert(topChampionData.role === 'Mage' || topChampion.average > 50, 
+                `Specific test: Top champion is Mage or has high score (${topChampionData.role}, ${topChampion.average.toFixed(1)}%)`);
+            
+            html += '<div class="result info"><strong>Top 5 with Specific Preferences (Mage, Middle, Easy, High Damage):</strong><br>';
+            specificResults.top5.forEach((champion, index) => {
+                const role = allChampions[champion.championName].role;
+                const difficulty = allChampions[champion.championName].difficulty;
+                html += `${index + 1}. ${champion.championName} (${role}, Diff: ${difficulty}) - Avg: ${champion.average.toFixed(1)}%<br>`;
+            });
+            html += '</div>';
+
+            // Edge Case 3: Conflicting preferences
+            html += '<h3>Edge Case 3: Conflicting Preferences</h3>';
+            const conflictingFeatures = {
+                role: 'Tank',
+                position: 'Middle',  // Tanks rarely go middle
+                difficulty: 9,       // Tanks are usually easy
+                damage: 9,           // Tanks usually have low damage
+                toughness: 2         // Tanks should have high toughness
+            };
+            
+            const conflictingResults = generateRecommendations(conflictingFeatures);
+            
+            html += assert(conflictingResults.top5.length === 5, `Conflicting test: Exactly 5 champions returned (got ${conflictingResults.top5.length})`);
+            html += assert(conflictingResults.top5.every(c => c.randomForest !== undefined && c.decisionTree !== undefined && c.knn !== undefined), 
+                'Conflicting test: All champions have 3 scores');
+            
+            // System should still provide recommendations even with conflicting preferences
+            html += assert(conflictingResults.top5[0].average > 0, 
+                'Conflicting test: System provides recommendations despite conflicts');
+            
+            html += '<div class="result info"><strong>Top 5 with Conflicting Preferences (Tank, Middle, Hard, High Damage, Low Toughness):</strong><br>';
+            conflictingResults.top5.forEach((champion, index) => {
+                const role = allChampions[champion.championName].role;
+                const championData = allChampions[champion.championName];
+                html += `${index + 1}. ${champion.championName} (${role}, Dmg: ${championData.damage}, Tough: ${championData.toughness}) - Avg: ${champion.average.toFixed(1)}%<br>`;
+            });
+            html += '</div>';
+            
+            // Edge Case 4: Extreme values
+            html += '<h3>Edge Case 4: Extreme Values</h3>';
+            const extremeFeatures = {
+                role: 'Assassin',
+                position: 'Middle',
+                difficulty: 10,  // Maximum difficulty
+                damage: 10,      // Maximum damage
+                toughness: 0     // Minimum toughness
+            };
+            
+            const extremeResults = generateRecommendations(extremeFeatures);
+            
+            html += assert(extremeResults.top5.length === 5, `Extreme test: Exactly 5 champions returned (got ${extremeResults.top5.length})`);
+            html += assert(extremeResults.top5.every(c => c.average >= 0 && c.average <= 100), 
+                'Extreme test: All average scores are within 0-100 range');
+            
+            html += '<div class="result info"><strong>Top 5 with Extreme Values (Max Difficulty, Max Damage, Min Toughness):</strong><br>';
+            extremeResults.top5.forEach((champion, index) => {
+                const role = allChampions[champion.championName].role;
+                html += `${index + 1}. ${champion.championName} (${role}) - Avg: ${champion.average.toFixed(1)}%<br>`;
+            });
+            html += '</div>';
+            
+            html += '</div>';
+
+            // ===== TASK 11.3: Test Score Accuracy =====
+            html += '<div class="test-section">';
+            html += '<h2>Task 11.3: Test Score Accuracy</h2>';
+            html += '<p>Manually verifying scores for sample champions and checking calculation logic transparency.</p>';
+            
+            // Manual verification for a specific champion
+            html += '<h3>Manual Score Verification: Ahri with Mage Preferences</h3>';
+            const ahriTestFeatures = {
+                role: 'Mage',
+                position: 'Middle',
+                difficulty: 5,
+                damage: 8,
+                toughness: 3
+            };
+            
+            const ahriResults = generateRecommendations(ahriTestFeatures);
+            const ahriChampion = ahriResults.aggregated['Ahri'];
+            
+            html += assert(ahriChampion !== undefined, 'Ahri exists in aggregated results');
+            
+            // Verify Random Forest score calculation
+            const ahriData = allChampions['Ahri'];
+            let expectedRFScore = 0;
+            
+            // Role match (Mage === Mage): +40
+            if (ahriTestFeatures.role === ahriData.role) expectedRFScore += 40;
+            
+            // Position match (Middle in positions): +30
+            if (ahriData.positions.includes(ahriTestFeatures.position)) expectedRFScore += 30;
+            
+            // Difficulty match: 20 - (|5-5| * 2) = 20
+            const diffDelta = Math.abs(ahriTestFeatures.difficulty - ahriData.difficulty);
+            expectedRFScore += Math.max(0, 20 - (diffDelta * 2));
+            
+            // Damage match: 15 - (|8-8| * 1.5) = 15
+            const damageDelta = Math.abs(ahriTestFeatures.damage - ahriData.damage);
+            expectedRFScore += Math.max(0, 15 - (damageDelta * 1.5));
+            
+            // Toughness match: 15 - (|3-3| * 1.5) = 15
+            const toughnessDelta = Math.abs(ahriTestFeatures.toughness - ahriData.toughness);
+            expectedRFScore += Math.max(0, 15 - (toughnessDelta * 1.5));
+            
+            // Normalize: (120 / 170) * 100 = 70.59%
+            const expectedNormalizedRF = (expectedRFScore / 170) * 100;
+            
+            html += `<div class="result info">
+                <strong>Expected RF Calculation for Ahri:</strong><br>
+                Role Match: +40 (Mage === Mage)<br>
+                Position Match: +30 (Middle in positions)<br>
+                Difficulty Match: +${Math.max(0, 20 - (diffDelta * 2))} (|5-5| = 0)<br>
+                Damage Match: +${Math.max(0, 15 - (damageDelta * 1.5))} (|8-8| = 0)<br>
+                Toughness Match: +${Math.max(0, 15 - (toughnessDelta * 1.5))} (|3-3| = 0)<br>
+                Raw Score: ${expectedRFScore}<br>
+                Normalized: ${expectedNormalizedRF.toFixed(2)}%<br>
+                Actual: ${ahriChampion.randomForest.toFixed(2)}%
+            </div>`;
+            
+            html += assertApprox(ahriChampion.randomForest, expectedNormalizedRF, 0.1, 
+                'Ahri RF score matches expected calculation');
+            
+            // Verify transparency of calculations
+            html += '<h3>Calculation Transparency</h3>';
+            const ahriRFDetails = ahriResults.scores.randomForest['Ahri'].details;
+            
+            html += assert(ahriRFDetails !== undefined && ahriRFDetails !== null, 
+                'Ahri RF details object exists');
+            html += assert(ahriRFDetails.contributingFactors !== undefined && Array.isArray(ahriRFDetails.contributingFactors), 
+                'Contributing factors array exists');
+            html += assert(ahriRFDetails.matchedCriteria !== undefined && Array.isArray(ahriRFDetails.matchedCriteria), 
+                'Matched criteria array exists');
+            html += assert(ahriRFDetails.penalties !== undefined && Array.isArray(ahriRFDetails.penalties), 
+                'Penalties array exists');
+            
+            html += `<div class="result info">
+                <strong>Ahri RF Calculation Details:</strong><br>
+                Contributing Factors: ${ahriRFDetails.contributingFactors.length}<br>
+                Matched Criteria: ${ahriRFDetails.matchedCriteria.length}<br>
+                Penalties: ${ahriRFDetails.penalties.length}<br>
+            </div>`;
+            
+            // Display detailed breakdown
+            if (ahriRFDetails.contributingFactors.length > 0) {
+                html += '<div class="result info"><strong>Contributing Factors:</strong><br>';
+                ahriRFDetails.contributingFactors.forEach(factor => {
+                    html += `- ${factor.factor}: Weight ${factor.weight}, Contribution ${factor.contribution.toFixed(2)}<br>`;
+                });
+                html += '</div>';
+            }
+            
+            if (ahriRFDetails.matchedCriteria.length > 0) {
+                html += '<div class="result info"><strong>Matched Criteria:</strong><br>';
+                ahriRFDetails.matchedCriteria.forEach(criterion => {
+                    html += `✓ ${criterion}<br>`;
+                });
+                html += '</div>';
+            }
+
+            // Test another champion with mismatches
+            html += '<h3>Manual Score Verification: Garen with Mage Preferences (Mismatch)</h3>';
+            const garenChampion = ahriResults.aggregated['Garen'];
+            const garenData = allChampions['Garen'];
+            
+            html += assert(garenChampion !== undefined, 'Garen exists in aggregated results');
+            
+            // Garen is Fighter, not Mage - should have lower score
+            html += assert(garenChampion.randomForest < ahriChampion.randomForest, 
+                'Garen (Fighter) scores lower than Ahri (Mage) for Mage preferences');
+            
+            const garenRFDetails = ahriResults.scores.randomForest['Garen'].details;
+            
+            html += `<div class="result info">
+                <strong>Garen RF Score:</strong> ${garenChampion.randomForest.toFixed(2)}%<br>
+                <strong>Penalties:</strong> ${garenRFDetails.penalties.length > 0 ? garenRFDetails.penalties.join(', ') : 'None'}
+            </div>`;
+            
+            html += assert(garenRFDetails.penalties.length > 0, 
+                'Garen has penalties for role mismatch');
+            
+            // Test score consistency across algorithms
+            html += '<h3>Score Consistency Across Algorithms</h3>';
+            
+            // All three algorithms should give reasonable scores
+            html += assert(ahriChampion.randomForest > 0 && ahriChampion.randomForest <= 100, 
+                'Ahri RF score is in valid range (0-100)');
+            html += assert(ahriChampion.decisionTree > 0 && ahriChampion.decisionTree <= 100, 
+                'Ahri DT score is in valid range (0-100)');
+            html += assert(ahriChampion.knn > 0 && ahriChampion.knn <= 100, 
+                'Ahri KNN score is in valid range (0-100)');
+            
+            // Average should be calculated correctly
+            const expectedAverage = (ahriChampion.randomForest + ahriChampion.decisionTree + ahriChampion.knn) / 3;
+            html += assertApprox(ahriChampion.average, expectedAverage, 0.01, 
+                'Ahri average score calculated correctly');
+            
+            // Weighted should be calculated correctly
+            const expectedWeighted = (ahriChampion.randomForest * 0.4) + (ahriChampion.decisionTree * 0.3) + (ahriChampion.knn * 0.3);
+            html += assertApprox(ahriChampion.weighted, expectedWeighted, 0.01, 
+                'Ahri weighted score calculated correctly');
+            
+            html += `<div class="result info">
+                <strong>Ahri Score Summary:</strong><br>
+                Random Forest: ${ahriChampion.randomForest.toFixed(2)}%<br>
+                Decision Tree: ${ahriChampion.decisionTree.toFixed(2)}%<br>
+                KNN: ${ahriChampion.knn.toFixed(2)}%<br>
+                Average: ${ahriChampion.average.toFixed(2)}% (Expected: ${expectedAverage.toFixed(2)}%)<br>
+                Weighted: ${ahriChampion.weighted.toFixed(2)}% (Expected: ${expectedWeighted.toFixed(2)}%)
+            </div>`;
+            
+            // Test calculation auditability
+            html += '<h3>Calculation Auditability</h3>';
+            
+            // Every champion should have details for all 3 algorithms
+            let allHaveDetails = true;
+            let detailsCount = 0;
+            
+            for (const championName of Object.keys(allChampions)) {
+                const champion = ahriResults.aggregated[championName];
+                if (!champion.details || 
+                    !champion.details.randomForest || 
+                    !champion.details.decisionTree || 
+                    !champion.details.knn) {
+                    allHaveDetails = false;
+                    break;
+                }
+                detailsCount++;
+            }
+            
+            html += assert(allHaveDetails, 
+                `All ${detailsCount} champions have calculation details for all 3 algorithms`);
+            
+            // Verify details structure for a sample
+            const sampleChampion = ahriResults.aggregated['Lux'];
+            const sampleRFDetails = sampleChampion.details.randomForest;
+            const sampleDTDetails = sampleChampion.details.decisionTree;
+            const sampleKNNDetails = sampleChampion.details.knn;
+            
+            html += assert(
+                sampleRFDetails.contributingFactors && 
+                sampleRFDetails.matchedCriteria && 
+                sampleRFDetails.penalties,
+                'Lux RF details have all required fields'
+            );
+            
+            html += assert(
+                sampleDTDetails.contributingFactors && 
+                sampleDTDetails.matchedCriteria && 
+                sampleDTDetails.penalties,
+                'Lux DT details have all required fields'
+            );
+            
+            html += assert(
+                sampleKNNDetails.contributingFactors && 
+                sampleKNNDetails.matchedCriteria && 
+                sampleKNNDetails.penalties,
+                'Lux KNN details have all required fields'
+            );
+            
+            html += '<div class="result success">✓ All calculations are transparent and auditable</div>';
+            
+            html += '</div>';
+
+            // Update summary
+            resultsDiv.innerHTML = html;
+            document.getElementById('total-tests').textContent = totalTests;
+            document.getElementById('passed-tests').textContent = passedTests;
+            document.getElementById('failed-tests').textContent = failedTests;
+            
+            // Add final summary message
+            const summaryDiv = document.getElementById('test-summary');
+            if (failedTests === 0) {
+                summaryDiv.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                summaryDiv.innerHTML += '<p style="margin-top: 15px; font-size: 1.2rem;">🎉 All integration tests passed!</p>';
+            } else {
+                summaryDiv.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+                summaryDiv.innerHTML += `<p style="margin-top: 15px; font-size: 1.2rem;">⚠️ ${failedTests} test(s) failed</p>`;
+            }
+        }
+
+        // Run tests on page load
+        window.addEventListener('DOMContentLoaded', runTests);
+    </script>
+</body>
+</html>

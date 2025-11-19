@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Data Access</title>
+</head>
+<body>
+    <h1>Test Data Access</h1>
+    <div id="result"></div>
+
+    <script>
+        async function testDataAccess() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing data access...</p>';
+            
+            const urls = [
+                './src/data/champions.json',
+                './data/champions.json',
+                'https://raw.githubusercontent.com/abdullah-binmadhi/LOL-Recommender-System/main/src/data/champions.json',
+                'https://raw.githubusercontent.com/abdullah-binmadhi/LOL-Recommender-System/main/data/champions.json'
+            ];
+            
+            for (const url of urls) {
+                try {
+                    resultDiv.innerHTML += `<p>Trying ${url}...</p>`;
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        const data = await response.json();
+                        resultDiv.innerHTML += `<p style="color: green;">Success! Loaded ${data.champions ? data.champions.length : Object.keys(data).length} items from ${url}</p>`;
+                        return;
+                    } else {
+                        resultDiv.innerHTML += `<p style="color: orange;">Failed with status ${response.status} from ${url}</p>`;
+                    }
+                } catch (error) {
+                    resultDiv.innerHTML += `<p style="color: red;">Error: ${error.message} from ${url}</p>`;
+                }
+            }
+            
+            resultDiv.innerHTML += '<p style="color: red;">All attempts failed</p>';
+        }
+        
+        document.addEventListener('DOMContentLoaded', testDataAccess);
+    </script>
+</body>
+</html>
