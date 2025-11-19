@@ -3858,59 +3858,54 @@
                 
                 // Iterate through all champions and calculate match score
                 for (const [championName, champion] of Object.entries(allChampions)) {
+                    // STRICTER: Skip champions with wrong role entirely (unless "No Preference")
+                    if (userRole !== 'No Preference' && userRole !== champion.role) {
+                        continue; // Don't consider champions from wrong role
+                    }
+                    
                     let matchScore = 0;
                     let totalCriteria = 0;
                     
                     // Role match (most important - 40% weight)
                     totalCriteria += 4;
-                    if (userRole === 'No Preference' || userRole === champion.role) {
-                        matchScore += 4;
-                    } else {
-                        matchScore += 0.5; // Small partial credit for wrong role
-                    }
+                    matchScore += 4; // Full credit since we filtered by role
                     
-                    // Difficulty match (25% weight)
+                    // Difficulty match (25% weight) - STRICTER tolerance
                     if (userDifficulty !== null) {
                         totalCriteria += 2.5;
                         const difficultyDiff = Math.abs(userDifficulty - champion.difficulty);
                         if (difficultyDiff <= 1) {
                             matchScore += 2.5; // Exact or very close match
-                        } else if (difficultyDiff <= 2.5) {
-                            matchScore += 1.5; // Close match
-                        } else if (difficultyDiff <= 4) {
-                            matchScore += 0.75; // Somewhat close
+                        } else if (difficultyDiff <= 2) {
+                            matchScore += 1.0; // Close match (reduced from 1.5)
                         } else {
-                            matchScore += 0.25; // Far but some credit
+                            matchScore += 0; // No partial credit for far matches
                         }
                     }
                     
-                    // Damage match (20% weight)
+                    // Damage match (20% weight) - STRICTER tolerance
                     if (userDamage !== null) {
                         totalCriteria += 2;
                         const damageDiff = Math.abs(userDamage - champion.damage);
                         if (damageDiff <= 1) {
                             matchScore += 2; // Exact or very close match
-                        } else if (damageDiff <= 2.5) {
-                            matchScore += 1.25; // Close match
-                        } else if (damageDiff <= 4) {
-                            matchScore += 0.5; // Somewhat close
+                        } else if (damageDiff <= 2) {
+                            matchScore += 0.8; // Close match (reduced from 1.25)
                         } else {
-                            matchScore += 0.2; // Far but some credit
+                            matchScore += 0; // No partial credit for far matches
                         }
                     }
                     
-                    // Toughness match (15% weight)
+                    // Toughness match (15% weight) - STRICTER tolerance
                     if (userToughness !== null) {
                         totalCriteria += 1.5;
                         const toughnessDiff = Math.abs(userToughness - champion.toughness);
                         if (toughnessDiff <= 1) {
                             matchScore += 1.5; // Exact or very close match
-                        } else if (toughnessDiff <= 2.5) {
-                            matchScore += 0.9; // Close match
-                        } else if (toughnessDiff <= 4) {
-                            matchScore += 0.4; // Somewhat close
+                        } else if (toughnessDiff <= 2) {
+                            matchScore += 0.6; // Close match (reduced from 0.9)
                         } else {
-                            matchScore += 0.15; // Far but some credit
+                            matchScore += 0; // No partial credit for far matches
                         }
                     }
                     
@@ -3922,12 +3917,12 @@
                 // Sort champions by score descending
                 championScores.sort((a, b) => b.score - a.score);
                 
-                // Use adaptive threshold: start at 45%, but ensure at least top 20-30% of champions are relevant
-                const minRelevantCount = Math.max(10, Math.floor(championScores.length * 0.15));
-                const maxRelevantCount = Math.ceil(championScores.length * 0.35);
+                // STRICTER: Use 60% threshold and cap at 15% of champions (down from 45% and 35%)
+                const minRelevantCount = Math.max(8, Math.floor(championScores.length * 0.10));
+                const maxRelevantCount = Math.ceil(championScores.length * 0.15);
                 
                 const relevantChampions = new Set();
-                let threshold = 0.45;
+                let threshold = 0.60; // Increased from 0.45 to 0.60
                 
                 // First pass: add champions above threshold
                 for (const champ of championScores) {
