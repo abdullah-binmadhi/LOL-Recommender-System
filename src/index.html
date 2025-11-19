@@ -3875,42 +3875,42 @@
                     totalCriteria += 4;
                     matchScore += 4; // Full credit since we filtered by position
                     
-                    // Difficulty match (25% weight) - STRICTER tolerance
+                    // Difficulty match (25% weight) - VERY STRICT: only ±1 tolerance
                     if (userDifficulty !== null) {
                         totalCriteria += 2.5;
                         const difficultyDiff = Math.abs(userDifficulty - champion.difficulty);
-                        if (difficultyDiff <= 1) {
-                            matchScore += 2.5; // Exact or very close match
-                        } else if (difficultyDiff <= 2) {
-                            matchScore += 1.0; // Close match (reduced from 1.5)
+                        if (difficultyDiff === 0) {
+                            matchScore += 2.5; // Perfect match only
+                        } else if (difficultyDiff === 1) {
+                            matchScore += 1.25; // Adjacent match gets half credit
                         } else {
-                            matchScore += 0; // No partial credit for far matches
+                            matchScore += 0; // No credit for ±2 or more
                         }
                     }
                     
-                    // Damage match (20% weight) - STRICTER tolerance
+                    // Damage match (20% weight) - VERY STRICT: only ±1 tolerance
                     if (userDamage !== null) {
                         totalCriteria += 2;
                         const damageDiff = Math.abs(userDamage - champion.damage);
-                        if (damageDiff <= 1) {
-                            matchScore += 2; // Exact or very close match
-                        } else if (damageDiff <= 2) {
-                            matchScore += 0.8; // Close match (reduced from 1.25)
+                        if (damageDiff === 0) {
+                            matchScore += 2; // Perfect match only
+                        } else if (damageDiff === 1) {
+                            matchScore += 1.0; // Adjacent match gets half credit
                         } else {
-                            matchScore += 0; // No partial credit for far matches
+                            matchScore += 0; // No credit for ±2 or more
                         }
                     }
                     
-                    // Toughness match (15% weight) - STRICTER tolerance
+                    // Toughness match (15% weight) - VERY STRICT: only ±1 tolerance
                     if (userToughness !== null) {
                         totalCriteria += 1.5;
                         const toughnessDiff = Math.abs(userToughness - champion.toughness);
-                        if (toughnessDiff <= 1) {
-                            matchScore += 1.5; // Exact or very close match
-                        } else if (toughnessDiff <= 2) {
-                            matchScore += 0.6; // Close match (reduced from 0.9)
+                        if (toughnessDiff === 0) {
+                            matchScore += 1.5; // Perfect match only
+                        } else if (toughnessDiff === 1) {
+                            matchScore += 0.75; // Adjacent match gets half credit
                         } else {
-                            matchScore += 0; // No partial credit for far matches
+                            matchScore += 0; // No credit for ±2 or more
                         }
                     }
                     
@@ -3922,12 +3922,12 @@
                 // Sort champions by score descending
                 championScores.sort((a, b) => b.score - a.score);
                 
-                // Use 60% threshold and cap at 60 champions
-                const minRelevantCount = Math.max(8, Math.floor(championScores.length * 0.10));
-                const maxRelevantCount = 60; // Fixed cap at 60 champions
+                // Very strict: 75% threshold, but allow all champions with min/max constraints
+                const minRelevantCount = Math.ceil(championScores.length * 0.20); // At least 20%
+                const maxRelevantCount = Math.floor(championScores.length * 0.80); // At most 80%
                 
                 const relevantChampions = new Set();
-                let threshold = 0.60; // Increased from 0.45 to 0.60
+                let threshold = 0.75; // Very strict threshold to prevent 100% scores
                 
                 // First pass: add champions above threshold
                 for (const champ of championScores) {
