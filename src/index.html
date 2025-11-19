@@ -1702,6 +1702,228 @@
         .metrics-icon {
             font-size: 1.5rem;
         }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            margin: auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+            overflow: hidden;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            position: relative;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-close {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-50%) rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 30px;
+            color: #333;
+            line-height: 1.7;
+        }
+
+        .modal-body h3 {
+            color: #667eea;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .modal-body h3:first-child {
+            margin-top: 0;
+        }
+
+        .modal-body p {
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .modal-score {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 20px 0;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .modal-score.warning {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-left-color: #f57c00;
+        }
+
+        .modal-score.poor {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            border-left-color: #c62828;
+        }
+
+        .modal-score-value {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 5px;
+        }
+
+        .modal-score.warning .modal-score-value {
+            color: #f57c00;
+        }
+
+        .modal-score.poor .modal-score-value {
+            color: #c62828;
+        }
+
+        .modal-score-label {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .champion-list {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .champion-list-item {
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .champion-list-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .champion-list-icon {
+            font-size: 1.2rem;
+        }
+
+        .champion-list-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .champion-list-badge {
+            margin-left: auto;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .champion-list-badge.relevant {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .champion-list-badge.not-relevant {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        .metric-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+        }
+
+        .metric-card::after {
+            content: '🔍 Click for details';
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: #999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .metric-card:hover::after {
+            opacity: 1;
+        }
+
+        .metric-card {
+            position: relative;
+        }
     </style>
 </head>
 <body>
@@ -1842,6 +2064,19 @@
             <div class="buttons">
                 <button class="btn btn-primary" onclick="saveRecommendation()">Save</button>
                 <button class="btn btn-primary" onclick="restartQuestionnaire()">Try Again</button>
+            </div>
+        </div>
+
+        <!-- Metric Modal -->
+        <div id="metric-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modal-title">Metric Details</h2>
+                    <span class="modal-close" onclick="closeMetricModal()">&times;</span>
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <!-- Content will be populated dynamically -->
+                </div>
             </div>
         </div>
     </div>
@@ -3953,7 +4188,7 @@
                     
                     <div class="metrics-grid">
                         <!-- Precision@1 Card -->
-                        <div class="metric-card">
+                        <div class="metric-card" onclick="showMetricModal('p1', ${metrics.p1}, ${relevantCount}, ${recommendedCount})">
                             <div class="metric-label">Precision@1</div>
                             <div class="metric-value ${getColorClass(metrics.p1)}">
                                 ${formatPercentage(metrics.p1)}
@@ -3964,7 +4199,7 @@
                         </div>
 
                         <!-- Precision@3 Card -->
-                        <div class="metric-card">
+                        <div class="metric-card" onclick="showMetricModal('p3', ${metrics.p3}, ${relevantCount}, ${recommendedCount})">
                             <div class="metric-label">Precision@3</div>
                             <div class="metric-value ${getColorClass(metrics.p3)}">
                                 ${formatPercentage(metrics.p3)}
@@ -3975,7 +4210,7 @@
                         </div>
 
                         <!-- Precision@5 Card -->
-                        <div class="metric-card">
+                        <div class="metric-card" onclick="showMetricModal('p5', ${metrics.p5}, ${relevantCount}, ${recommendedCount})">
                             <div class="metric-label">Precision@5</div>
                             <div class="metric-value ${getColorClass(metrics.p5)}">
                                 ${formatPercentage(metrics.p5)}
@@ -3986,7 +4221,7 @@
                         </div>
 
                         <!-- MRR Card -->
-                        <div class="metric-card">
+                        <div class="metric-card" onclick="showMetricModal('mrr', ${metrics.mrr}, ${relevantCount}, ${recommendedCount})">
                             <div class="metric-label">Mean Reciprocal Rank</div>
                             <div class="metric-value ${getColorClass(metrics.mrr)}">
                                 ${formatPercentage(metrics.mrr)}
@@ -5142,6 +5377,10 @@ function showDetailedAnalysis() {
                 // Get recommended champions from ML results
                 const recommendedChampions = EvaluationMetrics.getRecommendedChampions(mlResults);
                 
+                // Store globally for modal access
+                window.currentMLResults = mlResults;
+                window.currentRelevantChampions = relevantChampions;
+                
                 // Calculate Precision@K metrics
                 const precision1 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 1);
                 const precision3 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 3);
@@ -5522,6 +5761,226 @@ function restartQuestionnaire() {
         }
 
         // Function to save the current recommendation and display all results on a web page
+        // Global variables to store metric data
+        let currentMetricData = null;
+
+        // Function to show metric modal with detailed information
+        function showMetricModal(metricType, value, relevantCount, recommendedCount) {
+            const modal = document.getElementById('metric-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            
+            // Store metric data globally for access
+            currentMetricData = { metricType, value, relevantCount, recommendedCount };
+            
+            // Get recommended champions from current ML results
+            const recommendedChampions = window.currentMLResults ? 
+                EvaluationMetrics.getRecommendedChampions(window.currentMLResults) : [];
+            
+            // Get relevant champions
+            const relevantChampions = window.currentRelevantChampions || new Set();
+            
+            let content = '';
+            let title = '';
+            let scoreClass = value >= 0.7 ? '' : (value >= 0.4 ? 'warning' : 'poor');
+            
+            if (metricType === 'p1') {
+                title = '📊 Precision@1 - Top Recommendation Quality';
+                const topChampion = recommendedChampions[0] || 'N/A';
+                const isRelevant = relevantChampions.has(topChampion);
+                
+                content = `
+                    <div class="modal-score ${scoreClass}">
+                        <div class="modal-score-value">${(value * 100).toFixed(1)}%</div>
+                        <div class="modal-score-label">Precision@1 Score</div>
+                    </div>
+                    
+                    <h3>What is Precision@1?</h3>
+                    <p>Precision@1 measures whether our <strong>top recommendation</strong> matches your preferences. A score of 100% means the #1 champion is highly relevant to what you're looking for.</p>
+                    
+                    <h3>Your Top Recommendation</h3>
+                    <div class="champion-list">
+                        <div class="champion-list-item">
+                            <span class="champion-list-icon">🏆</span>
+                            <span class="champion-list-name">${topChampion}</span>
+                            <span class="champion-list-badge ${isRelevant ? 'relevant' : 'not-relevant'}">
+                                ${isRelevant ? '✓ Relevant' : '✗ Not Optimal'}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <h3>Why This Score?</h3>
+                    <p>${isRelevant ? 
+                        `<strong>${topChampion}</strong> is an excellent match for your preferences! The champion aligns well with your desired role, difficulty level, and playstyle.` :
+                        `<strong>${topChampion}</strong> doesn't perfectly match all your preferences. This could mean the champion has a different difficulty level or playstyle than what you specified. Consider trying the other recommendations or adjusting your preferences.`
+                    }</p>
+                    
+                    <h3>How It's Calculated</h3>
+                    <p>We compare your top recommendation against ${relevantCount} champions that match your preferences (role, difficulty, damage output, and toughness). The recommendation is considered successful if it falls within this relevant set.</p>
+                `;
+                
+            } else if (metricType === 'p3') {
+                title = '📊 Precision@3 - Top 3 Recommendations Quality';
+                const top3 = recommendedChampions.slice(0, 3);
+                const relevantInTop3 = top3.filter(champ => relevantChampions.has(champ)).length;
+                
+                content = `
+                    <div class="modal-score ${scoreClass}">
+                        <div class="modal-score-value">${(value * 100).toFixed(1)}%</div>
+                        <div class="modal-score-label">Precision@3 Score</div>
+                    </div>
+                    
+                    <h3>What is Precision@3?</h3>
+                    <p>Precision@3 measures how many of your <strong>top 3 recommendations</strong> are relevant to your preferences. This gives you confidence that you have multiple good options to choose from.</p>
+                    
+                    <h3>Your Top 3 Recommendations</h3>
+                    <div class="champion-list">
+                        ${top3.map((champ, idx) => {
+                            const isRelevant = relevantChampions.has(champ);
+                            return `
+                                <div class="champion-list-item">
+                                    <span class="champion-list-icon">#${idx + 1}</span>
+                                    <span class="champion-list-name">${champ}</span>
+                                    <span class="champion-list-badge ${isRelevant ? 'relevant' : 'not-relevant'}">
+                                        ${isRelevant ? '✓ Relevant' : '✗ Not Optimal'}
+                                    </span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    
+                    <h3>Why This Score?</h3>
+                    <p><strong>${relevantInTop3} out of 3</strong> recommendations match your preferences well. ${
+                        relevantInTop3 === 3 ? 'Excellent! All three suggestions are great matches for your playstyle.' :
+                        relevantInTop3 === 2 ? 'Good! Most of your top picks align with what you\'re looking for.' :
+                        relevantInTop3 === 1 ? 'You have at least one strong option, but consider reviewing the others or adjusting preferences.' :
+                        'None of the top 3 perfectly match your preferences. Try adjusting your criteria for better results.'
+                    }</p>
+                    
+                    <h3>Scoring Details</h3>
+                    <p>Score = (Relevant Champions in Top 3) ÷ 3 = ${relevantInTop3}/3 = ${(value * 100).toFixed(1)}%</p>
+                `;
+                
+            } else if (metricType === 'p5') {
+                title = '📊 Precision@5 - Top 5 Recommendations Quality';
+                const top5 = recommendedChampions.slice(0, 5);
+                const relevantInTop5 = top5.filter(champ => relevantChampions.has(champ)).length;
+                
+                content = `
+                    <div class="modal-score ${scoreClass}">
+                        <div class="modal-score-value">${(value * 100).toFixed(1)}%</div>
+                        <div class="modal-score-label">Precision@5 Score</div>
+                    </div>
+                    
+                    <h3>What is Precision@5?</h3>
+                    <p>Precision@5 measures how many of your <strong>top 5 recommendations</strong> are relevant. This metric shows the overall quality of our recommendation system for giving you multiple viable options.</p>
+                    
+                    <h3>Your Top 5 Recommendations</h3>
+                    <div class="champion-list">
+                        ${top5.map((champ, idx) => {
+                            const isRelevant = relevantChampions.has(champ);
+                            return `
+                                <div class="champion-list-item">
+                                    <span class="champion-list-icon">#${idx + 1}</span>
+                                    <span class="champion-list-name">${champ}</span>
+                                    <span class="champion-list-badge ${isRelevant ? 'relevant' : 'not-relevant'}">
+                                        ${isRelevant ? '✓ Relevant' : '✗ Not Optimal'}
+                                    </span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    
+                    <h3>Why This Score?</h3>
+                    <p><strong>${relevantInTop5} out of 5</strong> recommendations are good matches. ${
+                        relevantInTop5 >= 4 ? 'Excellent diversity! You have multiple great options to experiment with.' :
+                        relevantInTop5 >= 3 ? 'Good variety! You should find several champions that fit your style.' :
+                        relevantInTop5 >= 2 ? 'Decent options available, though some may require adaptation to your playstyle.' :
+                        'Limited optimal matches. Consider broadening your preferences or trying the top-ranked champions.'
+                    }</p>
+                    
+                    <h3>Scoring Details</h3>
+                    <p>Score = (Relevant Champions in Top 5) ÷ 5 = ${relevantInTop5}/5 = ${(value * 100).toFixed(1)}%</p>
+                    <p>Out of ${relevantCount} total relevant champions from our database of ${recommendedCount} analyzed champions.</p>
+                `;
+                
+            } else if (metricType === 'mrr') {
+                title = '📊 Mean Reciprocal Rank (MRR)';
+                const firstRelevantIndex = recommendedChampions.findIndex(champ => relevantChampions.has(champ));
+                const rank = firstRelevantIndex >= 0 ? firstRelevantIndex + 1 : 'N/A';
+                const firstRelevantChampion = firstRelevantIndex >= 0 ? recommendedChampions[firstRelevantIndex] : 'None found';
+                
+                content = `
+                    <div class="modal-score ${scoreClass}">
+                        <div class="modal-score-value">${(value * 100).toFixed(1)}%</div>
+                        <div class="modal-score-label">MRR Score</div>
+                    </div>
+                    
+                    <h3>What is Mean Reciprocal Rank?</h3>
+                    <p>MRR measures <strong>how quickly</strong> we show you a relevant champion. It answers the question: "Do I have to scroll through many recommendations before finding a good match?"</p>
+                    
+                    <h3>First Relevant Match</h3>
+                    <div class="champion-list">
+                        <div class="champion-list-item">
+                            <span class="champion-list-icon">🎯</span>
+                            <span class="champion-list-name">${firstRelevantChampion}</span>
+                            ${rank !== 'N/A' ? `<span class="champion-list-badge relevant">Position #${rank}</span>` : ''}
+                        </div>
+                    </div>
+                    
+                    <h3>Why This Score?</h3>
+                    <p>${rank !== 'N/A' ? 
+                        `Your first relevant match appears at position <strong>#${rank}</strong>. ${
+                            rank === 1 ? 'Perfect! The very first recommendation is a great match.' :
+                            rank <= 2 ? 'Excellent! You found a relevant champion in the top 2.' :
+                            rank <= 5 ? 'Good! A relevant champion appears in your top 5 recommendations.' :
+                            'You may need to look through several recommendations to find the best match.'
+                        }` :
+                        'No relevant champions were found in the recommendations. Try adjusting your preferences for better matches.'
+                    }</p>
+                    
+                    <h3>How It's Calculated</h3>
+                    <p>MRR = 1 ÷ (Position of First Relevant Champion)</p>
+                    ${rank !== 'N/A' ? `<p>MRR = 1 ÷ ${rank} = ${value.toFixed(3)} = ${(value * 100).toFixed(1)}%</p>` : '<p>MRR = 0 (no relevant matches found)</p>'}
+                    <p>A score of 100% means the first recommendation is relevant. 50% means the second recommendation is the first relevant one, and so on.</p>
+                    
+                    <h3>What Makes a Champion Relevant?</h3>
+                    <p>Champions are considered relevant when they score at least 45% on our weighted matching system:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Role Match:</strong> 40% weight - Most important factor</li>
+                        <li><strong>Difficulty Match:</strong> 25% weight - Matches your skill preference</li>
+                        <li><strong>Damage Output:</strong> 20% weight - Matches your playstyle</li>
+                        <li><strong>Toughness/Durability:</strong> 15% weight - Tank vs. Squishy preference</li>
+                    </ul>
+                `;
+            }
+            
+            modalTitle.textContent = title;
+            modalBody.innerHTML = content;
+            modal.classList.add('active');
+        }
+
+        // Function to close metric modal
+        function closeMetricModal() {
+            const modal = document.getElementById('metric-modal');
+            modal.classList.remove('active');
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('metric-modal');
+            if (event.target === modal) {
+                closeMetricModal();
+            }
+        }
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeMetricModal();
+            }
+        });
+
         function saveRecommendation() {
             // Get the current user data from localStorage
             const userData = JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]');
