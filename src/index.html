@@ -2127,34 +2127,6 @@
             opacity: 0.95;
         }
 
-        /* AI Explanation Styling */
-        .ai-explanation {
-            background: linear-gradient(135deg, #f0f4ff 0%, #e8f0ff 100%);
-            border: 2px solid #667eea;
-            border-radius: 12px;
-            padding: 15px;
-            margin: 15px 0;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
-            animation: fadeInUp 0.5s ease-out;
-        }
-
-        .ai-icon {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #667eea;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .ai-text {
-            font-size: 0.95rem;
-            color: #333;
-            line-height: 1.6;
-            font-style: italic;
-        }
-
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -2221,102 +2193,6 @@
 
         .metric-card:hover {
             transform: translateY(-2px);
-        }
-
-        /* AI Report Card Styling */
-        .ai-report-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 12px;
-            padding: 25px;
-            text-align: center;
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .ai-report-icon {
-            font-size: 2.5rem;
-            margin-bottom: 5px;
-        }
-
-        .ai-report-card h4 {
-            margin: 0;
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-
-        .ai-report-card p {
-            margin: 0;
-            font-size: 0.9rem;
-            opacity: 0.95;
-            line-height: 1.4;
-        }
-
-        .btn-generate-report {
-            background: white;
-            color: #667eea;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            margin-top: 8px;
-        }
-
-        .btn-generate-report:hover {
-            background: #f8f9ff;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-generate-report:active {
-            transform: translateY(0);
-        }
-
-        .report-icon {
-            font-size: 1.2rem;
-        }
-
-        .btn-generate-report.loading {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        .btn-generate-report.loading::after {
-            content: '';
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid #667eea;
-            border-top: 2px solid transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-left: 8px;
-        }
-
-        /* AI Report Modal */
-        #ai-report-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            animation: fadeIn 0.3s ease;
         }
 
         #ai-report-modal.active {
@@ -4413,17 +4289,6 @@
                                 Algorithm confidence & variety balance
                             </div>
                         </div>
-
-                        <!-- AI Report Button Card -->
-                        <div class="ai-report-card">
-                            <div class="ai-report-icon">🤖</div>
-                            <h4>AI Insights & Analysis</h4>
-                            <p>Generate a comprehensive AI-powered report analyzing your recommendations and metrics</p>
-                            <button class="btn-generate-report" onclick="generateAIReport()">
-                                <span class="report-icon">✨</span>
-                                Generate AI Insight & Report
-                            </button>
-                        </div>
                     </div>
 
                     <!-- Performance Interpretation -->
@@ -4451,23 +4316,33 @@
             return html;
         }
 
-        // Google Gemini AI Integration for Champion Explanations
+        // Application Logic
+        let currentQuestion = 1;
+        let answers = {};
+        let mlResults = {};
+        
+        // TASK 13.1: Score caching system
+        // Cache algorithm scores to avoid recalculation with same features
+        const scoreCache = new Map();
+        
+        // TASK 13.2: Details caching system
+        // Cache calculation details loaded on demand
+        const detailsCache = new Map();
+        
         /**
-         * Generate personalized champion explanation using Google Gemini AI
-         * @param {string} championName - Name of the champion
-         * @param {Object} userPreferences - User's answer preferences
-         * @param {Object} championData - Champion's data from database
-         * @returns {Promise<string>} - AI-generated explanation
+         * Generate a hash key from features object for caching
+         * @param {Object} features - User feature object
+         * @returns {string} Hash key for caching
          */
-        async function generateChampionExplanation(championName, userPreferences, championData) {
-            try {
-                const prompt = `You are a League of Legends expert. Explain why ${championName} is a perfect match for a player with these preferences in 2-3 sentences:
-
-Player wants: ${userPreferences.role || 'Any'} role, ${userPreferences.playstyle || 'balanced'} playstyle, ${userPreferences.difficulty || 'medium'} difficulty.
-
-${championName} has: ${championData.difficulty}/10 difficulty, ${championData.damage}/10 damage, ${championData.toughness}/10 toughness, ${championData.mobility}/10 mobility.
-
-Be concise and engaging.`;
+        function generateFeatureHash(features) {
+            // Create a stable string representation of features
+            const keys = Object.keys(features).sort();
+            const values = keys.map(key => `${key}:${features[key]}`);
+            return values.join('|');
+        }
+        
+        /**
+         * Get cached scores for an algorithm or calculate if not cached
 
                 console.log('🤖 Calling Gemini API for:', championName);
 
@@ -4645,94 +4520,143 @@ This metric ${metricDescriptions[metricName]}. Explain what this score means for
 
             return explanations[metricName] || `Score: ${percentage}% with ${relevantCount} relevant champions found.`;
         }
-
+        
         /**
-         * Enhance champion recommendation cards with AI-generated explanations
-         * @param {Array} topChampions - Array of top recommended champions with scores
+         * Get cached scores for an algorithm or calculate if not cached
+         * TASK 14.1: Now includes performance profiling
+         * @param {string} algorithmName - Name of the algorithm ('random-forest', 'decision-tree', 'knn')
+         * @param {Object} algorithm - Algorithm instance
+         * @param {Object} features - User features
+         * @returns {Object} Scores object for all champions
          */
-        async function enhanceChampionCardsWithAI(topChampions) {
-            console.log('🤖 Starting AI enhancement for top champions:', topChampions);
+        function getCachedScores(algorithmName, algorithm, features) {
+            const featureHash = generateFeatureHash(features);
+            const cacheKey = `${algorithmName}-${featureHash}`;
             
-            const userPreferences = {
-                role: answers[1] || 'No Preference',
-                position: answers[2] || 'No Preference',
-                playstyle: answers[3] || 'Balanced/Hybrid',
-                difficulty: answers[4] || 'Medium (4-6)',
-                range: answers[5] || 'No Preference',
-                resource: answers[6] || 'No Preference',
-                damageType: answers[7] || 'No Preference'
-            };
-
-            // Process all 5 champions
-            const championsToExplain = topChampions.slice(0, 5);
-            
-            for (let i = 0; i < championsToExplain.length; i++) {
-                const champion = championsToExplain[i];
-                const championName = champion.name || champion.championName;
-                const championData = allChampions[championName];
-                
-                if (!championData) {
-                    console.warn(`⚠️ Champion data not found for: ${championName}`);
-                    continue;
-                }
-
-                try {
-                    console.log(`🤖 Generating AI explanation for ${championName} (${i + 1}/5)...`);
-                    
-                    // Generate AI explanation
-                    const explanation = await generateChampionExplanation(
-                        championName,
-                        userPreferences,
-                        championData
-                    );
-
-                    // Find the champion card in the DOM and add AI explanation
-                    const matchCards = document.querySelectorAll('.match-card');
-                    
-                    for (const card of matchCards) {
-                        const cardTitle = card.querySelector('h4');
-                        if (cardTitle && cardTitle.textContent.includes(championName)) {
-                            // Check if AI explanation already exists
-                            let aiExplanationDiv = card.querySelector('.ai-explanation');
-                            
-                            if (!aiExplanationDiv) {
-                                // Create new AI explanation div
-                                aiExplanationDiv = document.createElement('div');
-                                aiExplanationDiv.className = 'ai-explanation';
-                                
-                                // Insert after champion-stats-grid or at the end of card
-                                const statsGrid = card.querySelector('.champion-stats-grid');
-                                if (statsGrid) {
-                                    statsGrid.after(aiExplanationDiv);
-                                } else {
-                                    card.appendChild(aiExplanationDiv);
-                                }
-                            }
-                            
-                            // Update content
-                            aiExplanationDiv.innerHTML = `
-                                <div class="ai-icon">✨ AI Insight</div>
-                                <div class="ai-text">${explanation}</div>
-                            `;
-                            
-                            console.log(`✅ AI explanation added for ${championName}`);
-                            break;
-                        }
-                    }
-
-                    // Add delay between API calls (500ms)
-                    if (i < championsToExplain.length - 1) {
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                    }
-                    
-                } catch (error) {
-                    console.error(`❌ Failed to generate AI explanation for ${championName}:`, error);
-                    // Continue to next champion even if this one fails
-                }
+            // Check if scores are cached
+            if (scoreCache.has(cacheKey)) {
+                console.log(`[Cache Hit] Using cached scores for ${algorithmName}`);
+                return scoreCache.get(cacheKey);
             }
             
-            console.log('🤖 AI enhancement completed');
+            // Calculate scores if not cached - with performance profiling
+            console.log(`[Cache Miss] Calculating scores for ${algorithmName}`);
+            const profileResult = profilePredictAll(algorithmName, algorithm, features);
+            const scores = profileResult.scores;
+            
+            // Store in cache
+            scoreCache.set(cacheKey, scores);
+            
+            // Limit cache size to prevent memory issues (keep last 50 entries)
+            if (scoreCache.size > 50) {
+                const firstKey = scoreCache.keys().next().value;
+                scoreCache.delete(firstKey);
+            }
+            
+            return scores;
         }
+        
+        /**
+         * Get cached calculation details or load on demand
+         * @param {string} algorithmName - Name of the algorithm
+         * @param {string} championName - Name of the champion
+         * @param {Object} detailsObject - Details object from mlResults
+         * @returns {Object} Calculation details
+         */
+        function getCachedDetails(algorithmName, championName, detailsObject) {
+            const cacheKey = `${algorithmName}-${championName}`;
+            
+            // Check if details are cached
+            if (detailsCache.has(cacheKey)) {
+                console.log(`[Cache Hit] Using cached details for ${algorithmName} - ${championName}`);
+                return detailsCache.get(cacheKey);
+            }
+            
+            // Load details on demand
+            console.log(`[Cache Miss] Loading details for ${algorithmName} - ${championName}`);
+            
+            // Store in cache
+            detailsCache.set(cacheKey, detailsObject);
+            
+            // Limit cache size (keep last 100 entries)
+            if (detailsCache.size > 100) {
+                const firstKey = detailsCache.keys().next().value;
+                detailsCache.delete(firstKey);
+            }
+            
+            return detailsObject;
+        }
+        
+        /**
+         * Clear all caches (useful for testing or when user preferences change significantly)
+         */
+        function clearAllCaches() {
+            scoreCache.clear();
+            detailsCache.clear();
+            console.log('[Cache] All caches cleared');
+        }
+        
+        // TASK 14.1: Performance Profiling System
+        // Track performance metrics for each algorithm
+        const performanceMetrics = {
+            'random-forest': { calls: 0, totalTime: 0, avgTime: 0, minTime: Infinity, maxTime: 0, lastTime: 0 },
+            'decision-tree': { calls: 0, totalTime: 0, avgTime: 0, minTime: Infinity, maxTime: 0, lastTime: 0 },
+            'knn': { calls: 0, totalTime: 0, avgTime: 0, minTime: Infinity, maxTime: 0, lastTime: 0 }
+        };
+        
+        /**
+         * Profile the execution time of predictAll() for an algorithm
+         * @param {string} algorithmName - Name of the algorithm
+         * @param {Object} algorithm - Algorithm instance
+         * @param {Object} features - User features
+         * @returns {Object} Object containing scores and timing information
+         */
+        function profilePredictAll(algorithmName, algorithm, features) {
+            const startTime = performance.now();
+            
+            // Execute predictAll
+            const scores = algorithm.predictAll(features);
+            
+            const endTime = performance.now();
+            const executionTime = endTime - startTime;
+            
+            // Update metrics
+            const metrics = performanceMetrics[algorithmName];
+            metrics.calls++;
+            metrics.totalTime += executionTime;
+            metrics.avgTime = metrics.totalTime / metrics.calls;
+            metrics.minTime = Math.min(metrics.minTime, executionTime);
+            metrics.maxTime = Math.max(metrics.maxTime, executionTime);
+            metrics.lastTime = executionTime;
+            
+            // Log performance data
+            console.log(`[Performance] ${algorithmName} predictAll() took ${executionTime.toFixed(3)}ms`);
+            
+            return {
+                scores: scores,
+                timing: {
+                    executionTime: executionTime,
+                    avgTime: metrics.avgTime,
+                    minTime: metrics.minTime,
+                    maxTime: metrics.maxTime,
+                    calls: metrics.calls
+                }
+            };
+        }
+        
+        // Load questions from questions.json
+        let questions = [];
+        
+        fetch('data/questions.json')
+            .then(response => response.json())
+            .then(data => {
+                questions = data;
+                console.log(`✅ Loaded ${questions.length} questions from questions.json`);
+            })
+            .catch(error => {
+                console.error('❌ Error loading questions:', error);
+                alert('Failed to load questions. Please refresh the page.');
+            });
 
         /**
          * Enhance metric cards with AI-generated explanations
@@ -5103,31 +5027,6 @@ ${text}
                 alert('❌ Failed to copy report');
             });
         }
-
-        // Application Logic
-        let currentQuestion = 1;
-        let answers = {};
-        let mlResults = {};
-        
-        // TASK 13.1: Score caching system
-        // Cache algorithm scores to avoid recalculation with same features
-        const scoreCache = new Map();
-        
-        // TASK 13.2: Details caching system
-        // Cache calculation details loaded on demand
-        const detailsCache = new Map();
-        
-        /**
-         * Generate a hash key from features object for caching
-         * @param {Object} features - User feature object
-         * @returns {string} Hash key for caching
-         */
-        function generateFeatureHash(features) {
-            // Create a stable string representation of features
-            const keys = Object.keys(features).sort();
-            const values = keys.map(key => `${key}:${features[key]}`);
-            return values.join('|');
-        }
         
         /**
          * Get cached scores for an algorithm or calculate if not cached
@@ -5194,23 +5093,6 @@ ${text}
             
             return detailsObject;
         }
-        
-        /**
-         * Clear all caches (useful for testing or when user preferences change significantly)
-         */
-        function clearAllCaches() {
-            scoreCache.clear();
-            detailsCache.clear();
-            console.log('[Cache] All caches cleared');
-        }
-        
-        // TASK 14.1: Performance Profiling System
-        // Track performance metrics for each algorithm
-        const performanceMetrics = {
-            'random-forest': { calls: 0, totalTime: 0, avgTime: 0, minTime: Infinity, maxTime: 0, lastTime: 0 },
-            'decision-tree': { calls: 0, totalTime: 0, avgTime: 0, minTime: Infinity, maxTime: 0, lastTime: 0 },
-            'knn': { calls: 0, totalTime: 0, avgTime: 0, minTime: Infinity, maxTime: 0, lastTime: 0 }
-        };
         
         /**
          * Profile the execution time of predictAll() for an algorithm
@@ -6432,9 +6314,10 @@ function showDetailedAnalysis() {
                 name: c.championName,
                 score: c.weighted
             }));
-            enhanceChampionCardsWithAI(topChampionsForAI).catch(err => {
-                console.log('Champion AI enhancement skipped:', err);
-            });
+            // AI enhancement removed
+            // enhanceChampionCardsWithAI(topChampionsForAI).catch(err => {
+            //     console.log('Champion AI enhancement skipped:', err);
+            // });
             
             // Enhance with AI-generated explanations for quality metrics
             try {
@@ -6446,18 +6329,8 @@ function showDetailedAnalysis() {
                 const precision5 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 5);
                 const mrr = EvaluationMetrics.meanReciprocalRank(recommendedChampions, relevantChampions);
                 
-                const metricsForAI = {
-                    p1: precision1,
-                    p3: precision3,
-                    p5: precision5,
-                    mrr: mrr
-                };
-                
-                enhanceMetricCardsWithAI(metricsForAI, relevantChampions.size, recommendedChampions.length).catch(err => {
-                    console.log('Metric AI enhancement skipped:', err);
-                });
             } catch (error) {
-                console.log('Metric AI enhancement skipped due to error:', error);
+                console.log('Quality metrics calculation error:', error);
             }
             
             // Google Analytics tracking removed as per user request
