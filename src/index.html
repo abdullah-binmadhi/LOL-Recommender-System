@@ -2126,6 +2126,62 @@
             font-size: 1.1rem;
             opacity: 0.95;
         }
+
+        /* AI Explanation Styling */
+        .ai-explanation {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8f0ff 100%);
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .ai-icon {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .ai-text {
+            font-size: 0.95rem;
+            color: #333;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Loading state for AI */
+        .ai-loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -2301,6 +2357,10 @@
     </div>
 
     <script>      
+  // Google Gemini API Configuration
+        const GEMINI_API_KEY = 'AIzaSyClkO4SHTR_t2d7JYI-zgBykopCW2no10U';
+        const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+
   // Champion Database (50 champions for optimal performance)
         const allChampions = {
             'Jinx': { role: 'Marksman', positions: ['ADC'], difficulty: 6, damage: 9, toughness: 2, control: 7, mobility: 6, utility: 6, image: 'https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Jinx.png', stats: { winRate: 51.8, pickRate: 12.3, banRate: 4.2, tier: 'A', trend: 'stable' } },
@@ -4163,6 +4223,137 @@
             return html;
         }
 
+        // Google Gemini AI Integration for Champion Explanations
+        /**
+         * Generate personalized champion explanation using Google Gemini AI
+         * @param {string} championName - Name of the champion
+         * @param {Object} userPreferences - User's answer preferences
+         * @param {Object} championData - Champion's data from database
+         * @returns {Promise<string>} - AI-generated explanation
+         */
+        async function generateChampionExplanation(championName, userPreferences, championData) {
+            try {
+                const prompt = `You are a League of Legends expert. Explain why ${championName} is a perfect match for a player with these preferences in a friendly, concise way (2-3 sentences max):
+
+Player Preferences:
+- Role: ${userPreferences.role || 'Any'}
+- Position: ${userPreferences.position || 'Any'}
+- Playstyle: ${userPreferences.playstyle || 'Balanced'}
+- Difficulty: ${userPreferences.difficulty || 'Medium'}
+- Engagement Range: ${userPreferences.range || 'Medium'}
+- Resource Type: ${userPreferences.resource || 'Any'}
+- Damage Type: ${userPreferences.damageType || 'Any'}
+
+Champion Stats:
+- Role: ${championData.role}
+- Positions: ${championData.positions?.join(', ') || 'Flexible'}
+- Difficulty: ${championData.difficulty}/10
+- Damage: ${championData.damage}/10
+- Toughness: ${championData.toughness}/10
+- Mobility: ${championData.mobility}/10
+
+Keep it short, personalized, and engaging. Focus on why THIS champion matches THEIR preferences.`;
+
+                const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: prompt
+                            }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 150,
+                            topP: 0.8,
+                            topK: 40
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const explanation = data.candidates?.[0]?.content?.parts?.[0]?.text || 
+                                  'This champion matches your playstyle preferences perfectly!';
+                
+                return explanation.trim();
+            } catch (error) {
+                console.error('Gemini AI Error:', error);
+                // Return a fallback explanation if API fails
+                return `${championName} matches your preference for ${userPreferences.role || 'versatile'} champions with ${userPreferences.playstyle || 'balanced'} playstyle.`;
+            }
+        }
+
+        /**
+         * Enhance champion recommendation cards with AI-generated explanations
+         * @param {Array} topChampions - Array of top recommended champions with scores
+         */
+        async function enhanceChampionCardsWithAI(topChampions) {
+            const userPreferences = {
+                role: answers[1],
+                position: answers[2],
+                playstyle: answers[3],
+                difficulty: answers[4],
+                range: answers[5],
+                resource: answers[6],
+                damageType: answers[7]
+            };
+
+            // Process top 3 champions (to avoid hitting API rate limits)
+            const championsToExplain = topChampions.slice(0, 3);
+            
+            for (let i = 0; i < championsToExplain.length; i++) {
+                const champion = championsToExplain[i];
+                const championData = allChampions[champion.name];
+                
+                if (!championData) continue;
+
+                // Generate AI explanation
+                const explanation = await generateChampionExplanation(
+                    champion.name,
+                    userPreferences,
+                    championData
+                );
+
+                // Find the champion card in the DOM and add AI explanation
+                const championCards = document.querySelectorAll('.champion-name');
+                for (const card of championCards) {
+                    if (card.textContent.includes(champion.name)) {
+                        const parentCard = card.closest('.champion-card') || card.closest('.top-champion-card');
+                        if (parentCard && !parentCard.querySelector('.ai-explanation')) {
+                            const aiDiv = document.createElement('div');
+                            aiDiv.className = 'ai-explanation';
+                            aiDiv.innerHTML = `
+                                <div class="ai-icon">✨ AI Insight</div>
+                                <div class="ai-text">${explanation}</div>
+                            `;
+                            
+                            // Insert after the champion stats section
+                            const statsSection = parentCard.querySelector('.champion-stats') || 
+                                               parentCard.querySelector('.champion-score');
+                            if (statsSection) {
+                                statsSection.parentNode.insertBefore(aiDiv, statsSection.nextSibling);
+                            } else {
+                                parentCard.appendChild(aiDiv);
+                            }
+                        }
+                        break;
+                    }
+                }
+
+                // Add a small delay between API calls to respect rate limits
+                if (i < championsToExplain.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+            }
+        }
+
         // Application Logic
         let currentQuestion = 1;
         let answers = {};
@@ -5485,6 +5676,15 @@ function showDetailedAnalysis() {
             
             // Set the content
             analysisContent.innerHTML = content;
+            
+            // Enhance with AI-generated explanations
+            const topChampionsForAI = top5Champions.map(c => ({
+                name: c.championName,
+                score: c.weighted
+            }));
+            enhanceChampionCardsWithAI(topChampionsForAI).catch(err => {
+                console.log('AI enhancement skipped:', err);
+            });
             
             // Google Analytics tracking removed as per user request
             
