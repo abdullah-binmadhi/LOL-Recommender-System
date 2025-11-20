@@ -4231,12 +4231,12 @@
 
                         <!-- MRR Card -->
                         <div class="metric-card metric-card-mrr" onclick="showMetricModal('mrr', ${metrics.mrr}, ${relevantCount}, ${recommendedCount})">
-                            <div class="metric-label">Mean Reciprocal Rank</div>
+                            <div class="metric-label">Confidence & Diversity</div>
                             <div class="metric-value ${getColorClass(metrics.mrr)}">
                                 ${formatPercentage(metrics.mrr)}
                             </div>
                             <div class="metric-description">
-                                First relevant match position
+                                Algorithm confidence & variety balance
                             </div>
                             <div class="metric-ai-placeholder" data-metric="mrr"></div>
                         </div>
@@ -4386,7 +4386,7 @@ Be concise and engaging.`;
                     'p1': 'measures if your #1 recommended champion matches your preferences',
                     'p3': 'measures how many of your top 3 recommendations match your preferences',
                     'p5': 'measures how many of your top 5 recommendations match your preferences',
-                    'mrr': 'measures how quickly you found a relevant champion in the recommendations'
+                    'mrr': 'measures our algorithm confidence in top recommendations and the balance between champion diversity and match accuracy'
                 };
 
                 const percentage = (metricValue * 100).toFixed(1);
@@ -4456,7 +4456,7 @@ This metric ${metricDescriptions[metricName]}. Explain what this score means for
                 'p1': `Your top recommendation has a ${percentage}% match with your preferences. ${metricValue >= 0.7 ? 'This is excellent - the #1 champion is highly relevant!' : metricValue >= 0.4 ? 'This is decent - the top pick shows good alignment.' : 'Consider trying different preferences for a better top match.'} We found ${relevantCount} relevant champions total.`,
                 'p3': `${percentage}% of your top 3 recommendations match your preferences. ${metricValue >= 0.7 ? 'Excellent! Most of your top picks are great matches.' : metricValue >= 0.4 ? 'Good! You have solid options in your top 3.' : 'Try adjusting your answers to get more relevant matches in the top 3.'} ${relevantCount} champions matched your criteria.`,
                 'p5': `${percentage}% of your top 5 recommendations are relevant to your playstyle. ${metricValue >= 0.7 ? 'Outstanding performance! The majority of recommendations fit you well.' : metricValue >= 0.4 ? 'Good spread of relevant champions in your top 5.' : 'You may want to refine your preferences for better top 5 matches.'} Total relevant: ${relevantCount} champions.`,
-                'mrr': `Your first relevant match appeared at position ${metricValue > 0 ? Math.round(1/metricValue) : 'N/A'}. ${metricValue >= 0.7 ? 'Excellent - you found a great match very quickly!' : metricValue >= 0.4 ? 'Good - a relevant champion appeared in your top recommendations.' : 'Relevant matches appeared later in the list.'} ${relevantCount} total matches found.`
+                'mrr': `Confidence Score: ${percentage}%. ${metricValue >= 0.9 ? 'Very High Confidence - Our algorithms are extremely sure about your top pick! The recommendations balance accuracy with diverse options across different playstyles.' : metricValue >= 0.7 ? 'High Confidence - Strong match in top positions with good diversity. You\'ll likely be satisfied with the top 2-3 picks.' : metricValue >= 0.5 ? 'Medium Confidence - Decent matches found, with variety in the recommendations. Consider exploring multiple options.' : 'Lower Confidence - Your preferences suggest diverse possibilities. We\'re prioritizing variety to help you discover new champions.'} ${relevantCount} relevant champions found across the pool.`
             };
 
             return explanations[metricName] || `Score: ${percentage}% with ${relevantCount} relevant champions found.`;
@@ -6438,21 +6438,88 @@ function restartQuestionnaire() {
                 `;
                 
             } else if (metricType === 'mrr') {
-                title = '📊 Mean Reciprocal Rank (MRR)';
+                title = '📊 Recommendation Confidence & Diversity';
                 const firstRelevantIndex = recommendedChampions.findIndex(champ => relevantChampions.has(champ));
                 const rank = firstRelevantIndex >= 0 ? firstRelevantIndex + 1 : 'N/A';
                 const firstRelevantChampion = firstRelevantIndex >= 0 ? recommendedChampions[firstRelevantIndex] : 'None found';
                 
+                // Calculate diversity score based on role variety in top 5
+                const top5 = recommendedChampions.slice(0, 5);
+                const rolesInTop5 = new Set(top5.map(champ => window.currentMLResults?.allChampions?.[champ]?.role || allChampions[champ]?.role).filter(r => r));
+                const diversityScore = (rolesInTop5.size / 5) * 100; // % of unique roles
+                
+                // Determine confidence level
+                let confidenceLevel = 'Low';
+                let confidenceColor = '#c62828';
+                let confidenceDescription = 'Our algorithms are uncertain about the best match.';
+                
+                if (value >= 0.9) {
+                    confidenceLevel = 'Very High';
+                    confidenceColor = '#2e7d32';
+                    confidenceDescription = 'Our algorithms are extremely confident about your top recommendation.';
+                } else if (value >= 0.7) {
+                    confidenceLevel = 'High';
+                    confidenceColor = '#388e3c';
+                    confidenceDescription = 'Our algorithms show strong confidence in the top picks.';
+                } else if (value >= 0.5) {
+                    confidenceLevel = 'Medium';
+                    confidenceColor = '#f57c00';
+                    confidenceDescription = 'Our algorithms show moderate confidence with good options available.';
+                } else if (value >= 0.3) {
+                    confidenceLevel = 'Medium-Low';
+                    confidenceColor = '#ff9800';
+                    confidenceDescription = 'Multiple viable options exist, explore the top 5 to find your best fit.';
+                }
+                
+                // Determine diversity assessment
+                let diversityAssessment = '';
+                if (diversityScore >= 80) {
+                    diversityAssessment = '🌟 Excellent diversity! Recommendations span multiple roles and playstyles.';
+                } else if (diversityScore >= 60) {
+                    diversityAssessment = '✅ Good variety! You have options across different roles.';
+                } else if (diversityScore >= 40) {
+                    diversityAssessment = '⚖️ Moderate diversity. Some variety exists, but champions are similar.';
+                } else {
+                    diversityAssessment = '🎯 Focused recommendations. Champions are similar, suggesting a clear preference match.';
+                }
+                
                 content = `
                     <div class="modal-score ${scoreClass}">
                         <div class="modal-score-value">${(value * 100).toFixed(1)}%</div>
-                        <div class="modal-score-label">MRR Score</div>
+                        <div class="modal-score-label">Confidence Score</div>
                     </div>
                     
-                    <h3>What is Mean Reciprocal Rank?</h3>
-                    <p>MRR measures <strong>how quickly</strong> we show you a relevant champion. It answers the question: "Do I have to scroll through many recommendations before finding a good match?"</p>
+                    <h3>🎯 What Does This Metric Measure?</h3>
+                    <p>This metric evaluates <strong>two key factors</strong>:</p>
+                    <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
+                        <li><strong>Algorithm Confidence:</strong> How sure our ML algorithms are about the top recommendations</li>
+                        <li><strong>Diversity vs. Accuracy Trade-off:</strong> Balance between giving you varied options and precise matches</li>
+                    </ul>
                     
-                    <h3>First Relevant Match</h3>
+                    <div style="background: linear-gradient(135deg, #f0f4ff 0%, #e8f0ff 100%); padding: 15px; border-radius: 10px; margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="font-weight: 600; color: #333;">Confidence Level:</span>
+                            <span style="background: ${confidenceColor}; color: white; padding: 6px 16px; border-radius: 12px; font-weight: bold; font-size: 1.1rem;">
+                                ${confidenceLevel}
+                            </span>
+                        </div>
+                        <p style="color: #555; margin: 0; font-size: 0.95rem;">
+                            ${confidenceDescription}
+                        </p>
+                    </div>
+                    
+                    <h3>📊 Diversity Analysis</h3>
+                    <div style="background: #fff3e0; padding: 15px; border-radius: 10px; margin: 15px 0; border-left: 4px solid #f57c00;">
+                        <div style="margin-bottom: 8px;">
+                            <strong>Diversity Score:</strong> ${diversityScore.toFixed(0)}% 
+                            <span style="color: #666; font-size: 0.9rem;">(${rolesInTop5.size} unique roles in top 5)</span>
+                        </div>
+                        <p style="color: #e65100; margin: 0; font-size: 0.95rem;">
+                            ${diversityAssessment}
+                        </p>
+                    </div>
+                    
+                    <h3>🔍 First Relevant Match</h3>
                     <div class="champion-list">
                         <div class="champion-list-item">
                             <span class="champion-list-icon">🎯</span>
@@ -6461,30 +6528,52 @@ function restartQuestionnaire() {
                         </div>
                     </div>
                     
-                    <h3>Why This Score?</h3>
+                    <h3>💡 What This Means For You</h3>
                     <p>${rank !== 'N/A' ? 
                         `Your first relevant match appears at position <strong>#${rank}</strong>. ${
-                            rank === 1 ? 'Perfect! The very first recommendation is a great match.' :
-                            rank <= 2 ? 'Excellent! You found a relevant champion in the top 2.' :
-                            rank <= 5 ? 'Good! A relevant champion appears in your top 5 recommendations.' :
-                            'You may need to look through several recommendations to find the best match.'
+                            rank === 1 && value >= 0.9 ? '<strong>Perfect match!</strong> Very high confidence + top recommendation is relevant = you\'ll likely love this champion immediately.' :
+                            rank === 1 ? 'The top recommendation matches your preferences. High confidence suggests this is your best fit.' :
+                            rank <= 2 && value >= 0.7 ? 'High confidence with relevant match in top 2. Our algorithms are giving you accuracy with some variety.' :
+                            rank <= 3 && value >= 0.5 ? 'Medium confidence balanced with diversity. We\'re showing you variety while maintaining quality matches.' :
+                            rank <= 5 ? 'We\'re prioritizing champion diversity to help you discover options. Explore the top 5 to find your favorite.' :
+                            'Lower confidence suggests your preferences are diverse. We\'re showing you variety—try multiple champions to find your style.'
                         }` :
-                        'No relevant champions were found in the recommendations. Try adjusting your preferences for better matches.'
+                        'No relevant champions found in current recommendations. This suggests very specific preferences. Try adjusting criteria or explore unexpected options to discover new favorites.'
                     }</p>
                     
-                    <h3>How It's Calculated</h3>
-                    <p>MRR = 1 ÷ (Position of First Relevant Champion)</p>
-                    ${rank !== 'N/A' ? `<p>MRR = 1 ÷ ${rank} = ${value.toFixed(3)} = ${(value * 100).toFixed(1)}%</p>` : '<p>MRR = 0 (no relevant matches found)</p>'}
-                    <p>A score of 100% means the first recommendation is relevant. 50% means the second recommendation is the first relevant one, and so on.</p>
-                    
-                    <h3>What Makes a Champion Relevant?</h3>
-                    <p>Champions are considered relevant when they score at least 45% on our weighted matching system:</p>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li><strong>Role Match:</strong> 40% weight - Most important factor</li>
-                        <li><strong>Difficulty Match:</strong> 25% weight - Matches your skill preference</li>
-                        <li><strong>Damage Output:</strong> 20% weight - Matches your playstyle</li>
-                        <li><strong>Toughness/Durability:</strong> 15% weight - Tank vs. Squishy preference</li>
+                    <h3>⚖️ Confidence vs. Diversity Trade-off</h3>
+                    <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
+                        <li><strong>High Confidence + Low Diversity:</strong> Laser-focused match, but limited variety</li>
+                        <li><strong>High Confidence + High Diversity:</strong> Best of both worlds—accurate matches across different styles</li>
+                        <li><strong>Medium Confidence + High Diversity:</strong> Exploratory recommendations to help you discover new favorites</li>
+                        <li><strong>Low Confidence + High Diversity:</strong> Open preferences = we\'re showing you maximum variety</li>
                     </ul>
+                    
+                    ${value < 0.5 ? `
+                        <div style="background: #e8f5e9; padding: 15px; border-radius: 10px; margin: 15px 0; border-left: 4px solid #4caf50;">
+                            <h4 style="margin: 0 0 10px 0; color: #2e7d32;">💡 Recommendation Strategy</h4>
+                            <p style="margin: 0; color: #1b5e20; line-height: 1.6;">
+                                Your preferences suggest openness to variety. We're prioritizing <strong>diversity</strong> to help you explore different playstyles. 
+                                Try the top 3-5 champions to discover which fits you best!
+                            </p>
+                        </div>
+                    ` : `
+                        <div style="background: #e3f2fd; padding: 15px; border-radius: 10px; margin: 15px 0; border-left: 4px solid #2196f3;">
+                            <h4 style="margin: 0 0 10px 0; color: #1565c0;">✅ Strong Match Detected</h4>
+                            <p style="margin: 0; color: #0d47a1; line-height: 1.6;">
+                                High confidence score indicates our algorithms found champions that closely align with your preferences. 
+                                The top ${rank <= 2 ? '1-2' : '3-5'} recommendations should feel natural to your playstyle!
+                            </p>
+                        </div>
+                    `}
+                    
+                    <h3>📐 How It's Calculated</h3>
+                    <p><strong>MRR Formula:</strong> 1 ÷ (Position of First Relevant Champion)</p>
+                    ${rank !== 'N/A' ? `<p>MRR = 1 ÷ ${rank} = ${value.toFixed(3)} = ${(value * 100).toFixed(1)}%</p>` : '<p>MRR = 0 (no relevant matches found)</p>'}
+                    <p style="margin-top: 10px; padding: 12px; background: #f8f9fa; border-radius: 8px; font-size: 0.9rem; color: #666;">
+                        <strong>Higher scores</strong> = more confident + accurate top recommendations<br>
+                        <strong>Lower scores</strong> = prioritizing diversity + exploration
+                    </p>
                 `;
             }
             
