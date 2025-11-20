@@ -2222,6 +2222,183 @@
         .metric-card:hover {
             transform: translateY(-2px);
         }
+
+        /* AI Report Card Styling */
+        .ai-report-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ai-report-icon {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+        }
+
+        .ai-report-card h4 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .ai-report-card p {
+            margin: 0;
+            font-size: 0.9rem;
+            opacity: 0.95;
+            line-height: 1.4;
+        }
+
+        .btn-generate-report {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            margin-top: 8px;
+        }
+
+        .btn-generate-report:hover {
+            background: #f8f9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-generate-report:active {
+            transform: translateY(0);
+        }
+
+        .report-icon {
+            font-size: 1.2rem;
+        }
+
+        .btn-generate-report.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-generate-report.loading::after {
+            content: '';
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #667eea;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
+        }
+
+        /* AI Report Modal */
+        #ai-report-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        #ai-report-modal.active {
+            display: flex;
+        }
+
+        #ai-report-modal .modal-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-close {
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            transform: scale(1.2);
+            opacity: 0.8;
+        }
+
+        .ai-report-content h3 {
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .ai-report-content p {
+            margin-bottom: 15px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Report Action Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -4202,7 +4379,6 @@
                             <div class="metric-description">
                                 Top recommendation relevance
                             </div>
-                            <div class="metric-ai-placeholder" data-metric="p1"></div>
                         </div>
 
                         <!-- Precision@3 Card -->
@@ -4214,7 +4390,6 @@
                             <div class="metric-description">
                                 Top 3 recommendations relevance
                             </div>
-                            <div class="metric-ai-placeholder" data-metric="p3"></div>
                         </div>
 
                         <!-- Precision@5 Card -->
@@ -4226,7 +4401,6 @@
                             <div class="metric-description">
                                 Top 5 recommendations relevance
                             </div>
-                            <div class="metric-ai-placeholder" data-metric="p5"></div>
                         </div>
 
                         <!-- MRR Card -->
@@ -4238,7 +4412,17 @@
                             <div class="metric-description">
                                 Algorithm confidence & variety balance
                             </div>
-                            <div class="metric-ai-placeholder" data-metric="mrr"></div>
+                        </div>
+
+                        <!-- AI Report Button Card -->
+                        <div class="ai-report-card">
+                            <div class="ai-report-icon">🤖</div>
+                            <h4>AI Insights & Analysis</h4>
+                            <p>Generate a comprehensive AI-powered report analyzing your recommendations and metrics</p>
+                            <button class="btn-generate-report" onclick="generateAIReport()">
+                                <span class="report-icon">✨</span>
+                                Generate AI Insight & Report
+                            </button>
                         </div>
                     </div>
 
@@ -4604,6 +4788,320 @@ This metric ${metricDescriptions[metricName]}. Explain what this score means for
             }
             
             console.log('🤖 Metric AI enhancement completed');
+        }
+
+        /**
+         * Generate comprehensive AI insight and analysis report
+         * Includes detailed champion analysis, metric opinions, and strategic recommendations
+         */
+        async function generateAIReport() {
+            const button = document.querySelector('.btn-generate-report');
+            
+            if (!button) return;
+            
+            // Prevent multiple clicks
+            if (button.classList.contains('loading')) return;
+            
+            button.classList.add('loading');
+            button.innerHTML = '<span class="report-icon">⏳</span> Generating Report...';
+            
+            try {
+                // Gather all data needed for the report
+                const top5Champions = mlResults.top5 || [];
+                const relevantChampions = EvaluationMetrics.calculateUserRelevance(answers, allChampions);
+                const recommendedChampions = EvaluationMetrics.getRecommendedChampions(mlResults);
+                
+                const precision1 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 1);
+                const precision3 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 3);
+                const precision5 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 5);
+                const mrr = EvaluationMetrics.meanReciprocalRank(recommendedChampions, relevantChampions);
+                
+                const userPreferences = {
+                    role: answers[1] || 'No Preference',
+                    position: answers[2] || 'No Preference',
+                    playstyle: answers[3] || 'Balanced/Hybrid',
+                    difficulty: answers[4] || 'Medium (4-6)',
+                    range: answers[5] || 'No Preference',
+                    resource: answers[6] || 'No Preference',
+                    damageType: answers[7] || 'No Preference'
+                };
+                
+                // Build comprehensive prompt for Gemini
+                const championsList = top5Champions.map((c, idx) => 
+                    `${idx + 1}. ${c.championName} - ${c.weighted.toFixed(1)}% match (${allChampions[c.championName]?.role || 'Unknown'})`
+                ).join('\n');
+                
+                const prompt = `You are an expert League of Legends analyst. Create a comprehensive, professional analysis report based on this recommendation system data.
+
+**USER PREFERENCES:**
+- Role: ${userPreferences.role}
+- Position: ${userPreferences.position}
+- Playstyle: ${userPreferences.playstyle}
+- Difficulty: ${userPreferences.difficulty}
+- Range: ${userPreferences.range}
+- Resource Type: ${userPreferences.resource}
+- Damage Type: ${userPreferences.damageType}
+
+**TOP 5 RECOMMENDED CHAMPIONS:**
+${championsList}
+
+**QUALITY METRICS:**
+- Precision@1: ${(precision1 * 100).toFixed(1)}% (Is top pick relevant?)
+- Precision@3: ${(precision3 * 100).toFixed(1)}% (Top 3 relevance)
+- Precision@5: ${(precision5 * 100).toFixed(1)}% (Top 5 relevance)
+- Confidence & Diversity Score: ${(mrr * 100).toFixed(1)}% (Algorithm confidence)
+- Relevant Champions Found: ${relevantChampions.size} out of ${Object.keys(allChampions).length}
+
+**PLEASE PROVIDE:**
+
+1. **EXECUTIVE SUMMARY** (2-3 sentences)
+   - Overall quality assessment of recommendations
+   - Key strength of the top pick
+
+2. **DETAILED CHAMPION ANALYSIS** (For each top 3 champions)
+   - Why this champion fits the user's preferences
+   - Strengths and potential challenges
+   - Best situations to pick this champion
+
+3. **METRICS ANALYSIS & OPINION**
+   - Interpretation of Precision@1, @3, @5 scores
+   - What the Confidence & Diversity score reveals
+   - Overall system performance rating (Excellent/Good/Fair/Poor)
+
+4. **STRATEGIC RECOMMENDATIONS**
+   - Which champion to start with and why
+   - Learning path suggestion
+   - Tips for maximizing success with these picks
+
+5. **DIVERSITY VS ACCURACY ASSESSMENT**
+   - Is the user getting variety or laser-focused matches?
+   - Are the algorithms confident or exploratory?
+
+**FORMAT:** Use clear headings, bullet points, and professional tone. Be honest about both strengths and limitations. Keep it comprehensive but readable (800-1000 words max).`;
+
+                console.log('🤖 Generating comprehensive AI report...');
+
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: prompt
+                            }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.8,
+                            maxOutputTokens: 2048,
+                            topP: 0.9,
+                            topK: 40
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const report = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                if (!report) {
+                    throw new Error('No report generated');
+                }
+
+                console.log('✅ AI Report generated successfully');
+                
+                // Display the report in a modal or new section
+                displayAIReport(report, {
+                    champions: top5Champions,
+                    metrics: { precision1, precision3, precision5, mrr },
+                    preferences: userPreferences,
+                    relevantCount: relevantChampions.size
+                });
+
+            } catch (error) {
+                console.error('❌ AI Report generation failed:', error);
+                alert('Failed to generate AI report. Please try again.');
+            } finally {
+                button.classList.remove('loading');
+                button.innerHTML = '<span class="report-icon">✨</span> Generate AI Insight & Report';
+            }
+        }
+
+        /**
+         * Display the AI-generated report in a beautiful modal
+         */
+        function displayAIReport(reportText, data) {
+            // Create modal HTML
+            const modalHTML = `
+                <div id="ai-report-modal" class="modal active" style="display: flex;">
+                    <div class="modal-content" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+                        <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 12px 12px 0 0;">
+                            <h2 style="margin: 0; font-size: 1.8rem; display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 2rem;">🤖</span> AI-Powered Analysis Report
+                            </h2>
+                            <p style="margin: 10px 0 0 0; opacity: 0.95; font-size: 0.95rem;">
+                                Comprehensive insights generated by Google Gemini AI
+                            </p>
+                            <span class="modal-close" onclick="closeAIReportModal()" style="position: absolute; right: 25px; top: 25px; font-size: 2rem; color: white; cursor: pointer;">&times;</span>
+                        </div>
+                        <div class="modal-body" style="padding: 30px; background: white;">
+                            <!-- Report Metadata -->
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #667eea;">
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                                    <div>
+                                        <strong>📊 Report Generated:</strong> ${new Date().toLocaleString()}
+                                    </div>
+                                    <div>
+                                        <strong>🎯 Champions Analyzed:</strong> ${data.champions.length}
+                                    </div>
+                                    <div>
+                                        <strong>📈 Precision@5:</strong> ${(data.metrics.precision5 * 100).toFixed(1)}%
+                                    </div>
+                                    <div>
+                                        <strong>🔮 Confidence Score:</strong> ${(data.metrics.mrr * 100).toFixed(1)}%
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- AI Report Content -->
+                            <div class="ai-report-content" style="line-height: 1.8; color: #333;">
+                                ${formatReportText(reportText)}
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div style="margin-top: 30px; display: flex; gap: 15px; justify-content: center; padding-top: 20px; border-top: 2px solid #e0e0e0;">
+                                <button onclick="downloadAIReport()" class="btn btn-primary" style="padding: 12px 24px; font-size: 1rem;">
+                                    📥 Download Report
+                                </button>
+                                <button onclick="copyAIReport()" class="btn btn-secondary" style="padding: 12px 24px; font-size: 1rem;">
+                                    📋 Copy to Clipboard
+                                </button>
+                                <button onclick="closeAIReportModal()" class="btn btn-secondary" style="padding: 12px 24px; font-size: 1rem;">
+                                    ✖️ Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Append to body
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+            // Store report data globally for download/copy functions
+            window.currentAIReport = {
+                text: reportText,
+                data: data,
+                generated: new Date().toISOString()
+            };
+        }
+
+        /**
+         * Format the AI report text with proper HTML styling
+         */
+        function formatReportText(text) {
+            // Convert markdown-style formatting to HTML
+            let formatted = text
+                // Headers
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                // Bold
+                .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                // Line breaks
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+
+            // Wrap in paragraphs
+            formatted = '<p>' + formatted + '</p>';
+
+            // Style headings
+            formatted = formatted.replace(/<p><strong>(\d+\.\s+[^<]+)<\/strong><\/p>/g, 
+                '<h3 style="color: #667eea; margin-top: 25px; margin-bottom: 15px; font-size: 1.3rem;">$1</h3>');
+
+            return formatted;
+        }
+
+        /**
+         * Close the AI report modal
+         */
+        function closeAIReportModal() {
+            const modal = document.getElementById('ai-report-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        /**
+         * Download the AI report as a text file
+         */
+        function downloadAIReport() {
+            if (!window.currentAIReport) return;
+
+            const { text, data, generated } = window.currentAIReport;
+            
+            const content = `
+═══════════════════════════════════════════════════════════════
+    🤖 AI-POWERED CHAMPION RECOMMENDATION ANALYSIS REPORT
+═══════════════════════════════════════════════════════════════
+
+Generated: ${new Date(generated).toLocaleString()}
+System: League of Legends Champion Recommender with ML Algorithms
+
+───────────────────────────────────────────────────────────────
+                        QUALITY METRICS
+───────────────────────────────────────────────────────────────
+
+Precision@1:    ${(data.metrics.precision1 * 100).toFixed(1)}%
+Precision@3:    ${(data.metrics.precision3 * 100).toFixed(1)}%
+Precision@5:    ${(data.metrics.precision5 * 100).toFixed(1)}%
+Confidence:     ${(data.metrics.mrr * 100).toFixed(1)}%
+Relevant Found: ${data.relevantCount} champions
+
+───────────────────────────────────────────────────────────────
+                    TOP RECOMMENDED CHAMPIONS
+───────────────────────────────────────────────────────────────
+
+${data.champions.map((c, i) => `${i + 1}. ${c.championName} - ${c.weighted.toFixed(1)}% Match`).join('\n')}
+
+───────────────────────────────────────────────────────────────
+                    AI ANALYSIS & INSIGHTS
+───────────────────────────────────────────────────────────────
+
+${text}
+
+═══════════════════════════════════════════════════════════════
+              Report Generated by Gemini 2.5 Flash AI
+═══════════════════════════════════════════════════════════════
+`;
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `LoL_AI_Report_${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            console.log('📥 AI Report downloaded');
+        }
+
+        /**
+         * Copy the AI report to clipboard
+         */
+        function copyAIReport() {
+            if (!window.currentAIReport) return;
+
+            const { text } = window.currentAIReport;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ Report copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('❌ Failed to copy report');
+            });
         }
 
         // Application Logic
