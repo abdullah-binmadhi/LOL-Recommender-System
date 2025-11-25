@@ -140,17 +140,33 @@
     </div>
 
     <script>
+        // Detect base path based on hostname
+        function getBasePath() {
+            const hostname = window.location.hostname;
+            const pathname = window.location.pathname;
+            
+            // If on GitHub Pages, use the repo name as base path
+            if (hostname.includes('github.io')) {
+                return '/LOL-Recommender-System';
+            }
+            // For Vercel or local, use root
+            return '';
+        }
+        
+        const basePath = getBasePath();
+        console.log(`Detected base path: ${basePath}`);
+        
         // Function to load champion data with fallbacks
         async function loadChampionData() {
             const urls = [
                 '../data/champions.json',
                 '../../data/champions.json',
+                `${basePath}/src/data/champions.json`,
+                `${basePath}/data/champions.json`,
                 '/src/data/champions.json',
                 '/data/champions.json',
-                '/LOL-Recommender-System/src/data/champions.json',
-                '/LOL-Recommender-System/data/champions.json',
                 'https://abdullah-binmadhi.github.io/LOL-Recommender-System/src/data/champions.json',
-                'https://abdullah-binmadhi.github.io/LOL-Recommender-System/data/champions.json'
+                'https://raw.githubusercontent.com/abdullah-binmadhi/LOL-Recommender-System/main/src/data/champions.json'
             ];
             
             // Try each URL with different approaches
