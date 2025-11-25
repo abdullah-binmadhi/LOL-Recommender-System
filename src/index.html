@@ -2772,9 +2772,31 @@
         // Questions Database - Loading from JSON file
         let questionsDatabase = [];
         
-        // Load questions from JSON file
-        fetch('data/questions.json')
-            .then(response => response.json())
+        // Load questions from JSON file with fallbacks
+        async function loadQuestionsData() {
+            const urls = [
+                'data/questions.json',
+                './data/questions.json',
+                '/LOL-Recommender-System/src/data/questions.json',
+                'https://abdullah-binmadhi.github.io/LOL-Recommender-System/src/data/questions.json'
+            ];
+            
+            for (const url of urls) {
+                try {
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log(`✅ Loaded questions from: ${url}`);
+                        return data;
+                    }
+                } catch (error) {
+                    console.warn(`Failed to load from ${url}:`, error);
+                }
+            }
+            throw new Error('Failed to load questions from all sources');
+        }
+        
+        loadQuestionsData()
             .then(data => {
                 questionsDatabase = data.questions.map(question => {
                     return {
@@ -4647,8 +4669,30 @@ This metric ${metricDescriptions[metricName]}. Explain what this score means for
         // Load questions from questions.json
         let questions = [];
         
-        fetch('data/questions.json')
-            .then(response => response.json())
+        async function loadQuestions() {
+            const urls = [
+                'data/questions.json',
+                './data/questions.json',
+                '/LOL-Recommender-System/src/data/questions.json',
+                'https://abdullah-binmadhi.github.io/LOL-Recommender-System/src/data/questions.json'
+            ];
+            
+            for (const url of urls) {
+                try {
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log(`✅ Loaded ${data.length} questions from: ${url}`);
+                        return data;
+                    }
+                } catch (error) {
+                    console.warn(`Failed to load questions from ${url}:`, error);
+                }
+            }
+            throw new Error('Failed to load questions from all sources');
+        }
+        
+        loadQuestions()
             .then(data => {
                 questions = data;
                 console.log(`✅ Loaded ${questions.length} questions from questions.json`);
