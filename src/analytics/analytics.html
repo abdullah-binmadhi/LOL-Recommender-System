@@ -99,7 +99,7 @@
             <p>Comprehensive data visualization of League of Legends champions</p>
         </div>
         
-        <a href="./src/index.html" class="back-button">← Back to Champion Recommender</a>
+        <a href="../index.html" class="back-button">← Back to Champion Recommender</a>
         
         <div class="chart-grid">
             <div class="chart-container">
@@ -143,8 +143,8 @@
         // Function to load champion data with fallbacks
         async function loadChampionData() {
             const urls = [
-                './src/data/champions.json',
-                './data/champions.json',
+                '../data/champions.json',
+                '../../data/champions.json',
                 'https://raw.githubusercontent.com/abdullah-binmadhi/LOL-Recommender-System/main/src/data/champions.json',
                 'https://raw.githubusercontent.com/abdullah-binmadhi/LOL-Recommender-System/main/data/champions.json'
             ];
