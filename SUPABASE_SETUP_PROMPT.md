@@ -20,15 +20,18 @@ This is a League of Legends Champion Recommender application that currently runs
 Create a complete Supabase backend integration with the following components:
 
 ### 1. Supabase Project Setup
+
 - Initialize new Supabase project
 - Configure authentication providers (Email/Password)
 - Set up Row Level Security (RLS) policies
 - Create database schema for users and recommendations
 
 ### 2. Database Schema
+
 Design and implement tables with proper relationships and RLS policies.
 
 ### 3. Admin Dashboard (`/admin` route)
+
 - Protected route requiring admin authentication
 - View all registered users
 - View user recommendation history
@@ -36,6 +39,7 @@ Design and implement tables with proper relationships and RLS policies.
 - Analytics dashboard showing usage statistics
 
 ### 4. Frontend Integration
+
 - Migrate from localStorage to Supabase
 - Implement user registration/login
 - Sync recommendation history to database
@@ -50,6 +54,7 @@ Design and implement tables with proper relationships and RLS policies.
 Create the following tables with proper constraints and RLS policies:
 
 ### Table 1: `users`
+
 ```sql
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -81,6 +86,7 @@ CREATE POLICY "Admins can view all users"
 ```
 
 ### Table 2: `user_answers`
+
 Store questionnaire responses for each user session.
 
 ```sql
@@ -120,6 +126,7 @@ CREATE INDEX idx_user_answers_created_at ON user_answers(created_at DESC);
 ```
 
 ### Table 3: `recommendations`
+
 Store champion recommendations for each user session.
 
 ```sql
@@ -173,6 +180,7 @@ CREATE INDEX idx_recommendations_champion_name ON recommendations(champion_name)
 ```
 
 ### Table 4: `sessions`
+
 Track user sessions and completion status.
 
 ```sql
@@ -220,6 +228,7 @@ CREATE INDEX idx_sessions_completed ON sessions(is_completed);
 ```
 
 ### Table 5: `analytics_events`
+
 Track user interactions and events.
 
 ```sql
@@ -261,6 +270,7 @@ CREATE INDEX idx_analytics_events_created_at ON analytics_events(created_at DESC
 ## Part 2: Database Functions & Triggers
 
 ### Function: Update `updated_at` timestamp
+
 ```sql
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -278,6 +288,7 @@ CREATE TRIGGER update_users_updated_at
 ```
 
 ### Function: Get User Statistics (for admin dashboard)
+
 ```sql
 CREATE OR REPLACE FUNCTION get_user_statistics()
 RETURNS TABLE (
@@ -302,6 +313,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 ```
 
 ### Function: Get Top Recommended Champions
+
 ```sql
 CREATE OR REPLACE FUNCTION get_top_champions(limit_count INT DEFAULT 10)
 RETURNS TABLE (
@@ -332,6 +344,7 @@ Create a new admin dashboard page with the following features:
 ### File: `/admin/index.html`
 
 **Requirements:**
+
 1. **Authentication Check**: Verify user is logged in and has `is_admin = true`
 2. **Dashboard Sections**:
    - User Management Table (with search/filter)
@@ -841,11 +854,13 @@ async function logout() {
 ### Update `src/index.html` to integrate Supabase
 
 **Add Supabase CDN** (in `<head>` section):
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 ```
 
 **Add initialization code** (after existing ML code):
+
 ```javascript
 // Supabase configuration
 const SUPABASE_URL = 'YOUR_SUPABASE_URL';
@@ -957,7 +972,8 @@ async function trackEvent(eventType, eventData = {}) {
 ## Part 7: Environment Setup Instructions
 
 ### Step 1: Create Supabase Project
-1. Go to https://supabase.com
+
+1. Go to <https://supabase.com>
 2. Create new project
 3. Note down:
    - Project URL
@@ -965,12 +981,14 @@ async function trackEvent(eventType, eventData = {}) {
    - Database Password
 
 ### Step 2: Run SQL Migrations
+
 1. Go to SQL Editor in Supabase dashboard
 2. Copy and paste all table creation SQL from Part 1
 3. Run each migration sequentially
 4. Verify tables are created
 
 ### Step 3: Create Admin User
+
 ```sql
 -- Insert admin user (run in SQL Editor)
 INSERT INTO auth.users (
@@ -996,11 +1014,14 @@ WHERE email = 'admin@example.com';
 ```
 
 ### Step 4: Update Configuration
+
 Replace in all files:
+
 - `YOUR_SUPABASE_URL` → Your actual Supabase URL
 - `YOUR_SUPABASE_ANON_KEY` → Your actual anon key
 
 ### Step 5: Deploy
+
 1. Add `/admin` folder to repository
 2. Push to GitHub
 3. Verify routes work on GitHub Pages
@@ -1045,7 +1066,7 @@ Replace in all files:
 
 ## Expected File Structure After Implementation
 
-```
+```text
 /admin/
   ├── index.html          # Admin dashboard
   ├── login.html          # Admin login page
