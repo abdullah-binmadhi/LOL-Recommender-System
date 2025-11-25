@@ -4,14 +4,12 @@ node_modules
 .vscode
 .DS_Store
 docs-archive
-src/analytics
 *.md
 !README.md
 !USAGE_GUIDE.md
 components
 lib
 pages
-public
-data
+public/data
 .kiro
 .vercel
