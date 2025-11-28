@@ -6329,7 +6329,7 @@ function showDetailedAnalysis() {
             
             // Add alternative champions (skip the first one which is the top pick)
             for (var i = 1; i < Math.min(3, top10Champions.length); i++) {
-                var altChampion = top5Champions[i];
+                var altChampion = top10Champions[i];
                 content += '<div class="alternative-item">';
                 content += '<img src="' + getChampionImageUrl(altChampion.championName) + '" alt="' + altChampion.championName + '" class="alt-champion-img" ';
                 content += 'onerror="console.log(\'Failed to load image for alternative champion:\', \'' + altChampion.championName + '\', \'Generated URL:\', this.src); ';
@@ -6350,19 +6350,19 @@ function showDetailedAnalysis() {
             content += '<h4>Current Meta Insights</h4>';
             content += '<div class="meta-info">';
             
-            // Calculate average win rate from top5
+            // Calculate average win rate from top 10
             var totalWinRate = 0;
-            top5Champions.forEach(championResult => {
+            top10Champions.forEach(championResult => {
                 totalWinRate += (allChampions[championResult.championName].stats?.winRate || 50);
             });
-            var avgWinRate = top5Champions.length > 0 ? Math.round(totalWinRate / top5Champions.length * 10) / 10 : 50;
+            var avgWinRate = top10Champions.length > 0 ? Math.round(totalWinRate / top10Champions.length * 10) / 10 : 50;
             
             // Calculate average difficulty
             var totalDifficulty = 0;
-            top5Champions.forEach(championResult => {
+            top10Champions.forEach(championResult => {
                 totalDifficulty += allChampions[championResult.championName].difficulty;
             });
-            var avgDifficulty = top5Champions.length > 0 ? Math.round(totalDifficulty / top5Champions.length * 10) / 10 : 5;
+            var avgDifficulty = top10Champions.length > 0 ? Math.round(totalDifficulty / top10Champions.length * 10) / 10 : 5;
             
             content += '<div class="meta-stat">';
             content += '<span class="meta-label">Average Win Rate:</span>';
@@ -6375,7 +6375,7 @@ function showDetailedAnalysis() {
             
             // Check if all champions have positive win rates
             var allPositive = true;
-            top5Champions.forEach(championResult => {
+            top10Champions.forEach(championResult => {
                 if ((allChampions[championResult.championName].stats?.winRate || 50) < 50) {
                     allPositive = false;
                 }
@@ -6459,7 +6459,7 @@ function showDetailedAnalysis() {
             analysisContent.innerHTML = content;
             
             // Enhance with AI-generated explanations for champions
-            const topChampionsForAI = top5Champions.map(c => ({
+            const topChampionsForAI = top10Champions.map(c => ({
                 name: c.championName,
                 score: c.weighted
             }));
