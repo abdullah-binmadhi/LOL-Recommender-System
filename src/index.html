@@ -4313,11 +4313,11 @@
              * @returns {Array<string>} - Array of 5 champion names in order (highest score first)
              */
             static getRecommendedChampions(mlResults) {
-                // Check if mlResults has the new unified structure with top5 array
-                if (mlResults && mlResults.top5 && Array.isArray(mlResults.top5)) {
+                // Check if mlResults has the new unified structure with top10 array
+                if (mlResults && mlResults.top10 && Array.isArray(mlResults.top10)) {
                     // Extract top 10 champion names from mlResults.top10
                     // Maintain order (highest score first)
-                    return mlResults.top5.map(champion => champion.championName);
+                    return mlResults.top10.map(champion => champion.championName);
                 }
                 
                 // Fallback to legacy structure for backward compatibility
