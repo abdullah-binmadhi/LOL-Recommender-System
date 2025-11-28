@@ -3901,12 +3901,12 @@
             }
             
             /**
-             * Select top 5 champions from aggregated scores
+             * Select top 10 champions from aggregated scores
              * @param {Object} aggregatedScores - Aggregated scores object
              * @param {boolean} diversityFilter - Whether to apply diversity filter (default: true)
-             * @returns {Array} - Array of 5 champion objects with scores
+             * @returns {Array} - Array of 10 champion objects with scores
              */
-            static selectTop5(aggregatedScores, diversityFilter = true) {
+            static selectTop10(aggregatedScores, diversityFilter = true) {
                 // Convert object to array
                 let champions = Object.values(aggregatedScores);
                 
@@ -3918,28 +3918,28 @@
                     champions = this.applyDiversityFilter(champions);
                 }
                 
-                // Select top 5 champions
-                const top5 = champions.slice(0, 5);
+                // Select top 10 champions
+                const top10 = champions.slice(0, 10);
                 
                 // Ensure all are unique (should already be, but double-check)
                 const uniqueChampions = [];
                 const seenNames = new Set();
                 
-                for (const champion of top5) {
+                for (const champion of top10) {
                     if (!seenNames.has(champion.championName)) {
                         uniqueChampions.push(champion);
                         seenNames.add(champion.championName);
                     }
                 }
                 
-                // If we have less than 5 unique champions, fill from remaining
-                if (uniqueChampions.length < 5) {
+                // If we have less than 10 unique champions, fill from remaining
+                if (uniqueChampions.length < 10) {
                     for (const champion of champions) {
                         if (!seenNames.has(champion.championName)) {
                             uniqueChampions.push(champion);
                             seenNames.add(champion.championName);
                             
-                            if (uniqueChampions.length >= 5) break;
+                            if (uniqueChampions.length >= 10) break;
                         }
                     }
                 }
@@ -3956,29 +3956,29 @@
                 const selected = [];
                 const roleCount = {};
                 
-                // First pass: select champions with max 2 per role
+                // First pass: select champions with max 3 per role
                 for (const champion of champions) {
                     const championData = allChampions[champion.championName];
                     const role = championData?.role || 'Unknown';
                     
-                    // Limit to max 2 champions per role in top 5
-                    if ((roleCount[role] || 0) < 2) {
+                    // Limit to max 3 champions per role in top 10
+                    if ((roleCount[role] || 0) < 3) {
                         selected.push(champion);
                         roleCount[role] = (roleCount[role] || 0) + 1;
                     }
                     
-                    // Stop once we have 5 champions
-                    if (selected.length >= 5) break;
+                    // Stop once we have 10 champions
+                    if (selected.length >= 10) break;
                 }
                 
-                // If we don't have 5 yet, add remaining highest scores regardless of role
-                if (selected.length < 5) {
+                // If we don't have 10 yet, add remaining highest scores regardless of role
+                if (selected.length < 10) {
                     for (const champion of champions) {
                         // Check if not already selected
                         if (!selected.find(c => c.championName === champion.championName)) {
                             selected.push(champion);
                             
-                            if (selected.length >= 5) break;
+                            if (selected.length >= 10) break;
                         }
                     }
                 }
@@ -4176,10 +4176,11 @@
                 // Sort champions by score descending
                 championScores.sort((a, b) => b.score - a.score);
                 
-                // Stricter threshold to reduce relevant set size for meaningful Recall@5
-                // Target: 10-20 relevant champions (instead of 50+) for realistic recall metrics
-                const minRelevantCount = 8;  // Minimum 8 relevant champions
-                const maxRelevantCount = 20; // Maximum 20 relevant champions
+                // Fixed relevant set size for optimal Recall@10 calculations
+                // Target: Exactly 10 relevant champions for 1:1 ratio with recommendations
+                const targetRelevantCount = 10;  // Exactly 10 relevant champions
+                const minRelevantCount = 10;      // Minimum 10 relevant champions
+                const maxRelevantCount = 10;      // Maximum 10 relevant champions
                 
                 const relevantChampions = new Set();
                 let threshold = 0.80; // Raised threshold to 80% for stricter matching (was 0.70)
@@ -4222,7 +4223,7 @@
             static getRecommendedChampions(mlResults) {
                 // Check if mlResults has the new unified structure with top5 array
                 if (mlResults && mlResults.top5 && Array.isArray(mlResults.top5)) {
-                    // Extract top 5 champion names from mlResults.top5
+                    // Extract top 10 champion names from mlResults.top10
                     // Maintain order (highest score first)
                     return mlResults.top5.map(champion => champion.championName);
                 }
@@ -4348,20 +4349,20 @@
                             </div>
                         </div>
 
-                        <!-- Precision@5 Card -->
+                        <!-- Precision@10 Card -->
                         <div class="metric-card metric-card-p5" onclick="showMetricModal('p5', ${metrics.p5}, ${relevantCount}, ${recommendedCount})">
-                            <div class="metric-label">Precision@5</div>
+                            <div class="metric-label">Precision@10</div>
                             <div class="metric-value ${getColorClass(metrics.p5)}">
                                 ${formatPercentage(metrics.p5)}
                             </div>
                             <div class="metric-description">
-                                Top 5 recommendations relevance
+                                Top 10 recommendations relevance
                             </div>
                         </div>
 
-                        <!-- Recall@5 Card -->
+                        <!-- Recall@10 Card -->
                         <div class="metric-card metric-card-r5" onclick="showMetricModal('r5', ${metrics.r5}, ${relevantCount}, ${recommendedCount})">
-                            <div class="metric-label">Recall@5</div>
+                            <div class="metric-label">Recall@10</div>
                             <div class="metric-value ${getColorClass(metrics.r5)}">
                                 ${formatPercentage(metrics.r5)}
                             </div>
@@ -4370,9 +4371,9 @@
                             </div>
                         </div>
 
-                        <!-- F1-Score@5 Card -->
+                        <!-- F1-Score@10 Card -->
                         <div class="metric-card metric-card-f1" onclick="showMetricModal('f1', ${metrics.f1}, ${relevantCount}, ${recommendedCount})">
-                            <div class="metric-label">F1-Score@5</div>
+                            <div class="metric-label">F1-Score@10</div>
                             <div class="metric-value ${getColorClass(metrics.f1)}">
                                 ${formatPercentage(metrics.f1)}
                             </div>
@@ -4418,7 +4419,7 @@
                                 <div style="font-size: 1.3rem; font-weight: bold; color: #2e7d32;">${relevantCount}</div>
                             </div>
                             <div style="text-align: center;">
-                                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">Captured in Top 5</div>
+                                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">Captured in Top 10</div>
                                 <div style="font-size: 1.3rem; font-weight: bold; color: #1565c0;">${Math.round(metrics.r5 * relevantCount)}</div>
                             </div>
                             <div style="text-align: center;">
@@ -4554,14 +4555,14 @@
                 const metricNames = {
                     'p1': 'Precision@1',
                     'p3': 'Precision@3',
-                    'p5': 'Precision@5',
+                    'p5': 'Precision@10',
                     'mrr': 'Mean Reciprocal Rank'
                 };
 
                 const metricDescriptions = {
                     'p1': 'measures if your #1 recommended champion matches your preferences',
                     'p3': 'measures how many of your top 3 recommendations match your preferences',
-                    'p5': 'measures how many of your top 5 recommendations match your preferences',
+                    'p5': 'measures how many of your top 10 recommendations match your preferences',
                     'mrr': 'measures our algorithm confidence in top recommendations and the balance between champion diversity and match accuracy'
                 };
 
@@ -4631,7 +4632,7 @@ This metric ${metricDescriptions[metricName]}. Explain what this score means for
             const explanations = {
                 'p1': `Your top recommendation has a ${percentage}% match with your preferences. ${metricValue >= 0.7 ? 'This is excellent - the #1 champion is highly relevant!' : metricValue >= 0.4 ? 'This is decent - the top pick shows good alignment.' : 'Consider trying different preferences for a better top match.'} We found ${relevantCount} relevant champions total.`,
                 'p3': `${percentage}% of your top 3 recommendations match your preferences. ${metricValue >= 0.7 ? 'Excellent! Most of your top picks are great matches.' : metricValue >= 0.4 ? 'Good! You have solid options in your top 3.' : 'Try adjusting your answers to get more relevant matches in the top 3.'} ${relevantCount} champions matched your criteria.`,
-                'p5': `${percentage}% of your top 5 recommendations are relevant to your playstyle. ${metricValue >= 0.7 ? 'Outstanding performance! The majority of recommendations fit you well.' : metricValue >= 0.4 ? 'Good spread of relevant champions in your top 5.' : 'You may want to refine your preferences for better top 5 matches.'} Total relevant: ${relevantCount} champions.`,
+                'p5': `${percentage}% of your top 10 recommendations are relevant to your playstyle. ${metricValue >= 0.7 ? 'Outstanding performance! The majority of recommendations fit you well.' : metricValue >= 0.4 ? 'Good spread of relevant champions in your top 10.' : 'You may want to refine your preferences for better top 10 matches.'} Total relevant: ${relevantCount} champions.`,
                 'mrr': `Confidence Score: ${percentage}%. ${metricValue >= 0.9 ? 'Very High Confidence - Our algorithms are extremely sure about your top pick! The recommendations balance accuracy with diverse options across different playstyles.' : metricValue >= 0.7 ? 'High Confidence - Strong match in top positions with good diversity. You\'ll likely be satisfied with the top 2-3 picks.' : metricValue >= 0.5 ? 'Medium Confidence - Decent matches found, with variety in the recommendations. Consider exploring multiple options.' : 'Lower Confidence - Your preferences suggest diverse possibilities. We\'re prioritizing variety to help you discover new champions.'} ${relevantCount} relevant champions found across the pool.`
             };
 
@@ -4871,13 +4872,13 @@ This metric ${metricDescriptions[metricName]}. Explain what this score means for
             
             try {
                 // Gather all data needed for the report
-                const top5Champions = mlResults.top5 || [];
+                const top10Champions = mlResults.top10 || [];
                 const relevantChampions = EvaluationMetrics.calculateUserRelevance(answers, allChampions);
                 const recommendedChampions = EvaluationMetrics.getRecommendedChampions(mlResults);
                 
                 const precision1 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 1);
                 const precision3 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 3);
-                const precision5 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 5);
+                const precision10 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 10);
                 const mrr = EvaluationMetrics.meanReciprocalRank(recommendedChampions, relevantChampions);
                 
                 const userPreferences = {
@@ -4891,7 +4892,7 @@ This metric ${metricDescriptions[metricName]}. Explain what this score means for
                 };
                 
                 // Build comprehensive prompt for Gemini
-                const championsList = top5Champions.map((c, idx) => 
+                const championsList = top10Champions.map((c, idx) => 
                     `${idx + 1}. ${c.championName} - ${c.weighted.toFixed(1)}% match (${allChampions[c.championName]?.role || 'Unknown'})`
                 ).join('\n');
                 
@@ -4906,13 +4907,13 @@ This metric ${metricDescriptions[metricName]}. Explain what this score means for
 - Resource Type: ${userPreferences.resource}
 - Damage Type: ${userPreferences.damageType}
 
-**TOP 5 RECOMMENDED CHAMPIONS:**
+**TOP 10 RECOMMENDED CHAMPIONS:**
 ${championsList}
 
 **QUALITY METRICS:**
 - Precision@1: ${(precision1 * 100).toFixed(1)}% (Is top pick relevant?)
 - Precision@3: ${(precision3 * 100).toFixed(1)}% (Top 3 relevance)
-- Precision@5: ${(precision5 * 100).toFixed(1)}% (Top 5 relevance)
+- Precision@10: ${(precision10 * 100).toFixed(1)}% (Top 10 relevance)
 - Confidence & Diversity Score: ${(mrr * 100).toFixed(1)}% (Algorithm confidence)
 - Relevant Champions Found: ${relevantChampions.size} out of ${Object.keys(allChampions).length}
 
@@ -4928,7 +4929,7 @@ ${championsList}
    - Best situations to pick this champion
 
 3. **METRICS ANALYSIS & OPINION**
-   - Interpretation of Precision@1, @3, @5 scores
+   - Interpretation of Precision@1, @3, @10 scores
    - What the Confidence & Diversity score reveals
    - Overall system performance rating (Excellent/Good/Fair/Poor)
 
@@ -4980,7 +4981,7 @@ ${championsList}
                 
                 // Display the report in a modal or new section
                 displayAIReport(report, {
-                    champions: top5Champions,
+                    champions: top10Champions,
                     metrics: { precision1, precision3, precision5, mrr },
                     preferences: userPreferences,
                     relevantCount: relevantChampions.size
@@ -5915,9 +5916,9 @@ ${text}
             // Use ScoreAggregator to combine scores from all 3 algorithms
             const aggregated = ScoreAggregator.aggregateScores(rfScores, dtScores, knnScores);
             
-            // TASK 5.4: Select top 5 champions
-            // Get the top 5 champions based on aggregated scores
-            const top5 = ScoreAggregator.selectTop5(aggregated);
+            // TASK 5.4: Select top 10 champions
+            // Get the top 10 champions based on aggregated scores
+            const top10 = ScoreAggregator.selectTop10(aggregated);
             
             // TASK 5.5: Update mlResults global object
             // Store all results in the global mlResults object
@@ -5928,7 +5929,7 @@ ${text}
                     knn: knnScores
                 },
                 aggregated: aggregated,
-                top5: top5
+                top10: top10
             };
             
             // Measure performance for backward compatibility
@@ -5994,14 +5995,14 @@ ${text}
 
         function displayResults(performanceStats) {
             // Check if mlResults has the new unified structure
-            if (!mlResults.top5 || !Array.isArray(mlResults.top5) || mlResults.top5.length === 0) {
-                console.error('Error: mlResults does not contain top5 recommendations');
+            if (!mlResults.top10 || !Array.isArray(mlResults.top10) || mlResults.top10.length === 0) {
+                console.error('Error: mlResults does not contain top10 recommendations');
                 alert('An error occurred while generating recommendations. Please try again.');
                 return;
             }
             
-            // Extract champion names from top5 for backward compatibility
-            const champions = mlResults.top5.map(c => c.championName);
+            // Extract champion names from top10 for backward compatibility
+            const champions = mlResults.top10.map(c => c.championName);
             
             // Google Analytics tracking removed as per user request
             
@@ -6142,16 +6143,16 @@ function showDetailedAnalysis() {
             const analysisContent = document.getElementById('analysis-content');
             
             // Check if mlResults has the new unified structure
-            if (!mlResults.top5 || !Array.isArray(mlResults.top5) || mlResults.top5.length === 0) {
-                console.error('Error: mlResults does not contain top5 recommendations');
+            if (!mlResults.top10 || !Array.isArray(mlResults.top10) || mlResults.top10.length === 0) {
+                console.error('Error: mlResults does not contain top10 recommendations');
                 analysisContent.innerHTML = '<p style="color: white; text-align: center; padding: 40px;">An error occurred while generating recommendations. Please try again.</p>';
                 document.getElementById('detailed-analysis').classList.add('active');
                 return;
             }
             
-            // Get top 5 champions from unified structure
-            const top5Champions = mlResults.top5;
-            const topChampion = top5Champions[0];
+            // Get top 10 champions from unified structure
+            const top10Champions = mlResults.top10;
+            const topChampion = top10Champions[0];
             
             // Define algorithm names for consistent use throughout
             const algorithmNames = {
@@ -6170,13 +6171,13 @@ function showDetailedAnalysis() {
             content += '<div class="champion-analysis-section">';
             content += '<h3><i class="champion-finder-icon"></i> Champion Match Analysis</h3>';
             content += '<div class="analysis-explanation">';
-            content += '<p>Based on your preferences, here are your top ' + top5Champions.length + ' champion recommendations:</p>';
+            content += '<p>Based on your preferences, here are your top ' + top10Champions.length + ' champion recommendations:</p>';
             content += '</div>';
             
             content += '<div class="match-analysis-grid">';
             
             // Add match cards for each top5 champion
-            top5Champions.forEach((championResult, index) => {
+            top10Champions.forEach((championResult, index) => {
                 const champion = allChampions[championResult.championName];
                 const isTopPick = index === 0;
                 const roleMatch = answers[2] === 'No Preference' || champion.role === answers[2] ? 100 : 70;
@@ -6327,7 +6328,7 @@ function showDetailedAnalysis() {
             content += '<div class="alternatives-list">';
             
             // Add alternative champions (skip the first one which is the top pick)
-            for (var i = 1; i < Math.min(3, top5Champions.length); i++) {
+            for (var i = 1; i < Math.min(3, top10Champions.length); i++) {
                 var altChampion = top5Champions[i];
                 content += '<div class="alternative-item">';
                 content += '<img src="' + getChampionImageUrl(altChampion.championName) + '" alt="' + altChampion.championName + '" class="alt-champion-img" ';
@@ -6404,13 +6405,13 @@ function showDetailedAnalysis() {
                 // Calculate Precision@K metrics
                 const precision1 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 1);
                 const precision3 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 3);
-                const precision5 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 5);
+                const precision10 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 10);
                 
                 // Calculate Recall@K metrics
-                const recall5 = EvaluationMetrics.recallAtK(recommendedChampions, relevantChampions, 5);
+                const recall10 = EvaluationMetrics.recallAtK(recommendedChampions, relevantChampions, 10);
                 
                 // Calculate F1-Score@K metrics
-                const f1Score5 = EvaluationMetrics.f1ScoreAtK(recommendedChampions, relevantChampions, 5);
+                const f1Score10 = EvaluationMetrics.f1ScoreAtK(recommendedChampions, relevantChampions, 10);
                 
                 // Calculate Mean Reciprocal Rank
                 const mrr = EvaluationMetrics.meanReciprocalRank(recommendedChampions, relevantChampions);
@@ -6419,9 +6420,9 @@ function showDetailedAnalysis() {
                 const metrics = {
                     p1: precision1,
                     p3: precision3,
-                    p5: precision5,
-                    r5: recall5,
-                    f1: f1Score5,
+                    p5: precision10,
+                    r5: recall10,
+                    f1: f1Score10,
                     mrr: mrr
                 };
                 
@@ -6474,7 +6475,7 @@ function showDetailedAnalysis() {
                 
                 const precision1 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 1);
                 const precision3 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 3);
-                const precision5 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 5);
+                const precision10 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 10);
                 const mrr = EvaluationMetrics.meanReciprocalRank(recommendedChampions, relevantChampions);
                 
             } catch (error) {
@@ -6914,22 +6915,22 @@ function restartQuestionnaire() {
                 `;
                 
             } else if (metricType === 'p5') {
-                title = '📊 Precision@5 - Top 5 Recommendations Quality';
-                const top5 = recommendedChampions.slice(0, 5);
-                const relevantInTop5 = top5.filter(champ => relevantChampions.has(champ)).length;
+                title = '📊 Precision@10 - Top 10 Recommendations Quality';
+                const top10 = recommendedChampions.slice(0, 10);
+                const relevantInTop10 = top10.filter(champ => relevantChampions.has(champ)).length;
                 
                 content = `
                     <div class="modal-score ${scoreClass}">
                         <div class="modal-score-value">${(value * 100).toFixed(1)}%</div>
-                        <div class="modal-score-label">Precision@5 Score</div>
+                        <div class="modal-score-label">Precision@10 Score</div>
                     </div>
                     
-                    <h3>What is Precision@5?</h3>
-                    <p>Precision@5 measures how many of your <strong>top 5 recommendations</strong> are relevant. This metric shows the overall quality of our recommendation system for giving you multiple viable options.</p>
+                    <h3>What is Precision@10?</h3>
+                    <p>Precision@10 measures how many of your <strong>top 10 recommendations</strong> are relevant. This metric shows the overall quality of our recommendation system for giving you multiple viable options.</p>
                     
-                    <h3>Your Top 5 Recommendations</h3>
+                    <h3>Your Top 10 Recommendations</h3>
                     <div class="champion-list">
-                        ${top5.map((champ, idx) => {
+                        ${top10.map((champ, idx) => {
                             const isRelevant = relevantChampions.has(champ);
                             return `
                                 <div class="champion-list-item">
@@ -6944,15 +6945,15 @@ function restartQuestionnaire() {
                     </div>
                     
                     <h3>Why This Score?</h3>
-                    <p><strong>${relevantInTop5} out of 5</strong> recommendations are good matches. ${
-                        relevantInTop5 >= 4 ? 'Excellent diversity! You have multiple great options to experiment with.' :
-                        relevantInTop5 >= 3 ? 'Good variety! You should find several champions that fit your style.' :
-                        relevantInTop5 >= 2 ? 'Decent options available, though some may require adaptation to your playstyle.' :
+                    <p><strong>${relevantInTop10} out of 10</strong> recommendations are good matches. ${
+                        relevantInTop10 >= 8 ? 'Excellent diversity! You have multiple great options to experiment with.' :
+                        relevantInTop10 >= 6 ? 'Good variety! You should find several champions that fit your style.' :
+                        relevantInTop10 >= 4 ? 'Decent options available, though some may require adaptation to your playstyle.' :
                         'Limited optimal matches. Consider broadening your preferences or trying the top-ranked champions.'
                     }</p>
                     
                     <h3>Scoring Details</h3>
-                    <p>Score = (Relevant Champions in Top 5) ÷ 5 = ${relevantInTop5}/5 = ${(value * 100).toFixed(1)}%</p>
+                    <p>Score = (Relevant Champions in Top 10) ÷ 10 = ${relevantInTop10}/10 = ${(value * 100).toFixed(1)}%</p>
                     <p>Out of ${relevantCount} total relevant champions from our database of ${recommendedCount} analyzed champions.</p>
                 `;
                 
@@ -6962,10 +6963,10 @@ function restartQuestionnaire() {
                 const rank = firstRelevantIndex >= 0 ? firstRelevantIndex + 1 : 'N/A';
                 const firstRelevantChampion = firstRelevantIndex >= 0 ? recommendedChampions[firstRelevantIndex] : 'None found';
                 
-                // Calculate diversity score based on role variety in top 5
-                const top5 = recommendedChampions.slice(0, 5);
-                const rolesInTop5 = new Set(top5.map(champ => window.currentMLResults?.allChampions?.[champ]?.role || allChampions[champ]?.role).filter(r => r));
-                const diversityScore = (rolesInTop5.size / 5) * 100; // % of unique roles
+                // Calculate diversity score based on role variety in top 10
+                const top10 = recommendedChampions.slice(0, 10);
+                const rolesInTop10 = new Set(top10.map(champ => window.currentMLResults?.allChampions?.[champ]?.role || allChampions[champ]?.role).filter(r => r));
+                const diversityScore = (rolesInTop10.size / 5) * 100; // % of unique roles (max 5 roles)
                 
                 // Determine confidence level
                 let confidenceLevel = 'Low';
@@ -7031,7 +7032,7 @@ function restartQuestionnaire() {
                     <div style="background: #fff3e0; padding: 15px; border-radius: 10px; margin: 15px 0; border-left: 4px solid #f57c00;">
                         <div style="margin-bottom: 8px;">
                             <strong>Diversity Score:</strong> ${diversityScore.toFixed(0)}% 
-                            <span style="color: #666; font-size: 0.9rem;">(${rolesInTop5.size} unique roles in top 5)</span>
+                            <span style="color: #666; font-size: 0.9rem;">(${rolesInTop10.size} unique roles in top 10)</span>
                         </div>
                         <p style="color: #e65100; margin: 0; font-size: 0.95rem;">
                             ${diversityAssessment}
@@ -7054,7 +7055,7 @@ function restartQuestionnaire() {
                             rank === 1 ? 'The top recommendation matches your preferences. High confidence suggests this is your best fit.' :
                             rank <= 2 && value >= 0.7 ? 'High confidence with relevant match in top 2. Our algorithms are giving you accuracy with some variety.' :
                             rank <= 3 && value >= 0.5 ? 'Medium confidence balanced with diversity. We\'re showing you variety while maintaining quality matches.' :
-                            rank <= 5 ? 'We\'re prioritizing champion diversity to help you discover options. Explore the top 5 to find your favorite.' :
+                            rank <= 5 ? 'We\'re prioritizing champion diversity to help you discover options. Explore the top 10 to find your favorite.' :
                             'Lower confidence suggests your preferences are diverse. We\'re showing you variety—try multiple champions to find your style.'
                         }` :
                         'No relevant champions found in current recommendations. This suggests very specific preferences. Try adjusting criteria or explore unexpected options to discover new favorites.'
@@ -7073,7 +7074,7 @@ function restartQuestionnaire() {
                             <h4 style="margin: 0 0 10px 0; color: #2e7d32;">💡 Recommendation Strategy</h4>
                             <p style="margin: 0; color: #1b5e20; line-height: 1.6;">
                                 Your preferences suggest openness to variety. We're prioritizing <strong>diversity</strong> to help you explore different playstyles. 
-                                Try the top 3-5 champions to discover which fits you best!
+                                Try the top 5-10 champions to discover which fits you best!
                             </p>
                         </div>
                     ` : `
@@ -7081,7 +7082,7 @@ function restartQuestionnaire() {
                             <h4 style="margin: 0 0 10px 0; color: #1565c0;">✅ Strong Match Detected</h4>
                             <p style="margin: 0; color: #0d47a1; line-height: 1.6;">
                                 High confidence score indicates our algorithms found champions that closely align with your preferences. 
-                                The top ${rank <= 2 ? '1-2' : '3-5'} recommendations should feel natural to your playstyle!
+                                The top ${rank <= 3 ? '1-3' : rank <= 5 ? '3-5' : '5-10'} recommendations should feel natural to your playstyle!
                             </p>
                         </div>
                     `}
@@ -7096,24 +7097,24 @@ function restartQuestionnaire() {
                 `;
                 
             } else if (metricType === 'r5') {
-                title = '📊 Recall@5 - Coverage of Relevant Champions';
-                const top5 = recommendedChampions.slice(0, 5);
-                const relevantInTop5 = top5.filter(champ => relevantChampions.has(champ)).length;
-                const coveragePercent = relevantCount > 0 ? (relevantInTop5 / relevantCount * 100) : 0;
+                title = '📊 Recall@10 - Coverage of Relevant Champions';
+                const top10 = recommendedChampions.slice(0, 10);
+                const relevantInTop10 = top10.filter(champ => relevantChampions.has(champ)).length;
+                const coveragePercent = relevantCount > 0 ? (relevantInTop10 / relevantCount * 100) : 0;
                 
                 content = `
                     <div class="modal-score ${scoreClass}">
                         <div class="modal-score-value">${(value * 100).toFixed(1)}%</div>
-                        <div class="modal-score-label">Recall@5 Score</div>
+                        <div class="modal-score-label">Recall@10 Score</div>
                     </div>
                     
-                    <h3>What is Recall@5?</h3>
-                    <p>Recall@5 measures <strong>what percentage of ALL relevant champions</strong> we captured in your top 5 recommendations. While Precision asks "are recommendations relevant?", Recall asks "did we find most relevant options?"</p>
+                    <h3>What is Recall@10?</h3>
+                    <p>Recall@10 measures <strong>what percentage of ALL relevant champions</strong> we captured in your top 10 recommendations. While Precision asks "are recommendations relevant?", Recall asks "did we find most relevant options?"</p>
                     
                     <h3>Coverage Analysis</h3>
                     <div class="champion-list" style="background: #f0f4ff; padding: 15px; border-radius: 10px; margin: 15px 0;">
                         <div style="text-align: center; margin-bottom: 15px;">
-                            <div style="font-size: 2.5rem; font-weight: bold; color: #1976d2;">${relevantInTop5}</div>
+                            <div style="font-size: 2.5rem; font-weight: bold; color: #1976d2;">${relevantInTop10}</div>
                             <div style="color: #666; margin: 5px 0;">relevant champions captured</div>
                             <div style="font-size: 1.2rem; color: #333;">out of <strong>${relevantCount}</strong> total relevant</div>
                         </div>
@@ -7126,37 +7127,37 @@ function restartQuestionnaire() {
                     </div>
                     
                     <h3>Why This Score?</h3>
-                    <p>${value >= 0.4 ? 
-                        `<strong>Excellent coverage!</strong> We captured ${coveragePercent.toFixed(0)}% of your relevant champions in just 5 recommendations. This means you're seeing most of your best options.` :
-                        value >= 0.2 ? 
-                        `<strong>Good coverage.</strong> We found ${coveragePercent.toFixed(0)}% of relevant champions. There are ${relevantCount - relevantInTop5} more relevant options not shown in top 5.` :
-                        `<strong>Limited coverage.</strong> Only ${coveragePercent.toFixed(0)}% of relevant champions appear in top 5. This suggests either: (1) Very specific preferences = many relevant options exist, or (2) Diversity filter is hiding some matches.`
+                    <p>${value >= 0.7 ? 
+                        `<strong>Excellent coverage!</strong> We captured ${coveragePercent.toFixed(0)}% of your relevant champions in just 10 recommendations. This means you're seeing most of your best options.` :
+                        value >= 0.5 ? 
+                        `<strong>Good coverage.</strong> We found ${coveragePercent.toFixed(0)}% of relevant champions. There are ${relevantCount - relevantInTop10} more relevant options not shown in top 10.` :
+                        `<strong>Limited coverage.</strong> Only ${coveragePercent.toFixed(0)}% of relevant champions appear in top 10. This suggests either: (1) Very specific preferences = many relevant options exist, or (2) Diversity filter is hiding some matches.`
                     }</p>
                     
                     <h3>Trade-off Explanation</h3>
                     <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
-                        <li><strong>High Recall (>40%):</strong> You're seeing most relevant options quickly</li>
-                        <li><strong>Medium Recall (20-40%):</strong> Good coverage, but more options exist beyond top 5</li>
-                        <li><strong>Low Recall (<20%):</strong> System prioritizes precision over coverage (fewer but highly accurate picks)</li>
+                        <li><strong>High Recall (>70%):</strong> You're seeing most relevant options quickly</li>
+                        <li><strong>Medium Recall (50-70%):</strong> Good coverage, but more options exist beyond top 10</li>
+                        <li><strong>Low Recall (<50%):</strong> System prioritizes precision over coverage (fewer but highly accurate picks)</li>
                     </ul>
                     
                     <h3>How It's Calculated</h3>
-                    <p><strong>Formula:</strong> Recall@5 = (Relevant in Top 5) ÷ (Total Relevant Champions)</p>
-                    <p>Recall@5 = ${relevantInTop5} ÷ ${relevantCount} = ${value.toFixed(3)} = ${(value * 100).toFixed(1)}%</p>
+                    <p><strong>Formula:</strong> Recall@10 = (Relevant in Top 10) ÷ (Total Relevant Champions)</p>
+                    <p>Recall@10 = ${relevantInTop10} ÷ ${relevantCount} = ${value.toFixed(3)} = ${(value * 100).toFixed(1)}%</p>
                 `;
                 
             } else if (metricType === 'f1') {
-                title = '📊 F1-Score@5 - Balanced Quality Metric';
-                const top5 = recommendedChampions.slice(0, 5);
-                const relevantInTop5 = top5.filter(champ => relevantChampions.has(champ)).length;
+                title = '📊 F1-Score@10 - Balanced Quality Metric';
+                const top10 = recommendedChampions.slice(0, 10);
+                const relevantInTop10 = top10.filter(champ => relevantChampions.has(champ)).length;
                 
-                const precision = relevantInTop5 / 5;
-                const recall = relevantCount > 0 ? relevantInTop5 / relevantCount : 0;
+                const precision = relevantInTop10 / 10;
+                const recall = relevantCount > 0 ? relevantInTop10 / relevantCount : 0;
                 
                 content = `
                     <div class="modal-score ${scoreClass}">
                         <div class="modal-score-value">${(value * 100).toFixed(1)}%</div>
-                        <div class="modal-score-label">F1-Score@5</div>
+                        <div class="modal-score-label">F1-Score@10</div>
                     </div>
                     
                     <h3>What is F1-Score?</h3>
@@ -7171,14 +7172,14 @@ function restartQuestionnaire() {
                     <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                             <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
-                                <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">Precision@5</div>
+                                <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">Precision@10</div>
                                 <div style="font-size: 2rem; font-weight: bold; color: #1976d2;">${(precision * 100).toFixed(1)}%</div>
-                                <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">${relevantInTop5}/5 relevant</div>
+                                <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">${relevantInTop10}/10 relevant</div>
                             </div>
                             <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
-                                <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">Recall@5</div>
+                                <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">Recall@10</div>
                                 <div style="font-size: 2rem; font-weight: bold; color: #4caf50;">${(recall * 100).toFixed(1)}%</div>
-                                <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">${relevantInTop5}/${relevantCount} found</div>
+                                <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">${relevantInTop10}/${relevantCount} found</div>
                             </div>
                         </div>
                         
@@ -7961,13 +7962,13 @@ document.addEventListener('keydown', function(e) {
             const header = document.createElement('div');
             header.className = 'analysis-header';
             header.innerHTML = `
-                <h2>Your Top 5 Champion Recommendations</h2>
+                <h2>Your Top 10 Champion Recommendations</h2>
                 <p>Each champion has been evaluated by all three ML algorithms</p>
             `;
             analysisContent.appendChild(header);
             
-            // Task 7.2: Loop through top 5 champions
-            mlResults.top5.forEach((champion, index) => {
+            // Task 7.2: Loop through top 10 champions
+            mlResults.top10.forEach((champion, index) => {
                 // Task 7.3: Create champion card HTML for each
                 const card = document.createElement('div');
                 card.className = 'unified-recommendation-card';
