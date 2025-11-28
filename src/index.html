@@ -4176,12 +4176,13 @@
                 // Sort champions by score descending
                 championScores.sort((a, b) => b.score - a.score);
                 
-                // 70% threshold with 10-35% constraints
-                const minRelevantCount = Math.ceil(championScores.length * 0.10); // At least 10%
-                const maxRelevantCount = Math.floor(championScores.length * 0.35); // At most 35%
+                // Stricter threshold to reduce relevant set size for meaningful Recall@5
+                // Target: 10-20 relevant champions (instead of 50+) for realistic recall metrics
+                const minRelevantCount = 8;  // Minimum 8 relevant champions
+                const maxRelevantCount = 20; // Maximum 20 relevant champions
                 
                 const relevantChampions = new Set();
-                let threshold = 0.70; // Lowered threshold to allow more champions (was 0.75)
+                let threshold = 0.80; // Raised threshold to 80% for stricter matching (was 0.70)
                 
                 // First pass: add champions above threshold
                 for (const champ of championScores) {
