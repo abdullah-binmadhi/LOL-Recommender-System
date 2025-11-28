@@ -5778,7 +5778,7 @@ ${text}
                         <h2>${question.text}</h2>
                         <div class="options">
                             ${question.options.map(option => `
-                                <div class="option" onclick="selectOption(${question.id}, '${option.value}', this)" title="${option.description}">
+                                <div class="option" onclick="selectOption(${question.id}, \`${option.value}\`, this)" title="${option.description}">
                                     ${option.text}
                                 </div>
                             `).join('')}
@@ -5954,7 +5954,7 @@ ${text}
             filteredOptions.forEach(option => {
                 const isSelected = answers[questionId] === option.value ? 'selected' : '';
                 optionsHTML += `
-                    <div class="option ${isSelected}" onclick="selectOption(${questionId}, '${option.value}', this)">
+                    <div class="option ${isSelected}" onclick="selectOption(${questionId}, \`${option.value}\`, this)">
                         ${option.text}
                         ${option.description ? `<p style="font-size: 0.85rem; margin-top: 5px; opacity: 0.8;">${option.description}</p>` : ''}
                     </div>
