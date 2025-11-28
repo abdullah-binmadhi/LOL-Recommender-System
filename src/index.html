@@ -4018,6 +4018,62 @@
             }
             
             /**
+             * Calculate Recall@K metric
+             * @param {Array<string>} recommendedChampions - Array of recommended champion names
+             * @param {Set<string>} relevantChampions - Set of relevant champion names
+             * @param {number} k - Number of top recommendations to consider
+             * @returns {number} - Recall value between 0.0 and 1.0
+             */
+            static recallAtK(recommendedChampions, relevantChampions, k) {
+                // Handle edge cases
+                if (!recommendedChampions || recommendedChampions.length === 0 || k === 0) {
+                    return 0.0;
+                }
+                
+                if (relevantChampions.size === 0) {
+                    return 0.0; // No relevant champions exist
+                }
+                
+                // Get top K recommendations
+                const topK = recommendedChampions.slice(0, k);
+                
+                // Count how many relevant champions are in top K
+                let relevantCount = 0;
+                for (const champion of topK) {
+                    if (relevantChampions.has(champion)) {
+                        relevantCount++;
+                    }
+                }
+                
+                // Calculate recall
+                return relevantCount / relevantChampions.size;
+            }
+            
+            /**
+             * Calculate F1-Score@K metric
+             * Harmonic mean of Precision@K and Recall@K
+             * @param {Array<string>} recommendedChampions - Array of recommended champion names
+             * @param {Set<string>} relevantChampions - Set of relevant champion names
+             * @param {number} k - Number of top recommendations to consider
+             * @returns {number} - F1-Score value between 0.0 and 1.0
+             */
+            static f1ScoreAtK(recommendedChampions, relevantChampions, k) {
+                // Calculate Precision@K and Recall@K
+                const precision = this.precisionAtK(recommendedChampions, relevantChampions, k);
+                const recall = this.recallAtK(recommendedChampions, relevantChampions, k);
+                
+                // Handle edge case: both are 0
+                if (precision === 0 && recall === 0) {
+                    return 0.0;
+                }
+                
+                // Calculate F1-Score (harmonic mean)
+                const f1 = (2 * precision * recall) / (precision + recall);
+                
+                return f1;
+            }
+            
+            /**
              * Calculate Mean Reciprocal Rank metric
              * @param {Array<string>} recommendedChampions - Array of recommended champion names
              * @param {Set<string>} relevantChampions - Set of relevant champion names
@@ -4302,6 +4358,28 @@
                             </div>
                         </div>
 
+                        <!-- Recall@5 Card -->
+                        <div class="metric-card metric-card-r5" onclick="showMetricModal('r5', ${metrics.r5}, ${relevantCount}, ${recommendedCount})">
+                            <div class="metric-label">Recall@5</div>
+                            <div class="metric-value ${getColorClass(metrics.r5)}">
+                                ${formatPercentage(metrics.r5)}
+                            </div>
+                            <div class="metric-description">
+                                Coverage of relevant champions
+                            </div>
+                        </div>
+
+                        <!-- F1-Score@5 Card -->
+                        <div class="metric-card metric-card-f1" onclick="showMetricModal('f1', ${metrics.f1}, ${relevantCount}, ${recommendedCount})">
+                            <div class="metric-label">F1-Score@5</div>
+                            <div class="metric-value ${getColorClass(metrics.f1)}">
+                                ${formatPercentage(metrics.f1)}
+                            </div>
+                            <div class="metric-description">
+                                Balanced accuracy & coverage
+                            </div>
+                        </div>
+
                         <!-- MRR Card -->
                         <div class="metric-card metric-card-mrr" onclick="showMetricModal('mrr', ${metrics.mrr}, ${relevantCount}, ${recommendedCount})">
                             <div class="metric-label">Confidence & Diversity</div>
@@ -4322,10 +4400,25 @@
                         <p style="color: #424242; margin-bottom: 15px; line-height: 1.6;">
                             ${performanceMessage}
                         </p>
+                        
+                        <!-- F1-Score Interpretation -->
+                        <div style="background: rgba(102, 126, 234, 0.1); padding: 12px; border-radius: 8px; margin-top: 15px;">
+                            <strong style="color: #667eea;">F1-Score Insight:</strong>
+                            <span style="color: #333; margin-left: 8px;">
+                                ${metrics.f1 >= 0.4 ? 'Strong balance between accuracy and coverage!' : 
+                                  metrics.f1 >= 0.25 ? 'Good balance, with room for improvement.' : 
+                                  'System prioritizes precision over broad coverage.'}
+                            </span>
+                        </div>
+                        
                         <div style="display: flex; justify-content: space-around; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
                             <div style="text-align: center;">
                                 <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">Relevant Champions</div>
                                 <div style="font-size: 1.3rem; font-weight: bold; color: #2e7d32;">${relevantCount}</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">Captured in Top 5</div>
+                                <div style="font-size: 1.3rem; font-weight: bold; color: #1565c0;">${Math.round(metrics.r5 * relevantCount)}</div>
                             </div>
                             <div style="text-align: center;">
                                 <div style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">Recommended</div>
@@ -6312,6 +6405,12 @@ function showDetailedAnalysis() {
                 const precision3 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 3);
                 const precision5 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 5);
                 
+                // Calculate Recall@K metrics
+                const recall5 = EvaluationMetrics.recallAtK(recommendedChampions, relevantChampions, 5);
+                
+                // Calculate F1-Score@K metrics
+                const f1Score5 = EvaluationMetrics.f1ScoreAtK(recommendedChampions, relevantChampions, 5);
+                
                 // Calculate Mean Reciprocal Rank
                 const mrr = EvaluationMetrics.meanReciprocalRank(recommendedChampions, relevantChampions);
                 
@@ -6320,6 +6419,8 @@ function showDetailedAnalysis() {
                     p1: precision1,
                     p3: precision3,
                     p5: precision5,
+                    r5: recall5,
+                    f1: f1Score5,
                     mrr: mrr
                 };
                 
@@ -6991,6 +7092,130 @@ function restartQuestionnaire() {
                         <strong>Higher scores</strong> = more confident + accurate top recommendations<br>
                         <strong>Lower scores</strong> = prioritizing diversity + exploration
                     </p>
+                `;
+                
+            } else if (metricType === 'r5') {
+                title = '📊 Recall@5 - Coverage of Relevant Champions';
+                const top5 = recommendedChampions.slice(0, 5);
+                const relevantInTop5 = top5.filter(champ => relevantChampions.has(champ)).length;
+                const coveragePercent = relevantCount > 0 ? (relevantInTop5 / relevantCount * 100) : 0;
+                
+                content = `
+                    <div class="modal-score ${scoreClass}">
+                        <div class="modal-score-value">${(value * 100).toFixed(1)}%</div>
+                        <div class="modal-score-label">Recall@5 Score</div>
+                    </div>
+                    
+                    <h3>What is Recall@5?</h3>
+                    <p>Recall@5 measures <strong>what percentage of ALL relevant champions</strong> we captured in your top 5 recommendations. While Precision asks "are recommendations relevant?", Recall asks "did we find most relevant options?"</p>
+                    
+                    <h3>Coverage Analysis</h3>
+                    <div class="champion-list" style="background: #f0f4ff; padding: 15px; border-radius: 10px; margin: 15px 0;">
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <div style="font-size: 2.5rem; font-weight: bold; color: #1976d2;">${relevantInTop5}</div>
+                            <div style="color: #666; margin: 5px 0;">relevant champions captured</div>
+                            <div style="font-size: 1.2rem; color: #333;">out of <strong>${relevantCount}</strong> total relevant</div>
+                        </div>
+                        <div style="background: #1976d2; height: 8px; border-radius: 4px; margin: 15px 0;">
+                            <div style="background: #4caf50; height: 100%; width: ${coveragePercent}%; border-radius: 4px; transition: width 0.5s;"></div>
+                        </div>
+                        <div style="text-align: center; color: #555; font-size: 0.95rem;">
+                            ${coveragePercent.toFixed(1)}% coverage
+                        </div>
+                    </div>
+                    
+                    <h3>Why This Score?</h3>
+                    <p>${value >= 0.4 ? 
+                        `<strong>Excellent coverage!</strong> We captured ${coveragePercent.toFixed(0)}% of your relevant champions in just 5 recommendations. This means you're seeing most of your best options.` :
+                        value >= 0.2 ? 
+                        `<strong>Good coverage.</strong> We found ${coveragePercent.toFixed(0)}% of relevant champions. There are ${relevantCount - relevantInTop5} more relevant options not shown in top 5.` :
+                        `<strong>Limited coverage.</strong> Only ${coveragePercent.toFixed(0)}% of relevant champions appear in top 5. This suggests either: (1) Very specific preferences = many relevant options exist, or (2) Diversity filter is hiding some matches.`
+                    }</p>
+                    
+                    <h3>Trade-off Explanation</h3>
+                    <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
+                        <li><strong>High Recall (>40%):</strong> You're seeing most relevant options quickly</li>
+                        <li><strong>Medium Recall (20-40%):</strong> Good coverage, but more options exist beyond top 5</li>
+                        <li><strong>Low Recall (<20%):</strong> System prioritizes precision over coverage (fewer but highly accurate picks)</li>
+                    </ul>
+                    
+                    <h3>How It's Calculated</h3>
+                    <p><strong>Formula:</strong> Recall@5 = (Relevant in Top 5) ÷ (Total Relevant Champions)</p>
+                    <p>Recall@5 = ${relevantInTop5} ÷ ${relevantCount} = ${value.toFixed(3)} = ${(value * 100).toFixed(1)}%</p>
+                `;
+                
+            } else if (metricType === 'f1') {
+                title = '📊 F1-Score@5 - Balanced Quality Metric';
+                const top5 = recommendedChampions.slice(0, 5);
+                const relevantInTop5 = top5.filter(champ => relevantChampions.has(champ)).length;
+                
+                const precision = relevantInTop5 / 5;
+                const recall = relevantCount > 0 ? relevantInTop5 / relevantCount : 0;
+                
+                content = `
+                    <div class="modal-score ${scoreClass}">
+                        <div class="modal-score-value">${(value * 100).toFixed(1)}%</div>
+                        <div class="modal-score-label">F1-Score@5</div>
+                    </div>
+                    
+                    <h3>What is F1-Score?</h3>
+                    <p>F1-Score is the <strong>harmonic mean of Precision and Recall</strong>. It balances two questions:</p>
+                    <ul style="margin: 15px 0 15px 20px; line-height: 1.8;">
+                        <li><strong>Precision:</strong> "Are recommendations relevant?" (${(precision * 100).toFixed(1)}%)</li>
+                        <li><strong>Recall:</strong> "Did we find most relevant options?" (${(recall * 100).toFixed(1)}%)</li>
+                    </ul>
+                    <p>F1-Score gives you a <strong>single metric</strong> that captures both accuracy and coverage quality.</p>
+                    
+                    <h3>Component Breakdown</h3>
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                            <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
+                                <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">Precision@5</div>
+                                <div style="font-size: 2rem; font-weight: bold; color: #1976d2;">${(precision * 100).toFixed(1)}%</div>
+                                <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">${relevantInTop5}/5 relevant</div>
+                            </div>
+                            <div style="text-align: center; padding: 15px; background: white; border-radius: 8px;">
+                                <div style="font-size: 0.9rem; color: #666; margin-bottom: 8px;">Recall@5</div>
+                                <div style="font-size: 2rem; font-weight: bold; color: #4caf50;">${(recall * 100).toFixed(1)}%</div>
+                                <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">${relevantInTop5}/${relevantCount} found</div>
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; color: white;">
+                            <div style="font-size: 0.9rem; margin-bottom: 8px; opacity: 0.9;">Harmonic Mean (F1-Score)</div>
+                            <div style="font-size: 2.5rem; font-weight: bold;">${(value * 100).toFixed(1)}%</div>
+                            <div style="font-size: 0.85rem; margin-top: 8px; opacity: 0.85;">Balanced Quality Score</div>
+                        </div>
+                    </div>
+                    
+                    <h3>Why This Score?</h3>
+                    <p>${value >= 0.5 ? 
+                        `<strong>Excellent!</strong> Your recommendations achieve both high accuracy (${(precision * 100).toFixed(0)}%) and good coverage (${(recall * 100).toFixed(0)}%). The system is performing optimally.` :
+                        value >= 0.3 ? 
+                        `<strong>Good balance.</strong> The system balances accuracy and coverage well. ${precision > recall ? 'Precision is stronger (accurate picks), with moderate coverage.' : 'Recall is stronger (good coverage), with solid accuracy.'}` :
+                        value >= 0.15 ? 
+                        `<strong>Trade-off detected.</strong> ${precision > recall ? 'High precision (very accurate) but limited coverage - you\'re seeing highly targeted picks.' : 'Good coverage but lower precision - system is showing you variety.'}` :
+                        `<strong>Imbalanced.</strong> Either very high precision with low coverage, or vice versa. ${precision < 0.3 && recall < 0.3 ? 'Both metrics are low - consider broadening preferences.' : precision > recall ? 'System favors accuracy over coverage.' : 'System favors coverage over accuracy.'}`
+                    }</p>
+                    
+                    <h3>How It's Calculated</h3>
+                    <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; font-family: monospace; font-size: 0.9rem;">
+                        <div style="margin-bottom: 8px;"><strong>Formula:</strong></div>
+                        <div style="margin-left: 20px; line-height: 1.8;">
+                            F1 = 2 × (Precision × Recall) ÷ (Precision + Recall)<br>
+                            F1 = 2 × (${precision.toFixed(3)} × ${recall.toFixed(3)}) ÷ (${precision.toFixed(3)} + ${recall.toFixed(3)})<br>
+                            F1 = 2 × ${(precision * recall).toFixed(3)} ÷ ${(precision + recall).toFixed(3)}<br>
+                            F1 = ${value.toFixed(3)} = <strong>${(value * 100).toFixed(1)}%</strong>
+                        </div>
+                    </div>
+                    
+                    <h3>💡 Interpretation Guide</h3>
+                    <ul style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>F1 ≥ 50%:</strong> Excellent - both accuracy and coverage are strong</li>
+                        <li><strong>F1: 30-50%:</strong> Good - balanced performance with room for improvement</li>
+                        <li><strong>F1: 15-30%:</strong> Fair - either high precision OR high recall, not both</li>
+                        <li><strong>F1 < 15%:</strong> System needs tuning or preferences are very specific</li>
+                    </ul>
                 `;
             }
             
