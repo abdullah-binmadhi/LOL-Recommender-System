@@ -4105,112 +4105,162 @@
             static calculateUserRelevance(userAnswers, allChampions) {
                 const championScores = [];
                 
-                // Extract user preferences
-                const userRole = userAnswers.role || 'No Preference';
-                const userDifficulty = this.mapDifficultyToNumeric(userAnswers.difficulty);
-                const { damage: userDamage, toughness: userToughness } = this.mapPlaystyleToAttributes(userAnswers.playstyle);
+                // Extract user preferences - handle both object and array-like answers
+                const userRole = userAnswers.role || userAnswers[2] || 'No Preference';
+                const userPosition = userAnswers.position || userAnswers[3] || 'No Preference';
+                const difficultyAnswer = userAnswers.difficulty || userAnswers[1];
+                const playstyleAnswer = userAnswers.playstyle || userAnswers[4];
                 
-                // Iterate through all champions and calculate match score
+                const userDifficulty = this.mapDifficultyToNumeric(difficultyAnswer);
+                const { damage: userDamage, toughness: userToughness } = this.mapPlaystyleToAttributes(playstyleAnswer);
+                
+                // Psychological preferences (Questions 6-10)
+                const pressureResponse = userAnswers.pressure_response || userAnswers[6] || 'Stay calm and strategic';
+                const aestheticPreference = userAnswers.aesthetic_preference || userAnswers[7] || 'Heroic';
+                const teamContribution = userAnswers.team_contribution || userAnswers[8] || 'Balance between both';
+                const characterIdentity = userAnswers.character_identity || userAnswers[9] || 'No preference';
+                const problemSolving = userAnswers.problem_solving || userAnswers[10] || 'Analyze carefully before acting';
+                
+                // Score each champion using SAME logic as ML algorithms
                 for (const [championName, champion] of Object.entries(allChampions)) {
-                    // Get champion's primary position (first in positions array, fallback to role)
-                    const championPosition = (champion.positions && champion.positions.length > 0) 
-                        ? champion.positions[0] 
-                        : champion.role;
+                    let compatibilityScore = 0;
+                    let maxPossibleScore = 0;
                     
-                    // STRICTER: Skip champions with wrong position entirely (unless "No Preference")
-                    if (userRole !== 'No Preference' && userRole !== championPosition) {
-                        continue; // Don't consider champions from wrong position
+                    // 1. Role/Position match (40 points) - HIGHEST WEIGHT
+                    maxPossibleScore += 40;
+                    if (userRole === 'No Preference' || champion.role === userRole) {
+                        compatibilityScore += 40;
+                    } else if (userPosition !== 'No Preference' && champion.positions && champion.positions.includes(userPosition)) {
+                        compatibilityScore += 30; // Partial credit for position match even if role doesn't match
                     }
                     
-                    let matchScore = 0;
-                    let totalCriteria = 0;
-                    
-                    // Position match (most important - 40% weight)
-                    totalCriteria += 4;
-                    matchScore += 4; // Full credit since we filtered by position
-                    
-                    // Difficulty match (25% weight) - VERY STRICT: only ±1 tolerance
+                    // 2. Difficulty match (15 points) - RELAXED from ±1 to ±2
                     if (userDifficulty !== null) {
-                        totalCriteria += 2.5;
+                        maxPossibleScore += 15;
                         const difficultyDiff = Math.abs(userDifficulty - champion.difficulty);
                         if (difficultyDiff === 0) {
-                            matchScore += 2.5; // Perfect match only
-                        } else if (difficultyDiff === 1) {
-                            matchScore += 1.25; // Adjacent match gets half credit
-                        } else {
-                            matchScore += 0; // No credit for ±2 or more
+                            compatibilityScore += 15; // Perfect match
+                        } else if (difficultyDiff <= 1) {
+                            compatibilityScore += 12; // Close match
+                        } else if (difficultyDiff <= 2) {
+                            compatibilityScore += 8; // Acceptable match
                         }
+                        // difficultyDiff >= 3 gets 0 points
                     }
                     
-                    // Damage match (20% weight) - VERY STRICT: only ±1 tolerance
+                    // 3. Damage match (12 points) - RELAXED from ±1 to ±2
                     if (userDamage !== null) {
-                        totalCriteria += 2;
+                        maxPossibleScore += 12;
                         const damageDiff = Math.abs(userDamage - champion.damage);
                         if (damageDiff === 0) {
-                            matchScore += 2; // Perfect match only
-                        } else if (damageDiff === 1) {
-                            matchScore += 1.0; // Adjacent match gets half credit
-                        } else {
-                            matchScore += 0; // No credit for ±2 or more
+                            compatibilityScore += 12;
+                        } else if (damageDiff <= 1) {
+                            compatibilityScore += 10;
+                        } else if (damageDiff <= 2) {
+                            compatibilityScore += 6;
                         }
                     }
                     
-                    // Toughness match (15% weight) - VERY STRICT: only ±1 tolerance
+                    // 4. Toughness match (12 points) - RELAXED from ±1 to ±2
                     if (userToughness !== null) {
-                        totalCriteria += 1.5;
+                        maxPossibleScore += 12;
                         const toughnessDiff = Math.abs(userToughness - champion.toughness);
                         if (toughnessDiff === 0) {
-                            matchScore += 1.5; // Perfect match only
-                        } else if (toughnessDiff === 1) {
-                            matchScore += 0.75; // Adjacent match gets half credit
-                        } else {
-                            matchScore += 0; // No credit for ±2 or more
+                            compatibilityScore += 12;
+                        } else if (toughnessDiff <= 1) {
+                            compatibilityScore += 10;
+                        } else if (toughnessDiff <= 2) {
+                            compatibilityScore += 6;
                         }
                     }
                     
-                    // Calculate match percentage
-                    const matchPercentage = totalCriteria > 0 ? (matchScore / totalCriteria) : 0;
-                    championScores.push({ name: championName, score: matchPercentage });
+                    // 5. Psychological preferences (21 points) - NOW INCLUDED!
+                    maxPossibleScore += 21;
+                    
+                    // Pressure response (7 points)
+                    if (pressureResponse === 'Stay calm and strategic' && champion.toughness >= 6) {
+                        compatibilityScore += 7;
+                    } else if (pressureResponse === 'Take charge and lead' && (champion.damage >= 7 || champion.control >= 7)) {
+                        compatibilityScore += 7;
+                    } else if (pressureResponse === 'Get aggressive and take risks' && champion.damage >= 8) {
+                        compatibilityScore += 7;
+                    } else if (pressureResponse === 'Play cautiously to avoid mistakes' && champion.toughness >= 7) {
+                        compatibilityScore += 7;
+                    } else {
+                        compatibilityScore += 3; // Partial credit
+                    }
+                    
+                    // Team contribution (7 points)
+                    if (teamContribution === 'Lead and make decisions' && champion.control >= 7) {
+                        compatibilityScore += 7;
+                    } else if (teamContribution === 'Support and enable others' && champion.utility >= 7) {
+                        compatibilityScore += 7;
+                    } else if (teamContribution === 'Balance between both' && (champion.utility >= 5 && champion.control >= 5)) {
+                        compatibilityScore += 7;
+                    } else if (teamContribution === 'Stay independent and focus on my role' && champion.damage >= 7) {
+                        compatibilityScore += 7;
+                    } else {
+                        compatibilityScore += 3; // Partial credit
+                    }
+                    
+                    // Problem solving (7 points)
+                    if (problemSolving === 'Analyze carefully before acting' && champion.control >= 7) {
+                        compatibilityScore += 7;
+                    } else if (problemSolving === 'Jump in and adapt on the fly' && champion.mobility >= 7) {
+                        compatibilityScore += 7;
+                    } else if (problemSolving === "Follow the team's lead" && champion.utility >= 6) {
+                        compatibilityScore += 7;
+                    } else if (problemSolving === 'Focus on long-term improvement' && champion.difficulty >= 7) {
+                        compatibilityScore += 7;
+                    } else {
+                        compatibilityScore += 3; // Partial credit
+                    }
+                    
+                    // Calculate compatibility percentage
+                    const compatibilityPercentage = maxPossibleScore > 0 ? (compatibilityScore / maxPossibleScore) * 100 : 0;
+                    
+                    championScores.push({
+                        name: championName,
+                        score: compatibilityPercentage
+                    });
                 }
                 
-                // Sort champions by score descending
+                // Sort by compatibility score descending
                 championScores.sort((a, b) => b.score - a.score);
                 
-                // Fixed relevant set size for optimal Recall@10 calculations
-                // Target: Exactly 10 relevant champions for 1:1 ratio with recommendations
-                const targetRelevantCount = 10;  // Exactly 10 relevant champions
-                const minRelevantCount = 10;      // Minimum 10 relevant champions
-                const maxRelevantCount = 10;      // Maximum 10 relevant champions
+                // NEW APPROACH: Use adaptive threshold based on score distribution
+                // Find natural "break points" in the score distribution
                 
+                const topScore = championScores.length > 0 ? championScores[0].score : 0;
                 const relevantChampions = new Set();
-                let threshold = 0.80; // Raised threshold to 80% for stricter matching (was 0.70)
                 
-                // First pass: add champions above threshold
+                // Method 1: Champions within 20% of top score (80% of top score)
+                const threshold = Math.max(topScore * 0.80, 60); // At least 60% absolute minimum
+                
                 for (const champ of championScores) {
                     if (champ.score >= threshold) {
                         relevantChampions.add(champ.name);
                     }
                 }
                 
-                // Ensure we have at least minimum relevant champions
-                if (relevantChampions.size < minRelevantCount) {
-                    for (let i = 0; i < minRelevantCount && i < championScores.length; i++) {
+                // Method 2: Ensure at least 10 champions but no more than 20
+                if (relevantChampions.size < 10) {
+                    // Add top 10 if we don't have enough
+                    for (let i = 0; i < Math.min(10, championScores.length); i++) {
                         relevantChampions.add(championScores[i].name);
                     }
-                }
-                
-                // Cap at maximum to maintain quality standards
-                if (relevantChampions.size > maxRelevantCount) {
+                } else if (relevantChampions.size > 20) {
+                    // Cap at top 20 if we have too many
                     const cappedSet = new Set();
-                    let count = 0;
-                    for (const champ of championScores) {
-                        if (relevantChampions.has(champ.name) && count < maxRelevantCount) {
-                            cappedSet.add(champ.name);
-                            count++;
-                        }
+                    for (let i = 0; i < 20; i++) {
+                        cappedSet.add(championScores[i].name);
                     }
+                    console.log(`✅ Found ${cappedSet.size} relevant champions (threshold: ${threshold.toFixed(1)}%, top score: ${topScore.toFixed(1)}%)`);
                     return cappedSet;
                 }
+                
+                console.log(`✅ Found ${relevantChampions.size} relevant champions (threshold: ${threshold.toFixed(1)}%, top score: ${topScore.toFixed(1)}%)`);
+                console.log(`   Top 5 scores: ${championScores.slice(0, 5).map(c => `${c.name}: ${c.score.toFixed(1)}%`).join(', ')}`);
                 
                 return relevantChampions;
             }
