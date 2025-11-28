@@ -4098,11 +4098,15 @@
             
             /**
              * Calculate user relevance based on questionnaire answers
+             * ADAPTIVE APPROACH: Ensures we always have 10-20 relevant champions
+             * COMPATIBILITY-BASED: Champions with 80%+ ML score are automatically relevant
+             * 
              * @param {Object} userAnswers - User's questionnaire answers
              * @param {Object} allChampions - All available champions
+             * @param {Object} mlScores - OPTIONAL: ML scores from recommendation results
              * @returns {Set<string>} - Set of relevant champion names
              */
-            static calculateUserRelevance(userAnswers, allChampions) {
+            static calculateUserRelevance(userAnswers, allChampions, mlScores = null) {
                 const championScores = [];
                 
                 // Extract user preferences - handle both object and array-like answers
@@ -4120,6 +4124,18 @@
                 const teamContribution = userAnswers.team_contribution || userAnswers[8] || 'Balance between both';
                 const characterIdentity = userAnswers.character_identity || userAnswers[9] || 'No preference';
                 const problemSolving = userAnswers.problem_solving || userAnswers[10] || 'Analyze carefully before acting';
+                
+                // NEW: Get ML-scored champions if available (top 10 recommendations)
+                const mlScoredChampions = new Set();
+                if (mlScores && mlScores.top10) {
+                    mlScores.top10.forEach(champion => {
+                        // Champions with 80%+ average ML score are automatically relevant
+                        if (champion.average >= 80) {
+                            mlScoredChampions.add(champion.championName);
+                            console.log(`✅ Auto-relevant (ML score ${champion.average.toFixed(1)}%): ${champion.championName}`);
+                        }
+                    });
+                }
                 
                 // Score each champion using SAME logic as ML algorithms
                 for (const [championName, champion] of Object.entries(allChampions)) {
@@ -4221,46 +4237,72 @@
                     
                     championScores.push({
                         name: championName,
-                        score: compatibilityPercentage
+                        score: compatibilityPercentage,
+                        mlScored: mlScoredChampions.has(championName)
                     });
                 }
                 
                 // Sort by compatibility score descending
                 championScores.sort((a, b) => b.score - a.score);
                 
-                // NEW APPROACH: Use adaptive threshold based on score distribution
-                // Find natural "break points" in the score distribution
-                
-                const topScore = championScores.length > 0 ? championScores[0].score : 0;
+                // ADAPTIVE APPROACH: Build relevant set with multiple criteria
                 const relevantChampions = new Set();
                 
-                // Method 1: Champions within 20% of top score (80% of top score)
-                const threshold = Math.max(topScore * 0.80, 60); // At least 60% absolute minimum
+                // STEP 1: Add all champions with 80%+ ML score (if available)
+                mlScoredChampions.forEach(champion => relevantChampions.add(champion));
+                
+                // STEP 2: Add champions with high compatibility scores
+                const topScore = championScores.length > 0 ? championScores[0].score : 0;
+                const adaptiveThreshold = Math.max(topScore * 0.75, 60); // 75% of top score OR 60% minimum
                 
                 for (const champ of championScores) {
-                    if (champ.score >= threshold) {
+                    if (champ.score >= adaptiveThreshold) {
                         relevantChampions.add(champ.name);
                     }
                 }
                 
-                // Method 2: Ensure at least 10 champions but no more than 20
+                // STEP 3: Ensure minimum of 10 relevant champions (adaptive floor)
                 if (relevantChampions.size < 10) {
-                    // Add top 10 if we don't have enough
-                    for (let i = 0; i < Math.min(10, championScores.length); i++) {
+                    console.warn(`⚠️ Only ${relevantChampions.size} champions above threshold. Adding top ${10 - relevantChampions.size} to reach minimum.`);
+                    for (let i = 0; i < championScores.length && relevantChampions.size < 10; i++) {
                         relevantChampions.add(championScores[i].name);
                     }
-                } else if (relevantChampions.size > 20) {
-                    // Cap at top 20 if we have too many
+                }
+                
+                // STEP 4: Cap at maximum of 25 (prevents recall@10 from being too low)
+                if (relevantChampions.size > 25) {
                     const cappedSet = new Set();
-                    for (let i = 0; i < 20; i++) {
-                        cappedSet.add(championScores[i].name);
+                    let count = 0;
+                    
+                    // Prioritize ML-scored champions
+                    for (const champ of championScores) {
+                        if (mlScoredChampions.has(champ.name)) {
+                            cappedSet.add(champ.name);
+                            count++;
+                        }
                     }
-                    console.log(`✅ Found ${cappedSet.size} relevant champions (threshold: ${threshold.toFixed(1)}%, top score: ${topScore.toFixed(1)}%)`);
+                    
+                    // Then add highest-scoring non-ML champions
+                    for (const champ of championScores) {
+                        if (count >= 25) break;
+                        if (!mlScoredChampions.has(champ.name) && relevantChampions.has(champ.name)) {
+                            cappedSet.add(champ.name);
+                            count++;
+                        }
+                    }
+                    
+                    console.log(`✂️ Capped relevant set from ${relevantChampions.size} to ${cappedSet.size} champions`);
+                    console.log(`✅ Found ${cappedSet.size} relevant champions:`);
+                    console.log(`   - ${mlScoredChampions.size} from ML scores (80%+ compatibility)`);
+                    console.log(`   - ${cappedSet.size - mlScoredChampions.size} from adaptive threshold (${adaptiveThreshold.toFixed(1)}%)`);
+                    console.log(`   - Top 5 scores: ${championScores.slice(0, 5).map(c => `${c.name}: ${c.score.toFixed(1)}%${c.mlScored ? ' (ML)' : ''}`).join(', ')}`);
                     return cappedSet;
                 }
                 
-                console.log(`✅ Found ${relevantChampions.size} relevant champions (threshold: ${threshold.toFixed(1)}%, top score: ${topScore.toFixed(1)}%)`);
-                console.log(`   Top 5 scores: ${championScores.slice(0, 5).map(c => `${c.name}: ${c.score.toFixed(1)}%`).join(', ')}`);
+                console.log(`✅ Found ${relevantChampions.size} relevant champions:`);
+                console.log(`   - ${mlScoredChampions.size} from ML scores (80%+ compatibility)`);
+                console.log(`   - ${relevantChampions.size - mlScoredChampions.size} from adaptive threshold (${adaptiveThreshold.toFixed(1)}%)`);
+                console.log(`   - Top 5 scores: ${championScores.slice(0, 5).map(c => `${c.name}: ${c.score.toFixed(1)}%${c.mlScored ? ' (ML)' : ''}`).join(', ')}`);
                 
                 return relevantChampions;
             }
@@ -4923,7 +4965,7 @@ This metric ${metricDescriptions[metricName]}. Explain what this score means for
             try {
                 // Gather all data needed for the report
                 const top10Champions = mlResults.top10 || [];
-                const relevantChampions = EvaluationMetrics.calculateUserRelevance(answers, allChampions);
+                const relevantChampions = EvaluationMetrics.calculateUserRelevance(answers, allChampions, mlResults);
                 const recommendedChampions = EvaluationMetrics.getRecommendedChampions(mlResults);
                 
                 const precision1 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 1);
@@ -6443,7 +6485,7 @@ function showDetailedAnalysis() {
             // Calculate and display evaluation metrics
             try {
                 // Calculate user relevance based on questionnaire answers
-                const relevantChampions = EvaluationMetrics.calculateUserRelevance(answers, allChampions);
+                const relevantChampions = EvaluationMetrics.calculateUserRelevance(answers, allChampions, mlResults);
                 
                 // Get recommended champions from ML results
                 const recommendedChampions = EvaluationMetrics.getRecommendedChampions(mlResults);
@@ -6520,7 +6562,7 @@ function showDetailedAnalysis() {
             
             // Enhance with AI-generated explanations for quality metrics
             try {
-                const relevantChampions = EvaluationMetrics.calculateUserRelevance(answers, allChampions);
+                const relevantChampions = EvaluationMetrics.calculateUserRelevance(answers, allChampions, mlResults);
                 const recommendedChampions = EvaluationMetrics.getRecommendedChampions(mlResults);
                 
                 const precision1 = EvaluationMetrics.precisionAtK(recommendedChampions, relevantChampions, 1);
