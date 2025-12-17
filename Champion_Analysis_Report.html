@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Champion Data Analysis Report</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            background-color: #fff;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        .report-meta {
+            color: #7f8c8d;
+            font-style: italic;
+            margin-bottom: 40px;
+        }
+        .analysis-box {
+            background-color: #f9f9f9;
+            border-left: 5px solid #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 1.1em;
+            text-align: justify;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            margin: 30px 0;
+            page-break-inside: avoid;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        @media print {
+            body {
+                padding: 0;
+                max-width: 100%;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print" style="background: #fff3cd; color: #856404; padding: 15px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ffeeba;">
+        <strong>Note:</strong> Please use your browser's "Print" function (Ctrl+P / Cmd+P) and select "Save as PDF" to save this report.
+    </div>
+
+    <h1>Champion Data Analysis Report</h1>
+    <div class="report-meta">
+        Generated on: December 17, 2025<br>
+        Analyst: GitHub Copilot (Data Analyst Agent)
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">171</div>
+            <div class="stat-label">Total Champions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">Fighter</div>
+            <div class="stat-label">Most Common Role</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">Medium</div>
+            <div class="stat-label">Avg. Difficulty</div>
+        </div>
+    </div>
+
+    <h2>Executive Summary</h2>
+    <div class="analysis-box">
+        The analysis of the League of Legends champion roster reveals a diverse but structured ecosystem. <strong>Fighters</strong> dominate the class distribution, accounting for <strong>28.1%</strong> of all champions, followed by <strong>Mages (21.6%)</strong> and <strong>Marksmen (16.4%)</strong>, while <strong>Assassins</strong> and <strong>Supports</strong> are the most exclusive classes at <strong>9.9%</strong> each. In terms of combat range, the roster is remarkably balanced, with a slight majority of <strong>Melee (52.6%)</strong> champions compared to <strong>Ranged (47.4%)</strong>. Accessibility appears to be a key design philosophy, as <strong>53.8%</strong> of champions are classified as <strong>Medium difficulty</strong>, and nearly <strong>30%</strong> are <strong>Low difficulty</strong>, leaving only a small fraction (<strong>16.4%</strong>) as highly complex. Furthermore, the release history indicates a shift from rapid expansion in the game's early years (peaking at 40 champions in 2009) to a more curated release schedule of 3-6 champions annually in the last decade, suggesting a focus on quality and balance over quantity.
+    </div>
+
+    <h2>Visual Analysis</h2>
+
+    <h3>1. Class Distribution</h3>
+    <p>Fighters and Mages make up nearly half of the entire roster, indicating a focus on damage-dealing roles.</p>
+    <div class="chart-container">
+        <canvas id="heroTypeChart"></canvas>
+    </div>
+
+    <h3>2. Combat Range Balance</h3>
+    <p>The split between Melee and Ranged champions is nearly even, ensuring variety in gameplay styles.</p>
+    <div class="chart-container">
+        <canvas id="rangeTypeChart"></canvas>
+    </div>
+
+    <h3>3. Difficulty Curve</h3>
+    <p>The majority of champions fall into the "Medium" difficulty category, providing a balanced learning curve for players.</p>
+    <div class="chart-container">
+        <canvas id="difficultyChart"></canvas>
+    </div>
+
+    <script>
+        // Data from analysis
+        const heroTypeData = {
+            'Fighter': 48, 'Mage': 37, 'Marksman': 28, 'Tank': 24, 'Assassin': 17, 'Support': 17
+        };
+        
+        const rangeData = {
+            'Melee': 90, 'Ranged': 81
+        };
+        
+        const difficultyData = {
+            'Low (1)': 51, 'Medium (2)': 92, 'High (3)': 28
+        };
+
+        // Initialize Charts
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hero Type Chart
+            new Chart(document.getElementById('heroTypeChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(heroTypeData),
+                    datasets: [{
+                        label: 'Count',
+                        data: Object.values(heroTypeData),
+                        backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Range Type Chart
+            new Chart(document.getElementById('rangeTypeChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(rangeData),
+                    datasets: [{
+                        data: Object.values(rangeData),
+                        backgroundColor: ['#e74c3c', '#2ecc71']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Difficulty Chart
+            new Chart(document.getElementById('difficultyChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(difficultyData),
+                    datasets: [{
+                        data: Object.values(difficultyData),
+                        backgroundColor: ['#27ae60', '#f39c12', '#c0392b']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        });
+    </script>
+</body>
+</html>
