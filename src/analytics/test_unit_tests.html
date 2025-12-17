@@ -200,7 +200,7 @@
                     const dt = dtScores[championName]?.score || 0;
                     const knn = knnScores[championName]?.score || 0;
                     
-                    const average = (rf + dt + knn) / 3;
+                    const average = (rf * 0.4) + (dt * 0.3) + (knn * 0.3);
                     const weighted = this.calculateWeightedScore(rf, dt, knn);
                     
                     aggregated[championName] = {

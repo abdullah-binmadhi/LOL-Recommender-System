@@ -3860,10 +3860,11 @@
                     const dt = dtScores[championName]?.score || 0;
                     const knn = knnScores[championName]?.score || 0;
                     
-                    // Calculate average score
-                    const average = (rf + dt + knn) / 3;
+                    // Calculate weighted score (Random Forest 40%, Decision Tree 30%, KNN 30%)
+                    // This is now used as the primary "average" score for sorting and display
+                    const average = (rf * 0.4) + (dt * 0.3) + (knn * 0.3);
                     
-                    // Calculate weighted score
+                    // Calculate weighted score (redundant but kept for compatibility)
                     const weighted = this.calculateWeightedScore(rf, dt, knn);
                     
                     // Store aggregated data
@@ -7597,35 +7598,35 @@ function restartQuestionnaire() {
                     <h3 style="color: #1976d2;"><span style="font-size: 1.4rem;">🎓</span> How We Calculate Your Final Score</h3>
                     <div class="algorithm-score-card">
                         <p style="color: #666; margin-bottom: 15px;">
-                            Your final compatibility score is the <strong>average of all three ML algorithms</strong>. This ensemble approach provides more accurate and reliable recommendations.
+                            Your final compatibility score is a <strong>weighted ensemble of all three ML algorithms</strong>. Random Forest contributes 40%, while Decision Tree and KNN contribute 30% each.
                         </p>
                         
                         <div class="calculation-steps">
                             <div class="calculation-step">
-                                <div class="step-label">Random Forest Contribution</div>
+                                <div class="step-label">Random Forest Contribution (40%)</div>
                                 <div class="step-formula">
-                                    ${championData.scores.randomForest.toFixed(1)}% ÷ 3 = ${(championData.scores.randomForest / 3).toFixed(1)}%
+                                    ${championData.scores.randomForest.toFixed(1)}% × 0.4 = ${(championData.scores.randomForest * 0.4).toFixed(1)}%
                                 </div>
                             </div>
                             
                             <div class="calculation-step">
-                                <div class="step-label">Decision Tree Contribution</div>
+                                <div class="step-label">Decision Tree Contribution (30%)</div>
                                 <div class="step-formula">
-                                    ${championData.scores.decisionTree.toFixed(1)}% ÷ 3 = ${(championData.scores.decisionTree / 3).toFixed(1)}%
+                                    ${championData.scores.decisionTree.toFixed(1)}% × 0.3 = ${(championData.scores.decisionTree * 0.3).toFixed(1)}%
                                 </div>
                             </div>
                             
                             <div class="calculation-step">
-                                <div class="step-label">KNN Contribution</div>
+                                <div class="step-label">KNN Contribution (30%)</div>
                                 <div class="step-formula">
-                                    ${championData.scores.knn.toFixed(1)}% ÷ 3 = ${(championData.scores.knn / 3).toFixed(1)}%
+                                    ${championData.scores.knn.toFixed(1)}% × 0.3 = ${(championData.scores.knn * 0.3).toFixed(1)}%
                                 </div>
                             </div>
                             
                             <div class="calculation-step">
                                 <div class="step-label">Final Unified Score</div>
                                 <div class="step-formula">
-                                    (${championData.scores.randomForest.toFixed(1)} + ${championData.scores.decisionTree.toFixed(1)} + ${championData.scores.knn.toFixed(1)}) ÷ 3
+                                    (${(championData.scores.randomForest * 0.4).toFixed(1)} + ${(championData.scores.decisionTree * 0.3).toFixed(1)} + ${(championData.scores.knn * 0.3).toFixed(1)})
                                 </div>
                                 <div class="step-result">Result: ${championData.scores.average.toFixed(1)}%</div>
                             </div>
