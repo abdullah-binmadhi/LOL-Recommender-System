@@ -3,7 +3,7 @@
 ## Phase 1: Data Analysis & Feature Engineering
 **Goal:** Audit the current dataset and introduce new derived features to improve recommendation granularity.
 
-- [ ] Task: Audit `champions.json` for data completeness and relevance.
+- [x] Task: Audit `champions.json` for data completeness and relevance.
     - [ ] Sub-task: Write script to check for missing values or outdated stats.
     - [ ] Sub-task: Identify key missing features (e.g., damage type, power spikes).
 - [ ] Task: Implement `FeatureExtractor` class in JavaScript.
