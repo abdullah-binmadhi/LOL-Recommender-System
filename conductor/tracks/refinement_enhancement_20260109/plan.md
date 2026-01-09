@@ -6,7 +6,7 @@
 - [x] Task: Audit `champions.json` for data completeness and relevance.
     - [ ] Sub-task: Write script to check for missing values or outdated stats.
     - [ ] Sub-task: Identify key missing features (e.g., damage type, power spikes).
-- [ ] Task: Implement `FeatureExtractor` class in JavaScript.
+- [x] Task: Implement `FeatureExtractor` class in JavaScript.
     - [ ] Sub-task: Write tests for `FeatureExtractor` (TDD).
     - [ ] Sub-task: Implement logic to calculate derived stats (Burst, Sustain, CC).
 - [ ] Task: Update `champions.json` with new derived features.
