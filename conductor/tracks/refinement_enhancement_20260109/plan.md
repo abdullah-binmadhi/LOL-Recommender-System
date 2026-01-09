@@ -9,7 +9,7 @@
 - [x] Task: Implement `FeatureExtractor` class in JavaScript.
     - [ ] Sub-task: Write tests for `FeatureExtractor` (TDD).
     - [ ] Sub-task: Implement logic to calculate derived stats (Burst, Sustain, CC).
-- [ ] Task: Update `champions.json` with new derived features.
+- [x] Task: Update `champions.json` with new derived features.
     - [ ] Sub-task: Run extraction script to populate new fields.
     - [ ] Sub-task: Verify data integrity of the updated JSON.
 - [ ] Task: Conductor - User Manual Verification 'Data Analysis & Feature Engineering' (Protocol in workflow.md)
