@@ -54,6 +54,7 @@ def audit_champions():
         for feat in NEW_FEATURES:
             if feat not in champion:
                 missing_new_features[feat] += 1
+                errors.append(f"Champion '{champ_name}' missing new feature: '{feat}'")
 
     # Report results
     if errors:
