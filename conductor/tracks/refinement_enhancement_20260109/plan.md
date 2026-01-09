@@ -12,12 +12,12 @@
 - [x] Task: Update `champions.json` with new derived features.
     - [ ] Sub-task: Run extraction script to populate new fields.
     - [ ] Sub-task: Verify data integrity of the updated JSON.
-- [ ] Task: Conductor - User Manual Verification 'Data Analysis & Feature Engineering' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Data Analysis & Feature Engineering' (Protocol in workflow.md)
 
 ## Phase 2: Algorithm Refinement
 **Goal:** Optimize the ensemble weighting and individual algorithm parameters based on the new features.
 
-- [ ] Task: Create a validation test suite for the ensemble model.
+- [x] Task: Create a validation test suite for the ensemble model.
     - [ ] Sub-task: Define a set of "ground truth" user profiles and expected recommendations.
     - [ ] Sub-task: Write automated tests to measure current accuracy.
 - [ ] Task: Refine K-Nearest Neighbors (KNN) distance metric.
