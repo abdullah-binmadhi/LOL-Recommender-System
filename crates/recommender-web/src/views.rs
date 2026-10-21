@@ -48,7 +48,9 @@ pub fn App() -> impl IntoView {
             .effective_questions(),
     );
     let catalog = Arc::new(
-        EffectiveCatalog::current().expect("bundled effective champion catalog must remain valid"),
+        EffectiveCatalog::modern()
+            .or_else(|_| EffectiveCatalog::current())
+            .expect("bundled champion catalog must remain valid"),
     );
     let analytics_summary = Arc::new(recommender_core::analytics::default_analytics_summary());
     let counters: BTreeMap<String, CounterRecord> =

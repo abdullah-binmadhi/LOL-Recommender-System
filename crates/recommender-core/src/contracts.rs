@@ -54,6 +54,12 @@ impl EffectiveCatalog {
         Self::from_json(include_str!("../data/catalog.json"))
     }
 
+    /// Modern catalog containing the complete League of Legends roster (168+ champions)
+    /// up to 2026, including Ambessa, Aurora, Naafiri, Milio, K'Sante, and Renata Glasc.
+    pub fn modern() -> Result<Self, Error> {
+        Self::from_json(include_str!("../data/catalog_modern.json"))
+    }
+
     pub fn into_engine_entries(self) -> Result<Vec<CatalogEntry>, Error> {
         self.0
             .into_iter()
@@ -344,6 +350,19 @@ mod tests {
             "$catalog",
         );
         assert_eq!(catalog.len(), 162);
+    }
+
+    #[test]
+    fn modern_catalog_contains_all_169_champions_including_new_additions() {
+        let catalog = EffectiveCatalog::modern().unwrap();
+        assert_eq!(catalog.len(), 169);
+        assert!(catalog.0.iter().any(|c| c.name == "Ambessa"));
+        assert!(catalog.0.iter().any(|c| c.name == "Aurora"));
+        assert!(catalog.0.iter().any(|c| c.name == "Naafiri"));
+        assert!(catalog.0.iter().any(|c| c.name == "Milio"));
+        assert!(catalog.0.iter().any(|c| c.name == "K'Sante"));
+        assert!(catalog.0.iter().any(|c| c.name == "Renata Glasc"));
+        assert!(catalog.0.iter().any(|c| c.name == "Locke"));
     }
 
     #[test]
