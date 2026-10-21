@@ -4,7 +4,7 @@
   "description": "A League of Legends champion recommendation system using AI-powered algorithms",
   "scripts": {
     "dev": "trunk serve --config Trunk.toml",
-    "build": "echo 'Prebuilt static assets ready'",
+    "build": "node scripts/vercel-build.mjs",
     "build:rust": "npm run wasm:build && trunk build --release",
     "start": "echo 'No start command required - static HTML site'",
     "wasm:build": "node scripts/build-wasm.mjs",
