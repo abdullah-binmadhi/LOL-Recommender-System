@@ -1,0 +1,1113 @@
+{
+  "captured_at_utc": "2026-10-21T08:27:02.175137+00:00",
+  "source_state": {
+    "commit": "01d5d9a51bc34cddafae8f9aa1ef4697dce4e0df",
+    "working_tree_dirty": true
+  },
+  "browser": {
+    "name": "Chromium",
+    "version": "145.0.7632.6"
+  },
+  "viewports": {
+    "desktop": {
+      "checks": {
+        "viewport": {
+          "width": 1440,
+          "height": 900
+        },
+        "isolated_storage_before": [],
+        "start_images": [
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Jinx.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Yasuo.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Ahri.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Zed.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Lux.png"
+          }
+        ],
+        "mage_position_options": [
+          "Mid",
+          "Support"
+        ],
+        "recommendation_card_count": 10,
+        "recommendation_images": [
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Ahri.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Taliyah.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Vex.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Corki.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Fizz.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Akali.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Akshan.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Irelia.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Yone.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Pantheon.png"
+          }
+        ],
+        "champion_modal_name": "Ahri",
+        "champion_modal_image": [
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Ahri.png"
+          }
+        ],
+        "storage": {
+          "keys": [
+            "recentChampions",
+            "championRecommenderUsers"
+          ],
+          "synthetic_registration_count": 1,
+          "synthetic_record_matches": true,
+          "recent_champion_count": 10
+        },
+        "csv_export_filename": "champion_recommender_users.csv",
+        "analytics_chart_count": 5,
+        "screenshots": [
+          "desktop-01-root-entry.png",
+          "desktop-02-recommender-start.png",
+          "desktop-03-registration.png",
+          "desktop-04-question-1.png",
+          "desktop-05-filtered-question.png",
+          "desktop-06-recommendations.png",
+          "desktop-07-metric-modal.png",
+          "desktop-08-champion-modal.png",
+          "desktop-09-analytics.png"
+        ],
+        "external_ai_requests_attempted": 0
+      },
+      "requests": [
+        {
+          "stage": "root-entry",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/index.html",
+          "resource_type": "document"
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/index.html",
+          "resource_type": "document"
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Jinx.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Yasuo.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Ahri.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Zed.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Lux.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/data/questions.json",
+          "resource_type": "fetch"
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/data/questions.json",
+          "resource_type": "fetch"
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "POST",
+          "host": "vitals.vercel-insights.com",
+          "path": "/v1/vitals",
+          "resource_type": "fetch"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/wasm/scoring.mjs",
+          "resource_type": "script"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/public/wasm/lol_scoring_core.wasm",
+          "resource_type": "fetch"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Ahri.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/data/champion_counters.json",
+          "resource_type": "fetch"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Taliyah.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Vex.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Corki.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Fizz.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Akali.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Akshan.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Irelia.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Yone.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Pantheon.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "champion-modal",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Ahri.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/index.html",
+          "resource_type": "document"
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/analytics.html",
+          "resource_type": "document"
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/analytics/analytics.html",
+          "resource_type": "document"
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "cdn.jsdelivr.net",
+          "path": "/npm/chart.js",
+          "resource_type": "script"
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/data/champions.json",
+          "resource_type": "fetch"
+        }
+      ],
+      "responses": [
+        {
+          "stage": "root-entry",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/index.html",
+          "status": 200
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/index.html",
+          "status": 200
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/data/questions.json",
+          "status": 200
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/data/questions.json",
+          "status": 200
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Yasuo.png",
+          "status": 200
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Jinx.png",
+          "status": 200
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Lux.png",
+          "status": 200
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Zed.png",
+          "status": 200
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Ahri.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/wasm/scoring.mjs",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/public/wasm/lol_scoring_core.wasm",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/data/champion_counters.json",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Ahri.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Taliyah.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Vex.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Fizz.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Corki.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Akshan.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Akali.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Irelia.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Yone.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Pantheon.png",
+          "status": 200
+        },
+        {
+          "stage": "champion-modal",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Ahri.png",
+          "status": 200
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/index.html",
+          "status": 200
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/analytics.html",
+          "status": 200
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/analytics/analytics.html",
+          "status": 200
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "cdn.jsdelivr.net",
+          "path": "/npm/chart.js",
+          "status": 200
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/data/champions.json",
+          "status": 200
+        }
+      ],
+      "blocked_requests": [
+        {
+          "stage": "navigation-to-recommender",
+          "host": "vitals.vercel-insights.com",
+          "path": "/v1/vitals",
+          "reason": "external non-GET blocked"
+        }
+      ],
+      "request_failures": [
+        {
+          "stage": "navigation-to-recommender",
+          "host": "vitals.vercel-insights.com",
+          "path": "/v1/vitals",
+          "failure": "net::ERR_BLOCKED_BY_CLIENT.Inspector"
+        }
+      ],
+      "page_errors": [],
+      "console_errors": [
+        "Failed to load resource: net::ERR_BLOCKED_BY_CLIENT.Inspector"
+      ]
+    },
+    "mobile": {
+      "checks": {
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "isolated_storage_before": [],
+        "start_images": [
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Jinx.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Yasuo.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Ahri.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Zed.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Lux.png"
+          }
+        ],
+        "mage_position_options": [
+          "Mid",
+          "Support"
+        ],
+        "recommendation_card_count": 10,
+        "recommendation_images": [
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Ahri.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Taliyah.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Vex.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Corki.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Fizz.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Akali.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Akshan.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Irelia.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Yone.png"
+          },
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Pantheon.png"
+          }
+        ],
+        "champion_modal_name": "Ahri",
+        "champion_modal_image": [
+          {
+            "loaded": true,
+            "host": "ddragon.leagueoflegends.com",
+            "path": "/cdn/15.16.1/img/champion/Ahri.png"
+          }
+        ],
+        "storage": {
+          "keys": [
+            "recentChampions",
+            "championRecommenderUsers"
+          ],
+          "synthetic_registration_count": 1,
+          "synthetic_record_matches": true,
+          "recent_champion_count": 10
+        },
+        "csv_export_filename": "champion_recommender_users.csv",
+        "analytics_chart_count": 5,
+        "screenshots": [
+          "mobile-01-root-entry.png",
+          "mobile-02-recommender-start.png",
+          "mobile-03-registration.png",
+          "mobile-04-question-1.png",
+          "mobile-05-filtered-question.png",
+          "mobile-06-recommendations.png",
+          "mobile-07-metric-modal.png",
+          "mobile-08-champion-modal.png",
+          "mobile-09-analytics.png"
+        ],
+        "external_ai_requests_attempted": 0
+      },
+      "requests": [
+        {
+          "stage": "root-entry",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/index.html",
+          "resource_type": "document"
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/index.html",
+          "resource_type": "document"
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Jinx.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Yasuo.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Ahri.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Zed.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Lux.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/data/questions.json",
+          "resource_type": "fetch"
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/data/questions.json",
+          "resource_type": "fetch"
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "POST",
+          "host": "vitals.vercel-insights.com",
+          "path": "/v1/vitals",
+          "resource_type": "fetch"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/wasm/scoring.mjs",
+          "resource_type": "script"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/public/wasm/lol_scoring_core.wasm",
+          "resource_type": "fetch"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Ahri.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/data/champion_counters.json",
+          "resource_type": "fetch"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Taliyah.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Vex.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Corki.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Fizz.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Akali.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Akshan.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Irelia.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Yone.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Pantheon.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "champion-modal",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Ahri.png",
+          "resource_type": "image"
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/index.html",
+          "resource_type": "document"
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/analytics.html",
+          "resource_type": "document"
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/analytics/analytics.html",
+          "resource_type": "document"
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "cdn.jsdelivr.net",
+          "path": "/npm/chart.js",
+          "resource_type": "script"
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/data/champions.json",
+          "resource_type": "fetch"
+        }
+      ],
+      "responses": [
+        {
+          "stage": "root-entry",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/index.html",
+          "status": 200
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/index.html",
+          "status": 200
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/data/questions.json",
+          "status": 200
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/data/questions.json",
+          "status": 200
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Yasuo.png",
+          "status": 200
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Ahri.png",
+          "status": 200
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Jinx.png",
+          "status": 200
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Zed.png",
+          "status": 200
+        },
+        {
+          "stage": "navigation-to-recommender",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Lux.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/wasm/scoring.mjs",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/public/wasm/lol_scoring_core.wasm",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/data/champion_counters.json",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Corki.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Taliyah.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Fizz.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Vex.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Ahri.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Akali.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Irelia.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Akshan.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Pantheon.png",
+          "status": 200
+        },
+        {
+          "stage": "recommendation-scoring",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Yone.png",
+          "status": 200
+        },
+        {
+          "stage": "champion-modal",
+          "method": "GET",
+          "host": "ddragon.leagueoflegends.com",
+          "path": "/cdn/15.16.1/img/champion/Ahri.png",
+          "status": 200
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/index.html",
+          "status": 200
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/analytics.html",
+          "status": 200
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/analytics/analytics.html",
+          "status": 200
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "cdn.jsdelivr.net",
+          "path": "/npm/chart.js",
+          "status": 200
+        },
+        {
+          "stage": "analytics-navigation",
+          "method": "GET",
+          "host": "127.0.0.1",
+          "path": "/LOL-Recommender-System/src/data/champions.json",
+          "status": 200
+        }
+      ],
+      "blocked_requests": [
+        {
+          "stage": "navigation-to-recommender",
+          "host": "vitals.vercel-insights.com",
+          "path": "/v1/vitals",
+          "reason": "external non-GET blocked"
+        }
+      ],
+      "request_failures": [
+        {
+          "stage": "navigation-to-recommender",
+          "host": "vitals.vercel-insights.com",
+          "path": "/v1/vitals",
+          "failure": "net::ERR_BLOCKED_BY_CLIENT.Inspector"
+        }
+      ],
+      "page_errors": [],
+      "console_errors": [
+        "Failed to load resource: net::ERR_BLOCKED_BY_CLIENT.Inspector"
+      ]
+    }
+  },
+  "notes": [
+    "Each viewport used a new non-persistent Playwright browser context.",
+    "Registration values were synthetic and localStorage was discarded when the context closed.",
+    "Gemini endpoints and external non-GET requests were blocked; request URLs omit query strings and bodies.",
+    "The CSV download was observed but not retained."
+  ]
+}

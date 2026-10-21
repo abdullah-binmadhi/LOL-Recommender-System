@@ -1,0 +1,11 @@
+[package]
+name = "recommender-web"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.88"
+license = "MIT"
+description = "Leptos client-side Rust preview for the champion recommender"
+
+[dependencies]
+leptos = { version = "=0.8.22", features = ["csr"] }
+recommender-core = { path = "../recommender-core" }

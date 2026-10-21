@@ -73,6 +73,14 @@ node_modules/
 *.tmp
 *.temp
 
+# Rust build artifacts (keep Cargo.lock for reproducible builds)
+/target/
+/crates/**/target/
+/crates/**/Cargo.lock
+/rust/scoring-core/target/
+/rust-preview/
+/public/wasm/*.wasm
+
 # Next.js
 .next/
 out/

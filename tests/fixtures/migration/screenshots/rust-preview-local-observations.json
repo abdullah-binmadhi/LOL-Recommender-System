@@ -1,0 +1,115 @@
+{
+  "captured_at_utc": "2026-10-21T08:26:21.634825+00:00",
+  "preview_url": "http://127.0.0.1:54067/LOL-Recommender-System/rust-preview/",
+  "browser": {
+    "name": "Chromium",
+    "version": "145.0.7632.6"
+  },
+  "checks": {
+    "document_status": 200,
+    "stylesheet_links": [
+      {
+        "href": "/LOL-Recommender-System/rust-preview/preview-d72b0911320c4149.css",
+        "loaded": true
+      }
+    ],
+    "successful_css_responses": [
+      {
+        "method": "GET",
+        "host": "127.0.0.1",
+        "path": "/LOL-Recommender-System/rust-preview/preview-d72b0911320c4149.css",
+        "status": 200
+      }
+    ],
+    "computed_page_shell_style": {
+      "display": "block",
+      "maxWidth": "none"
+    },
+    "question_count": 12,
+    "questionnaire_answer_counter": "12 / 12",
+    "recommendation_count": 10,
+    "top_recommendations": [
+      "1. Cho'Gath \u2014 68.0%",
+      "2. Singed \u2014 67.1%",
+      "3. Malphite \u2014 66.2%",
+      "4. Kennen \u2014 46.3%",
+      "5. Nasus \u2014 46.1%",
+      "6. Sett \u2014 45.9%",
+      "7. Quinn \u2014 45.8%",
+      "8. Aatrox \u2014 45.7%",
+      "9. Akali \u2014 44.3%",
+      "10. Yone \u2014 43.3%"
+    ],
+    "successful_wasm_responses": [
+      {
+        "method": "GET",
+        "host": "127.0.0.1",
+        "path": "/LOL-Recommender-System/rust-preview/recommender-web-4373ebacb652f1f4_bg.wasm",
+        "status": 200
+      }
+    ],
+    "local_storage_keys_after_scoring": [],
+    "screenshot": "tests/fixtures/migration/screenshots/rust-preview-local.png"
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/",
+      "resource_type": "document"
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/preview-d72b0911320c4149.css",
+      "resource_type": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-f340d8e9cd7284c2.js",
+      "resource_type": "script"
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-4373ebacb652f1f4_bg.wasm",
+      "resource_type": "other"
+    }
+  ],
+  "responses": [
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/preview-d72b0911320c4149.css",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-f340d8e9cd7284c2.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-4373ebacb652f1f4_bg.wasm",
+      "status": 200
+    }
+  ],
+  "blocked_requests": [],
+  "request_failures": [],
+  "page_errors": [],
+  "console_errors": [],
+  "notes": [
+    "A fresh non-persistent browser context was used; no registration or user data was entered.",
+    "Question selections were synthetic and held in Rust UI state only.",
+    "Gemini endpoints and external non-GET requests were blocked; request URLs omit query strings and bodies."
+  ]
+}

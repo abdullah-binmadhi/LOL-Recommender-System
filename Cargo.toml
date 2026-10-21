@@ -1,0 +1,15 @@
+[workspace]
+members = [
+    "crates/recommender-core",
+    "crates/recommender-web",
+]
+default-members = [
+    "crates/recommender-core",
+    "crates/recommender-web",
+]
+resolver = "2"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1

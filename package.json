@@ -3,9 +3,15 @@
   "version": "1.0.0",
   "description": "A League of Legends champion recommendation system using AI-powered algorithms",
   "scripts": {
-    "dev": "echo 'This is a static site. Open index.html in a browser.'",
-    "build": "echo 'No build required - static HTML site'",
-    "start": "echo 'No start command required - static HTML site'"
+    "dev": "trunk serve --config Trunk.toml",
+    "build": "npm run wasm:build && trunk build --release",
+    "start": "echo 'No start command required - static HTML site'",
+    "wasm:build": "node scripts/build-wasm.mjs",
+    "wasm:test": "cargo test --locked --workspace && cargo build --release --locked --target wasm32-unknown-unknown --package recommender-core && node --test scripts/migration/wasm.test.mjs",
+    "test": "node scripts/migration/reference.mjs --check && node --test scripts/migration/reference.test.mjs && npm run wasm:test",
+    "lint:rust": "cargo clippy --locked --workspace --all-targets -- -D warnings",
+    "fmt:rust": "cargo fmt --all -- --check",
+    "preview:rust": "trunk serve --config Trunk.toml"
   },
   "keywords": [
     "league-of-legends",

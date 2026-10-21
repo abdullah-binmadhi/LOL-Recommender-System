@@ -1,0 +1,80 @@
+name: Rust scoring parity
+
+on:
+  push:
+    paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'crates/**'
+      - 'web/**'
+      - 'Trunk.toml'
+      - 'RUST_MIGRATION_PLAN.md'
+      - 'scripts/migration/**'
+      - 'tests/fixtures/migration/**'
+      - 'src/index.html'
+      - 'src/data/questions.json'
+      - 'src/analytics/FeatureExtractor.js'
+      - 'src/wasm/**'
+      - 'public/wasm/**'
+      - 'scripts/build-wasm.mjs'
+      - '.github/workflows/rust-scoring.yml'
+      - '.github/workflows/pages.yml'
+      - 'package.json'
+  pull_request:
+    paths:
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'crates/**'
+      - 'web/**'
+      - 'Trunk.toml'
+      - 'RUST_MIGRATION_PLAN.md'
+      - 'scripts/migration/**'
+      - 'tests/fixtures/migration/**'
+      - 'src/index.html'
+      - 'src/data/questions.json'
+      - 'src/analytics/FeatureExtractor.js'
+      - 'src/wasm/**'
+      - 'public/wasm/**'
+      - 'scripts/build-wasm.mjs'
+      - '.github/workflows/rust-scoring.yml'
+      - '.github/workflows/pages.yml'
+      - 'package.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # Match the fixture-generation V8 runtime; forest sorting is engine-dependent.
+          node-version: '26.9.0'
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+          components: rustfmt, clippy
+      - name: Check production reference drift
+        run: node scripts/migration/reference.mjs --check
+      - name: Test reference harness
+        run: node --test scripts/migration/reference.test.mjs
+      - name: Test workspace and end-to-end parity
+        run: cargo test --locked --workspace
+      - name: Lint Rust
+        run: cargo clippy --locked --workspace --all-targets -- -D warnings
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+      - name: Build core browser-target Wasm
+        run: cargo build --release --locked --target wasm32-unknown-unknown --package recommender-core
+      - name: Test browser-target Wasm parity
+        run: node --test scripts/migration/wasm.test.mjs
+      - name: Verify browser module is generated
+        run: node scripts/build-wasm.mjs
+      - name: Install Trunk
+        run: cargo install trunk --version 0.22.0 --locked
+      - name: Build Leptos preview for repository subpath
+        run: trunk build --release

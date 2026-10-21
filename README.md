@@ -6,6 +6,81 @@ An AI-powered champion recommendation system that uses three ensemble machine le
 
 ---
 
+## Rust migration status
+
+The canonical roadmap, parity contract, repository inventory, known issues, and phase gates are in [`RUST_MIGRATION_PLAN.md`](RUST_MIGRATION_PLAN.md). The Rust workspace is under `crates/`: `recommender-core` owns typed data/features and parity-preserving scoring; `recommender-web` is the Leptos browser preview. The current website remains the default production entry while migration proceeds.
+
+- **Phase 0 — Complete:** source inventory, parity contract, eight synthetic profile fixtures, desktop/mobile screenshots, and browser-observed interactions/network evidence are recorded. Reference, Rust/Wasm, and browser checks pass; no dormant AI path was invoked.
+- **Phase 1 — Local browser gate passed; publication pending:** the Cargo workspace, Leptos/Trunk preview, locked dependencies, CI, and Pages build are configured. The local preview loads its CSS/Wasm under `/LOL-Recommender-System/rust-preview/`, renders all 12 questions, and produces 10 Rust recommendations. GitHub Pages publication/remote verification remains; the default root entry is not redirected.
+- **Phase 2 — Implemented and parity-tested:** Rust contracts load the existing questionnaire and extracted 162-champion effective catalog; all eight profiles preserve legacy feature conversion. Production UI data/state remains JavaScript until Phase 4.
+- **Phase 3 — Scoring parity implemented:** native and Wasm checks match the captured reference profiles. Preserve these checks during later UI work.
+- **Phases 4–7 — Not started:** full UI/state, browser storage/exports, analytics, cutover, generated-site-only deployment, and rollback remain.
+
+The scope is web-only for now. Tauri is not required or being implemented; revisit native packaging only after the website migration if a separate app is approved.
+
+### Run the interim Rust scoring core
+
+From the repository root, with a current stable Rust toolchain:
+
+```sh
+printf '%s' '{"1":"Medium (4-6)","2":"Mage","3":"Mid","4":"High Damage Output"}' | cargo run --locked --quiet -p recommender-core --bin lol-scoring-core
+```
+
+Stdin is a JSON **answers object**, not a profile wrapper or precomputed features. Keys are question IDs (`"1"`–`"12"`); values must be strings or null. Missing/empty answers and unknown option strings retain production defaults. The CLI limits input to 1 MiB, writes one JSON result to stdout, and reports failures on stderr with a nonzero exit code. The first build downloads the `serde`/`serde_json` dependencies; the built executable runs offline.
+
+The output contains `features`, per-champion `scores` with explanations/forest uncertainty, catalog-ordered `aggregated`, ranked `top10`, and `evaluation`. Repeated aggregate explanations are omitted; read them from `scores[algorithm][championName].details`. Scores are unrounded `f64`; object key order is not meaningful. Catalog, ranking, and relevant-champion **array** order is meaningful.
+
+The library exposes:
+
+- `Engine::reference()` — embeds only the Phase 0 effective catalog (currently 162 champions) and actual forest subsets, **not expected profile scores**. No runtime file loading or JS execution.
+- `Engine::from_json(catalog, forest)` / `Engine::new(...)` — accept a custom ordered catalog and explicit forest. Reject duplicate names/IDs, unknown or repeated subset features, unknown bootstrap names, invalid string/position fields, missing numeric stats, and incomplete optional derived stats. Numeric fields must be finite and within ±1,000,000 to bound intermediate arithmetic. Asset JSON uses the reference array formats, not the external champion database format.
+- `engine.recommend(&answers)` — runs the complete pipeline, including evaluation.
+- `engine.score_features(&features)` — scores a complete feature object directly, without answer-based evaluation. Supply all numeric and string fields shown in a reference profile's `features` object.
+
+The scoring library has no filesystem, network, browser, random-number, or JavaScript-runtime dependency. Its JSON seam uses `serde_json::Value` to retain heterogeneous legacy explanation fields; catalog/forest configuration has typed Rust structs. The effective reference catalog and forest choices are compiled in from `crates/recommender-core/data/`; the matching migration fixtures remain test-only parity oracles. The scoring Wasm ABI is a small JSON-in/JSON-out boundary implemented in Rust. The Leptos preview uses generated JavaScript/Wasm glue, but contains no handwritten JavaScript application logic. The preview remains separate from the production root entry.
+
+### Build and validate the browser scoring module
+
+Install the `wasm32-unknown-unknown` Rust target once (`rustup target add wasm32-unknown-unknown`), then build and copy the browser asset:
+
+```sh
+npm run wasm:build
+```
+
+This produces `public/wasm/lol_scoring_core.wasm` (ignored by Git), preserving the current production app's asset URL. GitHub Pages builds the module during deployment; do not commit generated Wasm. Serve the repository over HTTP when testing the current browser app (for example, `python3 -m http.server 8080`, then open `http://localhost:8080/src/`). A missing or failed Wasm module shows a retryable error rather than silently falling back to JavaScript scoring.
+
+### Build the isolated Rust preview
+
+The preview is separate from the root production entry and is published at `/LOL-Recommender-System/rust-preview/`. Install the matching Trunk version and the browser target once, then run:
+
+```sh
+cargo install trunk --version 0.22.0 --locked
+rustup target add wasm32-unknown-unknown
+npm run build
+npm run preview:rust
+```
+
+`npm run build` builds the current site's Rust/Wasm scoring asset and the Leptos preview into `rust-preview/`. `npm run preview:rust` serves the preview using `Trunk.toml`; it does not change the default website. GitHub Pages runs the same builds and keeps the existing repository-root deployment.
+
+Run the native, Wasm, reference, and lint checks:
+
+```sh
+node scripts/migration/reference.mjs --check
+node --test scripts/migration/reference.test.mjs
+cargo test --locked --workspace
+cargo build --release --locked --target wasm32-unknown-unknown --package recommender-core
+node --test scripts/migration/wasm.test.mjs
+cargo clippy --locked --workspace --all-targets -- -D warnings
+cargo fmt --all -- --check
+trunk build --release
+```
+
+Native Rust and browser-target Wasm tests compare all eight synthetic profiles end to end, covering every champion's scores/raw scores, uncertainty, explanation text/order, feature conversion, catalog-ordered aggregation, exact top-10 ordering, relevant-champion order, and metrics. Numeric comparisons allow absolute error of `1e-9` against the reference's 12-decimal JSON values; strings, array order, and structure must match exactly. Additional tests exercise malformed/oversized inputs, custom-asset validation, previously unseen answer combinations, ties, diversity fallback, empty metrics, and CLI/Wasm error handling.
+
+**Compatibility first:** Rust intentionally preserves the existing Q6–10 psychological mapping even though the questionnaire has 12 questions, unused Q11–12, `Bot` versus `ADC`, missing derived champion stats, explicit versus missing range defaults, and the weighted score being called `average`. Diversity currently uses a max-three-per-role first pass, then fills remaining slots regardless of role. Rust consumes exported feature subsets instead of emulating JavaScript's engine-dependent random sort. Rebuilding reference assets requires reviewing drift and recompiling Rust; do not blindly regenerate fixtures to silence parity failures. Evaluation remains the production heuristic (partly based on model scores), **not independent ground truth or an accuracy claim**. The reference harness compares Rust against the existing JavaScript implementation; the Leptos preview itself does not call the legacy JavaScript scorer and is not the production root entry.
+
+---
+
 ## Overview
 
 This recommendation system analyzes user preferences through a 10-question assessment combining gameplay mechanics (role, position, difficulty, playstyle) and psychological factors (team collaboration, adaptability, strategic thinking). Three machine learning algorithms—Random Forest, Decision Tree, and K-Nearest Neighbors—independently evaluate all 170 champions in the database, then combine their predictions through weighted ensemble voting to produce highly accurate, diverse recommendations.
@@ -290,60 +365,43 @@ The difficulty distribution shows a roughly normal distribution centered around 
 
 | Technology | Purpose |
 |------------|---------|
-| **HTML5** | Structure and semantic markup |
-| **CSS3** | Responsive styling with flexbox/grid layouts |
-| **JavaScript (ES6+)** | Core ML algorithms and application logic |
-| **Custom ML Algorithms** | Random Forest, Decision Tree, KNN implementations |
-| **LocalStorage API** | Client-side data persistence and user session management |
-| **GitHub Pages** | Static site hosting and continuous deployment |
-| **Python + Matplotlib** | Analytics and visualization generation |
-| **Seaborn + NumPy** | Statistical analysis and advanced charting |
+| **Rust (`recommender-core`)** | Typed contracts, feature conversion, scoring, aggregation, evaluation; shared native/Wasm core |
+| **Leptos + Trunk** | Rust-authored browser preview at `/LOL-Recommender-System/rust-preview/` |
+| **HTML5 + CSS3** | Browser document structure and styling; no visual redesign during migration |
+| **JavaScript (legacy)** | Current production UI/state during staged migration; scoring JS remains reference-only, with Rust/Wasm as the active scorer |
+| **Serde + JSON** | Question, catalog, result, and historical storage data boundaries |
+| **LocalStorage API** | Current legacy UI persistence; browser storage port is planned for Phase 5 |
+| **GitHub Pages** | Static hosting; current root remains the default until Phase 7 acceptance |
+| **Python + Matplotlib, Seaborn + NumPy** | Analysis/report tooling outside the website migration |
 
 ### Project Structure
 
 ```
 LOL-Recommender-System/
+├── Cargo.toml / Cargo.lock      # Rust workspace and locked dependencies
+├── crates/
+│   ├── recommender-core/        # Contracts, source data, conversion, scoring, and metrics
+│   └── recommender-web/         # Leptos browser preview
+├── web/                         # Trunk HTML/CSS entry for the isolated preview
+├── rust-preview/                # Generated preview output; ignored by Git
 ├── src/
-│   ├── index.html              # Main application (8,500+ lines)
-│   │                           # Contains all ML algorithms, UI logic, and scoring systems
-│   ├── data/
-│   │   ├── champions.json      # 171 champion entries with attributes
-│   │   └── questions.json      # 10-question assessment structure
-│   ├── analytics/              # 23+ isolated test files
-│   │   ├── test_random_forest_predictall.html
-│   │   ├── test_decision_tree_predictall.html
-│   │   ├── test_knn_predictall.html
-│   │   ├── test_integration_tests.html
-│   │   ├── test_evaluation_metrics.html
-│   │   └── ...                 # Additional unit and integration tests
-│   └── Graphs/                 # 22 ML performance visualizations
-│       ├── generate_ml_charts.py           # Primary chart generation
-│       ├── generate_advanced_ml_charts.py  # Advanced analytics
-│       └── *.png                           # Generated performance charts
-├── docs-archive/               # Historical implementation documentation
-├── README.md                   # This file
-├── USAGE_GUIDE.md             # User guide with screenshots
-└── PROJECT_STRUCTURE.md       # Detailed architecture documentation
+│   ├── index.html               # Current production UI; retained until Phase 7
+│   ├── wasm/                    # Small adapter calling the Rust/Wasm scorer
+│   ├── data/questions.json      # Canonical 12-question source during migration
+│   ├── analytics/               # Active dashboard plus legacy reference tests
+│   └── Graphs/                  # Python analysis/report tooling
+├── tests/fixtures/migration/    # Captured JS reference outputs and synthetic profiles
+├── scripts/migration/           # Differential reference harness, test-only
+└── RUST_MIGRATION_PLAN.md       # Parity contract, phase status, and exit gates
 ```
 
 ### Implementation Philosophy
 
-This project employs a monolithic design where the entire application resides in a single 8,500-line HTML file (`src/index.html`). This architectural choice prioritizes simplicity and portability—the application runs standalone in any modern browser without dependencies, build tools, or server infrastructure.
+The production website remains a monolithic legacy page (`src/index.html`) during the staged migration; its existing UI is the behavior reference and remains the default entry. Recommendation scoring has moved to the shared Rust core compiled to WebAssembly. The separate Leptos/Trunk preview proves the Rust browser stack without changing the live root site.
 
-**Design Rationale:**
-- **Zero Dependencies:** Pure vanilla JavaScript with no frameworks or libraries
-- **Instant Deployment:** No build step, bundling, or compilation required
-- **Maximum Compatibility:** Works in any browser supporting ES6+
-- **Transparent Operation:** All code is readable and auditable in source form
-- **Offline Capability:** Once loaded, fully functional without internet connection
+The migration deliberately separates language changes from product changes. Keep the current design, 12-question sequence, effective 162-champion catalog, answer-mapping quirks, scoring weights, and result ordering stable until parity acceptance. Move UI/state, browser storage/exports, and analytics in later phases; then evaluate cutover and rollback in Phase 7.
 
-**Trade-offs Accepted:**
-- Code organization: Single file instead of modular components
-- Development workflow: Direct file editing instead of hot-reload systems
-- Version control: Large file diffs instead of granular changes
-- Testing: Browser-based HTML test files instead of automated test frameworks
-
-The decision to maintain this architecture reflects educational goals—students and developers can understand the entire system by reading a single file, with no hidden abstraction layers or framework magic.
+HTML and CSS remain appropriate for document structure and presentation. Trunk-generated JavaScript/Wasm glue is expected; handwritten JavaScript application logic is not part of the target runtime. Python report and chart tooling remains outside the website migration.
 
 ---
 

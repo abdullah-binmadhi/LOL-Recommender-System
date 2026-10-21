@@ -1,0 +1,9 @@
+[build]
+target = "web/index.html"
+dist = "rust-preview"
+public_url = "/LOL-Recommender-System/rust-preview/"
+
+[serve]
+addresses = ["127.0.0.1"]
+port = 8081
+open = false
