@@ -46,6 +46,8 @@ pub enum Modal {
     CloudHistory,
     #[allow(dead_code)]
     LinkRiotAccount,
+    #[allow(dead_code)]
+    OAuthConfigRequired,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default, serde::Serialize, serde::Deserialize)]

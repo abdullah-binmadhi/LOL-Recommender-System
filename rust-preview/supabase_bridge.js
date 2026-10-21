@@ -98,9 +98,12 @@
       }
 
       const redirectTo = window.location.origin + window.location.pathname;
-      const { error } = await client.auth.signInWithOAuth({
+      const { data, error } = await client.auth.signInWithOAuth({
         provider: "google",
-        options: { redirectTo: redirectTo }
+        options: {
+          redirectTo: redirectTo,
+          skipBrowserRedirect: true
+        }
       });
 
       if (error) {
@@ -108,6 +111,47 @@
         alert("Google sign-in failed: " + error.message);
         return false;
       }
+
+      if (data && data.url) {
+        // Probe endpoint to detect if provider is not enabled before navigating
+        try {
+          const probe = await fetch(data.url, { method: "GET" });
+          if (probe.status === 400) {
+            const probeJson = await probe.json().catch(() => ({}));
+            if (probeJson.error_code === "validation_failed" || (probeJson.msg && probeJson.msg.includes("not enabled"))) {
+              window.dispatchEvent(new CustomEvent("supabase-oauth-config-required", {
+                detail: {
+                  provider: "google",
+                  error: probeJson.msg || "Unsupported provider: provider is not enabled",
+                  dashboardUrl: "https://supabase.com/dashboard/project/erfybpoymihcepxnaosj/auth/providers",
+                  callbackUrl: "https://erfybpoymihcepxnaosj.supabase.co/auth/v1/callback"
+                }
+              }));
+              return false;
+            }
+          }
+        } catch (e) {
+          // If probe fails or is blocked, continue
+          console.warn("OAuth probe warning:", e);
+        }
+
+        window.location.href = data.url;
+        return true;
+      }
+      return true;
+    },
+
+    enableDemoMode: function() {
+      try { window.localStorage.setItem("mock_auth", "1"); } catch (_) {}
+      currentUser = {
+        id: "mock-summoner-uuid-001",
+        email: "summoner@example.com",
+        full_name: "Mock Summoner",
+        avatar_url: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/profileicon/588.png",
+        riot_id: "Faker#T1",
+        riot_region: "KR"
+      };
+      window.dispatchEvent(new CustomEvent("supabase-auth-changed", { detail: currentUser }));
       return true;
     },
 

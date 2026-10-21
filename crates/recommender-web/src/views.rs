@@ -72,6 +72,14 @@ pub fn App() -> impl IntoView {
     );
     on_cleanup(move || auth_listener.remove());
 
+    let oauth_config_listener = window_event_listener(
+        leptos::ev::Custom::new("supabase-oauth-config-required"),
+        move |_: web_sys::CustomEvent| {
+            state.update(|c| c.open_modal(Modal::OAuthConfigRequired));
+        },
+    );
+    on_cleanup(move || oauth_config_listener.remove());
+
     if let Some(win) = web_sys::window() {
         if let Ok(hash) = win.location().hash() {
             if hash == "#analytics" {
@@ -170,6 +178,7 @@ pub fn App() -> impl IntoView {
                 Some(Modal::SavedUsers(users)) => view_saved_users_modal(state, users).into_any(),
                 Some(Modal::LinkRiotAccount) => view_link_riot_modal(state).into_any(),
                 Some(Modal::CloudHistory) => view_cloud_history_modal(state).into_any(),
+                Some(Modal::OAuthConfigRequired) => view_oauth_config_modal(state).into_any(),
                 None => ().into_view().into_any(),
             }}
         </div>
@@ -1985,6 +1994,68 @@ fn view_cloud_history_modal(state: RwSignal<AppState>) -> impl IntoView {
                 </Button>
                 <Button variant=ButtonVariant::Primary on:click=move |_| state.update(AppState::close_modal)>
                     "Close"
+                </Button>
+            </footer>
+        </Dialog>
+    }
+    .into_any()
+}
+
+fn view_oauth_config_modal(state: RwSignal<AppState>) -> impl IntoView {
+    view! {
+        <Dialog
+            on_close=close_modal_callback(state)
+            label="Google OAuth Configuration Required"
+            class="inspector"
+        >
+            <header class="modal-head">
+                <span class="eyebrow" style="color: var(--warn);">"⚠️ Supabase Configuration Required"</span>
+                <h2>"Google Provider Not Enabled"</h2>
+                <p class="muted">
+                    "Supabase returned: <code>msg: \"Unsupported provider: provider is not enabled\"</code>"
+                </p>
+            </header>
+            <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px; margin-top: 14px;">
+                <div class="notice" style="border-color: rgba(251, 191, 36, 0.4); background: rgba(251, 191, 36, 0.08);">
+                    <p style="font-weight: 700; color: var(--gold-hi); margin-bottom: 6px;">
+                        "How to enable Google OAuth in your Supabase project:"
+                    </p>
+                    <ol style="margin-left: 18px; list-style: decimal; color: var(--text-2); display: flex; flex-direction: column; gap: 6px;">
+                        <li>"Open your Supabase project dashboard at erfybpoymihcepxnaosj."</li>
+                        <li>"Navigate to Authentication → Providers → Google."</li>
+                        <li>"Toggle Google provider to Enabled."</li>
+                        <li>"Paste your Google Cloud Client ID & Secret."</li>
+                        <li>"Set Authorized redirect URI to:"</li>
+                    </ol>
+                    <code style="display: block; background: rgba(1, 10, 19, 0.9); padding: 8px; border: 1px solid var(--gold-lo); margin-top: 8px; color: var(--cyan); word-break: break-all;">
+                        "https://erfybpoymihcepxnaosj.supabase.co/auth/v1/callback"
+                    </code>
+                </div>
+
+                <p style="color: var(--text-3); font-size: 0.9rem;">
+                    "Want to start calibrating right away without configuring Google Cloud now? You can activate instant summoner mode below."
+                </p>
+            </div>
+            <footer class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+                <a
+                    href="https://supabase.com/dashboard/project/erfybpoymihcepxnaosj/auth/providers"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-secondary btn-md"
+                >
+                    "Open Supabase Dashboard ↗"
+                </a>
+                <Button
+                    variant=ButtonVariant::Primary
+                    on:click=move |_| {
+                        storage::supabase_enable_demo_mode();
+                        state.update(|c| {
+                            c.close_modal();
+                            c.start_quiz();
+                        });
+                    }
+                >
+                    "⚡ Continue in Summoner Mode →"
                 </Button>
             </footer>
         </Dialog>

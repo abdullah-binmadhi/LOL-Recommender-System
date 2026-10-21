@@ -208,6 +208,14 @@ pub fn supabase_sign_out() {
 pub fn supabase_sign_out() {}
 
 #[cfg(target_arch = "wasm32")]
+pub fn supabase_enable_demo_mode() {
+    let _ = js_sys::eval("window.supabaseAuth && window.supabaseAuth.enableDemoMode()");
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn supabase_enable_demo_mode() {}
+
+#[cfg(target_arch = "wasm32")]
 pub fn supabase_get_current_user() -> Option<crate::state::AuthUser> {
     let result = js_sys::eval("window.supabaseAuth ? window.supabaseAuth.getCurrentUserJson() : ''").ok()?;
     let json_str = result.as_string()?;
