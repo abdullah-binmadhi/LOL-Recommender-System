@@ -31,6 +31,7 @@ fn open_analytics(state: RwSignal<AppState>) {
     state.update(AppState::open_analytics);
 }
 
+#[allow(dead_code)]
 fn open_profiles(state: RwSignal<AppState>) {
     let users = storage::load_users();
     state.update(|current| current.open_modal(Modal::SavedUsers(users)));
@@ -58,6 +59,18 @@ pub fn App() -> impl IntoView {
             .expect("bundled champion matchup data must remain valid");
     let counters = Arc::new(counters);
     let state = RwSignal::new(AppState::default());
+
+    if let Some(user) = storage::supabase_get_current_user() {
+        state.update(|c| c.set_auth_user(Some(user)));
+    }
+
+    let auth_listener = window_event_listener(
+        leptos::ev::Custom::new("supabase-auth-changed"),
+        move |_: web_sys::CustomEvent| {
+            state.update(|c| c.set_auth_user(storage::supabase_get_current_user()));
+        },
+    );
+    on_cleanup(move || auth_listener.remove());
 
     if let Some(win) = web_sys::window() {
         if let Ok(hash) = win.location().hash() {
@@ -116,7 +129,9 @@ pub fn App() -> impl IntoView {
                     Screen::Start => {
                         view_start(state, Arc::clone(&analytics_summary), question_total).into_any()
                     }
-                    Screen::Registration => view_registration(state).into_any(),
+                    Screen::Registration => {
+                        view_questionnaire(state, Arc::clone(&questions)).into_any()
+                    }
                     Screen::Questionnaire => {
                         view_questionnaire(state, Arc::clone(&questions)).into_any()
                     }
@@ -153,6 +168,8 @@ pub fn App() -> impl IntoView {
                     }
                 }
                 Some(Modal::SavedUsers(users)) => view_saved_users_modal(state, users).into_any(),
+                Some(Modal::LinkRiotAccount) => view_link_riot_modal(state).into_any(),
+                Some(Modal::CloudHistory) => view_cloud_history_modal(state).into_any(),
                 None => ().into_view().into_any(),
             }}
         </div>
@@ -205,16 +222,61 @@ fn view_navbar(state: RwSignal<AppState>) -> impl IntoView {
                         type="button"
                         class=quiz_class
                         disabled=quiz_locked
-                        on:click=move |_| state.update(AppState::begin_registration)
+                        on:click=move |_| {
+                            let is_authed = state.with(|c| c.auth_user.is_some());
+                            if is_authed {
+                                state.update(AppState::start_quiz);
+                            } else {
+                                storage::supabase_sign_in_google();
+                            }
+                        }
                     >
                         "Quiz"
-                    </button>
-                    <button type="button" class="nav-link" on:click=move |_| open_profiles(state)>
-                        "Profiles"
                     </button>
                     <button type="button" class=analytics_class on:click=move |_| open_analytics(state)>
                         "Analytics"
                     </button>
+                    {move || match state.with(|c| c.auth_user.clone()) {
+                        Some(user) => {
+                            let riot_label = user.riot_id.unwrap_or_else(|| "Link Riot ID".into());
+                            let avatar = user.avatar_url.unwrap_or_else(|| "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/profileicon/588.png".into());
+                            view! {
+                                <button
+                                    type="button"
+                                    class="nav-link"
+                                    title="Link or edit your Riot ID"
+                                    on:click=move |_| state.update(|c| c.open_modal(Modal::LinkRiotAccount))
+                                >
+                                    <img src=avatar alt="" style="width: 20px; height: 20px; border-radius: 0px; margin-right: 6px; vertical-align: middle; border: 1px solid var(--gold);" />
+                                    {riot_label}
+                                </button>
+                                <button
+                                    type="button"
+                                    class="nav-link"
+                                    on:click=move |_| state.update(|c| c.open_modal(Modal::CloudHistory))
+                                >
+                                    "History"
+                                </button>
+                                <button
+                                    type="button"
+                                    class="nav-link"
+                                    style="color: var(--gold);"
+                                    on:click=move |_| storage::supabase_sign_out()
+                                >
+                                    "Sign Out"
+                                </button>
+                            }.into_any()
+                        }
+                        None => view! {
+                            <button
+                                type="button"
+                                class="btn btn-secondary btn-md"
+                                on:click=move |_| storage::supabase_sign_in_google()
+                            >
+                                "✦ Google Sign-In"
+                            </button>
+                        }.into_any(),
+                    }}
                 </nav>
                 <span class="engine-badge">
                     <span class="pulse" aria-hidden="true"></span>
@@ -270,10 +332,24 @@ fn view_start(
                         "Answer a short calibration quiz. A K-Nearest Neighbors model, a Decision Tree and a Random Forest score every champion, then show you exactly why the winner fits."
                     </p>
                     <div class="hero-actions">
-                        <Button variant=ButtonVariant::Primary size=ButtonSize::Lg
-                            on:click=move |_| state.update(AppState::begin_registration)>
-                            "Find My Champion →"
-                        </Button>
+                        {move || {
+                            let is_authed = state.with(|c| c.auth_user.is_some());
+                            if is_authed {
+                                view! {
+                                    <Button variant=ButtonVariant::Primary size=ButtonSize::Lg
+                                        on:click=move |_| state.update(AppState::start_quiz)>
+                                        "Find My Champion →"
+                                    </Button>
+                                }.into_any()
+                            } else {
+                                view! {
+                                    <Button variant=ButtonVariant::Primary size=ButtonSize::Lg
+                                        on:click=move |_| storage::supabase_sign_in_google()>
+                                        "✦ Sign in with Google to Start ✦"
+                                    </Button>
+                                }.into_any()
+                            }
+                        }}
                         <Button variant=ButtonVariant::Ghost size=ButtonSize::Lg
                             on:click=move |_| open_analytics(state)>
                             "Explore the Data Lab"
@@ -335,6 +411,7 @@ fn view_start(
     }
 }
 
+#[allow(dead_code)]
 fn view_registration(state: RwSignal<AppState>) -> impl IntoView {
     view! {
         <section id="user-registration" class="registration">
@@ -636,6 +713,7 @@ fn view_questionnaire(
                                                 .map(|c| c.champion_name.clone())
                                                 .collect();
                                             let _ = storage::update_recent_champions(&top_champs);
+                                            storage::supabase_save_recommendation(rec);
                                         }
                                         state.update(|current| current.finish_scoring(result));
                                     } else {
@@ -795,17 +873,7 @@ fn view_analysis(
             <div class="action-dock" role="toolbar" aria-label="Result actions">
                 <Button variant=ButtonVariant::Primary
                     on:click=move |_| {
-                        let users = storage::load_users();
-                        if users.is_empty() {
-                            if let Some(w) = web_sys::window() {
-                                let _ = w.alert_with_message("No user data available to display.");
-                            }
-                        } else {
-                            state.update(|current| current.open_modal(Modal::SavedUsers(users)));
-                            if let Some(w) = web_sys::window() {
-                                let _ = w.alert_with_message("Results displayed on web page!");
-                            }
-                        }
+                        state.update(|current| current.open_modal(Modal::CloudHistory));
                     }>
                     "Save"
                 </Button>
@@ -1756,6 +1824,166 @@ fn view_saved_users_modal(
                 </Button>
                 <Button variant=ButtonVariant::Primary
                     on:click=move |_| state.update(AppState::close_modal)>
+                    "Close"
+                </Button>
+            </footer>
+        </Dialog>
+    }
+    .into_any()
+}
+
+fn view_link_riot_modal(state: RwSignal<AppState>) -> impl IntoView {
+    let current_riot_id = state.with(|c| {
+        c.auth_user
+            .as_ref()
+            .and_then(|u| u.riot_id.clone())
+            .unwrap_or_default()
+    });
+    let current_region = state.with(|c| {
+        c.auth_user
+            .as_ref()
+            .and_then(|u| u.riot_region.clone())
+            .unwrap_or_else(|| "NA".into())
+    });
+
+    let riot_id = RwSignal::new(current_riot_id);
+    let region = RwSignal::new(current_region);
+
+    view! {
+        <Dialog
+            on_close=close_modal_callback(state)
+            label="Link Riot Games Account"
+            class="inspector"
+        >
+            <header class="modal-head">
+                <span class="eyebrow">"✦ Riot Account Integration ✦"</span>
+                <h2>"Link Your Riot ID"</h2>
+                <p class="muted">
+                    "Connect your in-game identity to link rank, mastery stats, and future live telemetry."
+                </p>
+            </header>
+            <div class="modal-body" style="display: flex; flex-direction: column; gap: 18px; margin-top: 14px;">
+                <div class="field">
+                    <label for="riotIdInput">"Riot ID (GameName#TagLine)"</label>
+                    <input
+                        id="riotIdInput"
+                        type="text"
+                        placeholder="e.g. Faker#T1, Doublelift#NA1"
+                        prop:value=move || riot_id.get()
+                        on:input=move |ev| riot_id.set(event_target_value(&ev))
+                    />
+                </div>
+                <div class="field">
+                    <label for="riotRegionSelect">"Riot Server Region"</label>
+                    <select
+                        id="riotRegionSelect"
+                        prop:value=move || region.get()
+                        on:change=move |ev| region.set(event_target_value(&ev))
+                    >
+                        <option value="NA">"North America (NA)"</option>
+                        <option value="EUW">"Europe West (EUW)"</option>
+                        <option value="EUNE">"Europe Nordic & East (EUNE)"</option>
+                        <option value="KR">"Korea (KR)"</option>
+                        <option value="BR">"Brazil (BR)"</option>
+                        <option value="LAN">"Latin America North (LAN)"</option>
+                        <option value="LAS">"Latin America South (LAS)"</option>
+                        <option value="OCE">"Oceania (OCE)"</option>
+                        <option value="JP">"Japan (JP)"</option>
+                        <option value="TR">"Turkey (TR)"</option>
+                        <option value="RU">"Russia (RU)"</option>
+                    </select>
+                </div>
+                <p class="notice">
+                    "Note: Riot Games requires exact capitalization for Riot IDs with tags (e.g. Name#TAG)."
+                </p>
+            </div>
+            <footer class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+                <Button variant=ButtonVariant::Ghost on:click=move |_| state.update(AppState::close_modal)>
+                    "Cancel"
+                </Button>
+                <Button
+                    variant=ButtonVariant::Primary
+                    on:click=move |_| {
+                        let id = riot_id.get().trim().to_string();
+                        let reg = region.get();
+                        storage::supabase_update_riot_profile(&id, &reg);
+                        state.update(|c| {
+                            c.update_riot_profile(id, reg);
+                            c.close_modal();
+                        });
+                    }
+                >
+                    "Save Riot Profile"
+                </Button>
+            </footer>
+        </Dialog>
+    }
+    .into_any()
+}
+
+fn view_cloud_history_modal(state: RwSignal<AppState>) -> impl IntoView {
+    let auth = state.with(|c| c.auth_user.clone());
+
+    view! {
+        <Dialog
+            on_close=close_modal_callback(state)
+            label="Supabase Cloud Recommendation History"
+            class="inspector"
+        >
+            <header class="modal-head">
+                <span class="eyebrow">"✦ Cloud Sync Active ✦"</span>
+                <h2>"Supabase Telemetry & History"</h2>
+                <p class="muted">
+                    "Your calibration runs and champion compatibility scores are securely synced to Supabase."
+                </p>
+            </header>
+            <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px; margin-top: 14px;">
+                {match auth {
+                    Some(user) => {
+                        let riot_display = user.riot_id.unwrap_or_else(|| "Not linked yet".into());
+                        let region_display = user.riot_region.unwrap_or_else(|| "N/A".into());
+                        view! {
+                            <div class="panel" style="background: rgba(1, 10, 19, 0.85); border: 1px solid var(--gold-lo);">
+                                <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 12px;">
+                                    {user.avatar_url.map(|url| view! {
+                                        <img src=url alt="" style="width: 48px; height: 48px; border: 2px solid var(--gold);" />
+                                    })}
+                                    <div>
+                                        <strong style="color: var(--gold-hi); font-size: 1.1rem; display: block;">{user.full_name}</strong>
+                                        <span class="muted small">{user.email}</span>
+                                    </div>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 0.85rem; border-top: 1px solid var(--line); padding-top: 10px;">
+                                    <div>
+                                        <span class="muted">"Riot ID: "</span>
+                                        <strong style="color: var(--text);">{riot_display}</strong>
+                                    </div>
+                                    <div>
+                                        <span class="muted">"Region: "</span>
+                                        <strong style="color: var(--text);">{region_display}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="notice">
+                                "All completed quiz results are automatically written to table 'recommendation_history' with Row-Level Security."
+                            </p>
+                        }.into_any()
+                    }
+                    None => view! {
+                        <p class="notice notice-error">
+                            "You are currently not signed in. Sign in with Google to enable automatic cloud sync."
+                        </p>
+                    }.into_any()
+                }}
+            </div>
+            <footer class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+                <Button variant=ButtonVariant::Secondary
+                    on:click=move |_| {
+                        let _ = storage::export_table_csv();
+                    }>
+                    "Download CSV"
+                </Button>
+                <Button variant=ButtonVariant::Primary on:click=move |_| state.update(AppState::close_modal)>
                     "Close"
                 </Button>
             </footer>

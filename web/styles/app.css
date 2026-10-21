@@ -1356,14 +1356,14 @@ button {
 
 @media (max-width: 640px) {
   .page { padding: 24px 16px 40px; }
-  .navbar-inner { padding: 10px 16px; gap: 8px; }
+  .navbar-inner { padding: 10px 16px; gap: 8px; flex-wrap: wrap; }
   .brand-text { display: none; }
-  .nav { margin-left: auto; }
-  .nav-link { padding: 7px 12px; font-size: 0.85rem; }
+  .nav { margin-left: auto; display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+  .nav-link { padding: 6px 8px; font-size: 0.76rem; }
   .panel { padding: 20px; }
   .form-grid { grid-template-columns: 1fr; }
   .fan { height: 250px; }
-  .fan-card { width: 96px; border-radius: 14px; }
+  .fan-card { width: 96px; border-radius: 0px; }
   .fan-card figcaption { padding: 5px; font-size: 0.72rem; }
   .fan-2 { width: 118px; margin-left: -59px; }
   .fan-0 { top: 70px; }
@@ -1375,7 +1375,21 @@ button {
   .spotlight-art { max-width: 200px; }
   .fit-grid { grid-template-columns: 1fr; }
   .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  .podium-grid { grid-template-columns: 1fr; }
   .match-grid { grid-template-columns: 1fr; }
+  .match-card.roster-row {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+  .roster-models {
+    width: 100%;
+    order: 3;
+    display: flex;
+    justify-content: space-between;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+  }
   .quiz-actions .btn { padding-inline: 18px; }
   .options { grid-template-columns: 1fr; }
   .modal { padding: 12px; }

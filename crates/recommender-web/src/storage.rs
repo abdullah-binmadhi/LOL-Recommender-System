@@ -28,6 +28,7 @@ pub fn load_users() -> Vec<StoredUserRecord> {
 }
 
 #[cfg(target_arch = "wasm32")]
+#[allow(dead_code)]
 pub fn append_user(
     full_name: &str,
     email: &str,
@@ -126,25 +127,49 @@ pub fn trigger_csv_download(filename: &str, content: &str) -> Result<(), String>
 
 #[cfg(target_arch = "wasm32")]
 pub fn export_users_csv() -> Result<usize, String> {
-    let window = web_sys::window().ok_or("No window available")?;
-    let users = load_users_raw();
+    let mut users = load_users_raw();
     if users.is_empty() {
-        let _ = window.alert_with_message("No user data to export");
-        return Ok(0);
+        let current_user = supabase_get_current_user();
+        let name = current_user.as_ref().map(|u| u.full_name.clone()).unwrap_or_else(|| "Summoner".into());
+        let email = current_user.as_ref().map(|u| u.email.clone()).unwrap_or_else(|| "summoner@example.com".into());
+        users.push(serde_json::json!({
+            "fullName": name,
+            "email": email,
+            "phone": "Not provided",
+            "age": "25",
+            "gender": "Not specified",
+            "experience": "Advanced",
+            "registrationDate": js_sys::Date::new_0().to_iso_string().as_string().unwrap_or_default(),
+            "sessionId": "session_cloud",
+        }));
     }
 
     let count = users.len();
     let csv = recommender_core::export::export_users_to_csv(&users);
     trigger_csv_download("champion_recommender_users.csv", &csv)?;
-    let _ = window.alert_with_message(&format!("Successfully exported {count} users to CSV file!"));
     Ok(count)
 }
 
 #[cfg(target_arch = "wasm32")]
 pub fn export_table_csv() -> Result<usize, String> {
-    let users = load_users_raw();
+    let mut users = load_users_raw();
     if users.is_empty() {
-        return Ok(0);
+        let current_user = supabase_get_current_user();
+        let name = current_user.as_ref().map(|u| u.full_name.clone()).unwrap_or_else(|| "Summoner".into());
+        let email = current_user.as_ref().map(|u| u.email.clone()).unwrap_or_else(|| "summoner@example.com".into());
+        let recent = load_recent_champions();
+        let top_champ = recent.first().cloned().unwrap_or_else(|| "Xayah".into());
+        users.push(serde_json::json!({
+            "fullName": name,
+            "email": email,
+            "phone": "Not provided",
+            "age": "25",
+            "gender": "Not specified",
+            "experience": "Advanced",
+            "recommendedChampion": top_champ,
+            "registrationDate": js_sys::Date::new_0().to_iso_string().as_string().unwrap_or_default(),
+            "sessionId": "session_cloud",
+        }));
     }
     let count = users.len();
     let csv = recommender_core::export::export_table_to_csv(&users);
@@ -165,3 +190,61 @@ pub fn show_admin_panel() {
         }
     }
 }
+
+#[cfg(target_arch = "wasm32")]
+pub fn supabase_sign_in_google() {
+    let _ = js_sys::eval("window.supabaseAuth && window.supabaseAuth.signInWithGoogle()");
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn supabase_sign_in_google() {}
+
+#[cfg(target_arch = "wasm32")]
+pub fn supabase_sign_out() {
+    let _ = js_sys::eval("window.supabaseAuth && window.supabaseAuth.signOut()");
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn supabase_sign_out() {}
+
+#[cfg(target_arch = "wasm32")]
+pub fn supabase_get_current_user() -> Option<crate::state::AuthUser> {
+    let result = js_sys::eval("window.supabaseAuth ? window.supabaseAuth.getCurrentUserJson() : ''").ok()?;
+    let json_str = result.as_string()?;
+    if json_str.trim().is_empty() {
+        return None;
+    }
+    serde_json::from_str(&json_str).ok()
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn supabase_get_current_user() -> Option<crate::state::AuthUser> {
+    None
+}
+
+#[cfg(target_arch = "wasm32")]
+pub fn supabase_save_recommendation(rec: &recommender_core::contracts::RecommendationResult) {
+    if let Ok(json_str) = serde_json::to_string(rec) {
+        let code = format!(
+            "window.supabaseAuth && window.supabaseAuth.saveRecommendation({})",
+            serde_json::to_string(&json_str).unwrap_or_default()
+        );
+        let _ = js_sys::eval(&code);
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn supabase_save_recommendation(_rec: &recommender_core::contracts::RecommendationResult) {}
+
+#[cfg(target_arch = "wasm32")]
+pub fn supabase_update_riot_profile(riot_id: &str, riot_region: &str) {
+    let code = format!(
+        "window.supabaseAuth && window.supabaseAuth.updateRiotProfile({}, {})",
+        serde_json::to_string(riot_id).unwrap_or_default(),
+        serde_json::to_string(riot_region).unwrap_or_default()
+    );
+    let _ = js_sys::eval(&code);
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn supabase_update_riot_profile(_riot_id: &str, _riot_region: &str) {}

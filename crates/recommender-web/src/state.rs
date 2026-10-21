@@ -6,6 +6,7 @@ use recommender_core::contracts::{
 pub enum Screen {
     #[default]
     Start,
+    #[allow(dead_code)]
     Registration,
     Questionnaire,
     Results,
@@ -41,6 +42,20 @@ pub enum Modal {
     Metric(Metric),
     #[allow(dead_code)]
     SavedUsers(Vec<StoredUserRecord>),
+    #[allow(dead_code)]
+    CloudHistory,
+    #[allow(dead_code)]
+    LinkRiotAccount,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default, serde::Serialize, serde::Deserialize)]
+pub struct AuthUser {
+    pub id: String,
+    pub email: String,
+    pub full_name: String,
+    pub avatar_url: Option<String>,
+    pub riot_id: Option<String>,
+    pub riot_region: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -54,6 +69,7 @@ pub struct RegistrationDraft {
 }
 
 impl RegistrationDraft {
+    #[allow(dead_code)]
     pub fn is_valid(&self) -> bool {
         let age_is_valid = self
             .age
@@ -70,6 +86,8 @@ impl RegistrationDraft {
 #[derive(Debug, Clone, Default)]
 pub struct AppState {
     pub screen: Screen,
+    #[allow(dead_code)]
+    pub auth_user: Option<AuthUser>,
     pub registration: RegistrationDraft,
     pub answers: Answers,
     pub current_question_index: usize,
@@ -80,6 +98,27 @@ pub struct AppState {
 }
 
 impl AppState {
+    #[allow(dead_code)]
+    pub fn start_quiz(&mut self) {
+        self.screen = Screen::Questionnaire;
+        self.current_question_index = 0;
+        self.error = None;
+    }
+
+    #[allow(dead_code)]
+    pub fn set_auth_user(&mut self, user: Option<AuthUser>) {
+        self.auth_user = user;
+    }
+
+    #[allow(dead_code)]
+    pub fn update_riot_profile(&mut self, riot_id: String, riot_region: String) {
+        if let Some(ref mut user) = self.auth_user {
+            user.riot_id = Some(riot_id);
+            user.riot_region = Some(riot_region);
+        }
+    }
+
+    #[allow(dead_code)]
     pub fn begin_registration(&mut self) {
         self.screen = Screen::Registration;
         self.error = None;
@@ -95,6 +134,7 @@ impl AppState {
         self.error = None;
     }
 
+    #[allow(dead_code)]
     pub fn submit_registration(&mut self) -> bool {
         if !self.registration.is_valid() {
             self.error = Some("Please complete the required fields with valid values.".into());
@@ -197,8 +237,10 @@ impl AppState {
 
     pub fn restart(&mut self) {
         let registration = self.registration.clone();
+        let auth_user = self.auth_user.clone();
         *self = Self {
             registration,
+            auth_user,
             ..Self::default()
         };
     }

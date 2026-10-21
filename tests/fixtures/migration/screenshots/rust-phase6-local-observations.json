@@ -1,6 +1,6 @@
 {
-  "captured_at_utc": "2026-10-21T13:23:16.188426+00:00",
-  "preview_url": "http://127.0.0.1:53320/LOL-Recommender-System/rust-preview/",
+  "captured_at_utc": "2026-10-21T13:53:38.189138+00:00",
+  "preview_url": "http://127.0.0.1:54828/LOL-Recommender-System/rust-preview/",
   "browser": {
     "name": "Chromium",
     "version": "156.0.8078.4"
@@ -8,7 +8,7 @@
   "checks": {
     "desktop_stylesheet_links": [
       {
-        "href": "/LOL-Recommender-System/rust-preview/app-e4b943f13abfc48c.css",
+        "href": "/LOL-Recommender-System/rust-preview/app-49719f00a76d8809.css",
         "loaded": true
       }
     ],
@@ -20,9 +20,9 @@
     "desktop_analytics_back_to_home": true,
     "desktop_analytics_hash_routing": true,
     "desktop_analytics_html_redirect": true,
-    "desktop_registration_screenshot": "tests/fixtures/migration/screenshots/rust-phase6-desktop-registration.png",
+    "desktop_supabase_authenticated": true,
+    "desktop_riot_profile_updated": true,
     "desktop_question_screenshot": "tests/fixtures/migration/screenshots/rust-phase6-desktop-question-1.png",
-    "desktop_stored_users_count": 1,
     "desktop_keyboard_option_selection": true,
     "desktop_mage_filtered_positions": [
       "Mid",
@@ -40,8 +40,8 @@
     "desktop_metric_modal_screenshot": "tests/fixtures/migration/screenshots/rust-phase6-desktop-metric-modal.png",
     "desktop_recent_champions_count": 10,
     "desktop_local_storage_keys": [
-      "recentChampions",
-      "championRecommenderUsers"
+      "mock_auth",
+      "recentChampions"
     ],
     "desktop_saved_users_modal_screenshot": "tests/fixtures/migration/screenshots/rust-phase6-desktop-saved-users-modal.png",
     "desktop_table_csv_download": "champion_recommendations.csv",
@@ -51,7 +51,7 @@
     "desktop_restart_retains_registration": true,
     "mobile_stylesheet_links": [
       {
-        "href": "/LOL-Recommender-System/rust-preview/app-e4b943f13abfc48c.css",
+        "href": "/LOL-Recommender-System/rust-preview/app-49719f00a76d8809.css",
         "loaded": true
       }
     ],
@@ -63,9 +63,9 @@
     "mobile_analytics_back_to_home": true,
     "mobile_analytics_hash_routing": true,
     "mobile_analytics_html_redirect": true,
-    "mobile_registration_screenshot": "tests/fixtures/migration/screenshots/rust-phase6-mobile-registration.png",
+    "mobile_supabase_authenticated": true,
+    "mobile_riot_profile_updated": true,
     "mobile_question_screenshot": "tests/fixtures/migration/screenshots/rust-phase6-mobile-question-1.png",
-    "mobile_stored_users_count": 1,
     "mobile_keyboard_option_selection": true,
     "mobile_mage_filtered_positions": [
       "Mid",
@@ -83,8 +83,8 @@
     "mobile_metric_modal_screenshot": "tests/fixtures/migration/screenshots/rust-phase6-mobile-metric-modal.png",
     "mobile_recent_champions_count": 10,
     "mobile_local_storage_keys": [
-      "recentChampions",
-      "championRecommenderUsers"
+      "mock_auth",
+      "recentChampions"
     ],
     "mobile_saved_users_modal_screenshot": "tests/fixtures/migration/screenshots/rust-phase6-mobile-saved-users-modal.png",
     "mobile_table_csv_download": "champion_recommendations.csv",
@@ -96,25 +96,25 @@
       {
         "method": "GET",
         "host": "127.0.0.1",
-        "path": "/LOL-Recommender-System/rust-preview/recommender-web-9fce6c8786e03413_bg.wasm",
+        "path": "/LOL-Recommender-System/rust-preview/recommender-web-ce969df19746b58_bg.wasm",
         "status": 200
       },
       {
         "method": "GET",
         "host": "127.0.0.1",
-        "path": "/LOL-Recommender-System/rust-preview/recommender-web-9fce6c8786e03413_bg.wasm",
+        "path": "/LOL-Recommender-System/rust-preview/recommender-web-ce969df19746b58_bg.wasm",
         "status": 200
       },
       {
         "method": "GET",
         "host": "127.0.0.1",
-        "path": "/LOL-Recommender-System/rust-preview/recommender-web-9fce6c8786e03413_bg.wasm",
+        "path": "/LOL-Recommender-System/rust-preview/recommender-web-ce969df19746b58_bg.wasm",
         "status": 200
       },
       {
         "method": "GET",
         "host": "127.0.0.1",
-        "path": "/LOL-Recommender-System/rust-preview/recommender-web-9fce6c8786e03413_bg.wasm",
+        "path": "/LOL-Recommender-System/rust-preview/recommender-web-ce969df19746b58_bg.wasm",
         "status": 200
       }
     ],
@@ -131,19 +131,31 @@
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/app-e4b943f13abfc48c.css",
+      "path": "/LOL-Recommender-System/rust-preview/app-49719f00a76d8809.css",
       "resource_type": "stylesheet"
     },
     {
       "method": "GET",
-      "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/recommender-web-5ed0d965b536da0d.js",
+      "host": "cdn.jsdelivr.net",
+      "path": "/npm/@supabase/supabase-js@2",
       "resource_type": "script"
     },
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/recommender-web-9fce6c8786e03413_bg.wasm",
+      "path": "/LOL-Recommender-System/rust-preview/supabase_bridge.js",
+      "resource_type": "script"
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-fad84028c24f7316.js",
+      "resource_type": "script"
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-ce969df19746b58_bg.wasm",
       "resource_type": "other"
     },
     {
@@ -151,6 +163,12 @@
       "host": "fonts.googleapis.com",
       "path": "/css2",
       "resource_type": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "host": "ddragon.leagueoflegends.com",
+      "path": "/cdn/14.20.1/img/profileicon/588.png",
+      "resource_type": "image"
     },
     {
       "method": "GET",
@@ -203,19 +221,31 @@
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/app-e4b943f13abfc48c.css",
+      "path": "/LOL-Recommender-System/rust-preview/app-49719f00a76d8809.css",
       "resource_type": "stylesheet"
     },
     {
       "method": "GET",
-      "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/recommender-web-5ed0d965b536da0d.js",
+      "host": "cdn.jsdelivr.net",
+      "path": "/npm/@supabase/supabase-js@2",
       "resource_type": "script"
     },
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/recommender-web-9fce6c8786e03413_bg.wasm",
+      "path": "/LOL-Recommender-System/rust-preview/supabase_bridge.js",
+      "resource_type": "script"
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-fad84028c24f7316.js",
+      "resource_type": "script"
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-ce969df19746b58_bg.wasm",
       "resource_type": "other"
     },
     {
@@ -223,6 +253,12 @@
       "host": "fonts.googleapis.com",
       "path": "/css2",
       "resource_type": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "host": "ddragon.leagueoflegends.com",
+      "path": "/cdn/14.20.1/img/profileicon/588.png",
+      "resource_type": "image"
     },
     {
       "method": "GET",
@@ -329,19 +365,31 @@
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/app-e4b943f13abfc48c.css",
+      "path": "/LOL-Recommender-System/rust-preview/app-49719f00a76d8809.css",
       "resource_type": "stylesheet"
     },
     {
       "method": "GET",
-      "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/recommender-web-5ed0d965b536da0d.js",
+      "host": "cdn.jsdelivr.net",
+      "path": "/npm/@supabase/supabase-js@2",
       "resource_type": "script"
     },
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/recommender-web-9fce6c8786e03413_bg.wasm",
+      "path": "/LOL-Recommender-System/rust-preview/supabase_bridge.js",
+      "resource_type": "script"
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-fad84028c24f7316.js",
+      "resource_type": "script"
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-ce969df19746b58_bg.wasm",
       "resource_type": "other"
     },
     {
@@ -349,6 +397,12 @@
       "host": "fonts.googleapis.com",
       "path": "/css2",
       "resource_type": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "host": "ddragon.leagueoflegends.com",
+      "path": "/cdn/14.20.1/img/profileicon/588.png",
+      "resource_type": "image"
     },
     {
       "method": "GET",
@@ -401,19 +455,31 @@
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/app-e4b943f13abfc48c.css",
+      "path": "/LOL-Recommender-System/rust-preview/app-49719f00a76d8809.css",
       "resource_type": "stylesheet"
     },
     {
       "method": "GET",
-      "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/recommender-web-5ed0d965b536da0d.js",
+      "host": "cdn.jsdelivr.net",
+      "path": "/npm/@supabase/supabase-js@2",
       "resource_type": "script"
     },
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/recommender-web-9fce6c8786e03413_bg.wasm",
+      "path": "/LOL-Recommender-System/rust-preview/supabase_bridge.js",
+      "resource_type": "script"
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-fad84028c24f7316.js",
+      "resource_type": "script"
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-ce969df19746b58_bg.wasm",
       "resource_type": "other"
     },
     {
@@ -421,6 +487,12 @@
       "host": "fonts.googleapis.com",
       "path": "/css2",
       "resource_type": "stylesheet"
+    },
+    {
+      "method": "GET",
+      "host": "ddragon.leagueoflegends.com",
+      "path": "/cdn/14.20.1/img/profileicon/588.png",
+      "resource_type": "image"
     },
     {
       "method": "GET",
@@ -529,19 +601,25 @@
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/app-e4b943f13abfc48c.css",
+      "path": "/LOL-Recommender-System/rust-preview/app-49719f00a76d8809.css",
       "status": 200
     },
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/recommender-web-9fce6c8786e03413_bg.wasm",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-ce969df19746b58_bg.wasm",
       "status": 200
     },
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/recommender-web-5ed0d965b536da0d.js",
+      "path": "/LOL-Recommender-System/rust-preview/supabase_bridge.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-fad84028c24f7316.js",
       "status": 200
     },
     {
@@ -552,14 +630,20 @@
     },
     {
       "method": "GET",
-      "host": "fonts.gstatic.com",
-      "path": "/s/cinzel/v26/8vIJ7ww63mVu7gt79mT7PkRXMw.woff2",
+      "host": "cdn.jsdelivr.net",
+      "path": "/npm/@supabase/supabase-js@2",
       "status": 200
     },
     {
       "method": "GET",
       "host": "ddragon.leagueoflegends.com",
-      "path": "/cdn/15.16.1/img/champion/Jinx.png",
+      "path": "/cdn/14.20.1/img/profileicon/588.png",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "fonts.gstatic.com",
+      "path": "/s/cinzel/v26/8vIJ7ww63mVu7gt79mT7PkRXMw.woff2",
       "status": 200
     },
     {
@@ -584,6 +668,12 @@
       "method": "GET",
       "host": "ddragon.leagueoflegends.com",
       "path": "/cdn/15.16.1/img/champion/Lux.png",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "ddragon.leagueoflegends.com",
+      "path": "/cdn/15.16.1/img/champion/Jinx.png",
       "status": 200
     },
     {
@@ -601,19 +691,25 @@
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/app-e4b943f13abfc48c.css",
+      "path": "/LOL-Recommender-System/rust-preview/app-49719f00a76d8809.css",
       "status": 200
     },
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/recommender-web-9fce6c8786e03413_bg.wasm",
+      "path": "/LOL-Recommender-System/rust-preview/supabase_bridge.js",
       "status": 200
     },
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/recommender-web-5ed0d965b536da0d.js",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-ce969df19746b58_bg.wasm",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-fad84028c24f7316.js",
       "status": 200
     },
     {
@@ -624,14 +720,14 @@
     },
     {
       "method": "GET",
-      "host": "ddragon.leagueoflegends.com",
-      "path": "/cdn/15.16.1/img/champion/Jinx.png",
+      "host": "cdn.jsdelivr.net",
+      "path": "/npm/@supabase/supabase-js@2",
       "status": 200
     },
     {
       "method": "GET",
       "host": "ddragon.leagueoflegends.com",
-      "path": "/cdn/15.16.1/img/champion/Ahri.png",
+      "path": "/cdn/14.20.1/img/profileicon/588.png",
       "status": 200
     },
     {
@@ -643,7 +739,13 @@
     {
       "method": "GET",
       "host": "ddragon.leagueoflegends.com",
-      "path": "/cdn/15.16.1/img/champion/Yasuo.png",
+      "path": "/cdn/15.16.1/img/champion/Ahri.png",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "ddragon.leagueoflegends.com",
+      "path": "/cdn/15.16.1/img/champion/Jinx.png",
       "status": 200
     },
     {
@@ -654,20 +756,38 @@
     },
     {
       "method": "GET",
+      "host": "ddragon.leagueoflegends.com",
+      "path": "/cdn/15.16.1/img/champion/Yasuo.png",
+      "status": 200
+    },
+    {
+      "method": "GET",
       "host": "fonts.gstatic.com",
       "path": "/s/cinzel/v26/8vIJ7ww63mVu7gt79mT7PkRXMw.woff2",
       "status": 200
     },
     {
       "method": "GET",
-      "host": "fonts.gstatic.com",
-      "path": "/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwgknk-4.woff2",
+      "host": "ddragon.leagueoflegends.com",
+      "path": "/cdn/15.16.1/img/champion/Pyke.png",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "ddragon.leagueoflegends.com",
+      "path": "/cdn/15.16.1/img/champion/Fizz.png",
       "status": 200
     },
     {
       "method": "GET",
       "host": "ddragon.leagueoflegends.com",
       "path": "/cdn/15.16.1/img/champion/Quinn.png",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "ddragon.leagueoflegends.com",
+      "path": "/cdn/15.16.1/img/champion/LeeSin.png",
       "status": 200
     },
     {
@@ -684,20 +804,14 @@
     },
     {
       "method": "GET",
-      "host": "ddragon.leagueoflegends.com",
-      "path": "/cdn/15.16.1/img/champion/Fizz.png",
+      "host": "fonts.gstatic.com",
+      "path": "/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwgknk-4.woff2",
       "status": 200
     },
     {
       "method": "GET",
       "host": "ddragon.leagueoflegends.com",
-      "path": "/cdn/15.16.1/img/champion/LeeSin.png",
-      "status": 200
-    },
-    {
-      "method": "GET",
-      "host": "ddragon.leagueoflegends.com",
-      "path": "/cdn/15.16.1/img/champion/Pyke.png",
+      "path": "/cdn/15.16.1/img/champion/Akali.png",
       "status": 200
     },
     {
@@ -710,12 +824,6 @@
       "method": "GET",
       "host": "ddragon.leagueoflegends.com",
       "path": "/cdn/15.16.1/img/champion/Taliyah.png",
-      "status": 200
-    },
-    {
-      "method": "GET",
-      "host": "ddragon.leagueoflegends.com",
-      "path": "/cdn/15.16.1/img/champion/Akali.png",
       "status": 200
     },
     {
@@ -727,19 +835,31 @@
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/app-e4b943f13abfc48c.css",
+      "path": "/LOL-Recommender-System/rust-preview/app-49719f00a76d8809.css",
       "status": 200
     },
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/recommender-web-5ed0d965b536da0d.js",
+      "path": "/LOL-Recommender-System/rust-preview/supabase_bridge.js",
       "status": 200
     },
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/recommender-web-9fce6c8786e03413_bg.wasm",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-fad84028c24f7316.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-ce969df19746b58_bg.wasm",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "cdn.jsdelivr.net",
+      "path": "/npm/@supabase/supabase-js@2",
       "status": 200
     },
     {
@@ -751,13 +871,19 @@
     {
       "method": "GET",
       "host": "ddragon.leagueoflegends.com",
-      "path": "/cdn/15.16.1/img/champion/Yasuo.png",
+      "path": "/cdn/14.20.1/img/profileicon/588.png",
       "status": 200
     },
     {
       "method": "GET",
       "host": "ddragon.leagueoflegends.com",
       "path": "/cdn/15.16.1/img/champion/Jinx.png",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "ddragon.leagueoflegends.com",
+      "path": "/cdn/15.16.1/img/champion/Yasuo.png",
       "status": 200
     },
     {
@@ -799,19 +925,31 @@
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/app-e4b943f13abfc48c.css",
+      "path": "/LOL-Recommender-System/rust-preview/app-49719f00a76d8809.css",
       "status": 200
     },
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/recommender-web-5ed0d965b536da0d.js",
+      "path": "/LOL-Recommender-System/rust-preview/supabase_bridge.js",
       "status": 200
     },
     {
       "method": "GET",
       "host": "127.0.0.1",
-      "path": "/LOL-Recommender-System/rust-preview/recommender-web-9fce6c8786e03413_bg.wasm",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-fad84028c24f7316.js",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "127.0.0.1",
+      "path": "/LOL-Recommender-System/rust-preview/recommender-web-ce969df19746b58_bg.wasm",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "cdn.jsdelivr.net",
+      "path": "/npm/@supabase/supabase-js@2",
       "status": 200
     },
     {
@@ -823,19 +961,7 @@
     {
       "method": "GET",
       "host": "ddragon.leagueoflegends.com",
-      "path": "/cdn/15.16.1/img/champion/Ahri.png",
-      "status": 200
-    },
-    {
-      "method": "GET",
-      "host": "ddragon.leagueoflegends.com",
-      "path": "/cdn/15.16.1/img/champion/Lux.png",
-      "status": 200
-    },
-    {
-      "method": "GET",
-      "host": "ddragon.leagueoflegends.com",
-      "path": "/cdn/15.16.1/img/champion/Zed.png",
+      "path": "/cdn/14.20.1/img/profileicon/588.png",
       "status": 200
     },
     {
@@ -852,26 +978,26 @@
     },
     {
       "method": "GET",
+      "host": "ddragon.leagueoflegends.com",
+      "path": "/cdn/15.16.1/img/champion/Zed.png",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "ddragon.leagueoflegends.com",
+      "path": "/cdn/15.16.1/img/champion/Ahri.png",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "ddragon.leagueoflegends.com",
+      "path": "/cdn/15.16.1/img/champion/Lux.png",
+      "status": 200
+    },
+    {
+      "method": "GET",
       "host": "fonts.gstatic.com",
       "path": "/s/cinzel/v26/8vIJ7ww63mVu7gt79mT7PkRXMw.woff2",
-      "status": 200
-    },
-    {
-      "method": "GET",
-      "host": "ddragon.leagueoflegends.com",
-      "path": "/cdn/15.16.1/img/champion/LeeSin.png",
-      "status": 200
-    },
-    {
-      "method": "GET",
-      "host": "ddragon.leagueoflegends.com",
-      "path": "/cdn/15.16.1/img/champion/Kindred.png",
-      "status": 200
-    },
-    {
-      "method": "GET",
-      "host": "ddragon.leagueoflegends.com",
-      "path": "/cdn/15.16.1/img/champion/Xayah.png",
       "status": 200
     },
     {
@@ -889,13 +1015,31 @@
     {
       "method": "GET",
       "host": "ddragon.leagueoflegends.com",
+      "path": "/cdn/15.16.1/img/champion/LeeSin.png",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "ddragon.leagueoflegends.com",
+      "path": "/cdn/15.16.1/img/champion/Kindred.png",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "ddragon.leagueoflegends.com",
       "path": "/cdn/15.16.1/img/champion/Fizz.png",
       "status": 200
     },
     {
       "method": "GET",
       "host": "ddragon.leagueoflegends.com",
-      "path": "/cdn/15.16.1/img/champion/Akali.png",
+      "path": "/cdn/15.16.1/img/champion/Xayah.png",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "host": "fonts.gstatic.com",
+      "path": "/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwgknk-4.woff2",
       "status": 200
     },
     {
@@ -912,8 +1056,8 @@
     },
     {
       "method": "GET",
-      "host": "fonts.gstatic.com",
-      "path": "/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPxDcwgknk-4.woff2",
+      "host": "ddragon.leagueoflegends.com",
+      "path": "/cdn/15.16.1/img/champion/Akali.png",
       "status": 200
     }
   ],

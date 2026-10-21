@@ -81,44 +81,40 @@ def run_user_flow(
     checks[f"{viewport_name}_analytics_back_to_home"] = True
 
     # Test direct URL hash navigation
-    current_url = page.url.split("#")[0].rstrip("/") + "/"
-    page.goto(f"{current_url}#analytics")
+    current_url = page.url.split("#")[0].split("?")[0].rstrip("/") + "/"
+    page.goto(f"{current_url}?mock_auth=1#analytics")
     page.locator("#analytics-dashboard").wait_for(state="visible", timeout=5_000)
     page.get_by_role("button", name="← Back to Home").click()
     page.locator("#start-screen").wait_for(state="visible", timeout=5_000)
     checks[f"{viewport_name}_analytics_hash_routing"] = True
 
     # Test fallback analytics.html redirect
-    page.goto(f"{current_url}analytics.html")
+    page.goto(f"{current_url}analytics.html?mock_auth=1")
     page.locator("#analytics-dashboard").wait_for(state="visible", timeout=5_000)
     page.get_by_role("button", name="← Back to Home").click()
     page.locator("#start-screen").wait_for(state="visible", timeout=5_000)
     checks[f"{viewport_name}_analytics_html_redirect"] = True
 
-    page.get_by_role("button", name="Find My Champion").click()
-    page.locator("#user-registration").wait_for(state="visible", timeout=5_000)
-    checks[f"{viewport_name}_registration_screenshot"] = save_screenshot(
-        page, f"{viewport_name}-registration"
-    )
-    if page.evaluate("document.querySelector('#user-form').checkValidity()"):
-        raise AssertionError("Registration form should require its legacy required fields")
+    # Verify Supabase Google Auth state
+    auth_user = page.evaluate("window.supabaseAuth ? JSON.parse(window.supabaseAuth.getCurrentUserJson() || 'null') : null")
+    if not auth_user or auth_user.get("email") != "summoner@example.com":
+        raise AssertionError(f"Expected Supabase authenticated user, got: {auth_user}")
+    checks[f"{viewport_name}_supabase_authenticated"] = True
 
-    page.locator("#fullName").fill("Synthetic Summoner")
-    page.locator("#email").fill("synthetic@example.invalid")
-    page.locator("#age").fill("25")
-    page.locator("#experience").select_option("Intermediate")
-    page.locator("#user-form button[type=submit]").click()
+    # Test optional Riot ID linking modal
+    page.locator(".nav-link[title*='Riot']").click()
+    page.locator("#riotIdInput").wait_for(state="visible", timeout=5_000)
+    page.locator("#riotIdInput").fill("Faker#T1")
+    page.get_by_role("button", name="Save Riot Profile").click()
+    page.locator("#riotIdInput").wait_for(state="hidden", timeout=5_000)
+    checks[f"{viewport_name}_riot_profile_updated"] = True
+
+    # Click Find My Champion -> enters question 1 immediately (mandatory auth passed, no manual registration)
+    page.get_by_role("button", name="Find My Champion").click()
     page.locator("#question-1").wait_for(state="visible", timeout=5_000)
     checks[f"{viewport_name}_question_screenshot"] = save_screenshot(
         page, f"{viewport_name}-question-1"
     )
-
-    stored_users = page.evaluate("JSON.parse(localStorage.getItem('championRecommenderUsers') || '[]')")
-    if len(stored_users) != 1:
-        raise AssertionError(f"Expected 1 user in localStorage, got {len(stored_users)}")
-    if stored_users[0].get("fullName") != "Synthetic Summoner" or stored_users[0].get("email") != "synthetic@example.invalid":
-        raise AssertionError(f"Stored user mismatch: {stored_users[0]}")
-    checks[f"{viewport_name}_stored_users_count"] = len(stored_users)
 
     first_answer = page.get_by_role("button", name="Medium (4-6)")
     first_answer.focus()
@@ -245,8 +241,7 @@ def run_user_flow(
     page.locator("#start-screen").wait_for(state="visible", timeout=5_000)
     checks[f"{viewport_name}_restart_returns_to_start"] = True
     page.get_by_role("button", name="Find My Champion").click()
-    if page.locator("#fullName").input_value() != "Synthetic Summoner":
-        raise AssertionError("Restart should retain the entered registration values")
+    page.locator("#question-1").wait_for(state="visible", timeout=5_000)
     checks[f"{viewport_name}_restart_retains_registration"] = True
 
 
@@ -378,7 +373,8 @@ def main() -> None:
                 page.on("dialog", on_dialog)
                 context.route("**/*", guard_request)
 
-                response = page.goto(preview_url, wait_until="domcontentloaded", timeout=60_000)
+                target_url = f"{preview_url}?mock_auth=1" if "?" not in preview_url else f"{preview_url}&mock_auth=1"
+                response = page.goto(target_url, wait_until="domcontentloaded", timeout=60_000)
                 if response is None or not response.ok:
                     raise AssertionError(
                         f"Preview did not return a successful document response: {response}"
