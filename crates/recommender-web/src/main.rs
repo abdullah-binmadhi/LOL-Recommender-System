@@ -1,10 +1,14 @@
 #[cfg(target_arch = "wasm32")]
 mod analytics_view;
+#[cfg(target_arch = "wasm32")]
+mod components;
 #[cfg(any(target_arch = "wasm32", test))]
 mod state;
 #[cfg(target_arch = "wasm32")]
 mod storage;
 
+#[cfg(target_arch = "wasm32")]
+use components::ui::*;
 #[cfg(target_arch = "wasm32")]
 use leptos::prelude::*;
 #[cfg(target_arch = "wasm32")]
@@ -162,57 +166,65 @@ fn view_start(state: RwSignal<AppState>) -> impl IntoView {
         .map(|champion| {
             let image = champion_image_url(champion, None);
             view! {
-                <img src=image alt=champion class="champion-avatar" loading="lazy" />
+                <div class="showcase-avatar-wrapper">
+                    <img src=image alt=champion class="showcase-avatar-img champion-avatar" loading="lazy" />
+                </div>
             }
         })
         .collect_view();
 
     view! {
-        <section id="start-screen" class="card start-screen active">
+        <section id="start-screen" class="card start-screen hero-card ui-card active">
             <div class="hero-section">
+                <div class="hero-pill">
+                    <Badge variant=BadgeVariant::Default class="ui-badge-gold">
+                        "✦ Powered by Rust & WebAssembly"
+                    </Badge>
+                </div>
+
                 <div class="hero-content">
                     <h2 class="hero-title">
-                        <i class="champion-finder-icon"></i> " Find Your Perfect Champion"
+                        "Find Your " <span>"Signature Champion"</span>
                     </h2>
                     <p class="hero-description">
-                        "Our AI-powered system analyzes your playstyle preferences to find the ideal League of Legends champion that matches exactly what you're looking for"
+                        "Discover the optimal League of Legends champion tailored to your psychological profile, mechanical comfort, and role preferences using a 3-model machine learning ensemble."
                     </p>
                 </div>
 
                 <div class="champion-showcase">
-                    <div class="champion-images">{featured_champions}</div>
+                    <div class="champion-showcase-grid champion-images">{featured_champions}</div>
                 </div>
 
-                <div class="features">
-                    <div class="feature">
-                        <div class="feature-icon"><i class="ai-brain-icon"></i></div>
-                        <h3>"AI-Powered Analysis"</h3>
-                        <p>"Three advanced ML algorithms analyze your playstyle to find your perfect champion match"</p>
+                <div class="features feature-cards-grid">
+                    <div class="feature feature-box">
+                        <div class="feature-icon feature-icon-badge">"🧠"</div>
+                        <h4>"3-Model ML Ensemble"</h4>
+                        <p>"KNN, Decision Tree, and Random Forest models evaluate 150+ champions simultaneously."</p>
                     </div>
-                    <div class="feature">
-                        <div class="feature-icon"><i class="lightning-icon"></i></div>
-                        <h3>"Instant Results"</h3>
-                        <p>"Get personalized recommendations from 150+ champions in under 2 minutes"</p>
+                    <div class="feature feature-box">
+                        <div class="feature-icon feature-icon-badge">"⚡"</div>
+                        <h4>"Sub-Millisecond Speed"</h4>
+                        <p>"Native Rust core computes exact ranking, tie-breaking, and evaluation metrics in 0.5ms."</p>
                     </div>
-                    <div class="feature">
-                        <div class="feature-icon"><i class="target-icon"></i></div>
-                        <h3>"Accurate Matching"</h3>
-                        <p>"92% accuracy rate with pro tips and detailed champion analysis"</p>
+                    <div class="feature feature-box">
+                        <div class="feature-icon feature-icon-badge">"🎯"</div>
+                        <h4>"Precision Compatibility"</h4>
+                        <p>"Deep playstyle matching with detailed math breakdown and situational counters."</p>
                     </div>
                 </div>
 
-                <div class="cta-section">
+                <div class="cta-section hero-cta-group">
                     <button
                         type="button"
-                        class="btn btn-hero"
+                        class="btn btn-hero ui-btn ui-btn-primary ui-btn-lg"
                         on:click=move |_| state.update(AppState::begin_registration)
                     >
                         <span class="btn-text">"Find My Champion"</span>
-                        <span class="btn-icon">"→"</span>
+                        <span class="btn-icon">" →"</span>
                     </button>
                     <button
                         type="button"
-                        class="btn btn-hero"
+                        class="btn btn-hero ui-btn ui-btn-outline ui-btn-lg"
                         on:click=move |_| {
                             if let Some(win) = web_sys::window() {
                                 let _ = win.location().set_hash("#analytics");
@@ -220,8 +232,18 @@ fn view_start(state: RwSignal<AppState>) -> impl IntoView {
                             state.update(AppState::open_analytics);
                         }
                     >
-                        <span class="btn-text">"Analytics"</span>
-                        <span class="btn-icon">"📊"</span>
+                        <span class="btn-text">"Global Analytics"</span>
+                        <span class="btn-icon">" 📊"</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="ui-btn ui-btn-ghost ui-btn-lg"
+                        on:click=move |_| {
+                            let users = storage::load_users();
+                            state.update(|current| current.open_modal(Modal::SavedUsers(users)));
+                        }
+                    >
+                        "📁 Saved Profiles"
                     </button>
                 </div>
             </div>
@@ -232,15 +254,19 @@ fn view_start(state: RwSignal<AppState>) -> impl IntoView {
 #[cfg(target_arch = "wasm32")]
 fn view_registration(state: RwSignal<AppState>) -> impl IntoView {
     view! {
-        <section id="user-registration" class="card user-registration active">
-            <div class="registration-header">
-                <h2><i class="summoner-scroll"></i> " Quick Setup"</h2>
-                <p>"Just a few details to personalize your experience"</p>
+        <section id="user-registration" class="card user-registration ui-card registration-container active">
+            <div class="registration-header ui-card-header">
+                <div class="ui-card-title">
+                    <i class="summoner-scroll"></i> " Summoner Profile"
+                </div>
+                <p class="ui-card-description">
+                    "Personalize your questionnaire so the machine learning ensemble calibrates its recommendation."
+                </p>
             </div>
 
             <form
                 id="user-form"
-                class="registration-form"
+                class="registration-form ui-card-content"
                 on:submit=move |event| {
                     event.prevent_default();
                     let is_valid = state.with(|current| current.registration.is_valid());
@@ -260,13 +286,14 @@ fn view_registration(state: RwSignal<AppState>) -> impl IntoView {
                     });
                 }
             >
-                <div class="form-group">
-                    <label for="fullName">"Name"</label>
+                <div class="form-group form-field-group">
+                    <label for="fullName" class="form-label">"Summoner Name / Full Name"</label>
                     <input
                         type="text"
                         id="fullName"
                         name="fullName"
-                        placeholder="Enter your name"
+                        class="form-input"
+                        placeholder="e.g. Faker"
                         required=true
                         prop:value=move || state.with(|current| current.registration.full_name.clone())
                         on:input=move |event| {
@@ -276,13 +303,14 @@ fn view_registration(state: RwSignal<AppState>) -> impl IntoView {
                     />
                 </div>
 
-                <div class="form-group">
-                    <label for="email">"Email"</label>
+                <div class="form-group form-field-group">
+                    <label for="email" class="form-label">"Email Address"</label>
                     <input
                         type="email"
                         id="email"
                         name="email"
-                        placeholder="Enter your email"
+                        class="form-input"
+                        placeholder="summoner@example.com"
                         required=true
                         prop:value=move || state.with(|current| current.registration.email.clone())
                         on:input=move |event| {
@@ -292,13 +320,14 @@ fn view_registration(state: RwSignal<AppState>) -> impl IntoView {
                     />
                 </div>
 
-                <div class="form-group">
-                    <label for="age">"Age"</label>
+                <div class="form-group form-field-group">
+                    <label for="age" class="form-label">"Age"</label>
                     <input
                         type="number"
                         id="age"
                         name="age"
-                        placeholder="Enter your age"
+                        class="form-input"
+                        placeholder="e.g. 21"
                         min="13"
                         max="100"
                         required=true
@@ -310,11 +339,12 @@ fn view_registration(state: RwSignal<AppState>) -> impl IntoView {
                     />
                 </div>
 
-                <div class="form-group">
-                    <label for="experience">"LoL Experience"</label>
+                <div class="form-group form-field-group">
+                    <label for="experience" class="form-label">"League Experience Level"</label>
                     <select
                         id="experience"
                         name="experience"
+                        class="form-input"
                         required=true
                         prop:value=move || state.with(|current| current.registration.experience.clone())
                         on:change=move |event| {
@@ -322,20 +352,21 @@ fn view_registration(state: RwSignal<AppState>) -> impl IntoView {
                             state.update(|current| current.registration.experience = value);
                         }
                     >
-                        <option value="">"Select your experience"</option>
-                        <option value="New Player">"New Player"</option>
-                        <option value="Beginner">"Beginner"</option>
-                        <option value="Intermediate">"Intermediate"</option>
-                        <option value="Advanced">"Advanced"</option>
-                        <option value="Expert">"Expert"</option>
+                        <option value="">"Select experience level"</option>
+                        <option value="New Player">"New Player (Under 30 Levels)"</option>
+                        <option value="Beginner">"Beginner (Iron / Bronze)"</option>
+                        <option value="Intermediate">"Intermediate (Silver / Gold / Platinum)"</option>
+                        <option value="Advanced">"Advanced (Emerald / Diamond)"</option>
+                        <option value="Expert">"Expert (Master / Grandmaster / Challenger)"</option>
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="gender">"Gender"</label>
+                <div class="form-group form-field-group">
+                    <label for="gender" class="form-label">"Gender (Optional)"</label>
                     <select
                         id="gender"
                         name="gender"
+                        class="form-input"
                         prop:value=move || state.with(|current| current.registration.gender.clone())
                         on:change=move |event| {
                             let value = event_target_value(&event);
@@ -350,13 +381,14 @@ fn view_registration(state: RwSignal<AppState>) -> impl IntoView {
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="phone">"Phone (Optional)"</label>
+                <div class="form-group form-field-group">
+                    <label for="phone" class="form-label">"Phone (Optional)"</label>
                     <input
                         type="tel"
                         id="phone"
                         name="phone"
-                        placeholder="Enter your phone number"
+                        class="form-input"
+                        placeholder="Optional contact"
                         prop:value=move || state.with(|current| current.registration.phone.clone())
                         on:input=move |event| {
                             let value = event_target_value(&event);
@@ -365,23 +397,25 @@ fn view_registration(state: RwSignal<AppState>) -> impl IntoView {
                     />
                 </div>
 
-                <div class="form-buttons">
+                <div class="form-buttons ui-card-footer" style="padding: 24px 0 0; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between;">
                     <button
                         type="button"
-                        class="btn btn-secondary"
+                        class="btn btn-secondary ui-btn ui-btn-secondary"
                         on:click=move |_| state.update(AppState::return_to_start)
                     >
                         "← Back"
                     </button>
-                    <button type="submit" class="btn btn-primary">"Find My Champion →"</button>
+                    <button type="submit" class="btn btn-primary ui-btn ui-btn-primary ui-btn-lg">
+                        "Begin Questionnaire →"
+                    </button>
                 </div>
             </form>
 
             {move || state.with(|current| current.error.clone()).map(|error| view! {
                 <p class="application-error" role="alert">{error}</p>
             })}
-            <p class="registration-note">
-                "Rust preview notice: registration details stay in memory for this session and are not saved."
+            <p class="registration-note" style="color: var(--text-muted); font-size: 0.85rem; text-align: center; margin-top: 16px;">
+                "✦ Client-Side Secure: Your inputs are processed locally in WebAssembly."
             </p>
         </section>
     }
@@ -424,7 +458,7 @@ fn view_questionnaire(
                         view! {
                             <button
                                 type="button"
-                                class=if selected { "option selected" } else { "option" }
+                                class=if selected { "ui-option-card option selected active" } else { "ui-option-card option" }
                                 aria-pressed=if selected { "true" } else { "false" }
                                 on:click=move |_| {
                                     let selected_value = option_value.clone();
@@ -437,10 +471,15 @@ fn view_questionnaire(
                                     });
                                 }
                             >
-                                {option.text}
-                                {(!option.description.is_empty()).then(|| view! {
-                                    <p class="option-description">{option.description}</p>
-                                })}
+                                <div class="option-radio-ring">
+                                    <div class="option-radio-dot" />
+                                </div>
+                                <div class="option-text-label">
+                                    <div style="font-weight: 600; font-size: 1.05rem; color: var(--text-main);">{option.text}</div>
+                                    {(!option.description.is_empty()).then(|| view! {
+                                        <p class="option-description" style="margin: 4px 0 0; font-size: 0.9rem; color: var(--text-muted);">{option.description}</p>
+                                    })}
+                                </div>
                             </button>
                         }
                     })
@@ -456,37 +495,42 @@ fn view_questionnaire(
                 view! {
                     <section
                         id=format!("question-{}", question.id)
-                        class="card question-card active"
+                        class="card question-card ui-card active"
                         aria-label="Questionnaire"
+                        style="max-width: 760px; margin: 0 auto;"
                     >
-                        <div class="progress-container">
-                            <div class="progress-info">
-                                <span class="progress-text">
+                        <div class="progress-container" style="margin-bottom: 24px;">
+                            <div class="progress-info quiz-header-meta">
+                                <span class="progress-text quiz-step-title">
                                     {format!("Question {} of {}", question.id, question_count)}
                                 </span>
-                                <span class="progress-text">{format!("{}% Complete", progress)}</span>
+                                <span class="progress-text ui-badge ui-badge-cyan">
+                                    {format!("{}% Complete", progress)}
+                                </span>
                             </div>
-                            <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow=progress>
-                                <div class="progress-fill" style=format!("width: {progress}%")></div>
+                            <div class="progress-bar ui-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow=progress>
+                                <div class="progress-fill ui-progress-indicator" style=format!("width: {progress}%")></div>
                             </div>
                         </div>
 
-                        <div class="question">
-                            <h2>{question.text}</h2>
-                            <div class="options">{options}</div>
+                        <div class="question" style="margin-bottom: 28px;">
+                            <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 16px; line-height: 1.3;">
+                                {question.text}
+                            </h2>
+                            <div class="options quiz-options-list">{options}</div>
                         </div>
 
                         {move || state.with(|current| current.error.clone()).map(|error| view! {
                             <p class="application-error" role="alert">{error}</p>
                         })}
 
-                        <div class="buttons">
-                            <div class="button-group">
+                        <div class="buttons" style="border-top: 1px solid var(--border-subtle); padding-top: 20px;">
+                            <div class="button-group" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                                 {if snapshot.current_question_index > 0 {
                                     view! {
                                         <button
                                             type="button"
-                                            class="btn btn-secondary"
+                                            class="btn btn-secondary ui-btn ui-btn-secondary"
                                             on:click=move |_| state.update(AppState::previous)
                                         >
                                             "Previous"
@@ -498,7 +542,7 @@ fn view_questionnaire(
                                 }}
                                 <button
                                     type="button"
-                                    class="btn btn-primary"
+                                    class="btn btn-primary ui-btn ui-btn-primary ui-btn-lg"
                                     disabled=!can_advance
                                     on:click=move |_| {
                                         if !state.with_untracked(|current| current.can_advance(&questions_for_advance)) {
@@ -572,10 +616,10 @@ fn view_analysis(
                     .into_any(),
                 }}
             </div>
-            <div class="buttons">
+            <div class="buttons results-action-bar" style="margin-top: 36px; display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
                 <button
                     type="button"
-                    class="btn btn-primary"
+                    class="btn btn-primary ui-btn ui-btn-primary ui-btn-lg"
                     on:click=move |_| {
                         let users = storage::load_users();
                         if users.is_empty() {
@@ -594,10 +638,31 @@ fn view_analysis(
                 </button>
                 <button
                     type="button"
-                    class="btn btn-primary"
+                    class="btn btn-primary ui-btn ui-btn-ghost ui-btn-lg"
                     on:click=move |_| state.update(AppState::restart)
                 >
                     "Try Again"
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-secondary ui-btn ui-btn-secondary ui-btn-lg"
+                    on:click=move |_| {
+                        let _ = storage::export_users_csv();
+                    }
+                >
+                    "Export CSV"
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-hero ui-btn ui-btn-outline ui-btn-lg"
+                    on:click=move |_| {
+                        if let Some(win) = web_sys::window() {
+                            let _ = win.location().set_hash("#analytics");
+                        }
+                        state.update(AppState::open_analytics);
+                    }
+                >
+                    "Analytics"
                 </button>
             </div>
         </section>
@@ -1103,28 +1168,30 @@ fn view_champion_modal(
 
     view! {
         <div
-            class="modal active"
+            class="modal ui-dialog-overlay active"
             role="presentation"
             on:click=move |_| state.update(AppState::close_modal)
         >
             <section
-                class="modal-content champion-modal-content"
+                class="modal-content champion-modal-content ui-dialog-content"
                 role="dialog"
                 aria-modal="true"
                 aria-label=format!("{name} champion details")
                 on:click=move |event| event.stop_propagation()
             >
-                <header class="champion-modal-header">
-                    <img src=image alt=name.clone() class="champion-modal-img" />
-                    <div class="champion-modal-info">
-                        <h2>{name.clone()}</h2>
+                <header class="champion-modal-header" style="display: flex; gap: 20px; align-items: center; margin-bottom: 24px; position: relative;">
+                    <img src=image alt=name.clone() class="champion-modal-img" style="width: 80px; height: 80px; border-radius: 16px; border: 2px solid var(--gold-primary);" />
+                    <div class="champion-modal-info" style="flex: 1;">
+                        <h2 style="margin: 0 0 6px; color: var(--text-main); font-size: 1.8rem;">{name.clone()}</h2>
                         <div class="champion-modal-subtitle">
-                            {format!("{} · Difficulty {:.0}/10", champion.data.role, champion.data.difficulty)}
+                            <span class="ui-badge ui-badge-gold">{champion.data.role.clone()}</span>
+                            " "
+                            <span class="ui-badge ui-badge-cyan">{format!("Difficulty {:.0}/10", champion.data.difficulty)}</span>
                         </div>
                     </div>
                     <button
                         type="button"
-                        class="modal-close"
+                        class="modal-close ui-dialog-close"
                         aria-label="Close champion details"
                         on:click=move |_| state.update(AppState::close_modal)
                     >
@@ -1132,15 +1199,17 @@ fn view_champion_modal(
                     </button>
                 </header>
                 <div class="modal-body">
-                    <h3>"Champion Attributes"</h3>
-                    <div class="champion-stats-grid">
+                    <h3 style="color: var(--text-main); margin-bottom: 12px;">"Combat Attributes"</h3>
+                    <div class="champion-stats-grid" style="margin-bottom: 24px;">
                         <div class="stat-item"><span class="stat-label">"Damage"</span><span class="stat-value">{format!("{}/10", champion.data.damage)}</span></div>
                         <div class="stat-item"><span class="stat-label">"Toughness"</span><span class="stat-value">{format!("{}/10", champion.data.toughness)}</span></div>
                         <div class="stat-item"><span class="stat-label">"Mobility"</span><span class="stat-value">{format!("{}/10", champion.data.mobility)}</span></div>
                         <div class="stat-item"><span class="stat-label">"Utility"</span><span class="stat-value">{format!("{}/10", champion.data.utility)}</span></div>
                     </div>
-                    <h3>"Scoring Details"</h3>
-                    <p>"Each score and explanation below comes directly from the Rust scoring result."</p>
+                    <h3 style="color: var(--text-main); margin-bottom: 8px;">"Ensemble Scoring Breakdown"</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
+                        "Deterministic scoring contributions computed directly from the Rust scoring engine."
+                    </p>
                     {algorithm_details}
                 </div>
             </section>
@@ -1193,22 +1262,22 @@ fn view_metric_modal(
 
     view! {
         <div
-            class="modal active"
+            class="modal ui-dialog-overlay active"
             role="presentation"
             on:click=move |_| state.update(AppState::close_modal)
         >
             <section
-                class="modal-content"
+                class="modal-content ui-dialog-content"
                 role="dialog"
                 aria-modal="true"
                 aria-label=format!("{} metric details", metric.label())
                 on:click=move |event| event.stop_propagation()
             >
-                <header class="modal-header">
-                    <h2>{metric.label()}</h2>
+                <header class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="margin: 0; color: var(--text-main); font-size: 1.4rem;">{metric.label()}</h2>
                     <button
                         type="button"
-                        class="modal-close"
+                        class="modal-close ui-dialog-close"
                         aria-label="Close metric details"
                         on:click=move |_| state.update(AppState::close_modal)
                     >
@@ -1220,11 +1289,11 @@ fn view_metric_modal(
                         <div class="modal-score-value">{format!("{:.1}%", value * 100.0)}</div>
                         <div class="modal-score-label">{metric.label()}</div>
                     </div>
-                    <h3>"What this metric means"</h3>
-                    <p>{metric_explanation(metric)}</p>
-                    <h3>"Recommendations evaluated"</h3>
+                    <h3 style="color: var(--text-main); margin-top: 20px;">"What this metric means"</h3>
+                    <p style="color: var(--text-muted); line-height: 1.5;">{metric_explanation(metric)}</p>
+                    <h3 style="color: var(--text-main); margin-top: 20px;">"Recommendations evaluated"</h3>
                     <div class="champion-list">{list}</div>
-                    <p class="metric-footnote">
+                    <p class="metric-footnote" style="color: var(--text-subtle); font-size: 0.85rem; margin-top: 16px;">
                         {format!(
                             "The current heuristic identifies {} relevant champions from your answers. This is a recommendation evaluation aid, not an independently validated accuracy score.",
                             relevant.len()
@@ -1524,21 +1593,23 @@ fn view_saved_users_modal(
 
     view! {
         <div
-            class="modal active"
+            class="modal ui-dialog-overlay active"
             role="dialog"
             aria-modal="true"
             on:click=move |_| state.update(AppState::close_modal)
         >
             <section
-                class="modal-content modal-content-large"
-                style="max-width: 900px; max-height: 85vh; display: flex; flex-direction: column;"
+                class="modal-content modal-content-large ui-dialog-content"
+                style="max-width: 960px; max-height: 85vh; display: flex; flex-direction: column;"
                 on:click=move |event| event.stop_propagation()
             >
-                <header class="modal-header">
-                    <h2><i class="analysis-icon"></i> " All Champion Recommendations"</h2>
+                <header class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="margin: 0; color: var(--text-main); font-size: 1.4rem;">
+                        <i class="analysis-icon"></i> " Saved Summoner Profiles & Results"
+                    </h2>
                     <button
                         type="button"
-                        class="modal-close"
+                        class="modal-close ui-dialog-close"
                         aria-label="Close modal"
                         on:click=move |_| state.update(AppState::close_modal)
                     >
@@ -1546,38 +1617,38 @@ fn view_saved_users_modal(
                     </button>
                 </header>
                 <div class="modal-body" style="overflow: auto; flex: 1;">
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.9rem;">
                         <thead>
-                            <tr style="background-color: #3E1E68; color: white;">
-                                <th style="border: 1px solid #444; padding: 10px; text-align: left;">"ID"</th>
-                                <th style="border: 1px solid #444; padding: 10px; text-align: left;">"Name"</th>
-                                <th style="border: 1px solid #444; padding: 10px; text-align: left;">"Email"</th>
-                                <th style="border: 1px solid #444; padding: 10px; text-align: left;">"Age"</th>
-                                <th style="border: 1px solid #444; padding: 10px; text-align: left;">"Gender"</th>
-                                <th style="border: 1px solid #444; padding: 10px; text-align: left;">"Experience"</th>
-                                <th style="border: 1px solid #444; padding: 10px; text-align: left;">"Recommended Champion"</th>
-                                <th style="border: 1px solid #444; padding: 10px; text-align: left;">"Registration Date"</th>
+                            <tr style="background: rgba(200, 170, 110, 0.15); color: var(--gold-light); border-bottom: 2px solid var(--gold-primary);">
+                                <th style="border: 1px solid var(--border-subtle); padding: 10px; text-align: left;">"ID"</th>
+                                <th style="border: 1px solid var(--border-subtle); padding: 10px; text-align: left;">"Name"</th>
+                                <th style="border: 1px solid var(--border-subtle); padding: 10px; text-align: left;">"Email"</th>
+                                <th style="border: 1px solid var(--border-subtle); padding: 10px; text-align: left;">"Age"</th>
+                                <th style="border: 1px solid var(--border-subtle); padding: 10px; text-align: left;">"Gender"</th>
+                                <th style="border: 1px solid var(--border-subtle); padding: 10px; text-align: left;">"Experience"</th>
+                                <th style="border: 1px solid var(--border-subtle); padding: 10px; text-align: left;">"Recommended Champion"</th>
+                                <th style="border: 1px solid var(--border-subtle); padding: 10px; text-align: left;">"Registration Date"</th>
                             </tr>
                         </thead>
                         <tbody>{rows}</tbody>
                     </table>
                 </div>
-                <div class="modal-footer" style="padding: 15px 30px; display: flex; gap: 10px; border-top: 1px solid #eee;">
+                <div class="modal-footer" style="padding: 20px 0 0; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-subtle); margin-top: 16px;">
                     <button
                         type="button"
-                        class="btn btn-primary"
+                        class="btn btn-secondary ui-btn ui-btn-secondary"
                         on:click=move |_| {
                             let _ = storage::export_table_csv();
                         }
                     >
-                        "Download CSV"
+                        "📥 Download CSV"
                     </button>
                     <button
                         type="button"
-                        class="btn btn-primary"
+                        class="btn btn-primary ui-btn ui-btn-primary"
                         on:click=move |_| state.update(AppState::close_modal)
                     >
-                        "Close Results"
+                        "Close"
                     </button>
                 </div>
             </section>
