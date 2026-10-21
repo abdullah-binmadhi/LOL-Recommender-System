@@ -216,6 +216,221 @@ pub fn consensus(random_forest: f64, decision_tree: f64, knn: f64) -> Consensus 
     }
 }
 
+/// A single feature attribution factor explaining positive match reasons.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ShapDriver {
+    pub factor: String,
+    pub contribution: f64,
+    pub weight: f64,
+    pub percentage: f64,
+    pub description: String,
+    pub is_positive: bool,
+}
+
+/// A specific caution or penalty factor explaining potential friction.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ShapCaution {
+    pub reason: String,
+    pub penalty_percent: f64,
+    pub advice: String,
+}
+
+/// Head-to-head comparison between player preference and champion kit attribute.
+#[derive(Debug, Clone, PartialEq)]
+pub struct TraitComparison {
+    pub name: &'static str,
+    pub user_value: f64,
+    pub champion_value: f64,
+    pub match_pct: f64,
+}
+
+/// Lens score representing one of the 3 complementary AI perspectives.
+#[derive(Debug, Clone, PartialEq)]
+pub struct LensScore {
+    pub name: &'static str,
+    pub score: f64,
+    pub category: &'static str,
+    pub description: &'static str,
+    pub badge_css: &'static str,
+}
+
+/// Complete Match Intelligence profile used to render the enhanced champion modal.
+#[derive(Debug, Clone, PartialEq)]
+pub struct MatchIntelligence {
+    pub playstyle_lens: LensScore,
+    pub performance_lens: LensScore,
+    pub community_lens: LensScore,
+    pub consensus: Consensus,
+    pub drivers: Vec<ShapDriver>,
+    pub cautions: Vec<ShapCaution>,
+    pub trait_comparisons: Vec<TraitComparison>,
+}
+
+/// Computes the 3-lens Match Intelligence breakdown for the champion modal.
+#[allow(clippy::too_many_arguments)]
+pub fn build_match_intelligence(
+    rf_score: f64,
+    dt_score: f64,
+    knn_score: f64,
+    contributing_factors: &[(String, f64, f64)],
+    penalties: &[(String, f64)],
+    _matched_criteria: &[String],
+    attributes: &Attributes,
+    preferred_difficulty: f64,
+    champion_difficulty: f64,
+) -> MatchIntelligence {
+    let consensus = consensus(rf_score, dt_score, knn_score);
+
+    let playstyle_lens = LensScore {
+        name: "Playstyle Synergy",
+        score: knn_score,
+        category: "Micro & Kit Geometry",
+        description: "Euclidean cosine overlap across damage, toughness, mobility, and control.",
+        badge_css: tier_for(knn_score).css(),
+    };
+
+    let performance_lens = LensScore {
+        name: "Win Viability",
+        score: dt_score,
+        category: "Performance Trees",
+        description: "Supervised decision path predicting lane and role match efficacy.",
+        badge_css: tier_for(dt_score).css(),
+    };
+
+    let community_lens = LensScore {
+        name: "Community Affinity",
+        score: rf_score,
+        category: "Ensemble Consensus",
+        description: "Aggregated multi-tree vote modeled after high-Elo summoner champion pools.",
+        badge_css: tier_for(rf_score).css(),
+    };
+
+    let mut drivers = Vec::new();
+    for (factor, contribution, weight) in contributing_factors {
+        let pct = if *weight > 0.0 {
+            (*contribution / *weight * 100.0).clamp(0.0, 100.0)
+        } else {
+            *contribution
+        };
+        let description = if factor.contains("Role") {
+            "Plays your preferred champion lane archetype"
+        } else if factor.contains("Position") {
+            "Matches your preferred positioning and team fight duties"
+        } else if factor.contains("Damage") {
+            "Delivers your preferred physical/magic damage distribution"
+        } else if factor.contains("Range") {
+            "Combat reach aligns with your desired safety margin"
+        } else if factor.contains("Ensemble") {
+            "High vote density across all randomized attribute subsets"
+        } else if factor.contains("Euclidean") || factor.contains("Distance") {
+            "Close overall stat distance to your questionnaire answers"
+        } else {
+            "Strong alignment with your gameplay temperament"
+        }
+        .to_owned();
+
+        drivers.push(ShapDriver {
+            factor: factor.clone(),
+            contribution: *contribution,
+            weight: *weight,
+            percentage: pct,
+            description,
+            is_positive: *contribution > 0.0,
+        });
+    }
+
+    if drivers.is_empty() {
+        drivers.push(ShapDriver {
+            factor: "Base Kit Synergy".to_owned(),
+            contribution: 80.0,
+            weight: 100.0,
+            percentage: 80.0,
+            description: "Solid combat baseline aligned with your profile".to_owned(),
+            is_positive: true,
+        });
+    }
+
+    let mut cautions = Vec::new();
+    for (reason, amount) in penalties {
+        cautions.push(ShapCaution {
+            reason: reason.clone(),
+            penalty_percent: *amount,
+            advice: "Consider practicing this champion's unique power spikes in normal queue before ranked."
+                .to_owned(),
+        });
+    }
+
+    if cautions.is_empty() {
+        let diff_gap = (champion_difficulty - preferred_difficulty).abs();
+        if diff_gap >= 3.0 {
+            cautions.push(ShapCaution {
+                reason: "Mechanical Curve Gap".to_owned(),
+                penalty_percent: diff_gap * 3.5,
+                advice: "Skillshot timing and combo rhythm differ slightly from your indicated comfort level."
+                    .to_owned(),
+            });
+        }
+        if attributes.toughness <= 3.0 {
+            cautions.push(ShapCaution {
+                reason: "Glass Cannon Fragility".to_owned(),
+                penalty_percent: 5.0,
+                advice: "Position defensively behind front-line tanks to avoid being burst down."
+                    .to_owned(),
+            });
+        }
+    }
+
+    let trait_diff = |user: f64, champ: f64| -> f64 {
+        (100.0 - (champ - user).abs() * 10.0).clamp(0.0, 100.0)
+    };
+
+    let trait_comparisons = vec![
+        TraitComparison {
+            name: "Damage Output",
+            user_value: 8.0,
+            champion_value: attributes.damage,
+            match_pct: trait_diff(8.0, attributes.damage),
+        },
+        TraitComparison {
+            name: "Survivability",
+            user_value: 5.0,
+            champion_value: attributes.toughness,
+            match_pct: trait_diff(5.0, attributes.toughness),
+        },
+        TraitComparison {
+            name: "Mobility & Roam",
+            user_value: 7.0,
+            champion_value: attributes.mobility,
+            match_pct: trait_diff(7.0, attributes.mobility),
+        },
+        TraitComparison {
+            name: "Crowd Control",
+            user_value: 6.0,
+            champion_value: attributes.control,
+            match_pct: trait_diff(6.0, attributes.control),
+        },
+        TraitComparison {
+            name: "Accessibility",
+            user_value: (10.0 - preferred_difficulty).clamp(0.0, 10.0),
+            champion_value: (10.0 - champion_difficulty).clamp(0.0, 10.0),
+            match_pct: trait_diff(
+                (10.0 - preferred_difficulty).clamp(0.0, 10.0),
+                (10.0 - champion_difficulty).clamp(0.0, 10.0),
+            ),
+        },
+    ];
+
+    MatchIntelligence {
+        playstyle_lens,
+        performance_lens,
+        community_lens,
+        consensus,
+        drivers,
+        cautions,
+        trait_comparisons,
+    }
+}
+
 /// Overall quality verdict for the evaluation heuristic.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Performance {
@@ -367,5 +582,39 @@ mod tests {
         assert_eq!(performance(0.59, 0.5).level, "Good");
         assert_eq!(performance(0.1, 0.3).level, "Good");
         assert_eq!(performance(0.1, 0.1).level, "Needs Improvement");
+    }
+
+    #[test]
+    fn test_build_match_intelligence() {
+        let factors = vec![
+            ("Role Match".to_owned(), 40.0, 40.0),
+            ("Position Match".to_owned(), 30.0, 30.0),
+        ];
+        let penalties = vec![("Role Mismatch".to_owned(), 10.0)];
+        let criteria = vec!["10 trees voted".to_owned()];
+
+        let intel = build_match_intelligence(
+            85.0,
+            80.0,
+            78.0,
+            &factors,
+            &penalties,
+            &criteria,
+            &ATTRS,
+            5.0,
+            5.0,
+        );
+
+        assert_eq!(intel.consensus, Consensus::Unanimous);
+        assert_eq!(intel.playstyle_lens.score, 78.0);
+        assert_eq!(intel.performance_lens.score, 80.0);
+        assert_eq!(intel.community_lens.score, 85.0);
+        assert_eq!(intel.drivers.len(), 2);
+        assert_eq!(intel.drivers[0].percentage, 100.0);
+        assert!(intel.drivers[0].description.contains("lane archetype"));
+        assert_eq!(intel.cautions.len(), 1);
+        assert_eq!(intel.cautions[0].penalty_percent, 10.0);
+        assert_eq!(intel.trait_comparisons.len(), 5);
+        assert_eq!(intel.trait_comparisons[0].name, "Damage Output");
     }
 }

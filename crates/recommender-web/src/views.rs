@@ -1301,16 +1301,78 @@ fn view_champion_modal(
     };
     let champion = record.data.clone();
     let image = champion_image_url(&name, Some(&champion));
-    let algorithm_details = [
-        (
-            "Random Forest",
-            recommendation.scores.random_forest.get(&name),
-        ),
-        (
-            "Decision Tree",
-            recommendation.scores.decision_tree.get(&name),
-        ),
-        ("K-Nearest Neighbors", recommendation.scores.knn.get(&name)),
+
+    let attributes = Attributes {
+        damage: champion.damage,
+        toughness: champion.toughness,
+        mobility: champion.mobility,
+        control: champion.control,
+        utility: champion.utility,
+    };
+
+    let rf_score = recommendation.scores.random_forest.get(&name);
+    let dt_score = recommendation.scores.decision_tree.get(&name);
+    let knn_score = recommendation.scores.knn.get(&name);
+
+    let rf_val = rf_score.map(|s| s.score).unwrap_or_default();
+    let dt_val = dt_score.map(|s| s.score).unwrap_or_default();
+    let knn_val = knn_score.map(|s| s.score).unwrap_or_default();
+
+    let mut contributing_factors = Vec::new();
+    let mut penalties = Vec::new();
+    let mut matched_criteria = Vec::new();
+
+    for score in [dt_score, rf_score, knn_score].into_iter().flatten() {
+        if let Some(factors) = score.details.get("contributingFactors").and_then(|v| v.as_array()) {
+            for f in factors {
+                let factor = f.get("factor").and_then(|v| v.as_str()).unwrap_or("").to_owned();
+                let contribution = f.get("contribution").and_then(|v| v.as_f64()).unwrap_or_else(|| {
+                    f.get("contribution").and_then(|v| v.as_str()).and_then(|s| s.parse().ok()).unwrap_or(0.0)
+                });
+                let weight = f.get("weight").and_then(|v| v.as_f64()).unwrap_or_else(|| {
+                    f.get("weight").and_then(|v| v.as_str()).and_then(|s| s.parse().ok()).unwrap_or(0.0)
+                });
+                if !factor.is_empty() && !contributing_factors.iter().any(|(existing, _, _)| existing == &factor) {
+                    contributing_factors.push((factor, contribution, weight));
+                }
+            }
+        }
+        if let Some(pens) = score.details.get("penalties").and_then(|v| v.as_array()) {
+            for p in pens {
+                let reason = p.get("reason").and_then(|v| v.as_str()).unwrap_or("").to_owned();
+                let amount = p.get("amount").and_then(|v| v.as_f64()).unwrap_or(0.0);
+                if !reason.is_empty() && !penalties.iter().any(|(existing, _)| existing == &reason) {
+                    penalties.push((reason, amount));
+                }
+            }
+        }
+        if let Some(crit) = score.details.get("matchedCriteria").and_then(|v| v.as_array()) {
+            for c in crit {
+                if let Some(s) = c.as_str() {
+                    if !matched_criteria.iter().any(|existing: &String| existing == s) {
+                        matched_criteria.push(s.to_owned());
+                    }
+                }
+            }
+        }
+    }
+
+    let intel = presenter::build_match_intelligence(
+        rf_val,
+        dt_val,
+        knn_val,
+        &contributing_factors,
+        &penalties,
+        &matched_criteria,
+        &attributes,
+        5.0,
+        champion.difficulty,
+    );
+
+    let raw_details = [
+        ("Random Forest", rf_score),
+        ("Decision Tree", dt_score),
+        ("K-Nearest Neighbors", knn_score),
     ]
     .into_iter()
     .map(|(label, score)| {
@@ -1333,11 +1395,71 @@ fn view_champion_modal(
     })
     .collect_view();
 
+    let drivers_view = intel
+        .drivers
+        .into_iter()
+        .map(|driver| {
+            let pct = driver.percentage;
+            view! {
+                <div class="driver-card">
+                    <div class="driver-info">
+                        <div class="driver-title-row">
+                            <span class="driver-name">{driver.factor}</span>
+                            <span class="driver-pct">{format!("+{pct:.1}% match")}</span>
+                        </div>
+                        <p class="driver-desc">{driver.description}</p>
+                    </div>
+                    <div class="driver-bar-track">
+                        <div class="driver-bar-fill" style=format!("width: {pct:.1}%") />
+                    </div>
+                </div>
+            }
+        })
+        .collect_view();
+
+    let cautions_view = intel
+        .cautions
+        .into_iter()
+        .map(|caution| {
+            view! {
+                <div class="caution-card">
+                    <div class="caution-header">
+                        <span class="caution-badge">"Notice"</span>
+                        <span class="caution-name">{caution.reason}</span>
+                        <span class="caution-penalty">{format!("-{:.1}% adjustment", caution.penalty_percent)}</span>
+                    </div>
+                    <p class="caution-advice">{caution.advice}</p>
+                </div>
+            }
+        })
+        .collect_view();
+
+    let trait_bars = intel
+        .trait_comparisons
+        .into_iter()
+        .map(|t| {
+            let match_pct = t.match_pct;
+            view! {
+                <div class="trait-row">
+                    <div class="trait-labels">
+                        <span class="trait-name">{t.name}</span>
+                        <span class="trait-vals">
+                            {format!("Desired: {:.0} / Kit: {:.0} ({match_pct:.0}% match)", t.user_value, t.champion_value)}
+                        </span>
+                    </div>
+                    <div class="trait-track">
+                        <div class="trait-fill" style=format!("width: {match_pct:.1}%") />
+                    </div>
+                </div>
+            }
+        })
+        .collect_view();
+
     view! {
         <Dialog
             on_close=close_modal_callback(state)
             label=format!("{name} champion details")
-            class="inspector"
+            class="inspector wide"
         >
             <header class="inspector-head">
                 <img src=image alt=name.clone() class="inspector-img" />
@@ -1348,23 +1470,87 @@ fn view_champion_modal(
                         <Badge variant=BadgeVariant::Cyan>
                             {format!("Difficulty {:.0}/10", champion.difficulty)}
                         </Badge>
+                        <Badge variant=BadgeVariant::Gold>
+                            {format!("{:.1}% Match", recommendation.top10.iter().find(|c| c.champion_name == name).map(|c| c.weighted).unwrap_or(rf_val))}
+                        </Badge>
                     </div>
                 </div>
             </header>
             <div class="modal-body">
-                <h3>"Attributes"</h3>
-                <div class="attr-grid">
-                    {attribute_meter("Damage", champion.damage)}
-                    {attribute_meter("Toughness", champion.toughness)}
-                    {attribute_meter("Mobility", champion.mobility)}
-                    {attribute_meter("Control", champion.control)}
-                    {attribute_meter("Utility", champion.utility)}
-                </div>
-                <h3>"Ensemble scoring"</h3>
-                <p class="muted">
-                    "Each score and explanation below comes directly from the Rust scoring result."
-                </p>
-                {algorithm_details}
+                <section class="intel-section">
+                    <div class="intel-header">
+                        <h3>"3-Lens Machine Learning Consensus"</h3>
+                        <span class=format!("consensus-badge {}", intel.consensus.css())>
+                            {intel.consensus.label()}
+                        </span>
+                    </div>
+                    <div class="lenses-grid">
+                        <div class="lens-card">
+                            <span class="lens-tag">"LENS 1"</span>
+                            <div class="lens-score">{format!("{:.1}%", intel.playstyle_lens.score)}</div>
+                            <h4 class="lens-title">{intel.playstyle_lens.name}</h4>
+                            <p class="lens-cat">{intel.playstyle_lens.category}</p>
+                            <p class="lens-desc">{intel.playstyle_lens.description}</p>
+                        </div>
+                        <div class="lens-card">
+                            <span class="lens-tag">"LENS 2"</span>
+                            <div class="lens-score">{format!("{:.1}%", intel.performance_lens.score)}</div>
+                            <h4 class="lens-title">{intel.performance_lens.name}</h4>
+                            <p class="lens-cat">{intel.performance_lens.category}</p>
+                            <p class="lens-desc">{intel.performance_lens.description}</p>
+                        </div>
+                        <div class="lens-card">
+                            <span class="lens-tag">"LENS 3"</span>
+                            <div class="lens-score">{format!("{:.1}%", intel.community_lens.score)}</div>
+                            <h4 class="lens-title">{intel.community_lens.name}</h4>
+                            <p class="lens-cat">{intel.community_lens.category}</p>
+                            <p class="lens-desc">{intel.community_lens.description}</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="intel-section">
+                    <h3>"Key Match Drivers (SHAP Attribution)"</h3>
+                    <p class="muted">"Primary positive factors identified by the tree and distance models."</p>
+                    <div class="drivers-container">
+                        {drivers_view}
+                    </div>
+                    {if !cautions_view.is_empty() {
+                        view! {
+                            <div class="cautions-container">
+                                {cautions_view}
+                            </div>
+                        }.into_any()
+                    } else {
+                        ().into_view().into_any()
+                    }}
+                </section>
+
+                <section class="intel-section">
+                    <h3>"Kit & Playstyle Alignment"</h3>
+                    <p class="muted">"Head-to-head comparison between your questionnaire preferences and this champion's attributes."</p>
+                    <div class="traits-container">
+                        {trait_bars}
+                    </div>
+                </section>
+
+                <section class="intel-section">
+                    <h3>"Base Combat Attributes"</h3>
+                    <div class="attr-grid">
+                        {attribute_meter("Damage", champion.damage)}
+                        {attribute_meter("Toughness", champion.toughness)}
+                        {attribute_meter("Mobility", champion.mobility)}
+                        {attribute_meter("Control", champion.control)}
+                        {attribute_meter("Utility", champion.utility)}
+                    </div>
+                </section>
+
+                <details class="raw-math-toggle">
+                    <summary>"Inspect Raw Model Matrices & Vectors"</summary>
+                    <div class="raw-details-wrap">
+                        {raw_details}
+                    </div>
+                </details>
             </div>
         </Dialog>
     }
