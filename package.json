@@ -21,5 +21,9 @@
     "web-app"
   ],
   "author": "Abdullah Bin Madhi",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/server": "^1.9.2",
+    "@supabase/supabase-js": "^2.118.0"
+  }
 }

@@ -1,5 +1,5 @@
 # Supabase Project Configuration for League of Legends Champion Recommender
-project_id = "lol-champion-recommender"
+project_id = "erfybpoymihcepxnaosj"
 
 [api]
 port = 54321
