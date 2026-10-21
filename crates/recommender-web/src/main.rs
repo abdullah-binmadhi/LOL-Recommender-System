@@ -1,9 +1,9 @@
 #[cfg(target_arch = "wasm32")]
 mod analytics_view;
 #[cfg(target_arch = "wasm32")]
-mod player_analytics_view;
-#[cfg(target_arch = "wasm32")]
 mod components;
+#[cfg(target_arch = "wasm32")]
+mod player_analytics_view;
 #[cfg(any(target_arch = "wasm32", test))]
 mod presenter;
 #[cfg(any(target_arch = "wasm32", test))]

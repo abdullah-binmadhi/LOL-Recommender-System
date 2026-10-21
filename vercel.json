@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": null,
+  "buildCommand": "echo 'Prebuilt static assets ready'",
   "devCommand": null,
-  "installCommand": null,
+  "installCommand": "npm install --legacy-peer-deps",
   "outputDirectory": ".",
   "public": true,
   "cleanUrls": true,

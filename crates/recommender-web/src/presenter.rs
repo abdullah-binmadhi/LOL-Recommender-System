@@ -380,9 +380,8 @@ pub fn build_match_intelligence(
         }
     }
 
-    let trait_diff = |user: f64, champ: f64| -> f64 {
-        (100.0 - (champ - user).abs() * 10.0).clamp(0.0, 100.0)
-    };
+    let trait_diff =
+        |user: f64, champ: f64| -> f64 { (100.0 - (champ - user).abs() * 10.0).clamp(0.0, 100.0) };
 
     let trait_comparisons = vec![
         TraitComparison {
@@ -594,15 +593,7 @@ mod tests {
         let criteria = vec!["10 trees voted".to_owned()];
 
         let intel = build_match_intelligence(
-            85.0,
-            80.0,
-            78.0,
-            &factors,
-            &penalties,
-            &criteria,
-            &ATTRS,
-            5.0,
-            5.0,
+            85.0, 80.0, 78.0, &factors, &penalties, &criteria, &ATTRS, 5.0, 5.0,
         );
 
         assert_eq!(intel.consensus, Consensus::Unanimous);

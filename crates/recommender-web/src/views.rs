@@ -2,8 +2,8 @@
 //! this module only renders prepared data.
 
 use crate::analytics_view;
-use crate::player_analytics_view;
 use crate::components::ui::*;
+use crate::player_analytics_view;
 use crate::presenter::{self, Attributes, MatchBreakdown};
 use crate::state::{filtered_options, AppState, Metric, Modal, Screen};
 use crate::{
@@ -1489,33 +1489,66 @@ fn view_champion_modal(
     let mut matched_criteria = Vec::new();
 
     for score in [dt_score, rf_score, knn_score].into_iter().flatten() {
-        if let Some(factors) = score.details.get("contributingFactors").and_then(|v| v.as_array()) {
+        if let Some(factors) = score
+            .details
+            .get("contributingFactors")
+            .and_then(|v| v.as_array())
+        {
             for f in factors {
-                let factor = f.get("factor").and_then(|v| v.as_str()).unwrap_or("").to_owned();
-                let contribution = f.get("contribution").and_then(|v| v.as_f64()).unwrap_or_else(|| {
-                    f.get("contribution").and_then(|v| v.as_str()).and_then(|s| s.parse().ok()).unwrap_or(0.0)
-                });
+                let factor = f
+                    .get("factor")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_owned();
+                let contribution = f
+                    .get("contribution")
+                    .and_then(|v| v.as_f64())
+                    .unwrap_or_else(|| {
+                        f.get("contribution")
+                            .and_then(|v| v.as_str())
+                            .and_then(|s| s.parse().ok())
+                            .unwrap_or(0.0)
+                    });
                 let weight = f.get("weight").and_then(|v| v.as_f64()).unwrap_or_else(|| {
-                    f.get("weight").and_then(|v| v.as_str()).and_then(|s| s.parse().ok()).unwrap_or(0.0)
+                    f.get("weight")
+                        .and_then(|v| v.as_str())
+                        .and_then(|s| s.parse().ok())
+                        .unwrap_or(0.0)
                 });
-                if !factor.is_empty() && !contributing_factors.iter().any(|(existing, _, _)| existing == &factor) {
+                if !factor.is_empty()
+                    && !contributing_factors
+                        .iter()
+                        .any(|(existing, _, _)| existing == &factor)
+                {
                     contributing_factors.push((factor, contribution, weight));
                 }
             }
         }
         if let Some(pens) = score.details.get("penalties").and_then(|v| v.as_array()) {
             for p in pens {
-                let reason = p.get("reason").and_then(|v| v.as_str()).unwrap_or("").to_owned();
+                let reason = p
+                    .get("reason")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("")
+                    .to_owned();
                 let amount = p.get("amount").and_then(|v| v.as_f64()).unwrap_or(0.0);
-                if !reason.is_empty() && !penalties.iter().any(|(existing, _)| existing == &reason) {
+                if !reason.is_empty() && !penalties.iter().any(|(existing, _)| existing == &reason)
+                {
                     penalties.push((reason, amount));
                 }
             }
         }
-        if let Some(crit) = score.details.get("matchedCriteria").and_then(|v| v.as_array()) {
+        if let Some(crit) = score
+            .details
+            .get("matchedCriteria")
+            .and_then(|v| v.as_array())
+        {
             for c in crit {
                 if let Some(s) = c.as_str() {
-                    if !matched_criteria.iter().any(|existing: &String| existing == s) {
+                    if !matched_criteria
+                        .iter()
+                        .any(|existing: &String| existing == s)
+                    {
                         matched_criteria.push(s.to_owned());
                     }
                 }

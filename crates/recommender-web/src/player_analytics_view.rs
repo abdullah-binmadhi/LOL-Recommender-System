@@ -5,7 +5,9 @@
 
 use crate::state::{AppState, Modal};
 use leptos::prelude::*;
-use recommender_core::player_analytics::{AdoptedMatch, MachineLearningInsight, PlayerAnalyticsReport};
+use recommender_core::player_analytics::{
+    AdoptedMatch, MachineLearningInsight, PlayerAnalyticsReport,
+};
 use std::f64::consts::PI;
 
 #[cfg(target_arch = "wasm32")]
@@ -394,7 +396,13 @@ fn view_radar_svg(curr: [f64; 5], prev: [f64; 5]) -> impl IntoView {
     let center_x = 130.0;
     let center_y = 130.0;
     let max_radius = 80.0;
-    let labels = ["Aggression", "Mobility", "Durability", "Utility", "Waveclear"];
+    let labels = [
+        "Aggression",
+        "Mobility",
+        "Durability",
+        "Utility",
+        "Waveclear",
+    ];
 
     let compute_points = |scores: [f64; 5]| -> String {
         let mut pts = Vec::new();

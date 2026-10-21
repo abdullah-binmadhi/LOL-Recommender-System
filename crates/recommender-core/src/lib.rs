@@ -2,7 +2,6 @@
 //! No browser, filesystem, networking, clocks, or JavaScript runtime in the library.
 mod aggregation;
 pub mod analytics;
-pub mod player_analytics;
 mod compat;
 pub mod contracts;
 mod decision_tree;
@@ -10,6 +9,7 @@ pub mod evaluation;
 pub mod export;
 mod features;
 mod knn;
+pub mod player_analytics;
 mod random_forest;
 #[cfg(target_arch = "wasm32")]
 mod wasm_abi;

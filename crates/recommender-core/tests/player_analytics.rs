@@ -21,7 +21,10 @@ fn test_demo_player_analytics_report() {
     assert_eq!(report.efficacy.adoption_rate, 70.0);
 
     // Anchor champion: Ahri was in all 3 calibrations
-    assert!(report.evolution.anchor_champions.contains(&"Ahri".to_string()));
+    assert!(report
+        .evolution
+        .anchor_champions
+        .contains(&"Ahri".to_string()));
 
     // ML insights generated
     assert_eq!(report.ml_insights.len(), 3);

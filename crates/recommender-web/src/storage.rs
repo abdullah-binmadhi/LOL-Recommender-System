@@ -130,8 +130,14 @@ pub fn export_users_csv() -> Result<usize, String> {
     let mut users = load_users_raw();
     if users.is_empty() {
         let current_user = supabase_get_current_user();
-        let name = current_user.as_ref().map(|u| u.full_name.clone()).unwrap_or_else(|| "Summoner".into());
-        let email = current_user.as_ref().map(|u| u.email.clone()).unwrap_or_else(|| "summoner@example.com".into());
+        let name = current_user
+            .as_ref()
+            .map(|u| u.full_name.clone())
+            .unwrap_or_else(|| "Summoner".into());
+        let email = current_user
+            .as_ref()
+            .map(|u| u.email.clone())
+            .unwrap_or_else(|| "summoner@example.com".into());
         users.push(serde_json::json!({
             "fullName": name,
             "email": email,
@@ -155,8 +161,14 @@ pub fn export_table_csv() -> Result<usize, String> {
     let mut users = load_users_raw();
     if users.is_empty() {
         let current_user = supabase_get_current_user();
-        let name = current_user.as_ref().map(|u| u.full_name.clone()).unwrap_or_else(|| "Summoner".into());
-        let email = current_user.as_ref().map(|u| u.email.clone()).unwrap_or_else(|| "summoner@example.com".into());
+        let name = current_user
+            .as_ref()
+            .map(|u| u.full_name.clone())
+            .unwrap_or_else(|| "Summoner".into());
+        let email = current_user
+            .as_ref()
+            .map(|u| u.email.clone())
+            .unwrap_or_else(|| "summoner@example.com".into());
         let recent = load_recent_champions();
         let top_champ = recent.first().cloned().unwrap_or_else(|| "Xayah".into());
         users.push(serde_json::json!({
@@ -217,7 +229,8 @@ pub fn supabase_enable_demo_mode() {}
 
 #[cfg(target_arch = "wasm32")]
 pub fn supabase_get_current_user() -> Option<crate::state::AuthUser> {
-    let result = js_sys::eval("window.supabaseAuth ? window.supabaseAuth.getCurrentUserJson() : ''").ok()?;
+    let result =
+        js_sys::eval("window.supabaseAuth ? window.supabaseAuth.getCurrentUserJson() : ''").ok()?;
     let json_str = result.as_string()?;
     if json_str.trim().is_empty() {
         return None;

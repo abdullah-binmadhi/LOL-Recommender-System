@@ -16,14 +16,17 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
 
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own profile" ON public.user_profiles;
 CREATE POLICY "Users can view own profile"
     ON public.user_profiles FOR SELECT
     USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.user_profiles;
 CREATE POLICY "Users can insert own profile"
     ON public.user_profiles FOR INSERT
     WITH CHECK (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can update own profile" ON public.user_profiles;
 CREATE POLICY "Users can update own profile"
     ON public.user_profiles FOR UPDATE
     USING (auth.uid() = id);
@@ -69,10 +72,12 @@ CREATE TABLE IF NOT EXISTS public.recommendation_history (
 
 ALTER TABLE public.recommendation_history ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Allow public insert for recommendation runs" ON public.recommendation_history;
 CREATE POLICY "Allow public insert for recommendation runs"
     ON public.recommendation_history FOR INSERT
     WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Users can view own recommendations" ON public.recommendation_history;
 CREATE POLICY "Users can view own recommendations"
     ON public.recommendation_history FOR SELECT
     USING (auth.uid() = user_id OR auth.uid() IS NULL);
@@ -89,6 +94,7 @@ CREATE TABLE IF NOT EXISTS public.community_champion_stats (
 
 ALTER TABLE public.community_champion_stats ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public read for community champion stats" ON public.community_champion_stats;
 CREATE POLICY "Public read for community champion stats"
     ON public.community_champion_stats FOR SELECT
     USING (true);
