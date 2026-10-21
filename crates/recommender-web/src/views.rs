@@ -933,16 +933,17 @@ fn view_analysis_content(
     let tips: Vec<(&'static str, &'static str)> =
         role_tips(&preferred_role).iter().take(6).copied().collect();
 
-    let cards = entries
+    let top_cards = entries
         .iter()
+        .take(3)
         .map(|entry| {
             let modal_name = entry.name.clone();
             let is_top_pick = entry.rank == 1;
             let wr = entry.win_rate.unwrap_or(50.0);
             let card_class = if is_top_pick {
-                "match-card winner"
+                "match-card winner grand-podium"
             } else {
-                "match-card"
+                "match-card podium-secondary"
             };
             let tier = presenter::tier_for(entry.average);
             view! {
@@ -956,16 +957,20 @@ fn view_analysis_content(
                         });
                     }
                 >
+                    <div class="card-filigree-top" />
                     <span class="rank">{format!("#{}", entry.rank)}</span>
                     <div class="match-header">
-                        <img src=entry.image.clone() alt=entry.name.clone() class="match-champion-img" loading="lazy" />
+                        <div class="champion-frame">
+                            <img src=entry.image.clone() alt=entry.name.clone() class="match-champion-img" loading="lazy" />
+                            <div class="frame-border" />
+                        </div>
                         <div class="match-info">
                             <h4>
                                 {entry.name.clone()}
                                 {is_top_pick.then(|| view! { <span class="winner-badge">"TOP PICK"</span> })}
                             </h4>
                             <div class="match-tier">
-                                {format!("{} • {} tier • {:.1}% WR", entry.role, entry.tier, wr)}
+                                {format!("{} • {} Tier • {:.1}% WR", entry.role, entry.tier, wr)}
                             </div>
                         </div>
                         <div class=format!("match-score {}", tier.css())>
@@ -977,6 +982,46 @@ fn view_analysis_content(
                         {model_bar("RF", entry.random_forest)}
                         {model_bar("DT", entry.decision_tree)}
                         {model_bar("KNN", entry.knn)}
+                    </div>
+                </button>
+            }
+        })
+        .collect_view();
+
+    let roster_cards = entries
+        .iter()
+        .skip(3)
+        .map(|entry| {
+            let modal_name = entry.name.clone();
+            let wr = entry.win_rate.unwrap_or(50.0);
+            let tier = presenter::tier_for(entry.average);
+            view! {
+                <button
+                    type="button"
+                    class="match-card roster-row"
+                    aria-label=format!("Open {} recommendation details", entry.name)
+                    on:click=move |_| {
+                        state.update(|current| {
+                            current.open_modal(Modal::Champion(modal_name.clone()));
+                        });
+                    }
+                >
+                    <span class="roster-rank">{format!("#{}", entry.rank)}</span>
+                    <div class="roster-avatar-frame">
+                        <img src=entry.image.clone() alt=entry.name.clone() class="match-champion-img" loading="lazy" />
+                    </div>
+                    <div class="match-info roster-info">
+                        <h4>{entry.name.clone()}</h4>
+                        <div class="match-tier">{format!("{} • {} Tier • {:.1}% WR", entry.role, entry.tier, wr)}</div>
+                    </div>
+                    <div class="roster-models">
+                        <span class="roster-model-chip">{format!("RF: {:.0}%", entry.random_forest)}</span>
+                        <span class="roster-model-chip">{format!("DT: {:.0}%", entry.decision_tree)}</span>
+                        <span class="roster-model-chip">{format!("KNN: {:.0}%", entry.knn)}</span>
+                    </div>
+                    <div class=format!("match-score roster-score {}", tier.css())>
+                        <strong>{format!("{:.0}%", entry.average)}</strong>
+                        <span>{tier.label()}</span>
                     </div>
                 </button>
             }
@@ -1059,11 +1104,22 @@ fn view_analysis_content(
         </section>
 
         <section class="block" aria-labelledby="top10-title">
-            <div class="block-head">
-                <h2 id="top10-title" class="section-title">"Your top 10"</h2>
-                <p class="muted">"Select any card to inspect how each model scored it."</p>
+            <div class="block-head hex-block-head">
+                <span class="hex-rune-tag">"✦ HEXTECH MATCHMAKING ENGINE ✦"</span>
+                <h2 id="top10-title" class="section-title">"🥇 Primal Synergy Podium"</h2>
+                <p class="muted">"Your top 3 highest-compatibility champions across all 3 AI models."</p>
             </div>
-            <div class="match-grid">{cards}</div>
+            <div class="podium-grid">
+                {top_cards}
+            </div>
+
+            <div class="block-head hex-block-head" style="margin-top: 36px;">
+                <h2 class="section-title">"⚔️ Active Roster Candidates"</h2>
+                <p class="muted">"Alternative high-synergy recommendations ranked for your playstyle."</p>
+            </div>
+            <div class="roster-list">
+                {roster_cards}
+            </div>
         </section>
 
         {metrics}
