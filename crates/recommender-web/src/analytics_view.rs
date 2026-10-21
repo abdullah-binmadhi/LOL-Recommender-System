@@ -14,7 +14,7 @@ use std::sync::Arc;
 pub fn view_analytics(state: RwSignal<AppState>, summary: Arc<AnalyticsSummary>) -> impl IntoView {
     view! {
         <section id="analytics-dashboard" class="analytics-dashboard active">
-            <div class="analytics-nav">
+            <div class="analytics-nav" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <button
                     type="button"
                     class="back-button"
@@ -27,12 +27,26 @@ pub fn view_analytics(state: RwSignal<AppState>, summary: Arc<AnalyticsSummary>)
                 >
                     "← Back to Home"
                 </button>
+
+                <button
+                    type="button"
+                    class="back-button"
+                    style="border-color: var(--cyan); color: var(--cyan);"
+                    on:click=move |_| {
+                        if let Some(win) = web_sys::window() {
+                            let _ = win.location().set_hash("#analytics");
+                        }
+                        state.update(AppState::open_player_analytics);
+                    }
+                >
+                    "✦ Summoner Intelligence (Player Analytics) →"
+                </button>
             </div>
 
             <div class="analytics-header">
-                <h1>"Champion Analytics Dashboard"</h1>
+                <h1>"Champion Distribution & Roster Matrix"</h1>
                 <p class="analytics-subtitle">
-                    "Comprehensive data visualization of League of Legends champions"
+                    "Global demographic breakdown and combat taxonomy across all 171 League of Legends champions"
                 </p>
             </div>
 

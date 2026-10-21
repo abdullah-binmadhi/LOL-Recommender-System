@@ -2,6 +2,7 @@
 //! No browser, filesystem, networking, clocks, or JavaScript runtime in the library.
 mod aggregation;
 pub mod analytics;
+pub mod player_analytics;
 mod compat;
 pub mod contracts;
 mod decision_tree;

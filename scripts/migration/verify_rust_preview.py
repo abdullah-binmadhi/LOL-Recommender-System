@@ -49,8 +49,8 @@ def run_user_flow(
         page, f"{viewport_name}-start"
     )
 
-    # Phase 6: Verify Analytics Dashboard integration
-    page.get_by_role("button", name="Analytics").click()
+    # Phase 6: Verify Champion Distribution & Player Analytics
+    page.get_by_role("button", name="Champion Distribution").click()
     page.locator("#analytics-dashboard").wait_for(state="visible", timeout=5_000)
     checks[f"{viewport_name}_analytics_screenshot"] = save_screenshot(
         page, f"{viewport_name}-analytics"
@@ -80,17 +80,38 @@ def run_user_flow(
     page.locator("#start-screen").wait_for(state="visible", timeout=5_000)
     checks[f"{viewport_name}_analytics_back_to_home"] = True
 
-    # Test direct URL hash navigation
+    # Test Player Analytics view
+    page.get_by_role("button", name="✦ Player Analytics ✦").click()
+    page.locator("#player-analytics-dashboard").wait_for(state="visible", timeout=5_000)
+    checks[f"{viewport_name}_player_analytics_screenshot"] = save_screenshot(
+        page, f"{viewport_name}-player-analytics"
+    )
+    radar_text = page.locator("#player-analytics-dashboard").text_content()
+    if "Playstyle Archetype Radar" not in (radar_text or ""):
+        raise AssertionError("Player analytics dashboard missing Playstyle Archetype Radar")
+    if "Hextech Oracle" not in (radar_text or ""):
+        raise AssertionError("Player analytics dashboard missing Hextech Oracle ML section")
+    checks[f"{viewport_name}_player_analytics_rendered"] = True
+
+    page.get_by_role("button", name="← Back to Home").click()
+    page.locator("#start-screen").wait_for(state="visible", timeout=5_000)
+
+    # Test direct URL hash navigation for distribution and analytics
     current_url = page.url.split("#")[0].split("?")[0].rstrip("/") + "/"
-    page.goto(f"{current_url}?mock_auth=1#analytics")
+    page.goto(f"{current_url}?mock_auth=1#distribution")
     page.locator("#analytics-dashboard").wait_for(state="visible", timeout=5_000)
+    page.get_by_role("button", name="← Back to Home").click()
+    page.locator("#start-screen").wait_for(state="visible", timeout=5_000)
+
+    page.goto(f"{current_url}?mock_auth=1#analytics")
+    page.locator("#player-analytics-dashboard").wait_for(state="visible", timeout=5_000)
     page.get_by_role("button", name="← Back to Home").click()
     page.locator("#start-screen").wait_for(state="visible", timeout=5_000)
     checks[f"{viewport_name}_analytics_hash_routing"] = True
 
     # Test fallback analytics.html redirect
     page.goto(f"{current_url}analytics.html?mock_auth=1")
-    page.locator("#analytics-dashboard").wait_for(state="visible", timeout=5_000)
+    page.locator("#player-analytics-dashboard").wait_for(state="visible", timeout=5_000)
     page.get_by_role("button", name="← Back to Home").click()
     page.locator("#start-screen").wait_for(state="visible", timeout=5_000)
     checks[f"{viewport_name}_analytics_html_redirect"] = True

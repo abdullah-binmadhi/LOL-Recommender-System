@@ -2,6 +2,7 @@
 //! this module only renders prepared data.
 
 use crate::analytics_view;
+use crate::player_analytics_view;
 use crate::components::ui::*;
 use crate::presenter::{self, Attributes, MatchBreakdown};
 use crate::state::{filtered_options, AppState, Metric, Modal, Screen};
@@ -26,9 +27,19 @@ fn go_to_hash(hash: &str) {
     }
 }
 
-fn open_analytics(state: RwSignal<AppState>) {
+fn open_champion_distribution(state: RwSignal<AppState>) {
+    go_to_hash("#distribution");
+    state.update(AppState::open_champion_distribution);
+}
+
+fn open_player_analytics(state: RwSignal<AppState>) {
     go_to_hash("#analytics");
-    state.update(AppState::open_analytics);
+    state.update(AppState::open_player_analytics);
+}
+
+#[allow(dead_code)]
+fn open_analytics(state: RwSignal<AppState>) {
+    open_player_analytics(state);
 }
 
 #[allow(dead_code)]
@@ -82,13 +93,17 @@ pub fn App() -> impl IntoView {
 
     if let Some(win) = web_sys::window() {
         if let Ok(hash) = win.location().hash() {
-            if hash == "#analytics" {
-                state.update(AppState::open_analytics);
+            if hash == "#distribution" || hash == "#champion-distribution" {
+                state.update(AppState::open_champion_distribution);
+            } else if hash == "#analytics" || hash == "#player-analytics" {
+                state.update(AppState::open_player_analytics);
             }
         }
         if let Ok(search) = win.location().search() {
-            if search.contains("view=analytics") {
-                state.update(AppState::open_analytics);
+            if search.contains("view=distribution") {
+                state.update(AppState::open_champion_distribution);
+            } else if search.contains("view=analytics") {
+                state.update(AppState::open_player_analytics);
             }
         }
     }
@@ -96,8 +111,10 @@ pub fn App() -> impl IntoView {
     let hash_listener = window_event_listener(leptos::ev::hashchange, move |_| {
         if let Some(win) = web_sys::window() {
             if let Ok(hash) = win.location().hash() {
-                if hash == "#analytics" {
-                    state.update(AppState::open_analytics);
+                if hash == "#distribution" || hash == "#champion-distribution" {
+                    state.update(AppState::open_champion_distribution);
+                } else if hash == "#analytics" || hash == "#player-analytics" {
+                    state.update(AppState::open_player_analytics);
                 } else if hash.is_empty() || hash == "#" {
                     state.update(AppState::return_to_start);
                 }
@@ -146,8 +163,12 @@ pub fn App() -> impl IntoView {
                     Screen::Results => {
                         view_analysis(state, Arc::clone(&catalog), Arc::clone(&counters)).into_any()
                     }
-                    Screen::Analytics => {
+                    Screen::ChampionDistribution => {
                         analytics_view::view_analytics(state, Arc::clone(&analytics_summary))
+                            .into_any()
+                    }
+                    Screen::PlayerAnalytics => {
+                        player_analytics_view::view_player_analytics(state)
                             .into_any()
                     }
                 }}
@@ -200,8 +221,15 @@ fn view_navbar(state: RwSignal<AppState>) -> impl IntoView {
             "nav-link"
         }
     };
+    let dist_class = move || {
+        if matches!(screen(), Screen::ChampionDistribution) {
+            "nav-link active"
+        } else {
+            "nav-link"
+        }
+    };
     let analytics_class = move || {
-        if matches!(screen(), Screen::Analytics) {
+        if matches!(screen(), Screen::PlayerAnalytics) {
             "nav-link active"
         } else {
             "nav-link"
@@ -242,8 +270,11 @@ fn view_navbar(state: RwSignal<AppState>) -> impl IntoView {
                     >
                         "Quiz"
                     </button>
-                    <button type="button" class=analytics_class on:click=move |_| open_analytics(state)>
-                        "Analytics"
+                    <button type="button" class=dist_class on:click=move |_| open_champion_distribution(state)>
+                        "Champion Distribution"
+                    </button>
+                    <button type="button" class=analytics_class on:click=move |_| open_player_analytics(state)>
+                        "✦ Player Analytics ✦"
                     </button>
                     {move || match state.with(|c| c.auth_user.clone()) {
                         Some(user) => {

@@ -10,7 +10,8 @@ pub enum Screen {
     Registration,
     Questionnaire,
     Results,
-    Analytics,
+    ChampionDistribution,
+    PlayerAnalytics,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -85,7 +86,7 @@ impl RegistrationDraft {
     }
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct AppState {
     pub screen: Screen,
     #[allow(dead_code)]
@@ -97,6 +98,25 @@ pub struct AppState {
     pub modal: Option<Modal>,
     pub error: Option<String>,
     pub scoring: bool,
+    #[allow(dead_code)]
+    pub demo_telemetry: bool,
+}
+
+impl Default for AppState {
+    fn default() -> Self {
+        Self {
+            screen: Screen::Start,
+            auth_user: None,
+            registration: RegistrationDraft::default(),
+            answers: Answers::default(),
+            current_question_index: 0,
+            recommendation: None,
+            modal: None,
+            error: None,
+            scoring: false,
+            demo_telemetry: true,
+        }
+    }
 }
 
 impl AppState {
@@ -126,9 +146,26 @@ impl AppState {
         self.error = None;
     }
 
-    pub fn open_analytics(&mut self) {
-        self.screen = Screen::Analytics;
+    #[allow(dead_code)]
+    pub fn open_champion_distribution(&mut self) {
+        self.screen = Screen::ChampionDistribution;
         self.error = None;
+    }
+
+    #[allow(dead_code)]
+    pub fn open_player_analytics(&mut self) {
+        self.screen = Screen::PlayerAnalytics;
+        self.error = None;
+    }
+
+    #[allow(dead_code)]
+    pub fn open_analytics(&mut self) {
+        self.open_player_analytics();
+    }
+
+    #[allow(dead_code)]
+    pub fn toggle_demo_telemetry(&mut self) {
+        self.demo_telemetry = !self.demo_telemetry;
     }
 
     pub fn return_to_start(&mut self) {
@@ -579,7 +616,9 @@ mod tests {
         assert!(state.error.is_none());
 
         state.open_analytics();
-        assert_eq!(state.screen, Screen::Analytics);
+        assert_eq!(state.screen, Screen::PlayerAnalytics);
+        state.open_champion_distribution();
+        assert_eq!(state.screen, Screen::ChampionDistribution);
         state.return_to_start();
         assert_eq!(state.screen, Screen::Start);
     }
