@@ -3,20 +3,32 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/rust-preview",
+      "destination": "/rust-preview/index.html"
+    },
+    {
+      "source": "/rust-preview/",
+      "destination": "/rust-preview/index.html"
+    },
+    {
       "source": "/LOL-Recommender-System/(.*)",
       "destination": "/$1"
     },
     {
       "source": "/LOL-Recommender-System",
-      "destination": "/index.html"
+      "destination": "/rust-preview/index.html"
+    },
+    {
+      "source": "/distribution",
+      "destination": "/rust-preview/index.html"
     },
     {
       "source": "/analytics",
-      "destination": "/analytics.html"
+      "destination": "/rust-preview/index.html"
     },
     {
       "source": "/",
-      "destination": "/index.html"
+      "destination": "/rust-preview/index.html"
     }
   ],
   "headers": [
