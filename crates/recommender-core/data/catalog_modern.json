@@ -3907,5 +3907,75 @@
         "trend": "rising"
       }
     }
+  },
+  {
+    "name": "Zaahen",
+    "data": {
+      "role": "Fighter",
+      "positions": [
+        "Top"
+      ],
+      "damage": 9,
+      "toughness": 8,
+      "mobility": 7,
+      "control": 7,
+      "utility": 4,
+      "difficulty": 8,
+      "image": "https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Zaahen.png",
+      "stats": {
+        "winRate": 51.9,
+        "pickRate": 9.2,
+        "banRate": 13.5,
+        "tier": "S",
+        "trend": "stable"
+      }
+    }
+  },
+  {
+    "name": "Mel",
+    "data": {
+      "role": "Mage",
+      "positions": [
+        "Mid",
+        "Support"
+      ],
+      "damage": 8,
+      "toughness": 3,
+      "mobility": 4,
+      "control": 8,
+      "utility": 8,
+      "difficulty": 6,
+      "image": "https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Mel.png",
+      "stats": {
+        "winRate": 50.4,
+        "pickRate": 7.5,
+        "banRate": 6.8,
+        "tier": "A",
+        "trend": "stable"
+      }
+    }
+  },
+  {
+    "name": "Yunara",
+    "data": {
+      "role": "Marksman",
+      "positions": [
+        "ADC"
+      ],
+      "damage": 9,
+      "toughness": 3,
+      "mobility": 8,
+      "control": 5,
+      "utility": 4,
+      "difficulty": 7,
+      "image": "https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/Yunara.png",
+      "stats": {
+        "winRate": 51.1,
+        "pickRate": 8.9,
+        "banRate": 9.4,
+        "tier": "S",
+        "trend": "stable"
+      }
+    }
   }
 ]

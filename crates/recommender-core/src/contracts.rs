@@ -353,9 +353,9 @@ mod tests {
     }
 
     #[test]
-    fn modern_catalog_contains_all_169_champions_including_new_additions() {
+    fn modern_catalog_contains_all_172_champions_including_new_additions() {
         let catalog = EffectiveCatalog::modern().unwrap();
-        assert_eq!(catalog.len(), 169);
+        assert_eq!(catalog.len(), 172);
         assert!(catalog.0.iter().any(|c| c.name == "Ambessa"));
         assert!(catalog.0.iter().any(|c| c.name == "Aurora"));
         assert!(catalog.0.iter().any(|c| c.name == "Naafiri"));
@@ -363,6 +363,9 @@ mod tests {
         assert!(catalog.0.iter().any(|c| c.name == "K'Sante"));
         assert!(catalog.0.iter().any(|c| c.name == "Renata Glasc"));
         assert!(catalog.0.iter().any(|c| c.name == "Locke"));
+        assert!(catalog.0.iter().any(|c| c.name == "Zaahen"));
+        assert!(catalog.0.iter().any(|c| c.name == "Mel"));
+        assert!(catalog.0.iter().any(|c| c.name == "Yunara"));
     }
 
     #[test]

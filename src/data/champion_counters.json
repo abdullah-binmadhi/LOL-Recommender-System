@@ -71,5 +71,56 @@
       "Amumu",
       "Nautilus"
     ]
+  },
+  "Zaahen": {
+    "strong_against": [
+      "Sion",
+      "Cho'Gath",
+      "Nasus"
+    ],
+    "weak_against": [
+      "Fiora",
+      "Gwen",
+      "Vayne"
+    ],
+    "synergizes_with": [
+      "Sejuani",
+      "Orianna",
+      "Jarvan IV"
+    ]
+  },
+  "Mel": {
+    "strong_against": [
+      "Brand",
+      "Zyra",
+      "Vel'Koz"
+    ],
+    "weak_against": [
+      "Zed",
+      "Talon",
+      "Pyke"
+    ],
+    "synergizes_with": [
+      "Jinx",
+      "Caitlyn",
+      "Jhin"
+    ]
+  },
+  "Yunara": {
+    "strong_against": [
+      "Aphelios",
+      "Kog'Maw",
+      "Sivir"
+    ],
+    "weak_against": [
+      "Draven",
+      "Samira",
+      "Nautilus"
+    ],
+    "synergizes_with": [
+      "Thresh",
+      "Milio",
+      "Lulu"
+    ]
   }
 }
