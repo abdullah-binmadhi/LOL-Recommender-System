@@ -28,3 +28,9 @@ The screenshots are viewport captures, not full-page captures. Five of five hero
 - There were no uncaught browser page errors. Any blocked telemetry resource console message is expected from the harness interception.
 
 The registration values were synthetic, and no answers or registration data were submitted to a remote service. Reproduce the legacy-site baseline with `python scripts/migration/capture_browser_baseline.py` (requires the optional Playwright Python package and Chromium). Verify the local or deployed Rust preview with `python scripts/migration/verify_rust_preview.py` or `python scripts/migration/verify_rust_preview.py --url https://abdullah-binmadhi.github.io/LOL-Recommender-System/rust-preview/`.
+
+## Published preview smoke test
+
+After Pages deployment run [39570548610](https://github.com/abdullah-binmadhi/LOL-Recommender-System/actions/runs/39570548610), Chromium 145.0.7632.6 verified `https://abdullah-binmadhi.github.io/LOL-Recommender-System/rust-preview/` on 2026-10-21. The document, generated CSS, and generated Wasm all returned HTTP 200; all 12 questionnaire fields enabled Rust scoring, which returned 10 champions. The isolated preview did not write localStorage. See `rust-preview-published-observations.json` and `rust-preview-published.png`.
+
+The deployed root entry remained unchanged: the Git blob IDs for both `index.html` and `src/index.html` are identical before and after the preview deployment.

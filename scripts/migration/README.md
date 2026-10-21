@@ -3,23 +3,29 @@
 Node built-ins only; no install/build step. Run from the project root (Node 22+ recommended):
 
 ```sh
-node scripts/migration/reference.mjs --write
 node scripts/migration/reference.mjs --check
 node --test scripts/migration/reference.test.mjs
+```
+
+The reference source is frozen separately. After reviewing an intentional change to the parity contract, refresh the selected source sections and then regenerate fixture outputs:
+
+```sh
+node scripts/migration/reference.mjs --freeze-source
+node scripts/migration/reference.mjs --write
 ```
 
 With no argument, the generator defaults to **check**, not write. Review drift before intentionally regenerating. Output goes only to the existing `tests/fixtures/migration/` directory. No directory is created by the runner. Check is read-only, compares normalized JSON, and exits nonzero for changed values/provenance, missing JSON files, unexpected JSON files, or invalid extraction. Write does not delete stale files; remove obsolete fixtures explicitly after review if profile IDs change.
 
 ## Reference boundary
 
-The source of truth is the **current working-tree** `src/index.html`, not `migration_files/`, external champion JSON, or an assumed pristine commit. Existing production edits are intentionally reflected in the fixtures. `reference.mjs` selects uniquely occurring content boundaries for:
+The scoring source is `reference-source.json`: a frozen set of selected sections extracted from the Phase 0 working-tree `src/index.html`. It makes the parity baseline reproducible from a clean checkout while keeping the production page out of the preview-only deployment. It is not the full HTML, and it contains no browser/API code or credential. `--check` uses this snapshot; only the explicit `--freeze-source` command reads the current working-tree page. Do not refresh the snapshot or regenerate fixtures without a parity review. `reference.mjs` selects uniquely occurring content boundaries for:
 
 - Inline champion literal (evaluated with native object-literal duplicate-key behavior).
 - Image URL helper, stats table, generated stats, and catalog initialization.
 - Three algorithm classes, score aggregator, and evaluation metrics class.
 - Only the feature-conversion statements inside `runAllAlgorithms`, its mapping helpers, and the successful JSON-to-question projection.
 
-Boundaries are explicit content markers, not fragile line numbers, regex brace parsing, or execution of a whole page script. Missing, duplicate, or reversed markers fail closed. Delimiters and SHA-256 hashes of the exact selected text are recorded in `manifest.json`, plus full hashes of `src/data/questions.json` and `src/analytics/FeatureExtractor.js`. No full HTML is copied, emitted, or hashed. Unrelated UI/API changes are intentionally outside this check's scope.
+Boundaries are explicit content markers, not fragile line numbers, regex brace parsing, or execution of a whole page script. Missing, duplicate, or reversed markers fail closed. The snapshot contains only the selected scoring sections; delimiters and SHA-256 hashes of their exact text are recorded in `manifest.json`, alongside full hashes of `src/data/questions.json` and `src/analytics/FeatureExtractor.js`. No full HTML is copied, emitted, or hashed. Unrelated UI/API changes are intentionally outside this check's scope.
 
 **Only dependency repair:** the existing `src/analytics/FeatureExtractor.js` class is evaluated in the harness VM to supply the otherwise missing `FeatureExtractor` binding used by production feature conversion. Its CommonJS export wrapper is not needed/evaluated. No source is rewritten and no champion derived features are manufactured. This is a scoring reference with a documented helper repair, not a claim that the unmodified browser page completes successfully.
 

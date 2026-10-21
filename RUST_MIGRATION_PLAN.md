@@ -1,6 +1,6 @@
 # Rust Migration Plan
 
-**Status:** in progress
+**Status:** migration in progress; Phases 0–3 implemented, Phases 4–7 remain
 **Last verified:** 2026-10-21
 **Scope:** migrate the website's first-party application logic to Rust while preserving today's UI, questionnaire, effective champion catalog, and recommendation behavior.
 
@@ -26,7 +26,7 @@ The repository now contains the Rust workspace and an isolated Leptos/Trunk prev
 | Phase | Status | Evidence / remaining work |
 |---|---|---|
 | 0 — Freeze the migration contract | **Complete** | The production-reference harness, 12 JSON fixtures, eight synthetic profiles, source inventory, known-issues list, desktop/mobile screenshots, and browser-observed interaction/network report are recorded here and under `tests/fixtures/migration/screenshots/`. Reference, native Rust, Wasm, and browser checks pass. |
-| 1 — Build and deployment skeleton | **Local browser gate passes; Pages publication pending** | The root workspace contains `recommender-core` and `recommender-web`; pinned Leptos 0.8.22 and Trunk 0.22.0 build successfully. A project-subpath local browser smoke test confirms CSS/Wasm loading and Rust recommendations. The configured Pages workflow still needs to publish and verify the preview; the default root entry remains unchanged. |
+| 1 — Build and deployment skeleton | **Complete; published preview browser-verified** | GitHub Pages deployed the isolated preview at [`/LOL-Recommender-System/rust-preview/`](https://abdullah-binmadhi.github.io/LOL-Recommender-System/rust-preview/). Chromium 145.0.7632.6 verified HTTP 200 for the document, CSS, and Wasm; all 12 questions rendered and produced 10 Rust recommendations with no localStorage writes. The root `index.html` and `src/index.html` blobs are unchanged from the pre-deploy commit. |
 | 2 — Data contracts and feature conversion | **Implemented and parity-tested** | Rust contracts load the unchanged question JSON and the extracted ordered 162-champion production catalog. Typed answer conversion matches all eight reference profiles; storage fields and unknown values have Serde coverage. Production UI state remains JavaScript until Phase 4. |
 | 3 — Recommendation engine | **Scoring parity implemented against the captured reference** | Rust ports all three scorers, aggregation, ranking/diversity, explanations, and metrics. Native and Wasm parity checks pass for all eight profiles. Preserve these tests while moving code into the eventual workspace crates. |
 | 4 — Main website UI | **Not started** | Screens, navigation, and DOM state are still in `src/index.html`. |
@@ -124,9 +124,9 @@ During the observed pass, local GETs loaded the HTML, both question-loader paths
 
 ### Current reference harness and reproducible fixtures
 
-The source of truth for scoring parity is the current working-tree `src/index.html`, with the narrowly repaired `FeatureExtractor` binding documented in `scripts/migration/README.md`:
+The Phase 0 scoring reference is frozen in `scripts/migration/reference-source.json`: selected scoring sections extracted from the working-tree `src/index.html`, with the narrowly repaired `FeatureExtractor` binding documented in `scripts/migration/README.md`. The snapshot excludes the full page and all browser/API code, so clean checkouts can run parity tests without publishing root-page changes. Refresh it only after an explicit parity review.
 
-- `scripts/migration/reference.mjs` selects guarded production source sections, evaluates them in a fresh Node VM, and emits deterministic normalized JSON. It does not execute the whole page or browser code.
+- `scripts/migration/reference.mjs` evaluates the frozen guarded source sections in a fresh Node VM and emits deterministic normalized JSON. `--check` is reproducible from the committed snapshot; `--freeze-source` is an explicit contract update. It does not execute the whole page or browser code.
 - The harness uses `src/analytics/FeatureExtractor.js` only to supply the otherwise missing `FeatureExtractor` binding. Production code is not rewritten, and derived champion attributes are not manufactured. Node's `vm` is not a security sandbox for hostile source.
 - `tests/fixtures/migration/` has 12 JSON artifacts: effective catalog, question projection, actual forest choices, manifest/provenance, and eight profiles (`mage-mid`, `marksman-bot`, `tank-top`, `support-team`, `empty-defaults`, `unknown-values`, `no-preference-adc`, `legacy-psychological-10`). Profile fixtures include converted features, every champion's scores/details, aggregation, top10, relevant names, and metrics.
 - Reference output normalizes object-key order and rounds finite floats to 12 decimals; parity uses absolute tolerance `1e-9` for numeric values and exact structure/string/array order.
@@ -178,7 +178,7 @@ These are recorded to prevent the language migration from disguising product cha
 
 **Purpose:** prove the target stack builds and can be previewed before porting the main UI. Keep the current site as the default/live implementation.
 
-**Current status:** the workspace, root lockfile, Leptos preview, Trunk configuration, CI commands, Pages build step, and repository-subpath output are implemented. Native tests, lint, Wasm build/parity, and the Trunk release build pass. Chromium loaded the local preview under `/LOL-Recommender-System/rust-preview/`: CSS returned 200, the Trunk Wasm asset returned 200, all 12 questions rendered, and the Rust UI produced 10 recommendations without writing localStorage. Actual GitHub Pages publication and remote verification remain outstanding; do not mark the phase complete until they pass.
+**Current status:** complete. The workspace, root lockfile, Leptos preview, Trunk configuration, CI commands, Pages build, and repository-subpath output are implemented. GitHub Pages run [39570548610](https://github.com/abdullah-binmadhi/LOL-Recommender-System/actions/runs/39570548610) succeeded. Chromium 145.0.7632.6 verified the public preview document, CSS, and Wasm all return HTTP 200; all 12 questions rendered and the Rust questionnaire produced 10 recommendations without localStorage writes. The root entry remains the legacy website and its `index.html`/`src/index.html` blobs match the pre-deployment commit.
 
 - Create a Cargo workspace and commit the root lockfile. Move/organize scoring into `crates/recommender-core`; add `crates/recommender-web` for the Leptos UI.
 - Pin mutually compatible Leptos, Trunk, Serde, and browser-target dependencies; add the `wasm32-unknown-unknown` target and Trunk configuration.
@@ -187,8 +187,8 @@ These are recorded to prevent the language migration from disguising product cha
 - Build with the GitHub Pages project subpath (for example `/LOL-Recommender-System/`) and verify asset/Wasm URLs against a preview. Do not switch the default entry or overwrite the current deployment.
 - Align `.github/copilot-instructions.md` with the staged migration so it no longer mandates the old monolithic-JS target.
 
-**Validation:** native core tests run; Leptos app compiles and loads in a browser; styles/assets/Wasm resolve from a repository-subpath preview.
-**Exit gate:** a working Rust preview without changing the live application.
+**Validation (2026-10-21):** `npm test`, Clippy, formatting, the Trunk release build, local browser smoke test, and public GitHub Pages browser smoke test pass. The public page, CSS, and Wasm each returned HTTP 200; 12 questions produced 10 Rust recommendations. Root entry/source blobs were unchanged.
+**Exit gate:** met — the published Rust preview works under the repository subpath and the current production entry remains unchanged.
 
 ## Phase 2 — Port data contracts and feature conversion
 

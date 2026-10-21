@@ -7,6 +7,7 @@ import { syntheticProfiles } from './profiles.mjs';
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 export const fixtureDirectory = resolve(root, 'tests/fixtures/migration');
+export const referenceSourcePath = resolve(root, 'scripts/migration/reference-source.json');
 export const seed = 0x50484130;
 const htmlPath = 'src/index.html';
 const helperPath = 'src/analytics/FeatureExtractor.js';
@@ -52,6 +53,45 @@ export function selectedSections(html, helper) {
   return sections;
 }
 
+function validateSelectedSections(sections) {
+  for (const { code } of sections) {
+    if (/GEMINI_API_KEY|AIza[\w-]{20,}|<script|localStorage|fetch\s*\(|document\./.test(code)) {
+      throw new Error('Selected source contains excluded credentials or browser code; refusing evaluation');
+    }
+  }
+}
+
+export function referenceSections() {
+  const snapshot = JSON.parse(readFileSync(referenceSourcePath, 'utf8'));
+  const helper = readFileSync(resolve(root, helperPath), 'utf8');
+  if (snapshot.schemaVersion !== 1 || snapshot.source !== htmlPath || !Array.isArray(snapshot.sections)) {
+    throw new Error('Invalid frozen reference source snapshot');
+  }
+  const helperSection = {
+    name: 'featureExtractor', path: helperPath,
+    start: 'class FeatureExtractor {', end: "if (typeof module !== 'undefined' && module.exports)",
+    code: extractSection(helper, 'class FeatureExtractor {', "if (typeof module !== 'undefined' && module.exports)")
+  };
+  const sections = [...snapshot.sections, helperSection];
+  validateSelectedSections(sections);
+  return sections;
+}
+
+export function freezeReferenceSource() {
+  const html = readFileSync(resolve(root, htmlPath), 'utf8');
+  const helper = readFileSync(resolve(root, helperPath), 'utf8');
+  const sections = selectedSections(html, helper).filter(section => section.path === htmlPath);
+  validateSelectedSections(sections);
+  const snapshot = {
+    schemaVersion: 1,
+    source: htmlPath,
+    description: 'Phase 0 frozen scoring sections only; the full page and excluded browser/API code are not copied.',
+    sections
+  };
+  writeFileSync(referenceSourcePath, JSON.stringify(snapshot, null, 2) + '\n');
+  return sections.length;
+}
+
 export function normalize(value) {
   if (typeof value === 'number') {
     if (!Number.isFinite(value)) throw new Error('Non-finite reference number');
@@ -69,16 +109,10 @@ export const canonical = value => JSON.stringify(normalize(value)) + '\n';
 const hash = text => createHash('sha256').update(text).digest('hex');
 
 export function createReference({ profiles } = {}) {
-  const html = readFileSync(resolve(root, htmlPath), 'utf8');
   const helper = readFileSync(resolve(root, helperPath), 'utf8');
   const questionsText = readFileSync(resolve(root, questionsPath), 'utf8');
   const questions = JSON.parse(questionsText).questions;
-  const sections = selectedSections(html, helper);
-  for (const { code } of sections) {
-    if (/GEMINI_API_KEY|AIza[\w-]{20,}|<script|localStorage|fetch\s*\(|document\./.test(code)) {
-      throw new Error('Selected source contains excluded credentials or browser code; refusing evaluation');
-    }
-  }
+  const sections = referenceSections();
   const section = name => sections.find(item => item.name === name).code;
   const context = vm.createContext(Object.create(null), {
     name: 'phase-0-reference', codeGeneration: { strings: false, wasm: false }
@@ -214,17 +248,22 @@ export function compareArtifacts(artifacts, directory = fixtureDirectory) {
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const mode = process.argv[2] ?? '--check';
-    if (!['--write', '--check'].includes(mode) || process.argv.length > 3) {
-      throw new Error('Usage: node scripts/migration/reference.mjs [--write|--check]');
+    if (!['--write', '--check', '--freeze-source'].includes(mode) || process.argv.length > 3) {
+      throw new Error('Usage: node scripts/migration/reference.mjs [--check|--write|--freeze-source]');
     }
-    const artifacts = createReference();
-    if (mode === '--write') {
-      for (const [name, value] of artifacts) writeFileSync(resolve(fixtureDirectory, name), canonical(value));
-      console.log(`Wrote ${artifacts.size} sanitized reference fixtures.`);
+    if (mode === '--freeze-source') {
+      const sectionCount = freezeReferenceSource();
+      console.log(`Wrote ${sectionCount} sanitized scoring sections to the frozen source snapshot.`);
     } else {
-      const drift = compareArtifacts(artifacts);
-      if (drift.length) throw new Error(drift.join('\n'));
-      console.log(`Reference check passed: ${artifacts.size} fixtures match.`);
+      const artifacts = createReference();
+      if (mode === '--write') {
+        for (const [name, value] of artifacts) writeFileSync(resolve(fixtureDirectory, name), canonical(value));
+        console.log(`Wrote ${artifacts.size} sanitized reference fixtures from the frozen source.`);
+      } else {
+        const drift = compareArtifacts(artifacts);
+        if (drift.length) throw new Error(drift.join('\n'));
+        console.log(`Reference check passed: ${artifacts.size} fixtures match the frozen source.`);
+      }
     }
   } catch (error) {
     // Never dump selected source, VM stack snippets, or the full HTML on failure.

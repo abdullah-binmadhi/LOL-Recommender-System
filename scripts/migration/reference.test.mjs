@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import test from 'node:test';
 import {
   canonical, compareArtifacts, comparisonText, createReference, extractSection,
-  fixtureDirectory, normalize, root, selectedSections
+  fixtureDirectory, normalize, referenceSections, referenceSourcePath, root
 } from './reference.mjs';
 
 const artifacts = createReference();
@@ -20,15 +20,18 @@ const bounded = (value, min = 0, max = 100) => {
   assert.ok(value >= min && value <= max, `Expected value within ${min}..${max}`);
 };
 
-test('content boundaries fail closed; unrelated page content is not selected', () => {
+test('frozen source sections fail closed and exclude browser/API code', () => {
   assert.equal(extractSection('before START code END after', 'START', 'END'), 'START code');
   assert.throws(() => extractSection('START START END', 'START', 'END'), /ambiguous/);
   assert.throws(() => extractSection('START', 'START', 'END'), /Missing/);
   assert.throws(() => extractSection('END START', 'START', 'END'), /Reversed/);
-  const html = readFileSync(resolve(root, 'src/index.html'), 'utf8');
-  const helper = readFileSync(resolve(root, 'src/analytics/FeatureExtractor.js'), 'utf8');
-  const selected = selectedSections(html, helper);
-  assert.deepEqual(selectedSections(html + '\n<!-- unrelated synthetic page content -->', helper), selected);
+  const snapshot = JSON.parse(readFileSync(referenceSourcePath, 'utf8'));
+  assert.equal(snapshot.schemaVersion, 1);
+  assert.equal(snapshot.source, 'src/index.html');
+  assert.equal(snapshot.sections.length, 11);
+  const selected = referenceSections();
+  assert.equal(selected.length, 12);
+  assert.deepEqual(selected.slice(0, -1), snapshot.sections);
   for (const item of selected) {
     assert.ok(!/GEMINI_API_KEY|AIza[\w-]{20,}|<script|localStorage|fetch\s*\(|document\./.test(item.code), 'Selected source must exclude credentials and browser code');
     assert.equal(manifest.sections.find(section => section.name === item.name).sha256, sha256(item.code));

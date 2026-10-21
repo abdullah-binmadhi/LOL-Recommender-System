@@ -11,7 +11,7 @@ The current website remains the production/default entry until Phase 7 acceptanc
 - `crates/recommender-core/`: Rust data contracts, production catalog/question inputs, feature conversion, scoring, aggregation, and evaluation. Native and `wasm32-unknown-unknown` builds share this crate.
 - `crates/recommender-web/`: Leptos browser UI. Website application logic should be Rust; generated Wasm JavaScript glue is expected.
 - `web/`: Trunk entry HTML and CSS for the Rust preview.
-- `src/index.html`: current production UI and Phase 0 differential reference. The existing browser scoring route uses `src/wasm/scoring.mjs`; the old JS scorer is reference-only.
+- `src/index.html`: current production UI and Phase 0 differential reference. Keep the root website as the default through Phase 6; do not include local production-page edits in a preview-only Pages deployment. The isolated Leptos preview uses `recommender-core` directly.
 - `src/data/questions.json`: canonical unchanged 12-question source during migration.
 - `crates/recommender-core/data/catalog.json`: extracted effective 162-champion inline catalog, preserving source order and duplicate-key overwrite behavior. Do not substitute the enriched external champion JSON.
 - `tests/fixtures/migration/`: captured reference outputs and eight synthetic profiles. Fixture changes require an explicit parity review.
