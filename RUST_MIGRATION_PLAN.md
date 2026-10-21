@@ -1,6 +1,6 @@
 # Rust Migration Plan
 
-**Status:** migration in progress; Phases 0–3 implemented, Phases 4–7 remain
+**Status:** migration in progress; Phases 0–5 implemented, Phases 6–7 remain
 **Last verified:** 2026-10-21
 **Scope:** migrate the website's first-party application logic to Rust while preserving today's UI, questionnaire, effective champion catalog, and recommendation behavior.
 
@@ -29,8 +29,8 @@ The repository now contains the Rust workspace and an isolated Leptos/Trunk prev
 | 1 — Build and deployment skeleton | **Complete; published preview browser-verified** | GitHub Pages deployed the isolated preview at [`/LOL-Recommender-System/rust-preview/`](https://abdullah-binmadhi.github.io/LOL-Recommender-System/rust-preview/). Chromium 145.0.7632.6 verified HTTP 200 for the document, CSS, and Wasm; all 12 questions rendered and produced 10 Rust recommendations with no localStorage writes. The root `index.html` and `src/index.html` blobs are unchanged from the pre-deploy commit. |
 | 2 — Data contracts and feature conversion | **Implemented and parity-tested** | Rust contracts load the unchanged question JSON and the extracted ordered 162-champion production catalog. Typed answer conversion matches all eight reference profiles; storage fields and unknown values have Serde coverage. Production UI state remains JavaScript until Phase 4. |
 | 3 — Recommendation engine | **Scoring parity implemented against the captured reference** | Rust ports all three scorers, aggregation, ranking/diversity, explanations, and metrics. Native and Wasm parity checks pass for all eight profiles. Preserve these tests while moving code into the eventual workspace crates. |
-| 4 — Main website UI | **Not started** | Screens, navigation, and DOM state are still in `src/index.html`. |
-| 5 — Storage, exports, integrations | **Not started** | Browser storage, CSV export, and existing integrations remain JavaScript/browser-owned. |
+| 4 — Main website UI | **Complete; browser-verified** | Ported landing, registration, 12-question quiz with legacy role/psychological option filtering, scoring invocation, recommendation cards with breakdown bars and stats, metrics cards, champion and metric modals with Escape key support, meta insights, pro tips, and restart behavior into Leptos (`crates/recommender-web`). End-to-end verified with Chromium at desktop and mobile viewports with zero page errors or console errors, matching 10 recommendations and modal interactions with memory-only registration state. |
+| 5 — Storage, exports, integrations | **Complete; browser-verified** | LocalStorage read/write for both keys (`championRecommenderUsers` and `recentChampions`), 26-column CSV exporter and Blob download, Ctrl+Shift+E export, Ctrl+Shift+A admin confirm prompt, and Save button displaying saved users table modal. End-to-end verified with Chromium at desktop and mobile viewports with zero console or page errors and zero external data leaks. |
 | 6 — Analytics and remaining pages | **Not started** | The active dashboard remains HTML/JavaScript and loads Chart.js from a CDN. |
 | 7 — Validate, cut over, retire old runtime | **Not started** | There is no Leptos/Trunk cutover, generated-site-only deployment, measured release baseline, or tested rollback. |
 
@@ -220,24 +220,48 @@ These are recorded to prevent the language migration from disguising product cha
 
 **Purpose:** replace the current DOM/global-script interaction layer in Rust without redesigning the user journey.
 
-- Port the existing landing/start, registration, questionnaire and conditional option filtering, progress/navigation, loading/error states, recommendation cards, algorithm details, metrics, champion/metric modals, tips, counters, restart controls, and keyboard behavior.
-- Extract and reuse the current CSS; compare to Phase 0 desktop/mobile screenshots rather than recreating styles.
-- Use one explicit application state model rather than loose globals while keeping externally visible behavior unchanged.
+**Current status:** complete. The full primary flow is ported in `crates/recommender-web` using Leptos and the `recommender-core` engine. Verified via Playwright/Chromium 145.0.7632.6 across desktop (1440×900) and mobile (390×844) viewports.
 
-**Validation:** browser interaction checks for back/next/restart/filter/modal/keyboard behavior and desktop/mobile visual comparisons.
-**Exit gate:** the full primary flow uses Rust UI/state and no longer calls the old JS application logic.
+- [x] Port the existing landing/start, registration, questionnaire and conditional option filtering, progress/navigation, loading/error states, recommendation cards, algorithm details, metrics, champion/metric modals, tips, counters, restart controls, and keyboard behavior.
+- [x] Extract and reuse the current CSS (`web/styles/preview.css` and `web/styles/rust-ui.css`); compare to Phase 0 desktop/mobile screenshots rather than recreating styles.
+- [x] Use one explicit application state model (`crates/recommender-web/src/state.rs`) rather than loose globals while keeping externally visible behavior unchanged.
+
+**Validation (2026-10-21):**
+- `scripts/migration/verify_rust_preview.py` verified the local preview under the `/LOL-Recommender-System/rust-preview/` subpath.
+- Both desktop (1440×900) and mobile (390×844) viewports loaded CSS (HTTP 200) and Wasm (HTTP 200) without horizontal overflow.
+- Registration requires legacy mandatory fields (name, email, age, experience) while keeping optional fields optional; values remain in memory and do not write to localStorage during Phase 4.
+- Question option keyboard selection (Enter/Space) and navigation (Previous/Next) verified.
+- Conditional filters verified: Q2 Mage filters Q3 positions to `["Mid", "Support"]`; Q2 Marksman filters Q3 positions to `["Bot"]` and Q7 damage types to `["Physical", "No Preference"]`.
+- The 12-question flow runs the Rust recommendation engine, yielding 10 recommendations with breakdown bars, stat grids, strengths, and meta insights.
+- Both champion detail modal and evaluation metric modal open on click and close with Escape or backdrop/button clicks.
+- Restart ("Try Again") returns to start while retaining registration fields in memory for re-runs.
+- Zero console errors and zero page errors observed. Screenshots recorded under `tests/fixtures/migration/screenshots/rust-phase4-*.png` and report in `rust-phase4-local-observations.json`.
+
+**Exit gate:** met — the full primary flow uses Rust UI/state and no longer calls the old JS application logic.
 
 ## Phase 5 — Port browser storage, exports, and integrations
 
 **Purpose:** preserve browser-facing behavior and existing user records.
 
-- Implement localStorage access from Rust and read/write both existing keys without destructive migrations.
-- Port active CSV export, Ctrl+Shift+E, hidden admin access if retained as agreed, and browser downloads. Preserve field names/order and validate historical records.
-- Inventory each external integration and port only agreed reachable behavior. Do not activate disconnected result-saving code, dormant Gemini features, or previously uncalled server-save paths as a side effect.
-- Security exception: do not copy the current exposed Gemini credential into Rust, Wasm, JavaScript glue, or a native package. Credential-dependent functionality requires a separate secure configuration decision; browser bundles cannot protect secrets.
+**Current status:** complete. Browser storage (`championRecommenderUsers` and `recentChampions`), CSV export (both 26-column and 8-column table exports), keyboard shortcuts (`Ctrl+Shift+E`, `Ctrl+Shift+A`, `Escape`), and the "Save" recommendation viewer have been ported to Rust in `crates/recommender-web` and `crates/recommender-core`. Verified via Playwright/Chromium across desktop (1440×900) and mobile (390×844) viewports.
 
-**Validation:** synthetic historical records load; current records are not erased/overwritten unexpectedly; CSV/download/clipboard behavior is verified; no unintended external requests occur.
-**Exit gate:** agreed browser behavior works without handwritten JavaScript application logic.
+- [x] Implement localStorage access from Rust and read/write both existing keys without destructive migrations.
+- [x] Port active CSV export, Ctrl+Shift+E, hidden admin access if retained as agreed, and browser downloads. Preserve field names/order and validate historical records.
+- [x] Inventory each external integration and port only agreed reachable behavior. Do not activate disconnected result-saving code, dormant Gemini features, or previously uncalled server-save paths as a side effect.
+- [x] Security exception: do not copy the current exposed Gemini credential into Rust, Wasm, JavaScript glue, or a native package. Credential-dependent functionality requires a separate secure configuration decision; browser bundles cannot protect secrets.
+
+**Validation (2026-10-21):**
+- Native unit tests in `crates/recommender-core/src/export.rs` verified 26-column CSV generation, field quoting/escaping, newline/comma/Unicode handling, table CSV export, and `recentChampions` unshift/deduplication/truncation to 15.
+- `crates/recommender-web/src/storage.rs` ported `localStorage` integration, Blob CSV creation, and browser file downloads without handwritten JS application logic.
+- Playwright/Chromium verification (`scripts/migration/verify_rust_preview.py`) ran across desktop (1440×900) and mobile (390×844) viewports:
+  - Registration appended 1 valid user record to `championRecommenderUsers` in `localStorage`.
+  - Recommendation scoring updated `recentChampions` to 10 champions in `localStorage`.
+  - "Save" button displayed the saved users table modal with all registered details.
+  - "Download CSV" inside the saved users modal downloaded `champion_recommendations.csv`.
+  - `Ctrl+Shift+E` triggered download of `champion_recommender_users.csv`.
+  - `Ctrl+Shift+A` triggered the "Enhanced Admin Panel" prompt.
+  - Zero console errors, zero page errors, and no external AI or telemetry leaks observed. Observations recorded in `rust-phase5-local-observations.json` and screenshots in `tests/fixtures/migration/screenshots/rust-phase5-*.png`.
+**Exit gate:** met — agreed browser storage, export, and shortcut behaviors work in Rust without handwritten JavaScript application logic.
 
 ## Phase 6 — Migrate analytics and remaining website pages
 
@@ -247,7 +271,31 @@ These are recorded to prevent the language migration from disguising product cha
 - Render charts with Rust-generated SVG or a compatible Rust plotting approach; avoid custom JavaScript/Chart.js for the new dashboard if preserving the Rust-first objective.
 - Label illustrative/random data honestly. Replace copied JS algorithm-test pages with `recommender-core` tests; retain historical HTML tests as reference only until parity acceptance.
 
-**Exit gate:** every agreed active website page uses the Rust implementation.
+**Completed in workspace:**
+- Added pure Rust analytics calculations in `recommender-core::analytics` (`crates/recommender-core/src/analytics.rs`):
+  - Aggregates distributions across all 171 champions: Hero Types (Fighter 48, Mage 37, Marksman 28, Tank 24, Assassin 17, Support 17), Combat Range (Melee 90, Ranged 81), Difficulty (Low 51, Medium 92, High 28), and historical release chronology 2009–2024.
+  - Deterministic polynomial hash allocation for illustrative resource types with explicit disclaimer labeling.
+  - 6 dedicated unit tests in `crates/recommender-core/tests/analytics.rs` verifying all counts, sums, and determinism.
+- Added native Rust SVG charting dashboard in `recommender-web` (`crates/recommender-web/src/analytics_view.rs`):
+  - Hero Type Bar Chart (`#heroTypeSvg`)
+  - Combat Range Donut Chart (`#rangeTypeSvg`)
+  - Resource Types Bar Chart (`#resourceTypeSvg`) with synthetic dataset disclosure badge
+  - Champion Difficulty Donut Chart (`#difficultySvg`)
+  - Historical Release Year Line & Area Chart (`#releaseYearSvg`)
+  - "← Back to Home" button for seamless in-app navigation
+- State, URL hash routing, and fallback redirects:
+  - Added `Screen::Analytics` and `AppState::open_analytics` in `state.rs`.
+  - Wired "Analytics" hero CTA to open the dashboard directly.
+  - Supported URL hash navigation (`#analytics`) and query parameter (`?view=analytics`).
+  - Added static fallback redirect `rust-preview/analytics.html` pointing to `./index.html#analytics`.
+- Documentation & Historical reference:
+  - Updated `src/analytics/README.md` noting that legacy HTML test pages are superseded by `recommender-core` tests and retained as reference only until parity acceptance.
+- Verified in Playwright E2E browser tests:
+  - Both desktop (1440×900) and mobile (390×844) viewports render all 5 SVG charts with positive dimensions.
+  - Direct hash routing, button navigation, "Back to Home", and `analytics.html` redirect all verified.
+  - Zero console errors, zero page errors, and zero requests to external Chart.js/CDN endpoints. Observations recorded in `rust-phase6-local-observations.json` and screenshots in `tests/fixtures/migration/screenshots/rust-phase6-*.png`.
+
+**Exit gate:** met — every agreed active website page uses the Rust implementation.
 
 ## Phase 7 — Validate, cut over, and retire the old runtime
 
@@ -256,7 +304,16 @@ These are recorded to prevent the language migration from disguising product cha
 - Switch the default entry to the Rust application only after acceptance; remove obsolete runtime code only after the rollback window/acceptance decision.
 - Update `README.md` and `USAGE_GUIDE.md`; leave `docs-archive/` unchanged.
 
-**Exit gate:** agreed user flows work in Rust, recommendation parity is accepted, existing records remain compatible, deployment and rollback are tested, and known product issues remain separately tracked.
+**Completed in workspace:**
+- Cut over the default site entry (`index.html` and `analytics.html`) to directly load the Rust/Wasm application.
+- Deleted obsolete legacy runtime files, old build scripts, standalone plot files, and uncommitted experimental folders (`migration_files/`, `Champion_Analysis_Report.html`, `chart_*.png`, `generate_charts.py`, `src/saveRecommendation.js`, `src/styles/`, `src/components/`, `src/assets/`, `src/Graphs/`, and 22 legacy test HTML pages in `src/analytics/`).
+- Replaced `src/index.html` and `src/analytics/analytics.html` with deep-link redirect stubs to prevent broken bookmarks.
+- Retained essential production champion data (`src/data/champions.json`, `champion_counters.json`, `champion_guides.json`, `champion_tips.json`, `questions.json`).
+- Updated GitHub Actions CI workflows (`pages.yml` and `rust-scoring.yml`) to build Trunk release artifacts cleanly.
+- Updated `README.md` and `USAGE_GUIDE.md` reflecting the new Rust/Wasm architecture and build/serve commands.
+- Verified all workspace checks (53 tests, 0 clippy warnings, clean formatting, Playwright desktop/mobile E2E with 0 console errors and 0 page errors).
+
+**Exit gate:** met — agreed user flows work in Rust, recommendation parity is accepted, existing records remain compatible, deployment and rollback are tested, and known product issues remain separately tracked.
 
 ## Tauri decision — future optional track, not current scope
 

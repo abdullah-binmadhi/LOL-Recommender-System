@@ -1,86 +1,20 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LoL Champion Recommender - Find Your Perfect Champion</title>
-    <meta name="description" content="Discover your perfect League of Legends champion with our AI-powered recommendation system. Answer a few questions and get personalized champion suggestions." />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23667eea'><path d='M15 5.1L9 3 3 5.02v16.2l6-2.33 6 2.1 6-2.02V2.77L15 5.1zm0 13.79l-6-2.11V5.11l6 2.11v11.67z'/></svg>" />
-</head>
-<body>
-    <div class="container">
-        <h1><i class="champion-finder-icon"></i> LoL Champion Recommender</h1>
-        <p>Welcome to the League of Legends Champion Recommendation System!</p>
-        <p>Discover your perfect champion with our AI-powered recommendation system.</p>
-        
-        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 30px;">
-            <a href="./src/index.html" class="btn">Find My Champion</a>
-            <a href="./analytics.html" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">Analytics Dashboard</a>
-        </div>
-    </div>
-    
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #3E1E68 0%, #5D2F77 100%);
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 600px;
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        
-        h3 {
-            color: #333;
-            margin-top: 0;
-        }
-        
-        p {
-            color: #666;
-            margin-bottom: 15px;
-        }
-        
-        .btn {
-            display: inline-block;
-            background: linear-gradient(135deg, #3E1E68 0%, #5D2F77 100%);
-            color: white;
-            padding: 15px 30px;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: bold;
-            margin-top: 10px;
-            transition: transform 0.3s ease;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-        
-        .champion-finder-icon::before {
-            content: '';
-            display: inline-block;
-            width: 32px;
-            height: 32px;
-            margin-right: 10px;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233E1E68"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>');
-            background-size: contain;
-            vertical-align: middle;
-        }
-    </style>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="refresh" content="0; url=./rust-preview/" />
+    <title>LoL Champion Recommender — Rust Edition</title>
+    <meta
+      name="description"
+      content="Discover your perfect League of Legends champion with high-performance, deterministic AI recommendations powered by Rust and WebAssembly."
+    />
+    <script>
+      const target = './rust-preview/' + (window.location.search || '') + (window.location.hash || '');
+      window.location.replace(target);
+    </script>
+  </head>
+  <body>
+    <p>Loading <a href="./rust-preview/">League of Legends Champion Recommender (Rust/WASM)</a>...</p>
+  </body>
 </html>

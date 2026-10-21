@@ -78,7 +78,7 @@ node_modules/
 /crates/**/target/
 /crates/**/Cargo.lock
 /rust/scoring-core/target/
-/rust-preview/
+/rust-preview/.trunk-lock
 /public/wasm/*.wasm
 
 # Next.js

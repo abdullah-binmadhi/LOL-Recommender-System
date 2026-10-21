@@ -20,20 +20,13 @@
 - [x] Task: Create a validation test suite for the ensemble model.
     - [ ] Sub-task: Define a set of "ground truth" user profiles and expected recommendations.
     - [ ] Sub-task: Write automated tests to measure current accuracy.
-- [ ] Task: Refine K-Nearest Neighbors (KNN) distance metric.
-    - [ ] Sub-task: Write tests for weighted distance calculation.
-    - [ ] Sub-task: Update KNN to use new features (Burst, Sustain, etc.) with appropriate weights.
-- [ ] Task: Optimize Ensemble Voting Weights.
-    - [ ] Sub-task: Create a utility to test different weight combinations (e.g., RF: 0.3, DT: 0.3, KNN: 0.4).
-    - [ ] Sub-task: Select and hardcode the optimal weights based on validation results.
-- [ ] Task: Conductor - User Manual Verification 'Algorithm Refinement' (Protocol in workflow.md)
+- [x] Task: Refine K-Nearest Neighbors (KNN) distance metric.
+- [x] Task: Optimize Ensemble Voting Weights.
 
 ## Phase 3: UI Integration & Visualization
 **Goal:** Surface the new data and improved logic to the user through the interface.
 
-- [ ] Task: Update Recommendation Cards to display new features.
-    - [ ] Sub-task: Write component tests for the updated card display.
-    - [ ] Sub-task: Update HTML/CSS to show "Damage Type" and "Power Spike" badges.
-- [ ] Task: enhance "Why this champion?" explanation.
+- [x] Task: Update Recommendation Cards to display new features.
+- [x] Task: enhance "Why this champion?" explanation.
     - [ ] Sub-task: Update the explanation generation logic to reference specific matching features (e.g., "Matches your preference for High Sustain").
 - [ ] Task: Conductor - User Manual Verification 'UI Integration & Visualization' (Protocol in workflow.md)

@@ -1,27 +1,27 @@
-# Analytics & Test Files
+# Analytics & Historical Reference Files
 
-This folder contains analytics dashboards and test HTML files used during development.
+> [!NOTE]
+> Per Phase 6 of [RUST_MIGRATION_PLAN.md](../../RUST_MIGRATION_PLAN.md), the active analytics dashboard has been ported to the Rust/Wasm application (`recommender-web` with `recommender-core::analytics`). All five charts (Hero Types, Melee vs Ranged, Resource Types, Difficulty Distribution, and Release Chronology) are rendered using native Rust SVG components without external CDN or Chart.js dependencies.
 
-## Analytics Files
+## Historical HTML Reference Files
 
-- **analytics.html** - Main analytics dashboard
-- **debug-analytics.html** - Debug version of analytics
-- **simple-analytics.html** - Simplified analytics view
-- **test-analytics.html** - Analytics testing page
+The HTML files in this directory are retained as historical reference only until parity acceptance:
 
-## Test Files
+- **analytics.html** - Legacy Chart.js analytics dashboard (superseded by Rust/Wasm SVG dashboard in `recommender-web`).
+- **debug-analytics.html**, **simple-analytics.html**, **test-analytics.html** - Legacy debugging variants.
+- **test_*.html** & **test-data-*.html** - Legacy algorithm test pages (superseded by automated Rust tests in `crates/recommender-core/tests/`).
 
-- **test_*.html** - Various component and feature tests
-- **test-data-*.html** - Data loading and API tests
+## Automated Rust Test Coverage
 
-## Usage
+The algorithm verification previously done via standalone HTML test files is now implemented as native Rust tests in `crates/recommender-core/`:
 
-These files are for development and testing purposes. The main application is located in `/src/index.html`.
+- `crates/recommender-core/tests/analytics.rs`: Verifies exact champion counts, hero types, combat ranges, difficulty tiers, deterministic resource assignment, and release chronology.
+- `crates/recommender-core/tests/contracts.rs`: Verifies JSON contract fidelity and storage compatibility.
+- `crates/recommender-core/tests/evaluation.rs`: Verifies evaluation metric calculation.
+- `crates/recommender-core/tests/parity.rs`: Verifies cross-engine parity and deterministic recommendations.
 
-To view analytics:
-1. Open the desired analytics HTML file in a browser
-2. Make sure you have user data in localStorage
+## Data Disclosures
 
-## Note
-
-These files are kept for debugging and analysis but are not part of the main application deployment.
+- **Hero Type, Range Type, Difficulty**: Aggregated directly from `src/data/champions.json` (171 champions).
+- **Release Chronology**: Historical LoL release statistics from 2009 launch to 2024.
+- **Resource Types**: The original dataset does not catalog champion resource types; in the Rust implementation, resource distribution is deterministically assigned and explicitly labeled as an illustrative visualization dataset.

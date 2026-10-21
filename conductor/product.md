@@ -16,12 +16,13 @@ The project is an AI-powered champion recommendation system that uses ensemble m
 ## Key Features
 - **10-Question Comprehensive Profiler:** A balanced assessment of gameplay mechanics and psychological traits.
 - **Visual Algorithmic Breakdown:** Detailed visibility into how Random Forest, Decision Tree, and KNN each contributed to the final score.
+- **Deep Champion Analysis:** Recommendations now include granular data points like damage type, power spikes, and skill ceilings.
 - **Advanced Result Filtering:** Capabilities to refine suggestions by role, difficulty level, or champion ownership.
 
 ## User Experience (UX)
 - **High Performance:** A fast, lightning-quick responsive single-page application experience.
 - **Data-Driven Visualizations:** Clear, intuitive charts and bars that explain the "why" behind every suggestion.
-- **Modern Minimalism:** A clean UI design that prioritizes clarity and avoids data overwhelm.
+- **Modern Minimalism:** A clean, compact UI design that prioritizes clarity, using simpler colors and avoiding data overwhelm.
 
 ## Future Vision
 - **Riot API Integration:** Incorporate real-time match history and performance data for even deeper personalization.

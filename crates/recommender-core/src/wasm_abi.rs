@@ -26,7 +26,9 @@ pub extern "C" fn scoring_alloc(length: usize) -> *mut u8 {
 #[no_mangle]
 pub unsafe extern "C" fn scoring_dealloc(pointer: *mut u8, length: usize) {
     if !pointer.is_null() {
-        drop(Box::from_raw(slice::from_raw_parts_mut(pointer, length)));
+        drop(Box::from_raw(std::ptr::slice_from_raw_parts_mut(
+            pointer, length,
+        )));
     }
 }
 

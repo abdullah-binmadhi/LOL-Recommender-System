@@ -1082,8 +1082,13 @@ dependencies = [
 name = "recommender-web"
 version = "0.1.0"
 dependencies = [
+ "js-sys",
  "leptos",
  "recommender-core",
+ "serde",
+ "serde_json",
+ "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]

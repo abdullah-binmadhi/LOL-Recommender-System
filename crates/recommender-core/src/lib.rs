@@ -1,10 +1,12 @@
 //! Offline deterministic scoring, with a narrow JSON boundary for native/Wasm callers.
 //! No browser, filesystem, networking, clocks, or JavaScript runtime in the library.
 mod aggregation;
+pub mod analytics;
 mod compat;
 pub mod contracts;
 mod decision_tree;
 pub mod evaluation;
+pub mod export;
 mod features;
 mod knn;
 mod random_forest;

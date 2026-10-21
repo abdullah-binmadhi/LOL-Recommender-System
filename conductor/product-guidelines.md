@@ -6,8 +6,9 @@
 - **Competitive Motivation:** Maintain an energetic tone that inspires players to improve and master their recommended champions.
 
 ## Visual Identity & Design
-- **Clean Modern Thematic:** Use a light, modern aesthetic (generous whitespace, clean typography) while incorporating immersive League of Legends thematic elements (e.g., hextech motifs).
-- **Clarity Over Clutter:** Prioritize a high-contrast, readable UI that feels like a professional tool rather than a cluttered hobbyist site.
+- **Clean Compact Design:** Prioritize a high-density, information-rich layout that minimizes scrolling and excessive padding.
+- **Simplified Color Palette:** Use a restrained color palette (e.g., simple greys, blues) instead of complex gradients or thematic "hextech" visuals to improve readability.
+- **Professional Aesthetic:** The interface should feel like a serious analytical tool, avoiding "gamified" or flashy design elements.
 
 ## Data Visualization
 - **Progressive Disclosure:** Use simplified visual cues like color-coded progress bars and badges for immediate understanding.

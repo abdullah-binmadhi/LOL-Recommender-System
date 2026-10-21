@@ -7,9 +7,10 @@
 
 ## Machine Learning & Logic
 - **Custom ML Implementations:** Client-side JavaScript implementations of:
-    - **Random Forest**
-    - **Decision Tree**
-    - **K-Nearest Neighbors (KNN)**
+    - **Random Forest** (Ensemble of Decision Trees)
+    - **Decision Tree** (Gini Impurity)
+    - **K-Nearest Neighbors (KNN)** (Weighted Euclidean Distance)
+- **Feature Extraction:** Custom logic to derive advanced stats (Burst, Sustain, CC) from raw champion attributes.
 - **Ensemble Logic:** Weighted voting system to aggregate algorithm outputs for final recommendations.
 
 ## Data & Storage
