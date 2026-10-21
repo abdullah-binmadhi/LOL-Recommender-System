@@ -1,12 +1,13 @@
-#![allow(dead_code, unused_imports)]
 pub mod badge;
 pub mod button;
-pub mod card;
 pub mod dialog;
+pub mod gauge;
 pub mod progress;
+pub mod tabs;
 
 pub use badge::*;
 pub use button::*;
-pub use card::*;
 pub use dialog::*;
+pub use gauge::*;
 pub use progress::*;
+pub use tabs::*;

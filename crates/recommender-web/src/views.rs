@@ -1,0 +1,1521 @@
+//! Leptos views for every screen. Decisions live in `presenter` and `state`;
+//! this module only renders prepared data.
+
+use crate::analytics_view;
+use crate::components::ui::*;
+use crate::presenter::{self, Attributes, MatchBreakdown};
+use crate::state::{filtered_options, AppState, Metric, Modal, Screen};
+use crate::{
+    champion_image_url, metric_class, metric_explanation, metric_value, normalize_name, role_tips,
+    storage, CounterRecord,
+};
+use leptos::prelude::*;
+use recommender_core::analytics::AnalyticsSummary;
+use recommender_core::contracts::{
+    EffectiveCatalog, EffectiveQuestion, EvaluationResult, QuestionOption, QuestionnaireDefinition,
+    RecommendationResult,
+};
+use recommender_core::Engine;
+use std::{collections::BTreeMap, sync::Arc};
+
+const REPO_URL: &str = "https://github.com/abdullah-binmadhi/LOL-Recommender-System";
+
+fn go_to_hash(hash: &str) {
+    if let Some(window) = web_sys::window() {
+        let _ = window.location().set_hash(hash);
+    }
+}
+
+fn open_analytics(state: RwSignal<AppState>) {
+    go_to_hash("#analytics");
+    state.update(AppState::open_analytics);
+}
+
+fn open_profiles(state: RwSignal<AppState>) {
+    let users = storage::load_users();
+    state.update(|current| current.open_modal(Modal::SavedUsers(users)));
+}
+
+fn close_modal_callback(state: RwSignal<AppState>) -> Callback<()> {
+    Callback::new(move |()| state.update(AppState::close_modal))
+}
+
+#[component]
+pub fn App() -> impl IntoView {
+    let questions = Arc::new(
+        QuestionnaireDefinition::current()
+            .expect("bundled production questionnaire must remain valid")
+            .effective_questions(),
+    );
+    let catalog = Arc::new(
+        EffectiveCatalog::current().expect("bundled effective champion catalog must remain valid"),
+    );
+    let analytics_summary = Arc::new(recommender_core::analytics::default_analytics_summary());
+    let counters: BTreeMap<String, CounterRecord> =
+        serde_json::from_str(include_str!("../../../src/data/champion_counters.json"))
+            .expect("bundled champion matchup data must remain valid");
+    let counters = Arc::new(counters);
+    let state = RwSignal::new(AppState::default());
+
+    if let Some(win) = web_sys::window() {
+        if let Ok(hash) = win.location().hash() {
+            if hash == "#analytics" {
+                state.update(AppState::open_analytics);
+            }
+        }
+        if let Ok(search) = win.location().search() {
+            if search.contains("view=analytics") {
+                state.update(AppState::open_analytics);
+            }
+        }
+    }
+
+    let hash_listener = window_event_listener(leptos::ev::hashchange, move |_| {
+        if let Some(win) = web_sys::window() {
+            if let Ok(hash) = win.location().hash() {
+                if hash == "#analytics" {
+                    state.update(AppState::open_analytics);
+                } else if hash.is_empty() || hash == "#" {
+                    state.update(AppState::return_to_start);
+                }
+            }
+        }
+    });
+    on_cleanup(move || hash_listener.remove());
+
+    let keyboard_listener =
+        window_event_listener(leptos::ev::keydown, move |event: web_sys::KeyboardEvent| {
+            if event.key() == "Escape" {
+                state.update(AppState::close_modal);
+            } else if event.ctrl_key()
+                && event.shift_key()
+                && (event.key() == "E" || event.key() == "e")
+            {
+                event.prevent_default();
+                let _ = storage::export_users_csv();
+            } else if event.ctrl_key()
+                && event.shift_key()
+                && (event.key() == "A" || event.key() == "a")
+            {
+                event.prevent_default();
+                storage::show_admin_panel();
+            }
+        });
+    on_cleanup(move || keyboard_listener.remove());
+
+    let modal_catalog = Arc::clone(&catalog);
+    let question_total = questions.len();
+
+    view! {
+        <div class="app-shell">
+            {view_navbar(state)}
+            <main class="page">
+                {move || match state.with(|current| current.screen) {
+                    Screen::Start => {
+                        view_start(state, Arc::clone(&analytics_summary), question_total).into_any()
+                    }
+                    Screen::Registration => view_registration(state).into_any(),
+                    Screen::Questionnaire => {
+                        view_questionnaire(state, Arc::clone(&questions)).into_any()
+                    }
+                    Screen::Results => {
+                        view_analysis(state, Arc::clone(&catalog), Arc::clone(&counters)).into_any()
+                    }
+                    Screen::Analytics => {
+                        analytics_view::view_analytics(state, Arc::clone(&analytics_summary))
+                            .into_any()
+                    }
+                }}
+            </main>
+            {view_footer()}
+
+            {move || match state.with(|current| current.modal.clone()) {
+                Some(Modal::Champion(name)) => {
+                    match state.with(|current| current.recommendation.clone()) {
+                        Some(recommendation) => view_champion_modal(
+                            state,
+                            name,
+                            Arc::clone(&modal_catalog),
+                            recommendation,
+                        )
+                        .into_any(),
+                        None => ().into_view().into_any(),
+                    }
+                }
+                Some(Modal::Metric(metric)) => {
+                    match state.with(|current| current.recommendation.clone()) {
+                        Some(recommendation) => {
+                            view_metric_modal(state, metric, recommendation).into_any()
+                        }
+                        None => ().into_view().into_any(),
+                    }
+                }
+                Some(Modal::SavedUsers(users)) => view_saved_users_modal(state, users).into_any(),
+                None => ().into_view().into_any(),
+            }}
+        </div>
+    }
+}
+
+fn view_navbar(state: RwSignal<AppState>) -> impl IntoView {
+    let screen = move || state.with(|current| current.screen);
+    let quiz_locked = move || {
+        matches!(
+            screen(),
+            Screen::Registration | Screen::Questionnaire | Screen::Results
+        )
+    };
+    let quiz_class = move || {
+        if quiz_locked() {
+            "nav-link active"
+        } else {
+            "nav-link"
+        }
+    };
+    let analytics_class = move || {
+        if matches!(screen(), Screen::Analytics) {
+            "nav-link active"
+        } else {
+            "nav-link"
+        }
+    };
+
+    view! {
+        <header class="navbar">
+            <div class="navbar-inner">
+                <button
+                    type="button"
+                    class="brand"
+                    aria-label="Go to the home screen"
+                    on:click=move |_| {
+                        go_to_hash("");
+                        state.update(AppState::return_to_start);
+                    }
+                >
+                    <span class="brand-mark" aria-hidden="true"></span>
+                    <span class="brand-text">
+                        <strong>"Champion"</strong>
+                        " Recommender"
+                    </span>
+                </button>
+                <nav class="nav" aria-label="Primary">
+                    <button
+                        type="button"
+                        class=quiz_class
+                        disabled=quiz_locked
+                        on:click=move |_| state.update(AppState::begin_registration)
+                    >
+                        "Quiz"
+                    </button>
+                    <button type="button" class="nav-link" on:click=move |_| open_profiles(state)>
+                        "Profiles"
+                    </button>
+                    <button type="button" class=analytics_class on:click=move |_| open_analytics(state)>
+                        "Analytics"
+                    </button>
+                </nav>
+                <span class="engine-badge">
+                    <span class="pulse" aria-hidden="true"></span>
+                    "Rust · WebAssembly"
+                </span>
+            </div>
+        </header>
+    }
+}
+
+fn view_footer() -> impl IntoView {
+    view! {
+        <footer class="site-footer">
+            <p>
+                "Built with Rust, Leptos and WebAssembly. Scoring runs entirely in your browser."
+            </p>
+            <p class="legal">
+                "Not endorsed by Riot Games and does not reflect the views of Riot Games or anyone officially involved in producing League of Legends. "
+                <a href=REPO_URL target="_blank" rel="noopener noreferrer">"Source on GitHub"</a>
+            </p>
+        </footer>
+    }
+}
+
+fn view_start(
+    state: RwSignal<AppState>,
+    summary: Arc<AnalyticsSummary>,
+    question_total: usize,
+) -> impl IntoView {
+    let fan = ["Jinx", "Yasuo", "Ahri", "Zed", "Lux"]
+        .into_iter()
+        .enumerate()
+        .map(|(index, name)| {
+            let image = champion_image_url(name, None);
+            view! {
+                <figure class=format!("fan-card fan-{index}")>
+                    <img src=image alt=name loading="lazy" />
+                    <figcaption>{name}</figcaption>
+                </figure>
+            }
+        })
+        .collect_view();
+
+    view! {
+        <section id="start-screen" class="start-screen">
+            <div class="hero">
+                <div class="hero-copy">
+                    <Badge variant=BadgeVariant::Gold>"3-model ML ensemble"</Badge>
+                    <h1 class="hero-title">
+                        "Find the champion that " <em>"plays like you"</em>
+                    </h1>
+                    <p class="hero-lede">
+                        "Answer a short calibration quiz. A K-Nearest Neighbors model, a Decision Tree and a Random Forest score every champion, then show you exactly why the winner fits."
+                    </p>
+                    <div class="hero-actions">
+                        <Button variant=ButtonVariant::Primary size=ButtonSize::Lg
+                            on:click=move |_| state.update(AppState::begin_registration)>
+                            "Find My Champion →"
+                        </Button>
+                        <Button variant=ButtonVariant::Ghost size=ButtonSize::Lg
+                            on:click=move |_| open_analytics(state)>
+                            "Explore the Data Lab"
+                        </Button>
+                    </div>
+                </div>
+                <div class="hero-visual" aria-hidden="true">
+                    <div class="hero-glow"></div>
+                    <div class="fan">{fan}</div>
+                </div>
+            </div>
+
+            <ul class="stat-strip">
+                <li>
+                    <strong>{summary.total_champions}</strong>
+                    <span>"champions scored"</span>
+                </li>
+                <li>
+                    <strong>"3"</strong>
+                    <span>"models in the ensemble"</span>
+                </li>
+                <li>
+                    <strong>{question_total}</strong>
+                    <span>"calibration questions"</span>
+                </li>
+                <li>
+                    <strong>"0"</strong>
+                    <span>"servers, it runs locally"</span>
+                </li>
+            </ul>
+
+            <section class="steps" aria-labelledby="how-it-works">
+                <h2 id="how-it-works" class="section-title">"How it works"</h2>
+                <ol class="step-list">
+                    <li class="step-card">
+                        <span class="step-num">"01"</span>
+                        <h3>"Calibrate"</h3>
+                        <p>
+                            {format!("Answer {question_total} short questions about role, damage type, range, difficulty and playstyle.")}
+                        </p>
+                    </li>
+                    <li class="step-card">
+                        <span class="step-num">"02"</span>
+                        <h3>"Score"</h3>
+                        <p>
+                            "Three independent models rate every champion, then their scores are blended into one ranking."
+                        </p>
+                    </li>
+                    <li class="step-card">
+                        <span class="step-num">"03"</span>
+                        <h3>"Inspect"</h3>
+                        <p>
+                            "See why a champion fits, how much the models agree, plus counters, synergies and role tips."
+                        </p>
+                    </li>
+                </ol>
+            </section>
+        </section>
+    }
+}
+
+fn view_registration(state: RwSignal<AppState>) -> impl IntoView {
+    view! {
+        <section id="user-registration" class="registration">
+            <div class="panel form-panel">
+                <header class="panel-head">
+                    <h2>"Summoner profile"</h2>
+                    <p class="muted">
+                        "A few details personalise your quiz and are saved on this device only."
+                    </p>
+                </header>
+                <form
+                    id="user-form"
+                    class="form-grid"
+                    on:submit=move |event| {
+                        event.prevent_default();
+                        let is_valid = state.with(|current| current.registration.is_valid());
+                        if is_valid {
+                            let draft = state.with(|current| current.registration.clone());
+                            let _ = storage::append_user(
+                                &draft.full_name,
+                                &draft.email,
+                                &draft.phone,
+                                &draft.age,
+                                &draft.gender,
+                                &draft.experience,
+                            );
+                        }
+                        state.update(|current| {
+                            current.submit_registration();
+                        });
+                    }
+                >
+                    <div class="field span-2">
+                        <label for="fullName">"Name"</label>
+                        <input
+                            type="text"
+                            id="fullName"
+                            name="fullName"
+                            placeholder="Enter your name"
+                            required=true
+                            prop:value=move || state.with(|current| current.registration.full_name.clone())
+                            on:input=move |event| {
+                                let value = event_target_value(&event);
+                                state.update(|current| current.registration.full_name = value);
+                            }
+                        />
+                    </div>
+                    <div class="field span-2">
+                        <label for="email">"Email"</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="Enter your email"
+                            required=true
+                            prop:value=move || state.with(|current| current.registration.email.clone())
+                            on:input=move |event| {
+                                let value = event_target_value(&event);
+                                state.update(|current| current.registration.email = value);
+                            }
+                        />
+                    </div>
+                    <div class="field">
+                        <label for="age">"Age"</label>
+                        <input
+                            type="number"
+                            id="age"
+                            name="age"
+                            placeholder="Enter your age"
+                            min="13"
+                            max="100"
+                            required=true
+                            prop:value=move || state.with(|current| current.registration.age.clone())
+                            on:input=move |event| {
+                                let value = event_target_value(&event);
+                                state.update(|current| current.registration.age = value);
+                            }
+                        />
+                    </div>
+                    <div class="field">
+                        <label for="experience">"LoL Experience"</label>
+                        <select
+                            id="experience"
+                            name="experience"
+                            required=true
+                            prop:value=move || state.with(|current| current.registration.experience.clone())
+                            on:change=move |event| {
+                                let value = event_target_value(&event);
+                                state.update(|current| current.registration.experience = value);
+                            }
+                        >
+                            <option value="">"Select your experience"</option>
+                            <option value="New Player">"New Player"</option>
+                            <option value="Beginner">"Beginner"</option>
+                            <option value="Intermediate">"Intermediate"</option>
+                            <option value="Advanced">"Advanced"</option>
+                            <option value="Expert">"Expert"</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="gender">"Gender"</label>
+                        <select
+                            id="gender"
+                            name="gender"
+                            prop:value=move || state.with(|current| current.registration.gender.clone())
+                            on:change=move |event| {
+                                let value = event_target_value(&event);
+                                state.update(|current| current.registration.gender = value);
+                            }
+                        >
+                            <option value="">"Prefer not to say"</option>
+                            <option value="Male">"Male"</option>
+                            <option value="Female">"Female"</option>
+                            <option value="Non-binary">"Non-binary"</option>
+                            <option value="Other">"Other"</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="phone">"Phone (optional)"</label>
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            placeholder="Enter your phone number"
+                            prop:value=move || state.with(|current| current.registration.phone.clone())
+                            on:input=move |event| {
+                                let value = event_target_value(&event);
+                                state.update(|current| current.registration.phone = value);
+                            }
+                        />
+                    </div>
+
+                    {move || state.with(|current| current.error.clone()).map(|error| view! {
+                        <p class="notice notice-error span-2" role="alert">{error}</p>
+                    })}
+
+                    <div class="form-actions span-2">
+                        <Button variant=ButtonVariant::Ghost
+                            on:click=move |_| state.update(AppState::return_to_start)>
+                            "← Back"
+                        </Button>
+                        <Button variant=ButtonVariant::Primary size=ButtonSize::Lg submit=true>
+                            "Start the quiz →"
+                        </Button>
+                    </div>
+                </form>
+            </div>
+
+            <aside class="panel side-panel">
+                <h3>"What happens next"</h3>
+                <ol class="check-list">
+                    <li>"You answer the calibration questions, one at a time."</li>
+                    <li>"Three models score every champion against your answers."</li>
+                    <li>"You get a ranked top 10 with a clear explanation."</li>
+                </ol>
+                <p class="notice">
+                    "Your details never leave this browser. They are stored in local storage so you can export them later."
+                </p>
+            </aside>
+        </section>
+    }
+}
+
+fn view_questionnaire(
+    state: RwSignal<AppState>,
+    questions: Arc<Vec<EffectiveQuestion>>,
+) -> impl IntoView {
+    let question_count = questions.len();
+
+    view! {
+        <div id="questions-container">
+            {move || {
+                let snapshot = state.get();
+                let Some(question) = questions.get(snapshot.current_question_index).cloned() else {
+                    return view! {
+                        <div class="panel question-card">
+                            <p class="notice notice-error">"The questionnaire could not be loaded."</p>
+                        </div>
+                    }
+                    .into_any();
+                };
+
+                let current_answer = snapshot
+                    .answers
+                    .0
+                    .get(&question.id.to_string())
+                    .and_then(Option::as_deref)
+                    .unwrap_or_default()
+                    .to_owned();
+                let options = filtered_options(&question, &snapshot.answers)
+                    .into_iter()
+                    .map(|option: QuestionOption| {
+                        let option_value = option.value.clone();
+                        let selected = current_answer == option.value;
+                        let question_id = question.id;
+                        let questions_for_selection = Arc::clone(&questions);
+                        view! {
+                            <button
+                                type="button"
+                                class=if selected { "option selected" } else { "option" }
+                                aria-pressed=if selected { "true" } else { "false" }
+                                on:click=move |_| {
+                                    let selected_value = option_value.clone();
+                                    state.update(|current| {
+                                        current.select_answer(
+                                            question_id,
+                                            selected_value,
+                                            &questions_for_selection,
+                                        );
+                                    });
+                                }
+                            >
+                                <span class="option-mark" aria-hidden="true"></span>
+                                <span class="option-body">
+                                    <span class="option-text">{option.text}</span>
+                                    {(!option.description.is_empty()).then(|| view! {
+                                        <span class="option-desc">{option.description}</span>
+                                    })}
+                                </span>
+                            </button>
+                        }
+                    })
+                    .collect_view();
+
+                let index = snapshot.current_question_index;
+                let percent = (index as f64 / question_count as f64 * 100.0).round();
+                let is_last = index + 1 == question_count;
+                let can_advance = snapshot.can_advance(&questions) && !snapshot.scoring;
+                let questions_for_advance = Arc::clone(&questions);
+                let rail = (0..question_count)
+                    .map(|step| {
+                        let class = if step < index {
+                            "rail-dot done"
+                        } else if step == index {
+                            "rail-dot current"
+                        } else {
+                            "rail-dot"
+                        };
+                        view! { <li class=class></li> }
+                    })
+                    .collect_view();
+
+                view! {
+                    <section
+                        id=format!("question-{}", question.id)
+                        class="panel question-card"
+                        aria-label="Questionnaire"
+                    >
+                        <header class="quiz-head">
+                            <div class="quiz-meta">
+                                <span class="quiz-step">
+                                    {format!("Question {} of {}", question.id, question_count)}
+                                </span>
+                                <span class="quiz-percent">{format!("{percent:.0}% complete")}</span>
+                            </div>
+                            <Progress percent=Signal::derive(move || percent) label="Quiz progress" />
+                            <ol class="rail" aria-hidden="true">{rail}</ol>
+                        </header>
+
+                        <h2 class="quiz-question">{question.text}</h2>
+                        <div class="options">{options}</div>
+
+                        {move || state.with(|current| current.error.clone()).map(|error| view! {
+                            <p class="notice notice-error" role="alert">{error}</p>
+                        })}
+
+                        <footer class="quiz-actions">
+                            {if index > 0 {
+                                view! {
+                                    <Button variant=ButtonVariant::Ghost
+                                        on:click=move |_| state.update(AppState::previous)>
+                                        "← Previous"
+                                    </Button>
+                                }
+                                .into_any()
+                            } else {
+                                view! { <span class="spacer"></span> }.into_any()
+                            }}
+                            <Button
+                                variant=ButtonVariant::Primary
+                                size=ButtonSize::Lg
+                                disabled=Signal::derive(move || !can_advance)
+                                on:click=move |_| {
+                                    if !state.with_untracked(|current| current.can_advance(&questions_for_advance)) {
+                                        return;
+                                    }
+                                    if is_last {
+                                        let answers = state.with_untracked(|current| current.answers.clone());
+                                        state.update(|current| {
+                                            current.begin_scoring();
+                                        });
+                                        let result = Engine::reference()
+                                            .and_then(|engine| engine.recommend_typed(&answers))
+                                            .map_err(|error| error.to_string());
+                                        if let Ok(ref rec) = result {
+                                            let top_champs: Vec<String> = rec
+                                                .top10
+                                                .iter()
+                                                .map(|c| c.champion_name.clone())
+                                                .collect();
+                                            let _ = storage::update_recent_champions(&top_champs);
+                                        }
+                                        state.update(|current| current.finish_scoring(result));
+                                    } else {
+                                        state.update(|current| {
+                                            current.advance(&questions_for_advance);
+                                        });
+                                    }
+                                }
+                            >
+                                {if snapshot.scoring {
+                                    "Scoring…"
+                                } else if is_last {
+                                    "Reveal my matches"
+                                } else {
+                                    "Next →"
+                                }}
+                            </Button>
+                        </footer>
+                    </section>
+                }
+                .into_any()
+            }}
+        </div>
+    }
+}
+
+/// Owned, render-ready data for one recommended champion.
+struct MatchEntry {
+    rank: usize,
+    name: String,
+    image: String,
+    role: String,
+    tier: String,
+    win_rate: Option<f64>,
+    average: f64,
+    random_forest: f64,
+    decision_tree: f64,
+    knn: f64,
+    difficulty: f64,
+    attributes: Attributes,
+    breakdown: MatchBreakdown,
+}
+
+fn build_entries(
+    recommendation: &RecommendationResult,
+    catalog: &EffectiveCatalog,
+) -> Vec<MatchEntry> {
+    recommendation
+        .top10
+        .iter()
+        .enumerate()
+        .filter_map(|(index, score)| {
+            let record = catalog
+                .0
+                .iter()
+                .find(|record| record.name == score.champion_name)?;
+            let champion = &record.data;
+            let stats = champion.additional_fields.get("stats");
+            let tier = stats
+                .and_then(|stats| stats.get("tier"))
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or("B")
+                .to_owned();
+            let win_rate = stats
+                .and_then(|stats| stats.get("winRate"))
+                .and_then(serde_json::Value::as_f64);
+            Some(MatchEntry {
+                rank: index + 1,
+                name: score.champion_name.clone(),
+                image: champion_image_url(&score.champion_name, Some(champion)),
+                role: champion.role.clone(),
+                tier,
+                win_rate,
+                average: score.average,
+                random_forest: score.random_forest,
+                decision_tree: score.decision_tree,
+                knn: score.knn,
+                difficulty: champion.difficulty,
+                attributes: Attributes {
+                    damage: champion.damage,
+                    toughness: champion.toughness,
+                    mobility: champion.mobility,
+                    control: champion.control,
+                    utility: champion.utility,
+                },
+                breakdown: presenter::match_breakdown(
+                    &recommendation.features.role,
+                    &champion.role,
+                    recommendation.features.difficulty,
+                    champion.difficulty,
+                    champion.toughness,
+                ),
+            })
+        })
+        .collect()
+}
+
+fn model_bar(label: &'static str, value: f64) -> impl IntoView {
+    view! {
+        <div class="model-bar">
+            <span class="model-label">{label}</span>
+            <span class="model-track">
+                <span class="model-fill" style=format!("width: {:.0}%", value.clamp(0.0, 100.0))></span>
+            </span>
+            <span class="model-value">{format!("{value:.0}%")}</span>
+        </div>
+    }
+}
+
+fn fit_meter(label: &'static str, value: f64) -> impl IntoView {
+    view! {
+        <div class="fit">
+            <div class="fit-top">
+                <span>{label}</span>
+                <strong>{format!("{value:.0}%")}</strong>
+            </div>
+            <div class="fit-track">
+                <span style=format!("width: {:.0}%", value.clamp(0.0, 100.0))></span>
+            </div>
+        </div>
+    }
+}
+
+fn strength_chips(entry: &MatchEntry) -> impl IntoView {
+    presenter::strengths(&entry.attributes, entry.difficulty)
+        .into_iter()
+        .map(|strength| {
+            view! { <span class=format!("chip strength strength-{}", strength.key)>{strength.label}</span> }
+        })
+        .collect_view()
+}
+
+fn view_analysis(
+    state: RwSignal<AppState>,
+    catalog: Arc<EffectiveCatalog>,
+    counters: Arc<BTreeMap<String, CounterRecord>>,
+) -> impl IntoView {
+    view! {
+        <section id="detailed-analysis" class="results">
+            <div id="analysis-content">
+                {move || match state.with(|current| current.recommendation.clone()) {
+                    Some(recommendation) => view_analysis_content(
+                        state,
+                        Arc::clone(&catalog),
+                        Arc::clone(&counters),
+                        recommendation,
+                    )
+                    .into_any(),
+                    None => view! {
+                        <p class="notice notice-error" role="alert">
+                            "Recommendations are unavailable. Please restart and try again."
+                        </p>
+                    }
+                    .into_any(),
+                }}
+            </div>
+            <div class="action-dock" role="toolbar" aria-label="Result actions">
+                <Button variant=ButtonVariant::Primary
+                    on:click=move |_| {
+                        let users = storage::load_users();
+                        if users.is_empty() {
+                            if let Some(w) = web_sys::window() {
+                                let _ = w.alert_with_message("No user data available to display.");
+                            }
+                        } else {
+                            state.update(|current| current.open_modal(Modal::SavedUsers(users)));
+                            if let Some(w) = web_sys::window() {
+                                let _ = w.alert_with_message("Results displayed on web page!");
+                            }
+                        }
+                    }>
+                    "Save"
+                </Button>
+                <Button variant=ButtonVariant::Secondary
+                    on:click=move |_| state.update(AppState::restart)>
+                    "Try Again"
+                </Button>
+                <Button variant=ButtonVariant::Secondary
+                    on:click=move |_| {
+                        let _ = storage::export_users_csv();
+                    }>
+                    "Export CSV"
+                </Button>
+                <Button variant=ButtonVariant::Ghost on:click=move |_| open_analytics(state)>
+                    "Data Lab"
+                </Button>
+            </div>
+        </section>
+    }
+}
+
+fn view_analysis_content(
+    state: RwSignal<AppState>,
+    catalog: Arc<EffectiveCatalog>,
+    counters: Arc<BTreeMap<String, CounterRecord>>,
+    recommendation: RecommendationResult,
+) -> impl IntoView {
+    let entries = build_entries(&recommendation, &catalog);
+    let top_count = recommendation.top10.len();
+    let preferred_role = recommendation.features.role.clone();
+
+    let Some(top) = entries.first() else {
+        return view! {
+            <p class="notice notice-error" role="alert">
+                "No champions could be matched to your answers."
+            </p>
+        }
+        .into_any();
+    };
+
+    let top_name = top.name.clone();
+    let top_image = top.image.clone();
+    let top_role = top.role.clone();
+    let top_tier = top.tier.clone();
+    let top_win_rate = top.win_rate.unwrap_or(50.0);
+    let top_difficulty = top.difficulty;
+    let top_average = top.average;
+    let top_models = (top.random_forest, top.decision_tree, top.knn);
+    let top_fit = (
+        top.breakdown.role,
+        top.breakdown.difficulty,
+        top.breakdown.survivability,
+    );
+    let top_reasons =
+        presenter::reasons(&preferred_role, &top.role, &top.breakdown, &top.attributes);
+    let top_strengths = strength_chips(top).into_any();
+    let consensus = presenter::consensus(top.random_forest, top.decision_tree, top.knn);
+    let tier = presenter::tier_for(top.average);
+    let guide_url = format!(
+        "https://www.mobafire.com/league-of-legends/{}-guide",
+        top_name.to_lowercase()
+    );
+    let build_url = format!(
+        "https://u.gg/lol/champions/{}/build",
+        top_name.to_lowercase()
+    );
+    let reason_items = top_reasons
+        .into_iter()
+        .map(|reason| view! { <li>{reason}</li> })
+        .collect_view();
+
+    let alternatives: Vec<(String, String, String)> = entries
+        .iter()
+        .skip(1)
+        .take(2)
+        .map(|entry| {
+            (
+                entry.name.clone(),
+                entry.image.clone(),
+                format!("{:.0}% match • {}", entry.average, entry.role),
+            )
+        })
+        .collect();
+
+    let (win_rate_sum, _) = recommendation
+        .top10
+        .iter()
+        .filter_map(|score| {
+            catalog
+                .0
+                .iter()
+                .find(|record| record.name == score.champion_name)
+                .and_then(|record| record.data.additional_fields.get("stats"))
+                .and_then(|stats| stats.get("winRate"))
+                .and_then(serde_json::Value::as_f64)
+        })
+        .fold((0.0, 0usize), |(sum, count), rate| (sum + rate, count + 1));
+    let average_win_rate = if top_count == 0 {
+        50.0
+    } else {
+        win_rate_sum / top_count as f64
+    };
+    let average_difficulty = if top_count == 0 {
+        5.0
+    } else {
+        entries.iter().map(|entry| entry.difficulty).sum::<f64>() / top_count as f64
+    };
+    let all_positive_win_rates = entries
+        .iter()
+        .all(|entry| entry.win_rate.unwrap_or(50.0) >= 50.0);
+
+    let matchup = counters.get(&normalize_name(&top_name));
+    let strong_against = matchup
+        .map(|record| record.strong_against.clone())
+        .filter(|items| !items.is_empty())
+        .unwrap_or_else(|| vec!["Immobile champions".into(), "Squishy targets".into()]);
+    let weak_against = matchup
+        .map(|record| record.weak_against.clone())
+        .filter(|items| !items.is_empty())
+        .unwrap_or_else(|| vec!["Mobile champions".into(), "Tanks".into()]);
+    let synergies = matchup
+        .map(|record| record.synergizes_with.clone())
+        .filter(|items| !items.is_empty())
+        .unwrap_or_else(|| vec!["Engage supports".into(), "CC-heavy junglers".into()]);
+    let tips: Vec<(&'static str, &'static str)> =
+        role_tips(&preferred_role).iter().take(6).copied().collect();
+
+    let cards = entries
+        .iter()
+        .map(|entry| {
+            let modal_name = entry.name.clone();
+            let is_top_pick = entry.rank == 1;
+            let wr = entry.win_rate.unwrap_or(50.0);
+            let card_class = if is_top_pick {
+                "match-card winner"
+            } else {
+                "match-card"
+            };
+            let tier = presenter::tier_for(entry.average);
+            view! {
+                <button
+                    type="button"
+                    class=card_class
+                    aria-label=format!("Open {} recommendation details", entry.name)
+                    on:click=move |_| {
+                        state.update(|current| {
+                            current.open_modal(Modal::Champion(modal_name.clone()));
+                        });
+                    }
+                >
+                    <span class="rank">{format!("#{}", entry.rank)}</span>
+                    <div class="match-header">
+                        <img src=entry.image.clone() alt=entry.name.clone() class="match-champion-img" loading="lazy" />
+                        <div class="match-info">
+                            <h4>
+                                {entry.name.clone()}
+                                {is_top_pick.then(|| view! { <span class="winner-badge">"TOP PICK"</span> })}
+                            </h4>
+                            <div class="match-tier">
+                                {format!("{} • {} tier • {:.1}% WR", entry.role, entry.tier, wr)}
+                            </div>
+                        </div>
+                        <div class=format!("match-score {}", tier.css())>
+                            <strong>{format!("{:.0}%", entry.average)}</strong>
+                            <span>{tier.label()}</span>
+                        </div>
+                    </div>
+                    <div class="match-models">
+                        {model_bar("RF", entry.random_forest)}
+                        {model_bar("DT", entry.decision_tree)}
+                        {model_bar("KNN", entry.knn)}
+                    </div>
+                </button>
+            }
+        })
+        .collect_view();
+
+    let metrics = recommendation
+        .evaluation
+        .as_ref()
+        .map(|evaluation| view_evaluation_metrics(state, evaluation.clone(), top_count).into_any());
+
+    let tab = RwSignal::new("matchups");
+    let audience = audience_label(&preferred_role);
+    let tips_audience = audience.clone();
+    let panel = move || match tab.get() {
+        "meta" => view_meta_panel(
+            &alternatives,
+            average_win_rate,
+            average_difficulty,
+            all_positive_win_rates,
+        )
+        .into_any(),
+        "tips" => view_tips_panel(&tips, &tips_audience).into_any(),
+        _ => view_matchup_panel(&strong_against, &weak_against, &synergies).into_any(),
+    };
+
+    let inspect_name = top_name.clone();
+    view! {
+        <header class="results-head">
+            <Badge variant=BadgeVariant::Cyan>"Your results"</Badge>
+            <h1 class="results-title">"Your champion matches"</h1>
+            <p class="muted">
+                {format!("Ranked from {top_count} scored champions using your quiz answers.")}
+            </p>
+        </header>
+
+        <section class="spotlight" aria-label="Top champion match">
+            <div class="spotlight-art">
+                <img src=top_image alt=top_name.clone() />
+            </div>
+            <div class="spotlight-main">
+                <span class="eyebrow">"★ Your #1 champion match"</span>
+                <h2 class="spot-name">{top_name.clone()}</h2>
+                <p class="spot-sub">
+                    {format!("{top_role} • Difficulty {top_difficulty:.0}/10 • {top_tier} tier • {top_win_rate:.1}% win rate")}
+                </p>
+                <ul class="reason-list">{reason_items}</ul>
+                <div class="fit-grid">
+                    {fit_meter("Role fit", top_fit.0)}
+                    {fit_meter("Difficulty fit", top_fit.1)}
+                    {fit_meter("Survivability fit", top_fit.2)}
+                </div>
+                <div class="chips">{top_strengths}</div>
+                <div class="spot-actions">
+                    <Button variant=ButtonVariant::Primary
+                        on:click=move |_| {
+                            state.update(|current| {
+                                current.open_modal(Modal::Champion(inspect_name.clone()));
+                            });
+                        }>
+                        "Inspect the math"
+                    </Button>
+                    <a class="btn btn-secondary btn-md" href=guide_url target="_blank" rel="noopener noreferrer">
+                        "Champion guide"
+                    </a>
+                    <a class="btn btn-ghost btn-md" href=build_url target="_blank" rel="noopener noreferrer">
+                        "Build on U.GG"
+                    </a>
+                </div>
+            </div>
+            <div class="spotlight-side">
+                <RadialGauge score=top_average id="spotlight" caption=tier.label() />
+                <p class=format!("consensus {}", consensus.css())>{consensus.label()}</p>
+                <div class="spot-models">
+                    {model_bar("Random Forest", top_models.0)}
+                    {model_bar("Decision Tree", top_models.1)}
+                    {model_bar("KNN", top_models.2)}
+                </div>
+            </div>
+        </section>
+
+        <section class="block" aria-labelledby="top10-title">
+            <div class="block-head">
+                <h2 id="top10-title" class="section-title">"Your top 10"</h2>
+                <p class="muted">"Select any card to inspect how each model scored it."</p>
+            </div>
+            <div class="match-grid">{cards}</div>
+        </section>
+
+        {metrics}
+
+        <section class="block" aria-labelledby="insights-title">
+            <div class="block-head">
+                <h2 id="insights-title" class="section-title">"Insights for " {audience}</h2>
+            </div>
+            <TabBar
+                tabs=vec![("matchups", "Matchups"), ("meta", "Alternatives & Meta"), ("tips", "Pro Tips")]
+                active=tab
+            />
+            <div class="tab-panel" role="tabpanel">{panel}</div>
+        </section>
+    }
+    .into_any()
+}
+
+fn audience_label(preferred_role: &str) -> String {
+    if preferred_role == presenter::NO_PREFERENCE {
+        "your playstyle".to_owned()
+    } else {
+        format!("{preferred_role} players")
+    }
+}
+
+fn chip_list(items: &[String], class: &'static str) -> impl IntoView {
+    items
+        .iter()
+        .map(|item| view! { <li class=format!("matchup-item {class}")>{item.clone()}</li> })
+        .collect_view()
+}
+
+fn view_matchup_panel(
+    strong_against: &[String],
+    weak_against: &[String],
+    synergies: &[String],
+) -> impl IntoView {
+    view! {
+        <div class="matchup-grid">
+            <div class="matchup-col">
+                <h3><span class="dot dot-good"></span>"Strong against"</h3>
+                <ul>{chip_list(strong_against, "strong-against")}</ul>
+            </div>
+            <div class="matchup-col">
+                <h3><span class="dot dot-bad"></span>"Weak against"</h3>
+                <ul>{chip_list(weak_against, "weak-against")}</ul>
+            </div>
+            <div class="matchup-col">
+                <h3><span class="dot dot-synergy"></span>"Synergizes with"</h3>
+                <ul>{chip_list(synergies, "synergizes-with")}</ul>
+            </div>
+        </div>
+    }
+}
+
+fn view_meta_panel(
+    alternatives: &[(String, String, String)],
+    average_win_rate: f64,
+    average_difficulty: f64,
+    all_positive_win_rates: bool,
+) -> impl IntoView {
+    let alternatives = alternatives
+        .iter()
+        .map(|(name, image, line)| {
+            view! {
+                <div class="alternative-item">
+                    <img src=image.clone() alt=name.clone() class="alt-champion-img" loading="lazy" />
+                    <div>
+                        <div class="alt-name">{name.clone()}</div>
+                        <div class="muted">{line.clone()}</div>
+                    </div>
+                </div>
+            }
+        })
+        .collect_view();
+
+    view! {
+        <div class="meta-grid">
+            <div class="meta-col">
+                <h3>"Runner-up picks"</h3>
+                <div class="alternatives-list">{alternatives}</div>
+            </div>
+            <div class="meta-col">
+                <h3>"Current meta"</h3>
+                <dl class="meta-stats">
+                    <div><dt>"Average win rate"</dt><dd>{format!("{average_win_rate:.1}%")}</dd></div>
+                    <div><dt>"Average difficulty"</dt><dd>{format!("{average_difficulty:.1}/10")}</dd></div>
+                </dl>
+                <p class="notice">
+                    {if all_positive_win_rates {
+                        "All recommendations are currently meta-viable with positive win rates."
+                    } else {
+                        "Some recommendations may require extra practice due to current meta shifts."
+                    }}
+                </p>
+            </div>
+        </div>
+    }
+}
+
+fn view_tips_panel(tips: &[(&'static str, &'static str)], audience: &str) -> impl IntoView {
+    let items = tips
+        .iter()
+        .map(|(icon, tip)| {
+            view! {
+                <li class="tip-item">
+                    <span class="tip-icon" aria-hidden="true">{*icon}</span>
+                    <span class="tip-text">{*tip}</span>
+                </li>
+            }
+        })
+        .collect_view();
+    view! {
+        <ul class="tips-grid">{items}</ul>
+        <p class="muted small">{format!("Role-based fundamentals for {audience}.")}</p>
+    }
+}
+
+fn view_evaluation_metrics(
+    state: RwSignal<AppState>,
+    evaluation: EvaluationResult,
+    recommended_count: usize,
+) -> impl IntoView {
+    let values = [
+        (
+            Metric::PrecisionAt1,
+            evaluation.precision_at1,
+            "Top recommendation relevance",
+        ),
+        (
+            Metric::PrecisionAt3,
+            evaluation.precision_at3,
+            "Top 3 recommendations relevance",
+        ),
+        (
+            Metric::PrecisionAt10,
+            evaluation.precision_at10,
+            "Top 10 recommendations relevance",
+        ),
+        (
+            Metric::RecallAt10,
+            evaluation.recall_at10,
+            "Coverage of relevant champions",
+        ),
+        (
+            Metric::F1At10,
+            evaluation.f1_at10,
+            "Balanced accuracy & coverage",
+        ),
+        (
+            Metric::MeanReciprocalRank,
+            evaluation.mrr,
+            "Algorithm confidence & variety balance",
+        ),
+    ];
+    let metric_cards = values
+        .into_iter()
+        .map(|(metric, value, description)| {
+            view! {
+                <button
+                    type="button"
+                    class="metric-card"
+                    on:click=move |_| state.update(|current| current.open_modal(Modal::Metric(metric)))
+                >
+                    <span class="metric-label">{metric.label()}</span>
+                    <span class=format!("metric-value {}", metric_class(value))>
+                        {format!("{:.1}%", value * 100.0)}
+                    </span>
+                    <span class="metric-description">{description}</span>
+                    <span class="metric-track">
+                        <span
+                            class=format!("metric-fill {}", metric_class(value))
+                            style=format!("width: {:.0}%", (value * 100.0).clamp(0.0, 100.0))
+                        ></span>
+                    </span>
+                </button>
+            }
+        })
+        .collect_view();
+
+    let relevant_count = evaluation.relevant_champions.len();
+    let performance = presenter::performance(evaluation.precision_at10, evaluation.mrr);
+    let captured = (evaluation.recall_at10 * relevant_count as f64).round() as usize;
+
+    view! {
+        <section class="block evaluation-metrics-section" aria-labelledby="quality-title">
+            <div class="block-head">
+                <h2 id="quality-title" class="section-title">"Recommendation quality"</h2>
+                <p class="muted">
+                    "These scores use the existing preference-relevance heuristic; they are not independent measures of model accuracy."
+                </p>
+            </div>
+            <div class="metrics-grid">{metric_cards}</div>
+            <div class="performance">
+                <div>
+                    <h3>{format!("Overall: {}", performance.level)}</h3>
+                    <p class="muted">{performance.message}</p>
+                </div>
+                <dl class="performance-stats">
+                    <div><dt>"Relevant champions"</dt><dd>{relevant_count}</dd></div>
+                    <div><dt>"Captured in top 10"</dt><dd>{captured}</dd></div>
+                    <div><dt>"Recommended"</dt><dd>{recommended_count}</dd></div>
+                </dl>
+            </div>
+        </section>
+    }
+}
+
+fn attribute_meter(label: &'static str, value: f64) -> impl IntoView {
+    view! {
+        <div class="attr">
+            <div class="attr-top">
+                <span>{label}</span>
+                <strong>{format!("{value}/10")}</strong>
+            </div>
+            <div class="attr-track">
+                <span style=format!("width: {:.0}%", (value * 10.0).clamp(0.0, 100.0))></span>
+            </div>
+        </div>
+    }
+}
+
+fn view_champion_modal(
+    state: RwSignal<AppState>,
+    name: String,
+    catalog: Arc<EffectiveCatalog>,
+    recommendation: RecommendationResult,
+) -> impl IntoView {
+    let Some(record) = catalog.0.iter().find(|record| record.name == name) else {
+        return view! {
+            <Dialog on_close=close_modal_callback(state) label="Champion details unavailable">
+                <p class="notice notice-error">"Champion details are unavailable."</p>
+            </Dialog>
+        }
+        .into_any();
+    };
+    let champion = record.data.clone();
+    let image = champion_image_url(&name, Some(&champion));
+    let algorithm_details = [
+        (
+            "Random Forest",
+            recommendation.scores.random_forest.get(&name),
+        ),
+        (
+            "Decision Tree",
+            recommendation.scores.decision_tree.get(&name),
+        ),
+        ("K-Nearest Neighbors", recommendation.scores.knn.get(&name)),
+    ]
+    .into_iter()
+    .map(|(label, score)| {
+        let details = score
+            .map(|score| {
+                serde_json::to_string_pretty(&score.details)
+                    .unwrap_or_else(|_| score.details.to_string())
+            })
+            .unwrap_or_else(|| "No explanation details available.".into());
+        let score_value = score.map(|score| score.score).unwrap_or_default();
+        view! {
+            <details class="algorithm-detail">
+                <summary>
+                    <span>{label}</span>
+                    <strong>{format!("{score_value:.1}%")}</strong>
+                </summary>
+                <pre>{details}</pre>
+            </details>
+        }
+    })
+    .collect_view();
+
+    view! {
+        <Dialog
+            on_close=close_modal_callback(state)
+            label=format!("{name} champion details")
+            class="inspector"
+        >
+            <header class="inspector-head">
+                <img src=image alt=name.clone() class="inspector-img" />
+                <div>
+                    <h2>{name.clone()}</h2>
+                    <div class="chips">
+                        <Badge variant=BadgeVariant::Gold>{champion.role.clone()}</Badge>
+                        <Badge variant=BadgeVariant::Cyan>
+                            {format!("Difficulty {:.0}/10", champion.difficulty)}
+                        </Badge>
+                    </div>
+                </div>
+            </header>
+            <div class="modal-body">
+                <h3>"Attributes"</h3>
+                <div class="attr-grid">
+                    {attribute_meter("Damage", champion.damage)}
+                    {attribute_meter("Toughness", champion.toughness)}
+                    {attribute_meter("Mobility", champion.mobility)}
+                    {attribute_meter("Control", champion.control)}
+                    {attribute_meter("Utility", champion.utility)}
+                </div>
+                <h3>"Ensemble scoring"</h3>
+                <p class="muted">
+                    "Each score and explanation below comes directly from the Rust scoring result."
+                </p>
+                {algorithm_details}
+            </div>
+        </Dialog>
+    }
+    .into_any()
+}
+
+fn view_metric_modal(
+    state: RwSignal<AppState>,
+    metric: Metric,
+    recommendation: RecommendationResult,
+) -> impl IntoView {
+    let Some(evaluation) = recommendation.evaluation else {
+        return ().into_view().into_any();
+    };
+    let value = metric_value(metric, &evaluation);
+    let recommended: Vec<_> = recommendation
+        .top10
+        .iter()
+        .map(|champion| champion.champion_name.clone())
+        .collect();
+    let relevant = evaluation.relevant_champions.clone();
+    let list = recommended
+        .iter()
+        .take(match metric {
+            Metric::PrecisionAt1 => 1,
+            Metric::PrecisionAt3 => 3,
+            _ => recommended.len(),
+        })
+        .enumerate()
+        .map(|(index, name)| {
+            let is_relevant = relevant.iter().any(|champion| champion == name);
+            view! {
+                <div class="champion-list-item">
+                    <span class="champion-list-icon">{format!("#{}", index + 1)}</span>
+                    <span class="champion-list-name">{name.clone()}</span>
+                    <span class=if is_relevant {
+                        "champion-list-badge relevant"
+                    } else {
+                        "champion-list-badge not-relevant"
+                    }>
+                        {if is_relevant { "✓ Relevant" } else { "✗ Not optimal" }}
+                    </span>
+                </div>
+            }
+        })
+        .collect_view();
+
+    view! {
+        <Dialog
+            on_close=close_modal_callback(state)
+            label=format!("{} metric details", metric.label())
+        >
+            <header class="metric-modal-head">
+                <div class=format!("modal-score {}", metric_class(value))>
+                    <div class="modal-score-value">{format!("{:.1}%", value * 100.0)}</div>
+                    <div class="modal-score-label">{metric.label()}</div>
+                </div>
+                <div>
+                    <h2>{metric.label()}</h2>
+                    <p class="muted">{metric_explanation(metric)}</p>
+                </div>
+            </header>
+            <div class="modal-body">
+                <h3>"Recommendations evaluated"</h3>
+                <div class="champion-list">{list}</div>
+                <p class="muted small">
+                    {format!(
+                        "The current heuristic identifies {} relevant champions from your answers. This is a recommendation evaluation aid, not an independently validated accuracy score.",
+                        relevant.len()
+                    )}
+                </p>
+            </div>
+        </Dialog>
+    }
+    .into_any()
+}
+
+fn view_saved_users_modal(
+    state: RwSignal<AppState>,
+    users: Vec<recommender_core::contracts::StoredUserRecord>,
+) -> impl IntoView {
+    let is_empty = users.is_empty();
+    let rows = users
+        .iter()
+        .enumerate()
+        .map(|(index, user)| {
+            let age = match &user.age {
+                Some(serde_json::Value::String(s)) => s.clone(),
+                Some(serde_json::Value::Number(n)) => n.to_string(),
+                _ => String::new(),
+            };
+            view! {
+                <tr>
+                    <td>{index + 1}</td>
+                    <td>{user.full_name.clone().unwrap_or_default()}</td>
+                    <td>{user.email.clone().unwrap_or_default()}</td>
+                    <td>{age}</td>
+                    <td>{user.gender.clone().unwrap_or_default()}</td>
+                    <td>{user.experience.clone().unwrap_or_default()}</td>
+                    <td>{user.recommended_champion.clone().unwrap_or_default()}</td>
+                    <td>{user.registration_date.clone().unwrap_or_default()}</td>
+                </tr>
+            }
+        })
+        .collect_view();
+
+    view! {
+        <Dialog
+            on_close=close_modal_callback(state)
+            label="Saved summoner profiles"
+            class="wide"
+        >
+            <header class="modal-head">
+                <h2>"Saved profiles"</h2>
+                <p class="muted">"Stored only in this browser's local storage."</p>
+            </header>
+            <div class="modal-body">
+                {is_empty.then(|| view! {
+                    <p class="notice">"No profiles saved yet. Finish the quiz to create one."</p>
+                })}
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>"ID"</th>
+                                <th>"Name"</th>
+                                <th>"Email"</th>
+                                <th>"Age"</th>
+                                <th>"Gender"</th>
+                                <th>"Experience"</th>
+                                <th>"Recommended champion"</th>
+                                <th>"Registration date"</th>
+                            </tr>
+                        </thead>
+                        <tbody>{rows}</tbody>
+                    </table>
+                </div>
+            </div>
+            <footer class="modal-footer">
+                <Button variant=ButtonVariant::Secondary
+                    on:click=move |_| {
+                        let _ = storage::export_table_csv();
+                    }>
+                    "Download CSV"
+                </Button>
+                <Button variant=ButtonVariant::Primary
+                    on:click=move |_| state.update(AppState::close_modal)>
+                    "Close"
+                </Button>
+            </footer>
+        </Dialog>
+    }
+    .into_any()
+}

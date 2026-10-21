@@ -1,36 +1,21 @@
 use leptos::prelude::*;
 
-#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum BadgeVariant {
     #[default]
-    Default,
-    Secondary,
-    Outline,
+    Gold,
     Cyan,
-    Success,
-    Destructive,
 }
 
-#[allow(dead_code)]
 #[component]
 pub fn Badge(
-    #[prop(into, optional)] variant: BadgeVariant,
+    #[prop(optional)] variant: BadgeVariant,
     #[prop(into, optional)] class: String,
     children: Children,
 ) -> impl IntoView {
-    let variant_class = match variant {
-        BadgeVariant::Default => "ui-badge-gold",
-        BadgeVariant::Secondary => "ui-badge-secondary",
-        BadgeVariant::Outline => "ui-badge-outline",
-        BadgeVariant::Cyan => "ui-badge-cyan",
-        BadgeVariant::Success => "ui-badge-success",
-        BadgeVariant::Destructive => "ui-badge-destructive",
+    let variant = match variant {
+        BadgeVariant::Gold => "chip-gold",
+        BadgeVariant::Cyan => "chip-cyan",
     };
-
-    view! {
-        <span class=format!("ui-badge {variant_class} {class}")>
-            {children()}
-        </span>
-    }
+    view! { <span class=format!("chip {variant} {class}")>{children()}</span> }
 }
