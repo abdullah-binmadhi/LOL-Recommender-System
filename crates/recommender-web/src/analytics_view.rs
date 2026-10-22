@@ -341,16 +341,18 @@ pub fn view_analytics(state: RwSignal<AppState>, summary: Arc<AnalyticsSummary>)
             }}
 
             <div class="chart-grid">
-                <div class="chart-container">
+                // Tier 1: Champions per Hero Type (Full Width)
+                <div class="chart-container chart-container-full">
                     <div class="chart-header-block">
                         <h2 class="chart-title">"Champions per Hero Type"</h2>
-                        <span class="chart-subtitle">"Click a bar to filter by class"</span>
+                        <span class="chart-subtitle">"Click a bar to filter by class · 6 Core Archetypes"</span>
                     </div>
                     <div class="chart-wrapper">
                         {render_hero_type_chart(&summary.hero_types, state)}
                     </div>
                 </div>
 
+                // Tier 2: Combat Engagement (Left) & Mechanical Curve (Right)
                 <div class="chart-container">
                     <div class="chart-header-block">
                         <h2 class="chart-title">"Melee vs. Ranged"</h2>
@@ -363,8 +365,19 @@ pub fn view_analytics(state: RwSignal<AppState>, summary: Arc<AnalyticsSummary>)
 
                 <div class="chart-container">
                     <div class="chart-header-block">
-                        <h2 class="chart-title">"Resource Types"</h2>
-                        <span class="chart-badge-synthetic">"Click a bar to filter by resource"</span>
+                        <h2 class="chart-title">"Champion Difficulty Distribution"</h2>
+                        <span class="chart-subtitle">"Click a tier to filter by mechanical curve"</span>
+                    </div>
+                    <div class="chart-wrapper">
+                        {render_difficulty_chart(&summary.difficulties, summary.total_champions, state)}
+                    </div>
+                </div>
+
+                // Tier 3: Resource Systems (Full Width)
+                <div class="chart-container chart-container-full">
+                    <div class="chart-header-block">
+                        <h2 class="chart-title">"Resource Systems"</h2>
+                        <span class="chart-badge-synthetic">"Click a bar to filter by resource · Official Riot Games Data Dragon"</span>
                     </div>
                     <div class="chart-wrapper">
                         {render_resource_type_chart(&summary.resource_types, state)}
@@ -374,16 +387,7 @@ pub fn view_analytics(state: RwSignal<AppState>, summary: Arc<AnalyticsSummary>)
                     </p>
                 </div>
 
-                <div class="chart-container">
-                    <div class="chart-header-block">
-                        <h2 class="chart-title">"Champion Difficulty Distribution"</h2>
-                        <span class="chart-subtitle">"Click a tier to filter by mechanical curve"</span>
-                    </div>
-                    <div class="chart-wrapper">
-                        {render_difficulty_chart(&summary.difficulties, summary.total_champions, state)}
-                    </div>
-                </div>
-
+                // Tier 4: Historical Debut Timeline (Full Width)
                 <div class="chart-container chart-container-full">
                     <div class="chart-header-block">
                         <h2 class="chart-title">"Champions Released by Year"</h2>
@@ -425,12 +429,12 @@ fn donut_slice_path(
 #[cfg(target_arch = "wasm32")]
 fn render_hero_type_chart(slices: &[MetricSlice], state: RwSignal<AppState>) -> impl IntoView {
     let max_val = 50.0;
-    let width = 600.0;
-    let height = 300.0;
-    let left_margin = 45.0;
-    let right_margin = 25.0;
-    let top_margin = 25.0;
-    let bottom_margin = 40.0;
+    let width = 900.0;
+    let height = 340.0;
+    let left_margin = 55.0;
+    let right_margin = 35.0;
+    let top_margin = 30.0;
+    let bottom_margin = 45.0;
     let plot_w = width - left_margin - right_margin;
     let plot_h = height - top_margin - bottom_margin;
 
@@ -445,7 +449,7 @@ fn render_hero_type_chart(slices: &[MetricSlice], state: RwSignal<AppState>) -> 
 
     let n = slices.len().max(1);
     let step = plot_w / n as f64;
-    let bar_width = (step * 0.58).clamp(32.0, 56.0);
+    let bar_width = (step * 0.52).clamp(48.0, 72.0);
 
     let bars = slices
         .iter()
@@ -690,36 +694,46 @@ fn render_range_type_chart(
 
 #[cfg(target_arch = "wasm32")]
 fn render_resource_type_chart(slices: &[MetricSlice], state: RwSignal<AppState>) -> impl IntoView {
-    let max_val = 40.0;
-    let width = 600.0;
-    let height = 300.0;
-    let left_margin = 45.0;
-    let right_margin = 25.0;
-    let top_margin = 25.0;
-    let bottom_margin = 40.0;
+    let max_val = 160.0;
+    let width = 1000.0;
+    let height = 370.0;
+    let left_margin = 55.0;
+    let right_margin = 35.0;
+    let top_margin = 35.0;
+    let bottom_margin = 85.0;
     let plot_w = width - left_margin - right_margin;
     let plot_h = height - top_margin - bottom_margin;
 
     let colors = [
-        ("#3b82f6", "#1d4ed8"), // Mana
-        ("#ef4444", "#b91c1c"), // Fury
-        ("#eab308", "#a16207"), // Energy
-        ("#f97316", "#c2410c"), // Ferocity
-        ("#8b5cf6", "#6d28d9"), // Rage
-        ("#ec4899", "#be185d"), // Heat
-        ("#64748b", "#334155"), // Other
+        ("#3b82f6", "#1d4ed8"), // Mana (Arcane Blue)
+        ("#94a3b8", "#475569"), // None / Manaless (Slate Steel)
+        ("#eab308", "#a16207"), // Energy (Ionian Amber)
+        ("#f97316", "#c2410c"), // Fury (Burning Orange)
+        ("#06b6d4", "#0891b2"), // Flow (Wind Cyan)
+        ("#a855f7", "#7e22ce"), // Rage (Primal Violet)
+        ("#b91c1c", "#7f1d1d"), // Blood Well (Darkin Crimson)
+        ("#f59e0b", "#b45309"), // Courage (Noxian Gold)
+        ("#64748b", "#334155"), // Shield (Iron Armor)
+        ("#10b981", "#047857"), // Ferocity (Hunter Emerald)
+        ("#ec4899", "#be185d"), // Heat (Yordle Pink)
+        ("#d97706", "#92400e"), // Grit (Pit Fighter Bronze)
+        ("#ef4444", "#991b1b"), // Crimson Rush (Hemomancer Red)
     ];
 
     let n = slices.len().max(1);
     let step = plot_w / n as f64;
-    let bar_width = (step * 0.58).clamp(24.0, 48.0);
+    let bar_width = (step * 0.55).clamp(24.0, 44.0);
 
     let bars = slices
         .iter()
         .enumerate()
         .map(|(i, slice)| {
             let cx = left_margin + i as f64 * step + step / 2.0;
-            let bar_h = (slice.count as f64 / max_val) * plot_h;
+            let bar_h = if slice.count > 0 {
+                ((slice.count as f64 / max_val) * plot_h).max(6.0)
+            } else {
+                0.0
+            };
             let bar_y = top_margin + plot_h - bar_h;
             let bar_x = cx - bar_width / 2.0;
             let (c_top, c_bot) = colors
@@ -732,6 +746,7 @@ fn render_resource_type_chart(slices: &[MetricSlice], state: RwSignal<AppState>)
             let label_click = slice.label.clone();
             let label_click_txt = slice.label.clone();
             let count = slice.count;
+            let label_y = top_margin + plot_h + 16.0;
 
             view! {
                 <g class="chart-bar-group" style="cursor: pointer;">
@@ -778,11 +793,13 @@ fn render_resource_type_chart(slices: &[MetricSlice], state: RwSignal<AppState>)
                     </text>
                     <text
                         x=format!("{cx:.1}")
-                        y=format!("{:.1}", height - 12.0)
+                        y=format!("{label_y:.1}")
+                        transform=format!("rotate(-32, {cx:.1}, {label_y:.1})")
                         fill="#cbd5e1"
-                        font-size="12"
+                        font-size="11.5"
                         font-weight="600"
-                        text-anchor="middle"
+                        text-anchor="end"
+                        style="cursor: pointer;"
                         on:click=move |_| state.update(|s| s.toggle_roster_resource_type(label_click_txt.clone()))
                     >
                         {label}
@@ -792,7 +809,7 @@ fn render_resource_type_chart(slices: &[MetricSlice], state: RwSignal<AppState>)
         })
         .collect_view();
 
-    let grid_lines = [0, 10, 20, 30, 40]
+    let grid_lines = [0, 40, 80, 120, 160]
         .into_iter()
         .map(|tick| {
             let y = top_margin + plot_h - (tick as f64 / max_val) * plot_h;

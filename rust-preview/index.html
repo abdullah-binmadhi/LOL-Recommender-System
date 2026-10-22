@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#060a13" />
     <meta name="description" content="Find your League of Legends champion with a 3-model ML ensemble that runs entirely in your browser, powered by Rust and WebAssembly." />
     <title>LoL Champion Recommender</title>
-    <link rel="stylesheet" href="/LOL-Recommender-System/rust-preview/app-f9dc3da75950fa84.css" integrity="sha384-mFnNsVg8hTnBT8XBM4i71lW0HebdsPMsX9Diqn1IeLWAqx50MG1XI2IrTlsMEYoE"/>
+    <link rel="stylesheet" href="/LOL-Recommender-System/rust-preview/app-f034dd94c9e8a455.css" integrity="sha384-2eCXN24WC1RURVT5yaTRG6il/IsL+Yh2kRXVAf1aZkI/kx/4JtvBfpKnP0GSv852"/>
     
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -14,7 +14,7 @@
     
 <script type="module">
 import init, * as bindings from '/LOL-Recommender-System/rust-preview/recommender-web-8a7246f19304f6a0.js';
-const wasm = await init({ module_or_path: '/LOL-Recommender-System/rust-preview/recommender-web-56d3fa82c16fa087_bg.wasm' });
+const wasm = await init({ module_or_path: '/LOL-Recommender-System/rust-preview/recommender-web-207dd8a19112dbf3_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -23,7 +23,7 @@ window.wasmBindings = bindings;
 dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
 
 </script>
-  <link rel="modulepreload" href="/LOL-Recommender-System/rust-preview/recommender-web-8a7246f19304f6a0.js" crossorigin="anonymous" integrity="sha384-p4yQ++kDty1dB3twutM8nZREmYZoMANuefcVYvDFOfe+ixvKDqXsMZeKNLJ/RwXF"><link rel="preload" href="/LOL-Recommender-System/rust-preview/recommender-web-56d3fa82c16fa087_bg.wasm" crossorigin="anonymous" integrity="sha384-TRXJ8p5M3+68MuAtie4vwrGD93vzUhMAKRxuMWvGCh+CJ0YkU7wzuHRBOvISLI8V" as="fetch" type="application/wasm"></head>
+  <link rel="modulepreload" href="/LOL-Recommender-System/rust-preview/recommender-web-8a7246f19304f6a0.js" crossorigin="anonymous" integrity="sha384-p4yQ++kDty1dB3twutM8nZREmYZoMANuefcVYvDFOfe+ixvKDqXsMZeKNLJ/RwXF"><link rel="preload" href="/LOL-Recommender-System/rust-preview/recommender-web-207dd8a19112dbf3_bg.wasm" crossorigin="anonymous" integrity="sha384-YsNYFtFzP4aWLs9BfifENpe0kIAO4tSp9JkY/02OeGgodp5GGx+9DmN3n4SkufyT" as="fetch" type="application/wasm"></head>
   <body>
     <div id="app"></div>
   </body>
