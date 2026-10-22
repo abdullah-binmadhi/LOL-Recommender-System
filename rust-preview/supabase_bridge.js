@@ -26,6 +26,20 @@
     };
   }
 
+  // Check for OAuth error in URL hash
+  if (typeof window !== "undefined" && window.location && window.location.hash) {
+    if (window.location.hash.includes("error_description")) {
+      try {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const errorDesc = hashParams.get("error_description") || hashParams.get("error");
+        if (errorDesc) {
+          console.warn("Supabase Auth error from OAuth callback:", errorDesc);
+          alert("Authentication notice: " + decodeURIComponent(errorDesc.replace(/\+/g, " ")));
+        }
+      } catch (_) {}
+    }
+  }
+
   // Initialize official Supabase client if library is available
   if (window.supabase && typeof window.supabase.createClient === "function") {
     try {
@@ -36,6 +50,16 @@
           detectSessionInUrl: true
         }
       });
+
+      // Clean access_token from hash after client initialization
+      if (typeof window !== "undefined" && window.location && window.location.hash && window.location.hash.includes("access_token")) {
+        setTimeout(() => {
+          if (window.history && window.history.replaceState) {
+            const cleanUrl = window.location.origin + window.location.pathname + window.location.search;
+            window.history.replaceState(null, "", cleanUrl);
+          }
+        }, 500);
+      }
 
       // Listen for auth state changes
       client.auth.onAuthStateChange(async (event, session) => {
@@ -101,8 +125,7 @@
       const { data, error } = await client.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: redirectTo,
-          skipBrowserRedirect: true
+          redirectTo: redirectTo
         }
       });
 
@@ -112,32 +135,6 @@
         return false;
       }
 
-      if (data && data.url) {
-        // Probe endpoint to detect if provider is not enabled before navigating
-        try {
-          const probe = await fetch(data.url, { method: "GET" });
-          if (probe.status === 400) {
-            const probeJson = await probe.json().catch(() => ({}));
-            if (probeJson.error_code === "validation_failed" || (probeJson.msg && probeJson.msg.includes("not enabled"))) {
-              window.dispatchEvent(new CustomEvent("supabase-oauth-config-required", {
-                detail: {
-                  provider: "google",
-                  error: probeJson.msg || "Unsupported provider: provider is not enabled",
-                  dashboardUrl: "https://supabase.com/dashboard/project/erfybpoymihcepxnaosj/auth/providers",
-                  callbackUrl: "https://erfybpoymihcepxnaosj.supabase.co/auth/v1/callback"
-                }
-              }));
-              return false;
-            }
-          }
-        } catch (e) {
-          // If probe fails or is blocked, continue
-          console.warn("OAuth probe warning:", e);
-        }
-
-        window.location.href = data.url;
-        return true;
-      }
       return true;
     },
 

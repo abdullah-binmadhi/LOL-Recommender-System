@@ -94,11 +94,11 @@ fn test_resource_type_deterministic() {
 #[test]
 fn test_release_year_distribution() {
     let releases = release_year_distribution();
-    assert_eq!(releases.len(), 16);
+    assert_eq!(releases.len(), 18);
     assert_eq!(releases[0].label, "2009");
     assert_eq!(releases[0].count, 40);
-    assert_eq!(releases[releases.len() - 1].label, "2024");
-    assert_eq!(releases[releases.len() - 1].count, 3);
+    assert_eq!(releases[releases.len() - 1].label, "2026");
+    assert_eq!(releases[releases.len() - 1].count, 1);
 }
 
 #[test]
@@ -110,6 +110,6 @@ fn test_compute_analytics_summary() {
     assert_eq!(summary.range_types.len(), 2);
     assert_eq!(summary.difficulties.len(), 3);
     assert_eq!(summary.resource_types.len(), 7);
-    assert_eq!(summary.release_years.len(), 16);
+    assert_eq!(summary.release_years.len(), 18);
     assert!(!summary.resource_disclosure.is_empty());
 }

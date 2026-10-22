@@ -120,7 +120,7 @@ pub fn view_analytics(state: RwSignal<AppState>, summary: Arc<AnalyticsSummary>)
                 <div class="chart-container chart-container-full">
                     <div class="chart-header-block">
                         <h2 class="chart-title">"Champions Released by Year"</h2>
-                        <span class="chart-subtitle">"Historical champion debuts from 2009 launch to 2024"</span>
+                        <span class="chart-subtitle">"Historical champion debuts from 2009 launch to 2026"</span>
                     </div>
                     <div class="chart-wrapper chart-wrapper-wide">
                         {render_release_year_chart(&summary.release_years)}

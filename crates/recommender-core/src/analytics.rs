@@ -189,11 +189,11 @@ pub fn resource_type_distribution(catalog: &[CatalogEntry]) -> Vec<MetricSlice> 
         .collect()
 }
 
-/// Historical champion releases by year (2009–2024).
+/// Historical champion releases by year (2009–2026).
 ///
 /// Mirrors the dataset used in the legacy analytics dashboard.
 pub fn release_year_distribution() -> Vec<MetricSlice> {
-    const RELEASES: [(&str, usize); 16] = [
+    const RELEASES: [(&str, usize); 18] = [
         ("2009", 40),
         ("2010", 24),
         ("2011", 24),
@@ -208,8 +208,10 @@ pub fn release_year_distribution() -> Vec<MetricSlice> {
         ("2020", 5),
         ("2021", 4),
         ("2022", 6),
-        ("2023", 5),
+        ("2023", 4),
         ("2024", 3),
+        ("2025", 1),
+        ("2026", 1),
     ];
 
     RELEASES
