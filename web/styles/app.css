@@ -108,12 +108,12 @@ button {
 }
 
 .navbar-inner {
-  max-width: 1180px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 12px 24px;
+  padding: 10px 24px;
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
 }
 
 .brand {
@@ -126,6 +126,8 @@ button {
   border-radius: 0;
   cursor: pointer;
   color: var(--text);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .brand-mark {
@@ -142,24 +144,35 @@ button {
   font-size: 1.05rem;
   letter-spacing: 0.1em;
   color: var(--text-2);
+  white-space: nowrap;
 }
 .brand-text strong { color: var(--gold-hi); font-weight: 800; }
 
-.nav { display: flex; gap: 6px; margin-left: auto; }
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  flex-wrap: nowrap;
+}
 
 .nav-link {
   background: none;
   border: 1px solid transparent;
   border-radius: 0;
-  padding: 8px 16px;
+  padding: 6px 12px;
   color: var(--text-3);
   font-family: var(--font-title);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.80rem;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
   cursor: pointer;
   transition: all 0.18s;
+  flex-shrink: 0;
 }
 .nav-link:hover:not(:disabled) {
   color: var(--gold-hi);
@@ -185,6 +198,7 @@ button {
   font-weight: 600;
   color: var(--text-3);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .pulse {
   width: 8px;
@@ -1341,6 +1355,11 @@ button {
   .metrics-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
+@media (max-width: 1200px) {
+  .engine-badge { display: none; }
+  .nav-link { padding: 6px 9px; font-size: 0.77rem; }
+}
+
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; }
   .hero-visual { order: -1; }
@@ -1356,10 +1375,10 @@ button {
 
 @media (max-width: 640px) {
   .page { padding: 24px 16px 40px; }
-  .navbar-inner { padding: 10px 16px; gap: 8px; flex-wrap: wrap; }
+  .navbar-inner { padding: 10px 14px; gap: 8px; flex-wrap: nowrap; overflow-x: auto; }
   .brand-text { display: none; }
-  .nav { margin-left: auto; display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
-  .nav-link { padding: 6px 8px; font-size: 0.76rem; }
+  .nav { margin-left: auto; display: flex; flex-wrap: nowrap; gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .nav-link { padding: 6px 8px; font-size: 0.74rem; white-space: nowrap; }
   .panel { padding: 20px; }
   .form-grid { grid-template-columns: 1fr; }
   .fan { height: 250px; }
