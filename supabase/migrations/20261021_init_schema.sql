@@ -14,6 +14,15 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
+-- Idempotently ensure all profile columns exist even if table was created in an earlier migration
+ALTER TABLE public.user_profiles
+    ADD COLUMN IF NOT EXISTS email TEXT,
+    ADD COLUMN IF NOT EXISTS full_name TEXT,
+    ADD COLUMN IF NOT EXISTS avatar_url TEXT,
+    ADD COLUMN IF NOT EXISTS riot_id TEXT,
+    ADD COLUMN IF NOT EXISTS riot_region TEXT,
+    ADD COLUMN IF NOT EXISTS preferred_role TEXT;
+
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Users can view own profile" ON public.user_profiles;
