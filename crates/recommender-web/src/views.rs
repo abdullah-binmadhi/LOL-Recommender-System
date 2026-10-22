@@ -75,6 +75,10 @@ pub fn App() -> impl IntoView {
         state.update(|c| c.set_auth_user(Some(user)));
     }
 
+    if let Some(matches) = storage::load_cached_riot_matches() {
+        state.update(|c| c.set_live_matches(Some(matches)));
+    }
+
     let auth_listener = window_event_listener(
         leptos::ev::Custom::new("supabase-auth-changed"),
         move |_: web_sys::CustomEvent| {
@@ -82,6 +86,18 @@ pub fn App() -> impl IntoView {
         },
     );
     on_cleanup(move || auth_listener.remove());
+
+    let riot_listener = window_event_listener(
+        leptos::ev::Custom::new("riot-telemetry-synced"),
+        move |_: web_sys::CustomEvent| {
+            if let Some(matches) = storage::load_cached_riot_matches() {
+                state.update(|c| c.set_live_matches(Some(matches)));
+            } else {
+                state.update(|c| c.set_syncing_riot(false));
+            }
+        },
+    );
+    on_cleanup(move || riot_listener.remove());
 
     let oauth_config_listener = window_event_listener(
         leptos::ev::Custom::new("supabase-oauth-config-required"),
@@ -1988,13 +2004,15 @@ fn view_link_riot_modal(state: RwSignal<AppState>) -> impl IntoView {
                         let id = riot_id.get().trim().to_string();
                         let reg = region.get();
                         storage::supabase_update_riot_profile(&id, &reg);
+                        storage::supabase_fetch_riot_telemetry(&id, &reg);
                         state.update(|c| {
                             c.update_riot_profile(id, reg);
+                            c.set_syncing_riot(true);
                             c.close_modal();
                         });
                     }
                 >
-                    "Save Riot Profile"
+                    "Save & Sync Riot Profile"
                 </Button>
             </footer>
         </Dialog>

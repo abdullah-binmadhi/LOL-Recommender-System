@@ -147,6 +147,8 @@ pub struct AppState {
     pub scoring: bool,
     #[allow(dead_code)]
     pub demo_telemetry: bool,
+    pub live_player_matches: Option<Vec<recommender_core::player_analytics::AdoptedMatch>>,
+    pub is_syncing_riot: bool,
 }
 
 impl Default for AppState {
@@ -162,7 +164,9 @@ impl Default for AppState {
             modal: None,
             error: None,
             scoring: false,
-            demo_telemetry: true,
+            demo_telemetry: false,
+            live_player_matches: None,
+            is_syncing_riot: false,
         }
     }
 }
@@ -231,10 +235,39 @@ impl AppState {
 
     #[allow(dead_code)]
     pub fn update_riot_profile(&mut self, riot_id: String, riot_region: String) {
+        let summoner = riot_id.split('#').next().unwrap_or(&riot_id).to_string();
         if let Some(ref mut user) = self.auth_user {
-            user.riot_id = Some(riot_id);
-            user.riot_region = Some(riot_region);
+            user.riot_id = Some(riot_id.clone());
+            user.riot_region = Some(riot_region.clone());
+            if user.full_name.is_empty() || user.full_name == "Mock Summoner" {
+                user.full_name = summoner;
+            }
+        } else {
+            self.auth_user = Some(AuthUser {
+                id: "local-user".into(),
+                email: "".into(),
+                full_name: summoner,
+                avatar_url: None,
+                riot_id: Some(riot_id.clone()),
+                riot_region: Some(riot_region.clone()),
+            });
         }
+        self.demo_telemetry = false;
+    }
+
+    #[allow(dead_code)]
+    pub fn set_live_matches(
+        &mut self,
+        matches: Option<Vec<recommender_core::player_analytics::AdoptedMatch>>,
+    ) {
+        self.live_player_matches = matches;
+        self.demo_telemetry = false;
+        self.is_syncing_riot = false;
+    }
+
+    #[allow(dead_code)]
+    pub fn set_syncing_riot(&mut self, syncing: bool) {
+        self.is_syncing_riot = syncing;
     }
 
     #[allow(dead_code)]

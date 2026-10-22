@@ -269,3 +269,30 @@ pub fn supabase_update_riot_profile(riot_id: &str, riot_region: &str) {
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn supabase_update_riot_profile(_riot_id: &str, _riot_region: &str) {}
+
+#[cfg(target_arch = "wasm32")]
+pub fn supabase_fetch_riot_telemetry(riot_id: &str, riot_region: &str) {
+    let code = format!(
+        "window.supabaseAuth && window.supabaseAuth.fetchRiotTelemetry({}, {})",
+        serde_json::to_string(riot_id).unwrap_or_default(),
+        serde_json::to_string(riot_region).unwrap_or_default()
+    );
+    let _ = js_sys::eval(&code);
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn supabase_fetch_riot_telemetry(_riot_id: &str, _riot_region: &str) {}
+
+#[cfg(target_arch = "wasm32")]
+pub fn load_cached_riot_matches() -> Option<Vec<recommender_core::player_analytics::AdoptedMatch>> {
+    let storage = get_storage()?;
+    let json_str = storage.get_item("lol_riot_telemetry").ok()??;
+    let val: serde_json::Value = serde_json::from_str(&json_str).ok()?;
+    let matches_val = val.get("matches")?;
+    serde_json::from_value(matches_val.clone()).ok()
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn load_cached_riot_matches() -> Option<Vec<recommender_core::player_analytics::AdoptedMatch>> {
+    None
+}

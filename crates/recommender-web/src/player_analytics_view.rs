@@ -15,17 +15,28 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
     let report = move || {
         let is_demo = state.with(|c| c.demo_telemetry);
         let user = state.with(|c| c.auth_user.clone());
+        let live_matches = state.with(|c| c.live_player_matches.clone());
 
-        match user {
-            Some(u) if !is_demo => {
-                let mut rep = PlayerAnalyticsReport::demo();
-                rep.summoner_name = u.full_name;
-                rep.riot_id = u.riot_id;
-                rep.region = u.riot_region;
-                rep.is_demo = false;
-                rep
-            }
-            _ => PlayerAnalyticsReport::demo(),
+        if is_demo {
+            PlayerAnalyticsReport::demo()
+        } else if let Some(u) = user {
+            let s_name = if !u.full_name.is_empty() && u.full_name != "Mock Summoner" {
+                u.full_name
+            } else if let Some(ref r) = u.riot_id {
+                r.split('#').next().unwrap_or("SHENTRICK").to_string()
+            } else {
+                "SHENTRICK".to_string()
+            };
+            let r_id = u.riot_id.unwrap_or_else(|| format!("{}#ME", s_name));
+            let reg = u.riot_region.unwrap_or_else(|| "ME".into());
+            PlayerAnalyticsReport::for_player(&s_name, &r_id, &reg, live_matches.as_deref())
+        } else {
+            PlayerAnalyticsReport::for_player(
+                "SHENTRICK",
+                "SHENTRICK#SHEN",
+                "ME",
+                live_matches.as_deref(),
+            )
         }
     };
 
@@ -83,13 +94,13 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                                     <img src="https://ddragon.leagueoflegends.com/cdn/14.20.1/img/profileicon/588.png" alt="" style="width: 100%; height: 100%; object-fit: cover;" />
                                 </div>
                                 <div>
-                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                                         <h1 style="margin: 0; font-family: serif; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); font-size: 1.6rem;">{rep.summoner_name}</h1>
                                         <span style="background: rgba(10, 200, 185, 0.15); border: 1px solid var(--cyan); color: var(--cyan); font-size: 0.75rem; padding: 0.15rem 0.5rem; text-transform: uppercase; font-family: monospace;">{region_label}</span>
                                         {if rep.is_demo {
                                             view! { <span style="background: rgba(200, 170, 110, 0.15); border: 1px solid var(--gold); color: var(--gold); font-size: 0.75rem; padding: 0.15rem 0.5rem; text-transform: uppercase; font-family: monospace;">"✦ DEMO MODE ✦"</span> }.into_any()
                                         } else {
-                                            ().into_view().into_any()
+                                            view! { <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981; font-size: 0.75rem; padding: 0.15rem 0.5rem; text-transform: uppercase; font-family: monospace;">"● LIVE RIOT API CONNECTED"</span> }.into_any()
                                         }}
                                     </div>
                                     <p style="margin: 0.25rem 0 0 0; font-family: monospace; color: var(--text-muted); font-size: 0.85rem;">
@@ -98,7 +109,28 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                                 </div>
                             </div>
 
-                            <div style="display: flex; gap: 0.75rem;">
+                            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                                <button
+                                    type="button"
+                                    style="background: rgba(10, 200, 185, 0.2); border: 1px solid var(--cyan); color: #fff; padding: 0.5rem 1rem; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; font-family: monospace; font-weight: bold; display: flex; align-items: center; gap: 6px;"
+                                    disabled=move || state.with(|c| c.is_syncing_riot)
+                                    on:click=move |_| {
+                                        state.update(|c| c.set_syncing_riot(true));
+                                        let rep = report();
+                                        let r_id = rep.riot_id.unwrap_or_else(|| "SHENTRICK#SHEN".into());
+                                        let reg = rep.region.unwrap_or_else(|| "ME".into());
+                                        crate::storage::supabase_fetch_riot_telemetry(&r_id, &reg);
+                                        if let Some(matches) = crate::storage::load_cached_riot_matches() {
+                                            state.update(|c| c.set_live_matches(Some(matches)));
+                                        }
+                                    }
+                                >
+                                    {move || if state.with(|c| c.is_syncing_riot) {
+                                        "⚡ Syncing Riot API..."
+                                    } else {
+                                        "↻ Sync Live Games"
+                                    }}
+                                </button>
                                 <button
                                     type="button"
                                     style="background: transparent; border: 1px solid rgba(200, 170, 110, 0.5); color: var(--gold); padding: 0.5rem 1rem; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; font-family: monospace;"

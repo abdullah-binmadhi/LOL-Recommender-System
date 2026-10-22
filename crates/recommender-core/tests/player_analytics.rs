@@ -93,3 +93,33 @@ fn test_custom_player_analytics_calculation() {
     assert_eq!(report.efficacy.win_rate_lift, 100.0);
     assert_eq!(report.efficacy.adoption_rate, 50.0);
 }
+
+#[test]
+fn test_for_player_shentrick_middle_east() {
+    let report = PlayerAnalyticsReport::for_player("SHENTRICK", "SHENTRICK#SHEN", "ME", None);
+
+    assert_eq!(report.summoner_name, "SHENTRICK");
+    assert_eq!(report.riot_id.as_deref(), Some("SHENTRICK#SHEN"));
+    assert_eq!(report.region.as_deref(), Some("ME"));
+    assert!(!report.is_demo);
+    assert_eq!(report.total_analyzed_matches, 10);
+
+    // Primary champion must be Shen
+    assert!(report.evolution.anchor_champions.contains(&"Shen".to_string()));
+
+    // Match IDs must use ME1- prefix
+    assert!(report.recent_matches.iter().all(|m| m.match_id.starts_with("ME1-")));
+
+    // Role must be Top
+    assert!(report.recent_matches.iter().all(|m| m.role == "Top"));
+
+    // Shen specific ML insights
+    assert_eq!(report.ml_insights[0].id, "stand-united-synergy");
+    assert_eq!(report.ml_insights[1].id, "ki-barrier-trading");
+    assert_eq!(report.ml_insights[2].id, "side-lane-tempo");
+
+    // Efficacy calculations
+    assert_eq!(report.efficacy.calibrated_games, 8);
+    assert_eq!(report.efficacy.calibrated_wins, 8);
+    assert_eq!(report.efficacy.calibrated_win_rate, 100.0);
+}

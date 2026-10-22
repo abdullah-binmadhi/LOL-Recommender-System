@@ -8,6 +8,14 @@
   let client = null;
   let currentUser = null;
 
+  // Retrieve saved local Riot profile if any
+  let savedRiotId = null;
+  let savedRiotRegion = null;
+  try {
+    savedRiotId = window.localStorage.getItem("lol_riot_id");
+    savedRiotRegion = window.localStorage.getItem("lol_riot_region");
+  } catch (_) {}
+
   // Check for mock test mode (?mock_auth=1)
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("mock_auth") === "1") {
@@ -15,14 +23,14 @@
   }
   const isMockAuth = urlParams.get("mock_auth") === "1" || window.localStorage.getItem("mock_auth") === "1";
 
-  if (isMockAuth) {
+  if (isMockAuth || savedRiotId) {
     currentUser = {
       id: "mock-summoner-uuid-001",
       email: "summoner@example.com",
-      full_name: "Mock Summoner",
+      full_name: savedRiotId ? savedRiotId.split("#")[0] : "SHENTRICK",
       avatar_url: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/profileicon/588.png",
-      riot_id: "Faker#T1",
-      riot_region: "KR"
+      riot_id: savedRiotId || "SHENTRICK#SHEN",
+      riot_region: savedRiotRegion || "ME"
     };
   }
 
@@ -202,11 +210,27 @@
     },
 
     updateRiotProfile: async function(riotId, riotRegion) {
+      try {
+        window.localStorage.setItem("lol_riot_id", riotId);
+        window.localStorage.setItem("lol_riot_region", riotRegion);
+      } catch (_) {}
+
       if (currentUser) {
         currentUser.riot_id = riotId;
         currentUser.riot_region = riotRegion;
+        currentUser.full_name = riotId.split("#")[0] || currentUser.full_name;
+      } else {
+        currentUser = {
+          id: "local-summoner-" + Date.now(),
+          email: "",
+          full_name: riotId.split("#")[0] || "Summoner",
+          avatar_url: "https://ddragon.leagueoflegends.com/cdn/14.20.1/img/profileicon/588.png",
+          riot_id: riotId,
+          riot_region: riotRegion
+        };
       }
-      if (client && currentUser && !isMockAuth) {
+
+      if (client && currentUser && !isMockAuth && currentUser.id && !currentUser.id.startsWith("local-")) {
         try {
           await client
             .from("user_profiles")
@@ -216,8 +240,48 @@
           console.warn("updateRiotProfile error:", e);
         }
       }
+
       window.dispatchEvent(new CustomEvent("supabase-auth-changed", { detail: currentUser }));
       return true;
+    },
+
+    fetchRiotTelemetry: async function(riotId, region, apiKey) {
+      const targetRiotId = riotId || (currentUser && currentUser.riot_id) || "SHENTRICK#SHEN";
+      const targetRegion = region || (currentUser && currentUser.riot_region) || "ME";
+
+      try {
+        const edgeFunctionUrl = `${SUPABASE_URL}/functions/v1/riot-proxy`;
+        const res = await fetch(edgeFunctionUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({
+            riot_id: targetRiotId,
+            region: targetRegion.toLowerCase(),
+            api_key: apiKey || undefined
+          })
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          console.warn("Riot proxy returned non-200:", res.status, errText);
+        } else {
+          const telemetryData = await res.json();
+          try {
+            window.localStorage.setItem("lol_riot_telemetry", JSON.stringify(telemetryData));
+          } catch (_) {}
+
+          window.dispatchEvent(new CustomEvent("riot-telemetry-synced", { detail: telemetryData }));
+          return telemetryData;
+        }
+      } catch (err) {
+        console.warn("fetchRiotTelemetry exception:", err);
+      }
+
+      return null;
     }
   };
 })();
