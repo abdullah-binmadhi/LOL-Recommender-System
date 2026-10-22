@@ -1422,3 +1422,326 @@ button {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* ==========================================================================
+   Interactive Hextech Matrix Roster & Dynamic Champion Revelation
+   ========================================================================== */
+
+.matrix-filter-ribbon {
+  background: linear-gradient(180deg, rgba(14, 28, 48, 0.85) 0%, rgba(6, 12, 22, 0.95) 100%);
+  border: 1px solid var(--gold-lo);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(200, 170, 110, 0.08);
+  padding: 14px 20px;
+  margin-bottom: 24px;
+}
+
+.matrix-filter-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.matrix-sparkle {
+  color: var(--gold-hi);
+  font-size: 1.1rem;
+  animation: pulse 2.5s infinite;
+}
+
+.matrix-title {
+  font-family: var(--font-title);
+  font-size: 0.92rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gold-hi);
+}
+
+.matrix-counter-badge {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-3);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+}
+
+.matrix-counter-badge.active {
+  color: var(--gold-hi);
+  background: rgba(200, 170, 110, 0.15);
+  border-color: var(--gold);
+  box-shadow: 0 0 8px rgba(200, 170, 110, 0.3);
+}
+
+.matrix-reset-btn {
+  margin-left: auto;
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  font-family: var(--font-title);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+
+.matrix-reset-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold-hi);
+  background: rgba(200, 170, 110, 0.1);
+}
+
+.matrix-chips-tray {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.matrix-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(200, 170, 110, 0.12);
+  border: 1px solid var(--gold);
+  color: var(--gold-hi);
+  font-size: 0.78rem;
+  font-family: var(--font-title);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.matrix-chip strong {
+  color: #ffffff;
+}
+
+.chip-x {
+  background: none;
+  border: none;
+  color: var(--gold-hi);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: bold;
+  padding: 0 2px;
+  line-height: 1;
+  transition: transform 0.15s;
+}
+
+.chip-x:hover {
+  transform: scale(1.2);
+  color: #ff6b6b;
+}
+
+/* Champion Revealed Showcase (1 Champion Match) */
+.champion-reveal-heroic {
+  background: linear-gradient(135deg, rgba(20, 30, 48, 0.95) 0%, rgba(10, 18, 30, 0.98) 100%);
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 30px rgba(200, 170, 110, 0.35), inset 0 0 20px rgba(200, 170, 110, 0.15);
+  padding: 24px;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+.reveal-badge {
+  display: inline-block;
+  font-family: var(--font-title);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #060a13;
+  background: linear-gradient(90deg, var(--gold-hi), var(--gold));
+  padding: 4px 14px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.reveal-content {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.reveal-avatar {
+  width: 104px;
+  height: 104px;
+  border: 2px solid var(--gold-hi);
+  box-shadow: 0 0 20px rgba(200, 170, 110, 0.5);
+  object-fit: cover;
+}
+
+.reveal-info {
+  flex: 1;
+  min-width: 260px;
+}
+
+.reveal-name {
+  font-family: var(--font-title);
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--gold-hi);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.reveal-title {
+  display: block;
+  font-size: 0.92rem;
+  color: var(--cyan);
+  text-transform: capitalize;
+  font-weight: 600;
+  margin-top: 2px;
+  margin-bottom: 12px;
+}
+
+.reveal-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.reveal-tag {
+  font-size: 0.74rem;
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+}
+
+.reveal-trivia {
+  font-size: 0.86rem;
+  color: var(--text-2);
+  line-height: 1.45;
+  margin-bottom: 16px;
+}
+
+.reveal-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Matched Champions Roster Grid (> 1 Match) */
+.matched-roster-section {
+  background: rgba(7, 16, 28, 0.8);
+  border: 1px solid var(--line);
+  padding: 18px 20px;
+  margin-bottom: 28px;
+}
+
+.roster-section-header {
+  margin-bottom: 14px;
+}
+
+.roster-section-header h3 {
+  font-family: var(--font-title);
+  font-size: 1.05rem;
+  color: var(--gold-hi);
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.roster-section-subtitle {
+  font-size: 0.80rem;
+  color: var(--text-3);
+}
+
+.matched-roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+  max-height: 290px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.matched-roster-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.matched-roster-grid::-webkit-scrollbar-thumb {
+  background: var(--gold-lo);
+}
+
+.roster-micro-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.roster-micro-card:hover {
+  background: rgba(200, 170, 110, 0.1);
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.micro-avatar {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--gold-lo);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.micro-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.micro-name {
+  font-size: 0.82rem;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.micro-role {
+  font-size: 0.70rem;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Zero Match Banner */
+.zero-match-banner {
+  background: rgba(30, 15, 20, 0.85);
+  border: 1px solid #e11d48;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.zero-match-title {
+  color: #f43f5e;
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.zero-match-banner p {
+  font-size: 0.82rem;
+  color: var(--text-2);
+  margin-bottom: 12px;
+}

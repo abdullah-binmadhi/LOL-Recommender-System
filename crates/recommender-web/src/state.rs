@@ -86,6 +86,52 @@ impl RegistrationDraft {
     }
 }
 
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct RosterFilter {
+    pub hero_type: Option<String>,
+    pub range_type: Option<String>,
+    pub resource_type: Option<String>,
+    pub difficulty: Option<u8>,
+    pub release_year: Option<String>,
+}
+
+impl RosterFilter {
+    #[allow(dead_code)]
+    pub fn is_active(&self) -> bool {
+        self.hero_type.is_some()
+            || self.range_type.is_some()
+            || self.resource_type.is_some()
+            || self.difficulty.is_some()
+            || self.release_year.is_some()
+    }
+
+    #[allow(dead_code)]
+    pub fn active_count(&self) -> usize {
+        let mut count = 0;
+        if self.hero_type.is_some() {
+            count += 1;
+        }
+        if self.range_type.is_some() {
+            count += 1;
+        }
+        if self.resource_type.is_some() {
+            count += 1;
+        }
+        if self.difficulty.is_some() {
+            count += 1;
+        }
+        if self.release_year.is_some() {
+            count += 1;
+        }
+        count
+    }
+
+    #[allow(dead_code)]
+    pub fn clear(&mut self) {
+        *self = Self::default();
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct AppState {
     pub screen: Screen,
@@ -93,6 +139,7 @@ pub struct AppState {
     pub auth_user: Option<AuthUser>,
     pub registration: RegistrationDraft,
     pub answers: Answers,
+    pub roster_filter: RosterFilter,
     pub current_question_index: usize,
     pub recommendation: Option<RecommendationResult>,
     pub modal: Option<Modal>,
@@ -109,6 +156,7 @@ impl Default for AppState {
             auth_user: None,
             registration: RegistrationDraft::default(),
             answers: Answers::default(),
+            roster_filter: RosterFilter::default(),
             current_question_index: 0,
             recommendation: None,
             modal: None,
@@ -120,6 +168,55 @@ impl Default for AppState {
 }
 
 impl AppState {
+    #[allow(dead_code)]
+    pub fn toggle_roster_hero_type(&mut self, val: String) {
+        if self.roster_filter.hero_type.as_deref() == Some(&val) {
+            self.roster_filter.hero_type = None;
+        } else {
+            self.roster_filter.hero_type = Some(val);
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn toggle_roster_range_type(&mut self, val: String) {
+        if self.roster_filter.range_type.as_deref() == Some(&val) {
+            self.roster_filter.range_type = None;
+        } else {
+            self.roster_filter.range_type = Some(val);
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn toggle_roster_resource_type(&mut self, val: String) {
+        if self.roster_filter.resource_type.as_deref() == Some(&val) {
+            self.roster_filter.resource_type = None;
+        } else {
+            self.roster_filter.resource_type = Some(val);
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn toggle_roster_difficulty(&mut self, val: u8) {
+        if self.roster_filter.difficulty == Some(val) {
+            self.roster_filter.difficulty = None;
+        } else {
+            self.roster_filter.difficulty = Some(val);
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn toggle_roster_release_year(&mut self, val: String) {
+        if self.roster_filter.release_year.as_deref() == Some(&val) {
+            self.roster_filter.release_year = None;
+        } else {
+            self.roster_filter.release_year = Some(val);
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn clear_roster_filter(&mut self) {
+        self.roster_filter.clear();
+    }
     #[allow(dead_code)]
     pub fn start_quiz(&mut self) {
         self.screen = Screen::Questionnaire;

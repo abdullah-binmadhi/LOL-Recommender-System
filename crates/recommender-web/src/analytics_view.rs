@@ -3,15 +3,72 @@
 //! Replaces external Chart.js and CDN dependencies with deterministic, responsive
 //! SVG charts for hero types, combat ranges, difficulty, release chronology,
 //! and disclosed illustrative resource types.
+//!
+//! Features full faceted multi-chart cross-filtering, live candidate matching,
+//! and heroic champion revelation when the matrix narrows to a unique pick.
 
 use crate::state::AppState;
 use leptos::prelude::*;
-use recommender_core::analytics::{AnalyticsSummary, DifficultyMetric, MetricSlice};
+use recommender_core::analytics::{
+    filter_champions, AnalyticsSummary, DifficultyMetric, MetricSlice,
+};
 use std::f64::consts::PI;
 use std::sync::Arc;
 
 #[cfg(target_arch = "wasm32")]
+fn champion_avatar(name: &str) -> String {
+    let api_name = match name {
+        "Aurelion Sol" => "AurelionSol",
+        "Bel'Veth" => "Belveth",
+        "Cho'Gath" => "Chogath",
+        "Dr. Mundo" => "DrMundo",
+        "Jarvan IV" => "JarvanIV",
+        "Kai'Sa" => "Kaisa",
+        "Kha'Zix" => "Khazix",
+        "Kog'Maw" => "KogMaw",
+        "Lee Sin" => "LeeSin",
+        "Master Yi" => "MasterYi",
+        "Miss Fortune" => "MissFortune",
+        "Nunu & Willump" => "Nunu",
+        "Rek'Sai" => "RekSai",
+        "Tahm Kench" => "TahmKench",
+        "Twisted Fate" => "TwistedFate",
+        "Vel'Koz" => "Velkoz",
+        "Xin Zhao" => "XinZhao",
+        _ => {
+            return format!(
+                "https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/{}.png",
+                name.chars()
+                    .filter(|character| character.is_ascii_alphanumeric())
+                    .collect::<String>()
+            );
+        }
+    };
+    format!("https://ddragon.leagueoflegends.com/cdn/15.16.1/img/champion/{api_name}.png")
+}
+
+#[cfg(target_arch = "wasm32")]
 pub fn view_analytics(state: RwSignal<AppState>, summary: Arc<AnalyticsSummary>) -> impl IntoView {
+    let summary_champions = Arc::clone(&summary);
+    let total_champions = summary.total_champions;
+
+    let filtered_champions = Memo::new(move |_| {
+        let filter = state.with(|s| s.roster_filter.clone());
+        filter_champions(
+            &summary_champions.champions,
+            filter.hero_type.as_deref(),
+            filter.range_type.as_deref(),
+            filter.resource_type.as_deref(),
+            filter.difficulty,
+            filter.release_year.as_deref(),
+        )
+        .into_iter()
+        .cloned()
+        .collect::<Vec<_>>()
+    });
+
+    let is_filtered = move || state.with(|s| s.roster_filter.is_active());
+
     view! {
         <section id="analytics-dashboard" class="analytics-dashboard active">
             <div class="analytics-nav" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
@@ -73,34 +130,243 @@ pub fn view_analytics(state: RwSignal<AppState>, summary: Arc<AnalyticsSummary>)
                 </div>
             </div>
 
+            // Interactive Filter Ribbon & Roster Matcher
+            <div class="matrix-filter-ribbon">
+                <div class="matrix-filter-header">
+                    <span class="matrix-sparkle">"✦"</span>
+                    <span class="matrix-title">"Interactive Roster Matrix"</span>
+                    {move || {
+                        let count = filtered_champions.with(|c| c.len());
+                        let total = total_champions;
+                        if is_filtered() {
+                            view! {
+                                <span class="matrix-counter-badge active">
+                                    {format!("{count} of {total} Champions Match Query")}
+                                </span>
+                            }.into_any()
+                        } else {
+                            view! {
+                                <span class="matrix-counter-badge">
+                                    "Click any chart segment below to cross-filter champions"
+                                </span>
+                            }.into_any()
+                        }
+                    }}
+                    {move || {
+                        if is_filtered() {
+                            view! {
+                                <button
+                                    type="button"
+                                    class="matrix-reset-btn"
+                                    on:click=move |_| state.update(|s| s.clear_roster_filter())
+                                >
+                                    "↺ Reset All Filters"
+                                </button>
+                            }.into_any()
+                        } else {
+                            view! { <span class="matrix-reset-placeholder"></span> }.into_any()
+                        }
+                    }}
+                </div>
+
+                // Filter chips
+                {move || {
+                    let filter = state.with(|s| s.roster_filter.clone());
+                    let mut chips: Vec<AnyView> = Vec::new();
+
+                    if let Some(ref ht) = filter.hero_type {
+                        let ht_val = ht.clone();
+                        chips.push(view! {
+                            <span class="matrix-chip">
+                                <span class="chip-text">"Class: " <strong>{ht.clone()}</strong></span>
+                                <button type="button" class="chip-x" title="Remove filter" on:click=move |_| state.update(|s| s.toggle_roster_hero_type(ht_val.clone()))>"✕"</button>
+                            </span>
+                        }.into_any());
+                    }
+                    if let Some(ref rt) = filter.range_type {
+                        let rt_val = rt.clone();
+                        chips.push(view! {
+                            <span class="matrix-chip">
+                                <span class="chip-text">"Combat: " <strong>{rt.clone()}</strong></span>
+                                <button type="button" class="chip-x" title="Remove filter" on:click=move |_| state.update(|s| s.toggle_roster_range_type(rt_val.clone()))>"✕"</button>
+                            </span>
+                        }.into_any());
+                    }
+                    if let Some(ref res) = filter.resource_type {
+                        let res_val = res.clone();
+                        chips.push(view! {
+                            <span class="matrix-chip">
+                                <span class="chip-text">"Resource: " <strong>{res.clone()}</strong></span>
+                                <button type="button" class="chip-x" title="Remove filter" on:click=move |_| state.update(|s| s.toggle_roster_resource_type(res_val.clone()))>"✕"</button>
+                            </span>
+                        }.into_any());
+                    }
+                    if let Some(diff) = filter.difficulty {
+                        let diff_label = match diff {
+                            1 => "Low (1)",
+                            2 => "Medium (2)",
+                            3 => "High (3)",
+                            _ => "Custom",
+                        };
+                        chips.push(view! {
+                            <span class="matrix-chip">
+                                <span class="chip-text">"Difficulty: " <strong>{diff_label}</strong></span>
+                                <button type="button" class="chip-x" title="Remove filter" on:click=move |_| state.update(|s| s.toggle_roster_difficulty(diff))>"✕"</button>
+                            </span>
+                        }.into_any());
+                    }
+                    if let Some(ref yr) = filter.release_year {
+                        let yr_val = yr.clone();
+                        chips.push(view! {
+                            <span class="matrix-chip">
+                                <span class="chip-text">"Debuted: " <strong>{yr.clone()}</strong></span>
+                                <button type="button" class="chip-x" title="Remove filter" on:click=move |_| state.update(|s| s.toggle_roster_release_year(yr_val.clone()))>"✕"</button>
+                            </span>
+                        }.into_any());
+                    }
+
+                    if chips.is_empty() {
+                        view! { <span class="matrix-no-chips"></span> }.into_any()
+                    } else {
+                        view! {
+                            <div class="matrix-chips-tray">
+                                {chips}
+                            </div>
+                        }.into_any()
+                    }
+                }}
+            </div>
+
+            // Dynamic Matched Roster Section or Champion Revealed Showcase
+            {move || {
+                let list = filtered_champions.get();
+                let count = list.len();
+                let has_filter = is_filtered();
+
+                if !has_filter {
+                    return view! { <div style="display: none;"></div> }.into_any();
+                }
+
+                if count == 1 {
+                    let champ = list[0].clone();
+                    let champ_name = champ.name.clone();
+                    let champ_name_btn = champ.name.clone();
+                    let avatar = champion_avatar(&champ.name);
+                    view! {
+                        <div class="champion-reveal-heroic">
+                            <div class="reveal-badge">"✦ CHAMPION REVEALED! ✦"</div>
+                            <div class="reveal-content">
+                                <img class="reveal-avatar" src=avatar alt=champ.name.clone() />
+                                <div class="reveal-info">
+                                    <h2 class="reveal-name">{champ.name.clone()}</h2>
+                                    <span class="reveal-title">{champ.title.clone()}</span>
+                                    <div class="reveal-tags">
+                                        <span class="reveal-tag">"Class: " {champ.herotype.clone()}</span>
+                                        <span class="reveal-tag">"Combat: " {champ.range_type.clone()}</span>
+                                        <span class="reveal-tag">"Resource: " {champ.resource_type.clone()}</span>
+                                        <span class="reveal-tag">{format!("Difficulty {}/3", champ.difficulty)}</span>
+                                        <span class="reveal-tag">{format!("Debuted in {}", champ.release_year)}</span>
+                                    </div>
+                                    <p class="reveal-trivia">
+                                        {format!("Demographic Match: {} is the single champion across the entire 171-character roster uniquely satisfying all selected matrix parameters.", champ_name)}
+                                    </p>
+                                    <div class="reveal-actions">
+                                        <button
+                                            type="button"
+                                            class="btn btn-secondary btn-md"
+                                            on:click=move |_| state.update(|s| s.open_modal(crate::state::Modal::Champion(champ_name_btn.clone())))
+                                        >
+                                            "✦ Inspect Details & Counters"
+                                        </button>
+                                        <button
+                                            type="button"
+                                            class="btn btn-primary btn-md"
+                                            on:click=move |_| state.update(crate::state::AppState::start_quiz)
+                                        >
+                                            "Calibrate Quiz for This Archetype →"
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }.into_any()
+                } else if count > 1 {
+                    let cards = list.into_iter().map(|c| {
+                        let name_btn = c.name.clone();
+                        let avatar = champion_avatar(&c.name);
+                        view! {
+                            <div
+                                class="roster-micro-card"
+                                role="button"
+                                tabindex="0"
+                                title=format!("Click to inspect {}", c.name)
+                                on:click=move |_| state.update(|s| s.open_modal(crate::state::Modal::Champion(name_btn.clone())))
+                            >
+                                <img class="micro-avatar" src=avatar alt=c.name.clone() />
+                                <div class="micro-meta">
+                                    <strong class="micro-name">{c.name.clone()}</strong>
+                                    <span class="micro-role">{format!("{} · {}", c.herotype, c.range_type)}</span>
+                                </div>
+                            </div>
+                        }
+                    }).collect_view();
+
+                    view! {
+                        <div class="matched-roster-section">
+                            <div class="roster-section-header">
+                                <h3>"✦ Matched Champions (" {count} ")"</h3>
+                                <span class="roster-section-subtitle">"Click any champion card below to inspect full stats, matchups, and counters."</span>
+                            </div>
+                            <div class="matched-roster-grid">
+                                {cards}
+                            </div>
+                        </div>
+                    }.into_any()
+                } else {
+                    view! {
+                        <div class="zero-match-banner">
+                            <div class="zero-match-title">"⚠️ No Champions Match This Exact Combination"</div>
+                            <p>"No champions currently satisfy all of the active filters simultaneously. Try removing a filter to broaden your query."</p>
+                            <button
+                                type="button"
+                                class="btn btn-secondary btn-sm"
+                                on:click=move |_| state.update(|s| s.clear_roster_filter())
+                            >
+                                "↺ Reset All Filters"
+                            </button>
+                        </div>
+                    }.into_any()
+                }
+            }}
+
             <div class="chart-grid">
                 <div class="chart-container">
                     <div class="chart-header-block">
                         <h2 class="chart-title">"Champions per Hero Type"</h2>
-                        <span class="chart-subtitle">"Distribution across primary character archetypes"</span>
+                        <span class="chart-subtitle">"Click a bar to filter by class"</span>
                     </div>
                     <div class="chart-wrapper">
-                        {render_hero_type_chart(&summary.hero_types)}
+                        {render_hero_type_chart(&summary.hero_types, state)}
                     </div>
                 </div>
 
                 <div class="chart-container">
                     <div class="chart-header-block">
                         <h2 class="chart-title">"Melee vs. Ranged"</h2>
-                        <span class="chart-subtitle">"Combat engagement distance ratio"</span>
+                        <span class="chart-subtitle">"Click a slice to filter combat engagement"</span>
                     </div>
                     <div class="chart-wrapper">
-                        {render_range_type_chart(&summary.range_types, summary.total_champions)}
+                        {render_range_type_chart(&summary.range_types, summary.total_champions, state)}
                     </div>
                 </div>
 
                 <div class="chart-container">
                     <div class="chart-header-block">
                         <h2 class="chart-title">"Resource Types"</h2>
-                        <span class="chart-badge-synthetic">"⚠️ Illustrative Dataset"</span>
+                        <span class="chart-badge-synthetic">"Click a bar to filter by resource"</span>
                     </div>
                     <div class="chart-wrapper">
-                        {render_resource_type_chart(&summary.resource_types)}
+                        {render_resource_type_chart(&summary.resource_types, state)}
                     </div>
                     <p class="chart-disclosure-note">
                         {summary.resource_disclosure.clone()}
@@ -110,20 +376,20 @@ pub fn view_analytics(state: RwSignal<AppState>, summary: Arc<AnalyticsSummary>)
                 <div class="chart-container">
                     <div class="chart-header-block">
                         <h2 class="chart-title">"Champion Difficulty Distribution"</h2>
-                        <span class="chart-subtitle">"Riot mechanical learning curve ratings (1 to 3)"</span>
+                        <span class="chart-subtitle">"Click a tier to filter by mechanical curve"</span>
                     </div>
                     <div class="chart-wrapper">
-                        {render_difficulty_chart(&summary.difficulties, summary.total_champions)}
+                        {render_difficulty_chart(&summary.difficulties, summary.total_champions, state)}
                     </div>
                 </div>
 
                 <div class="chart-container chart-container-full">
                     <div class="chart-header-block">
                         <h2 class="chart-title">"Champions Released by Year"</h2>
-                        <span class="chart-subtitle">"Historical champion debuts from 2009 launch to 2026"</span>
+                        <span class="chart-subtitle">"Historical champion debuts from 2009 launch to 2026 · Click a node to filter by era"</span>
                     </div>
                     <div class="chart-wrapper chart-wrapper-wide">
-                        {render_release_year_chart(&summary.release_years)}
+                        {render_release_year_chart(&summary.release_years, state)}
                     </div>
                 </div>
             </div>
@@ -156,7 +422,7 @@ fn donut_slice_path(
 }
 
 #[cfg(target_arch = "wasm32")]
-fn render_hero_type_chart(slices: &[MetricSlice]) -> impl IntoView {
+fn render_hero_type_chart(slices: &[MetricSlice], state: RwSignal<AppState>) -> impl IntoView {
     let max_val = 50.0;
     let width = 600.0;
     let height = 300.0;
@@ -194,26 +460,43 @@ fn render_hero_type_chart(slices: &[MetricSlice]) -> impl IntoView {
                 .unwrap_or(("#6366f1", "#4338ca"));
 
             let grad_id = format!("hero_grad_{i}");
+            let label = slice.label.clone();
+            let label_click = slice.label.clone();
+            let label_click_txt = slice.label.clone();
+            let count = slice.count;
+
             view! {
-                <g class="chart-bar-group">
+                <g class="chart-bar-group" style="cursor: pointer;">
                     <defs>
                         <linearGradient id=grad_id.clone() x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stop-color=c_top />
                             <stop offset="100%" stop-color=c_bot />
                         </linearGradient>
                     </defs>
-                    <rect
-                        x=format!("{bar_x:.1}")
-                        y=format!("{bar_y:.1}")
-                        width=format!("{bar_width:.1}")
-                        height=format!("{bar_h:.1}")
-                        rx="6"
-                        fill=format!("url(#{grad_id})")
-                        stroke="rgba(255,255,255,0.25)"
-                        stroke-width="1"
-                    >
-                        <title>{format!("{}: {} champions", slice.label, slice.count)}</title>
-                    </rect>
+                    {
+                        let l = label.clone();
+                        move || {
+                            let is_active = state.with(|s| s.roster_filter.hero_type.as_deref() == Some(&l));
+                            let stroke = if is_active { "#ffd700" } else { "rgba(255,255,255,0.25)" };
+                            let stroke_w = if is_active { "2.5" } else { "1" };
+                            let l_inner = l.clone();
+                            view! {
+                                <rect
+                                    x=format!("{bar_x:.1}")
+                                    y=format!("{bar_y:.1}")
+                                    width=format!("{bar_width:.1}")
+                                    height=format!("{bar_h:.1}")
+                                    rx="6"
+                                    fill=format!("url(#{grad_id})")
+                                    stroke=stroke
+                                    stroke-width=stroke_w
+                                    on:click=move |_| state.update(|s| s.toggle_roster_hero_type(l_inner.clone()))
+                                >
+                                    <title>{format!("{l_inner}: {count} champions (Click to filter)")}</title>
+                                </rect>
+                            }
+                        }
+                    }
                     <text
                         x=format!("{cx:.1}")
                         y=format!("{:.1}", bar_y - 6.0)
@@ -221,8 +504,9 @@ fn render_hero_type_chart(slices: &[MetricSlice]) -> impl IntoView {
                         font-size="12"
                         font-weight="bold"
                         text-anchor="middle"
+                        on:click=move |_| state.update(|s| s.toggle_roster_hero_type(label_click.clone()))
                     >
-                        {slice.count}
+                        {count}
                     </text>
                     <text
                         x=format!("{cx:.1}")
@@ -231,8 +515,9 @@ fn render_hero_type_chart(slices: &[MetricSlice]) -> impl IntoView {
                         font-size="12"
                         font-weight="600"
                         text-anchor="middle"
+                        on:click=move |_| state.update(|s| s.toggle_roster_hero_type(label_click_txt.clone()))
                     >
-                        {slice.label.clone()}
+                        {label}
                     </text>
                 </g>
             }
@@ -283,7 +568,11 @@ fn render_hero_type_chart(slices: &[MetricSlice]) -> impl IntoView {
 }
 
 #[cfg(target_arch = "wasm32")]
-fn render_range_type_chart(slices: &[MetricSlice], total: usize) -> impl IntoView {
+fn render_range_type_chart(
+    slices: &[MetricSlice],
+    total: usize,
+    state: RwSignal<AppState>,
+) -> impl IntoView {
     let width = 460.0;
     let height = 300.0;
     let cx = 150.0;
@@ -312,20 +601,45 @@ fn render_range_type_chart(slices: &[MetricSlice], total: usize) -> impl IntoVie
             .copied()
             .unwrap_or(("#6366f1", "#4338ca"));
 
+        let label_for_path = slice.label.clone();
+        let label_for_legend = slice.label.clone();
+        let count = slice.count;
+        let pct = format!("{:.1}%", frac * 100.0);
+        let pct_tooltip = pct.clone();
+
+        let lp = label_for_path.clone();
         paths.push(view! {
-            <path
-                d=path_d
-                fill=color
-                stroke="#16213e"
-                stroke-width="2"
-            >
-                <title>{format!("{}: {} champions ({:.1}%)", slice.label, slice.count, frac * 100.0)}</title>
-            </path>
+            {
+                let lp_inner = lp.clone();
+                let path_d_c = path_d.clone();
+                let pct_tt = pct_tooltip.clone();
+                move || {
+                    let is_active = state.with(|s| s.roster_filter.range_type.as_deref() == Some(&lp_inner));
+                    let stroke = if is_active { "#ffd700" } else { "#16213e" };
+                    let stroke_w = if is_active { "3.5" } else { "2" };
+                    let lp_click = lp_inner.clone();
+                    view! {
+                        <path
+                            d=path_d_c.clone()
+                            fill=color
+                            stroke=stroke
+                            stroke-width=stroke_w
+                            style="cursor: pointer;"
+                            on:click=move |_| state.update(|s| s.toggle_roster_range_type(lp_click.clone()))
+                        >
+                            <title>{format!("{lp_inner}: {count} champions ({pct_tt}) · Click to filter")}</title>
+                        </path>
+                    }
+                }
+            }
         });
 
-        let pct = format!("{:.1}%", frac * 100.0);
         legend_items.push(view! {
-            <div class="legend-row">
+            <div
+                class="legend-row"
+                style="cursor: pointer;"
+                on:click=move |_| state.update(|s| s.toggle_roster_range_type(label_for_legend.clone()))
+            >
                 <span class="legend-swatch" style=format!("background-color: {color};")></span>
                 <span class="legend-label">{slice.label.clone()}</span>
                 <span class="legend-value">{format!("{} ({})", slice.count, pct)}</span>
@@ -374,7 +688,7 @@ fn render_range_type_chart(slices: &[MetricSlice], total: usize) -> impl IntoVie
 }
 
 #[cfg(target_arch = "wasm32")]
-fn render_resource_type_chart(slices: &[MetricSlice]) -> impl IntoView {
+fn render_resource_type_chart(slices: &[MetricSlice], state: RwSignal<AppState>) -> impl IntoView {
     let max_val = 40.0;
     let width = 600.0;
     let height = 300.0;
@@ -407,29 +721,49 @@ fn render_resource_type_chart(slices: &[MetricSlice]) -> impl IntoView {
             let bar_h = (slice.count as f64 / max_val) * plot_h;
             let bar_y = top_margin + plot_h - bar_h;
             let bar_x = cx - bar_width / 2.0;
-            let (c_top, c_bot) = colors.get(i % colors.len()).copied().unwrap_or(("#6366f1", "#4338ca"));
+            let (c_top, c_bot) = colors
+                .get(i % colors.len())
+                .copied()
+                .unwrap_or(("#6366f1", "#4338ca"));
 
-            let grad_id = format!("resource_grad_{i}");
+            let grad_id = format!("res_grad_{i}");
+            let label = slice.label.clone();
+            let label_click = slice.label.clone();
+            let label_click_txt = slice.label.clone();
+            let count = slice.count;
+
             view! {
-                <g class="chart-bar-group">
+                <g class="chart-bar-group" style="cursor: pointer;">
                     <defs>
                         <linearGradient id=grad_id.clone() x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stop-color=c_top />
                             <stop offset="100%" stop-color=c_bot />
                         </linearGradient>
                     </defs>
-                    <rect
-                        x=format!("{bar_x:.1}")
-                        y=format!("{bar_y:.1}")
-                        width=format!("{bar_width:.1}")
-                        height=format!("{bar_h:.1}")
-                        rx="6"
-                        fill=format!("url(#{grad_id})")
-                        stroke="rgba(255,255,255,0.2)"
-                        stroke-width="1"
-                    >
-                        <title>{format!("{}: {} champions (illustrative)", slice.label, slice.count)}</title>
-                    </rect>
+                    {
+                        let l = label.clone();
+                        move || {
+                            let is_active = state.with(|s| s.roster_filter.resource_type.as_deref() == Some(&l));
+                            let stroke = if is_active { "#ffd700" } else { "rgba(255,255,255,0.25)" };
+                            let stroke_w = if is_active { "2.5" } else { "1" };
+                            let l_inner = l.clone();
+                            view! {
+                                <rect
+                                    x=format!("{bar_x:.1}")
+                                    y=format!("{bar_y:.1}")
+                                    width=format!("{bar_width:.1}")
+                                    height=format!("{bar_h:.1}")
+                                    rx="5"
+                                    fill=format!("url(#{grad_id})")
+                                    stroke=stroke
+                                    stroke-width=stroke_w
+                                    on:click=move |_| state.update(|s| s.toggle_roster_resource_type(l_inner.clone()))
+                                >
+                                    <title>{format!("{l_inner}: {count} champions · Click to filter")}</title>
+                                </rect>
+                            }
+                        }
+                    }
                     <text
                         x=format!("{cx:.1}")
                         y=format!("{:.1}", bar_y - 6.0)
@@ -437,8 +771,9 @@ fn render_resource_type_chart(slices: &[MetricSlice]) -> impl IntoView {
                         font-size="12"
                         font-weight="bold"
                         text-anchor="middle"
+                        on:click=move |_| state.update(|s| s.toggle_roster_resource_type(label_click.clone()))
                     >
-                        {slice.count}
+                        {count}
                     </text>
                     <text
                         x=format!("{cx:.1}")
@@ -447,8 +782,9 @@ fn render_resource_type_chart(slices: &[MetricSlice]) -> impl IntoView {
                         font-size="12"
                         font-weight="600"
                         text-anchor="middle"
+                        on:click=move |_| state.update(|s| s.toggle_roster_resource_type(label_click_txt.clone()))
                     >
-                        {slice.label.clone()}
+                        {label}
                     </text>
                 </g>
             }
@@ -499,7 +835,11 @@ fn render_resource_type_chart(slices: &[MetricSlice]) -> impl IntoView {
 }
 
 #[cfg(target_arch = "wasm32")]
-fn render_difficulty_chart(diffs: &[DifficultyMetric], total: usize) -> impl IntoView {
+fn render_difficulty_chart(
+    diffs: &[DifficultyMetric],
+    total: usize,
+    state: RwSignal<AppState>,
+) -> impl IntoView {
     let width = 460.0;
     let height = 300.0;
     let cx = 150.0;
@@ -532,20 +872,42 @@ fn render_difficulty_chart(diffs: &[DifficultyMetric], total: usize) -> impl Int
             .copied()
             .unwrap_or(("#6366f1", "#4338ca"));
 
+        let level = d.level;
+        let label = d.label.clone();
+        let count = d.count;
+        let pct = format!("{:.1}%", frac * 100.0);
+        let pct_tooltip = pct.clone();
+
         paths.push(view! {
-            <path
-                d=path_d
-                fill=color
-                stroke="#16213e"
-                stroke-width="2"
-            >
-                <title>{format!("{}: {} champions ({:.1}%)", d.label, d.count, frac * 100.0)}</title>
-            </path>
+            {
+                let path_d_c = path_d.clone();
+                let pct_tt = pct_tooltip.clone();
+                move || {
+                    let is_active = state.with(|s| s.roster_filter.difficulty == Some(level));
+                    let stroke = if is_active { "#ffd700" } else { "#16213e" };
+                    let stroke_w = if is_active { "3.5" } else { "2" };
+                    view! {
+                        <path
+                            d=path_d_c.clone()
+                            fill=color
+                            stroke=stroke
+                            stroke-width=stroke_w
+                            style="cursor: pointer;"
+                            on:click=move |_| state.update(|s| s.toggle_roster_difficulty(level))
+                        >
+                            <title>{format!("{label}: {count} champions ({pct_tt}) · Click to filter")}</title>
+                        </path>
+                    }
+                }
+            }
         });
 
-        let pct = format!("{:.1}%", frac * 100.0);
         legend_items.push(view! {
-            <div class="legend-row">
+            <div
+                class="legend-row"
+                style="cursor: pointer;"
+                on:click=move |_| state.update(|s| s.toggle_roster_difficulty(level))
+            >
                 <span class="legend-swatch" style=format!("background-color: {color};")></span>
                 <span class="legend-label">{d.label.clone()}</span>
                 <span class="legend-value">{format!("{} ({})", d.count, pct)}</span>
@@ -594,7 +956,7 @@ fn render_difficulty_chart(diffs: &[DifficultyMetric], total: usize) -> impl Int
 }
 
 #[cfg(target_arch = "wasm32")]
-fn render_release_year_chart(slices: &[MetricSlice]) -> impl IntoView {
+fn render_release_year_chart(slices: &[MetricSlice], state: RwSignal<AppState>) -> impl IntoView {
     let max_val = 45.0;
     let width = 960.0;
     let height = 320.0;
@@ -618,14 +980,12 @@ fn render_release_year_chart(slices: &[MetricSlice]) -> impl IntoView {
         })
         .collect();
 
-    // Build polyline points string
     let polyline_pts = points
         .iter()
         .map(|(x, y)| format!("{x:.1},{y:.1}"))
         .collect::<Vec<_>>()
         .join(" ");
 
-    // Build area polygon string (down to baseline)
     let baseline_y = top_margin + plot_h;
     let mut area_pts = format!("{left_margin:.1},{baseline_y:.1} ");
     area_pts.push_str(&polyline_pts);
@@ -664,18 +1024,36 @@ fn render_release_year_chart(slices: &[MetricSlice]) -> impl IntoView {
         .iter()
         .zip(points.iter())
         .map(|(slice, &(x, y))| {
+            let year = slice.label.clone();
+            let count = slice.count;
+            let y_c = year.clone();
+            let y_c2 = year.clone();
+
             view! {
-                <g class="chart-point-group">
-                    <circle
-                        cx=format!("{x:.1}")
-                        cy=format!("{y:.1}")
-                        r="4.5"
-                        fill="#8b5cf6"
-                        stroke="#ffffff"
-                        stroke-width="2"
-                    >
-                        <title>{format!("{}: {} champions released", slice.label, slice.count)}</title>
-                    </circle>
+                <g class="chart-point-group" style="cursor: pointer;">
+                    {
+                        let y_inner = y_c.clone();
+                        move || {
+                            let is_active = state.with(|s| s.roster_filter.release_year.as_deref() == Some(&y_inner));
+                            let r = if is_active { "7" } else { "4.5" };
+                            let fill = if is_active { "#ffd700" } else { "#8b5cf6" };
+                            let stroke_w = if is_active { "2.5" } else { "2" };
+                            let y_click = y_inner.clone();
+                            view! {
+                                <circle
+                                    cx=format!("{x:.1}")
+                                    cy=format!("{y:.1}")
+                                    r=r
+                                    fill=fill
+                                    stroke="#ffffff"
+                                    stroke-width=stroke_w
+                                    on:click=move |_| state.update(|s| s.toggle_roster_release_year(y_click.clone()))
+                                >
+                                    <title>{format!("{y_inner}: {count} champions released · Click to filter")}</title>
+                                </circle>
+                            }
+                        }
+                    }
                     <text
                         x=format!("{x:.1}")
                         y=format!("{:.1}", y - 9.0)
@@ -683,8 +1061,9 @@ fn render_release_year_chart(slices: &[MetricSlice]) -> impl IntoView {
                         font-size="11"
                         font-weight="bold"
                         text-anchor="middle"
+                        on:click=move |_| state.update(|s| s.toggle_roster_release_year(y_c.clone()))
                     >
-                        {slice.count}
+                        {count}
                     </text>
                     <text
                         x=format!("{x:.1}")
@@ -693,8 +1072,9 @@ fn render_release_year_chart(slices: &[MetricSlice]) -> impl IntoView {
                         font-size="11"
                         font-weight="500"
                         text-anchor="middle"
+                        on:click=move |_| state.update(|s| s.toggle_roster_release_year(y_c2.clone()))
                     >
-                        {slice.label.clone()}
+                        {year}
                     </text>
                 </g>
             }

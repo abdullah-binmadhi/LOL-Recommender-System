@@ -112,4 +112,35 @@ fn test_compute_analytics_summary() {
     assert_eq!(summary.resource_types.len(), 7);
     assert_eq!(summary.release_years.len(), 18);
     assert!(!summary.resource_disclosure.is_empty());
+    assert_eq!(summary.champions.len(), 171);
+}
+
+#[test]
+fn test_filter_champions_cross_faceted() {
+    let catalog = load_test_catalog();
+    let summary = compute_analytics(&catalog);
+
+    // Filter Melee
+    let melee = recommender_core::analytics::filter_champions(
+        &summary.champions,
+        None,
+        Some("Melee"),
+        None,
+        None,
+        None,
+    );
+    assert!(!melee.is_empty());
+    assert!(melee.iter().all(|c| c.range_type == "Melee"));
+
+    // Filter Melee + Tank + 2010
+    let filtered = recommender_core::analytics::filter_champions(
+        &summary.champions,
+        Some("Tank"),
+        Some("Melee"),
+        None,
+        None,
+        Some("2010"),
+    );
+    assert!(!filtered.is_empty());
+    assert!(filtered.iter().any(|c| c.name == "Shen"));
 }
