@@ -136,12 +136,12 @@ impl QuestionnaireDefinition {
     /// Read the historical questionnaire unchanged; its JSON remains the canonical source during
     /// parity checks against legacy migration fixtures.
     pub fn current() -> Result<Self, Error> {
-        Self::from_json(include_str!("../data/questions_legacy.json"))
+        Self::from_json(include_str!("../../../src/data/questions.json"))
     }
 
     /// Modern 25-question comprehensive assessment across 5 tactical stages.
     pub fn modern() -> Result<Self, Error> {
-        Self::from_json(include_str!("../../../src/data/questions.json"))
+        Self::from_json(include_str!("../data/questions_modern.json"))
     }
 
     /// Match the production successful-load projection used by the current quiz UI.

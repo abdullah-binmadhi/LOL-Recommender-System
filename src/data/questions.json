@@ -2,228 +2,104 @@
   "questions": [
     {
       "id": 1,
-      "text": "What mechanical complexity and APM are you most comfortable with?",
+      "text": "What is your preferred difficulty?",
       "type": "multiple_choice",
       "options": ["Easy (1-3)", "Medium (4-6)", "Hard (7-8)", "Very Hard (9-10)"],
-      "weight": 0.9,
-      "feature_mapping": "difficulty",
-      "dimension": "Mechanical Execution & APM Comfort"
+      "weight": 0.8,
+      "feature_mapping": "difficulty"
     },
     {
       "id": 2,
-      "text": "Which primary champion class best represents your gameplay fantasy?",
-      "type": "multiple_choice",
+      "text": "What is your preferred role?",
+      "type": "multiple_choice", 
       "options": ["Tank", "Fighter", "Assassin", "Mage", "Marksman", "Support"],
-      "weight": 1.0,
-      "feature_mapping": "role",
-      "dimension": "Core Champion Archetype"
+      "weight": 0.9,
+      "feature_mapping": "role"
     },
     {
       "id": 3,
-      "text": "What is your primary lane or role assignment on Summoner's Rift?",
+      "text": "What is your preferred position?",
       "type": "multiple_choice",
       "options": ["Top", "Jungle", "Mid", "Bot", "Support"],
-      "weight": 1.0,
-      "feature_mapping": "position",
-      "dimension": "Map Assignment & Positioning"
+      "weight": 0.9,
+      "feature_mapping": "position"
     },
     {
       "id": 4,
-      "text": "What is your primary job description inside a chaotic teamfight?",
+      "text": "What playstyle do you prefer?",
       "type": "multiple_choice",
       "options": ["High Damage Output", "Tanky and Durable", "Support Team", "Balanced/Hybrid"],
-      "weight": 0.85,
-      "feature_mapping": "playstyle",
-      "dimension": "Teamfight Combat Role"
+      "weight": 0.8,
+      "feature_mapping": "playstyle"
     },
     {
       "id": 5,
-      "text": "How do you prefer to position relative to enemy champions?",
+      "text": "Do you prefer range or melee?",
       "type": "multiple_choice",
       "options": ["Ranged", "Melee", "No Preference"],
-      "weight": 0.8,
-      "feature_mapping": "attack_range",
-      "dimension": "Combat Spacing & Range"
+      "weight": 0.7,
+      "feature_mapping": "attack_range"
     },
     {
       "id": 6,
-      "text": "Which resource management system matches your playstyle?",
+      "text": "What is your preferred champion resource?",
       "type": "multiple_choice",
       "options": ["Energy", "Mana", "Ferocity", "Fury", "Rage", "Heat", "No Preference"],
-      "weight": 0.75,
-      "feature_mapping": "resource_type",
-      "dimension": "Resource System"
+      "weight": 0.7,
+      "feature_mapping": "resource_type"
     },
     {
       "id": 7,
-      "text": "What damage profile do you prefer outputting?",
+      "text": "What is your preferred damage type?",
       "type": "multiple_choice",
       "options": ["Physical", "Magic", "No Preference"],
       "weight": 0.8,
-      "feature_mapping": "damage_type",
-      "dimension": "Damage Profile & Composition"
+      "feature_mapping": "damage_type"
     },
     {
       "id": 8,
-      "text": "At what phase of the match do you want to be at your absolute strongest?",
+      "text": "How do you usually respond under pressure in a game?",
       "type": "multiple_choice",
-      "options": ["Early Game Lane Bully (1-6)", "Mid-Game Power Spiker (1-2 Items)", "Late-Game Hypercarry (3+ Items)", "Linear & Consistent"],
-      "weight": 0.85,
-      "feature_mapping": "power_curve",
-      "dimension": "Power Curve & Scaling"
+      "options": ["Stay calm and strategic", "Take charge and lead", "Get aggressive and take risks", "Play cautiously to avoid mistakes"],
+      "weight": 0.6,
+      "feature_mapping": "pressure_response",
+      "dimension": "Emotional stability & risk-taking"
     },
     {
       "id": 9,
-      "text": "How do you prefer your abilities to land on targets?",
+      "text": "What type of character aesthetic appeals to you most?",
       "type": "multiple_choice",
-      "options": ["High Skillshot & Precision", "Point-and-Click Targeted", "Auto-Attack & Kiting Heavy", "Area of Effect Zones"],
-      "weight": 0.8,
-      "feature_mapping": "targeting_style",
-      "dimension": "Targeting & Execution"
+      "options": ["Heroic", "Mysterious", "Dark and edgy", "Cute or playful", "Monstrous or non-human"],
+      "weight": 0.5,
+      "feature_mapping": "aesthetic_preference",
+      "dimension": "Aesthetic & identity preference"
     },
     {
       "id": 10,
-      "text": "What ability rotation rhythm feels most natural to you?",
+      "text": "When cooperating with others, how do you prefer to contribute to the team?",
       "type": "multiple_choice",
-      "options": ["Rapid Spammer (1-2s)", "Standard Rotation Combos (8-10s)", "Game-Changing Long Cooldown Ultimate", "Auto-Attack Enhancers"],
-      "weight": 0.75,
-      "feature_mapping": "cooldown_cadence",
-      "dimension": "Ability Cadence & Rhythm"
+      "options": ["Lead and make decisions", "Support and enable others", "Balance between both", "Stay independent and focus on my role"],
+      "weight": 0.7,
+      "feature_mapping": "team_contribution",
+      "dimension": "Teamwork & leadership orientation"
     },
     {
       "id": 11,
-      "text": "Where do you want to stand when a 5v5 teamfight breaks out?",
+      "text": "Which character identity do you usually prefer?",
       "type": "multiple_choice",
-      "options": ["Primary Initiator (Frontline)", "Flanker / Backline Diver", "Backline Anchor & Peeler", "Midline Skirmisher"],
-      "weight": 0.85,
-      "feature_mapping": "teamfight_stance",
-      "dimension": "Teamfight Positioning"
+      "options": ["Male", "Female", "Non-human", "No preference"],
+      "weight": 0.5,
+      "feature_mapping": "character_identity",
+      "dimension": "Character identity & self-expression"
     },
     {
       "id": 12,
-      "text": "When enemies focus you, how do you expect to survive?",
+      "text": "When faced with a difficult challenge, what best describes your approach?",
       "type": "multiple_choice",
-      "options": ["Armor, Health & Damage Reduction", "Self-Heal & Lifesteal Sustain", "Shields & Timing Barriers", "Stealth & Untargetability", "Pure Distance & Kiting"],
-      "weight": 0.8,
-      "feature_mapping": "defensive_style",
-      "dimension": "Defensive Mechanics"
-    },
-    {
-      "id": 13,
-      "text": "What type of crowd control do you value having in your kit?",
-      "type": "multiple_choice",
-      "options": ["Hard Single-Target Lockdown", "Massive AoE Stun / Knockup", "Soft CC & Zone Slows", "Zero CC / Pure Lethal Damage"],
-      "weight": 0.8,
-      "feature_mapping": "crowd_control",
-      "dimension": "Crowd Control Profile"
-    },
-    {
-      "id": 14,
-      "text": "What kind of mobility do you want from your champion?",
-      "type": "multiple_choice",
-      "options": ["Global / Semi-Global Presence", "In-Combat Multi-Dash Mobility", "High Out-of-Combat Roam Speed", "Immobile Juggernaut"],
-      "weight": 0.8,
-      "feature_mapping": "mobility_type",
-      "dimension": "Map Mobility & Relocation"
-    },
-    {
-      "id": 15,
-      "text": "How important is instant waveclear and minion clearing speed to your game plan?",
-      "type": "multiple_choice",
-      "options": ["Instant One-Shot Waveclear", "Precise Freezing & Last-Hitting", "Balanced Waveclear", "Single-Target Kill Focus"],
-      "weight": 0.7,
-      "feature_mapping": "waveclear_speed",
-      "dimension": "Wave Management"
-    },
-    {
-      "id": 16,
-      "text": "What is your primary method for closing out and winning games?",
-      "type": "multiple_choice",
-      "options": ["Dedicated Split-Push & 1v1 Duel", "5v5 Deathball Teamfighting", "Pick & Vision Ambush", "Poke & Siege from Range"],
-      "weight": 0.85,
-      "feature_mapping": "split_vs_teamfight",
-      "dimension": "Macro Win Condition"
-    },
-    {
-      "id": 17,
-      "text": "When major neutral objectives (Dragons, Barons, Grubs) spawn, what is your role?",
-      "type": "multiple_choice",
-      "options": ["Objective Shredder (% DPS)", "Zoner & Choke Blocker", "Smite / Steal Playmaker", "Cross-Map Split Pusher"],
-      "weight": 0.75,
-      "feature_mapping": "objective_affinity",
-      "dimension": "Objective Control"
-    },
-    {
-      "id": 18,
-      "text": "How do you feel about high-risk snowballing versus consistent baseline utility?",
-      "type": "multiple_choice",
-      "options": ["Snowball or Bust (High Volatility)", "Always Useful from Behind (Consistent Utility)", "Safe & Stable Scaling"],
-      "weight": 0.8,
-      "feature_mapping": "volatility_tolerance",
-      "dimension": "Variance & Consistency"
-    },
-    {
-      "id": 19,
-      "text": "How tethered do you like being to your assigned lane during the first 14 minutes?",
-      "type": "multiple_choice",
-      "options": ["Perma-Roamer (Gank Side Lanes)", "Lane Dominator (Demolish Plates)", "Reactive Roamer (Follow Fights)"],
-      "weight": 0.75,
-      "feature_mapping": "roaming_tendency",
-      "dimension": "Early Game Roam Frequency"
-    },
-    {
-      "id": 20,
-      "text": "Do you pride yourself more on winning 1v1 outplays or orchestrating team wombo-combos?",
-      "type": "multiple_choice",
-      "options": ["Pure 1v1 Solo Laner Outplayer", "Wombo-Combo Orchestrator", "Selfless Facilitator", "Equal Balance"],
-      "weight": 0.75,
-      "feature_mapping": "duelist_orientation",
-      "dimension": "Duelist vs Team Orientation"
-    },
-    {
-      "id": 21,
-      "text": "When your team is down 5,000 gold and the enemy is pushing your base, how do you play?",
-      "type": "multiple_choice",
-      "options": ["Look for the Miracle Engage", "Play Cautiously for Waveclear", "Create Cross-Map Pressure", "Protect and Peel for the Carry"],
-      "weight": 0.7,
-      "feature_mapping": "pressure_response",
-      "dimension": "Clutch Mindset & Adversity"
-    },
-    {
-      "id": 22,
-      "text": "What visual and audio combat feedback feels most satisfying to you?",
-      "type": "multiple_choice",
-      "options": ["Visceral, Heavy Impacts", "Swift, Razor-Sharp Precision", "Grand Arcane Fireworks", "High-Cadence Bullet Hell"],
+      "options": ["Analyze carefully before acting", "Jump in and adapt on the fly", "Follow the team's lead", "Focus on long-term improvement"],
       "weight": 0.6,
-      "feature_mapping": "combat_sensation",
-      "dimension": "Sensory Combat Feedback"
-    },
-    {
-      "id": 23,
-      "text": "Which lore and visual aesthetic theme appeals to you most?",
-      "type": "multiple_choice",
-      "options": ["Shadow & Demonic Assassin", "Holy & Celestial Guardian", "Hextech & Arcane Science", "Beast, Monster & Primal Nature", "Heroic & Noble Warrior"],
-      "weight": 0.65,
-      "feature_mapping": "aesthetic_preference",
-      "dimension": "Thematic Fantasy"
-    },
-    {
-      "id": 24,
-      "text": "What level of gameplay risk are you willing to take to win?",
-      "type": "multiple_choice",
-      "options": ["Ultra-High Risk Limit-Tester", "Calculated Risk (60%+ Odds)", "Risk-Averse / Safe Positioning"],
-      "weight": 0.75,
-      "feature_mapping": "risk_profile",
-      "dimension": "Risk Tolerance"
-    },
-    {
-      "id": 25,
-      "text": "At the end of a victory, what stat or achievement brings you the greatest satisfaction?",
-      "type": "multiple_choice",
-      "options": ["Most Kills & Pentakill Badge", "Highest Vision & Objective Score", "Most Damage Absorbed & Towers", "Perfect KDA & Flawless Mastery"],
-      "weight": 0.7,
       "feature_mapping": "problem_solving",
-      "dimension": "Victory Satisfaction & Fulfillment"
+      "dimension": "Cognitive style & problem-solving preference"
     }
   ]
 }
