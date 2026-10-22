@@ -2217,3 +2217,12 @@ button {
   color: var(--text-2);
   margin-bottom: 12px;
 }
+
+/* 5-Page Riot Account ML Hub Sub-Navigation */
+.analytics-subnav-btn:hover {
+  border-color: var(--cyan) !important;
+  color: #fff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(10, 200, 185, 0.22);
+}
+

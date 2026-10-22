@@ -1,11 +1,11 @@
 //! Personalized Player Analytics & Riot Account Machine Learning Hub.
 //!
-//! Provides a 5-page Summoner Intelligence & ML Hub:
-//! 1. `📊 Overview & Radar`: Executive KPIs, enlarged 5-axis Playstyle Archetype Radar, and Coaching Insights.
-//! 2. `🤖 No-Quiz Riot ML Lab`: 80/20 Train/Validation ML pipeline trained on the player's match history + No-Quiz Champion Recommendations.
-//! 3. `📜 Complete Game Logs`: Rich, filterable game logs for all matches played on the account with per-game ML grades.
-//! 4. `🏆 Played Champions Pool`: Full roster breakdown of every champion played on the account with 1-click Pin & Track.
-//! 5. `📌 Pinned Champion Tracker`: Longitudinal progress tracker & champion-specific ML win-condition thresholds.
+//! Provides a 5-page Summoner Intelligence & ML Hub with custom League of Legends Hextech SVG crests:
+//! 1. `Overview & Radar`: Executive KPIs, enlarged 5-axis Playstyle Archetype Radar, and Coaching Insights.
+//! 2. `No-Quiz Riot ML Lab`: 80/20 Train/Validation ML pipeline trained on the player's match history + No-Quiz Champion Recommendations.
+//! 3. `Complete Game Logs`: Rich, filterable game logs for all matches played on the account with per-game ML grades.
+//! 4. `Played Champions Pool`: Full roster breakdown of every champion played on the account with 1-click Pin & Track.
+//! 5. `Pinned Champion Tracker`: Longitudinal progress tracker & champion-specific ML win-condition thresholds.
 
 use crate::state::{AppState, Modal};
 use leptos::prelude::*;
@@ -32,6 +32,93 @@ fn save_pinned_champions(pins: &[String]) {
         if let Ok(json) = serde_json::to_string(pins) {
             let _ = storage.set_item(PINNED_CHAMPIONS_STORAGE_KEY, &json);
         }
+    }
+}
+
+/// Custom League of Legends Hextech & Runeterra inline SVG crest component.
+/// Replaces all generic Unicode emojis with authentic metallic gold (#c8aa6e) and Hextech cyan (#0ac8b9) vector crests.
+pub fn view_lol_icon(kind: &'static str) -> impl IntoView {
+    match kind {
+        "hex-compass" => view! {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <polygon points="12,2 20,6.5 20,17.5 12,22 4,17.5 4,6.5" stroke="#c8aa6e" stroke-width="1.6" fill="rgba(200,170,110,0.12)" />
+                <polygon points="12,5 17.5,10 15.5,17.5 8.5,17.5 6.5,10" stroke="#0ac8b9" stroke-width="1.4" fill="rgba(10,200,185,0.22)" />
+                <circle cx="12" cy="12" r="2" fill="#c8aa6e" />
+            </svg>
+        }
+        .into_any(),
+        "hex-core" => view! {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <polygon points="12,2 21,7 21,17 12,22 3,17 3,7" stroke="#0ac8b9" stroke-width="1.6" fill="rgba(10,200,185,0.14)" />
+                <polygon points="12,6.5 16.8,9.2 16.8,14.8 12,17.5 7.2,14.8 7.2,9.2" stroke="#c8aa6e" stroke-width="1.4" fill="rgba(200,170,110,0.2)" />
+                <line x1="12" y1="2" x2="12" y2="6.5" stroke="#c8aa6e" stroke-width="1.3" />
+                <line x1="21" y1="7" x2="16.8" y2="9.2" stroke="#c8aa6e" stroke-width="1.3" />
+                <line x1="21" y1="17" x2="16.8" y2="14.8" stroke="#c8aa6e" stroke-width="1.3" />
+                <line x1="12" y1="22" x2="12" y2="17.5" stroke="#c8aa6e" stroke-width="1.3" />
+                <line x1="3" y1="17" x2="7.2" y2="14.8" stroke="#c8aa6e" stroke-width="1.3" />
+                <line x1="3" y1="7" x2="7.2" y2="9.2" stroke="#c8aa6e" stroke-width="1.3" />
+                <circle cx="12" cy="12" r="2.2" fill="#0ac8b9" />
+            </svg>
+        }
+        .into_any(),
+        "match-blades" => view! {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <path d="M12 3L19 6V12C19 16.5 15.8 20.2 12 21.5C8.2 20.2 5 16.5 5 12V6L12 3Z" stroke="#c8aa6e" stroke-width="1.6" fill="rgba(200,170,110,0.12)" />
+                <path d="M8 8L16 16M16 8L8 16" stroke="#0ac8b9" stroke-width="1.8" stroke-linecap="round" />
+                <polygon points="12,6.5 13.8,10 12,13.5 10.2,10" fill="#c8aa6e" />
+            </svg>
+        }
+        .into_any(),
+        "mastery-crest" => view! {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <path d="M3 7L8 11L12 4L16 11L21 7L19 18H5L3 7Z" stroke="#c8aa6e" stroke-width="1.6" fill="rgba(200,170,110,0.18)" />
+                <polygon points="12,8.5 14.4,13 12,16.5 9.6,13" fill="#0ac8b9" stroke="#091428" stroke-width="0.8" />
+                <line x1="6" y1="20.5" x2="18" y2="20.5" stroke="#c8aa6e" stroke-width="1.8" />
+            </svg>
+        }
+        .into_any(),
+        "warden-sigil" => view! {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <polygon points="12,2 21,12 12,22 3,12" stroke="#c8aa6e" stroke-width="1.6" fill="rgba(200,170,110,0.14)" />
+                <polygon points="12,6 17.5,12 12,18 6.5,12" stroke="#0ac8b9" stroke-width="1.4" fill="rgba(10,200,185,0.2)" />
+                <circle cx="12" cy="12" r="2.2" fill="#c8aa6e" />
+            </svg>
+        }
+        .into_any(),
+        "nexus-pulse" => view! {
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <path d="M4 12A8 8 0 0 1 18.5 7.3M20 12A8 8 0 0 1 5.5 16.7" stroke="#0ac8b9" stroke-width="1.8" stroke-linecap="round" />
+                <polygon points="19,4 20.5,8.5 16,7.8" fill="#0ac8b9" />
+                <polygon points="5,20 3.5,15.5 8,16.2" fill="#0ac8b9" />
+                <polygon points="12,8.5 15.5,12 12,15.5 8.5,12" fill="#c8aa6e" />
+            </svg>
+        }
+        .into_any(),
+        "soul-link" => view! {
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <polygon points="9,5 15,12 9,19 3,12" stroke="#c8aa6e" stroke-width="1.7" fill="rgba(200,170,110,0.14)" />
+                <polygon points="15,5 21,12 15,19 9,12" stroke="#0ac8b9" stroke-width="1.7" fill="rgba(10,200,185,0.14)" />
+            </svg>
+        }
+        .into_any(),
+        "arcane-matrix" => view! {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <rect x="3" y="3" width="18" height="18" stroke="#c8aa6e" stroke-width="1.5" fill="rgba(9,20,40,0.6)" />
+                <line x1="9" y1="3" x2="9" y2="21" stroke="rgba(10,200,185,0.55)" stroke-width="1.2" />
+                <line x1="15" y1="3" x2="15" y2="21" stroke="rgba(10,200,185,0.55)" stroke-width="1.2" />
+                <line x1="3" y1="9" x2="21" y2="9" stroke="rgba(200,170,110,0.55)" stroke-width="1.2" />
+                <line x1="3" y1="15" x2="21" y2="15" stroke="rgba(200,170,110,0.55)" stroke-width="1.2" />
+                <circle cx="9" cy="9" r="2" fill="#0ac8b9" />
+                <circle cx="15" cy="15" r="2" fill="#c8aa6e" />
+            </svg>
+        }
+        .into_any(),
+        _ => view! {
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <polygon points="8,1 15,8 8,15 1,8" fill="#c8aa6e" stroke="#0ac8b9" stroke-width="1" />
+            </svg>
+        }
+        .into_any(),
     }
 }
 
@@ -103,7 +190,7 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                     <button
                         type="button"
                         class="back-button"
-                        style="background: transparent; border: 1px solid rgba(10, 200, 185, 0.4); color: var(--cyan); padding: 0.5rem 1rem; cursor: pointer; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em;"
+                        style="background: transparent; border: 1px solid rgba(10, 200, 185, 0.4); color: var(--cyan); padding: 0.5rem 1rem; cursor: pointer; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 0.45rem;"
                         on:click=move |_| {
                             if let Some(win) = web_sys::window() {
                                 let _ = win.location().set_hash("#distribution");
@@ -111,7 +198,8 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                             state.update(AppState::open_champion_distribution);
                         }
                     >
-                        "✦ Champion Distribution →"
+                        {view_lol_icon("arcane-matrix")}
+                        <span>"Champion Distribution →"</span>
                     </button>
                 </div>
             </div>
@@ -140,14 +228,24 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                                         <h1 style="margin: 0; font-family: serif; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); font-size: 1.6rem;">{rep.summoner_name}</h1>
                                         <span style="background: rgba(10, 200, 185, 0.15); border: 1px solid var(--cyan); color: var(--cyan); font-size: 0.75rem; padding: 0.15rem 0.5rem; text-transform: uppercase; font-family: monospace;">{region_label}</span>
                                         {if state.with(|c| c.riot_data_source.as_deref() == Some("live")) {
-                                            view! { <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #10b981; font-size: 0.75rem; padding: 0.15rem 0.5rem; text-transform: uppercase; font-family: monospace; font-weight: bold;">"● OFFICIAL RIOT API (LIVE)"</span> }.into_any()
+                                            view! {
+                                                <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #10b981; font-size: 0.75rem; padding: 0.15rem 0.55rem; text-transform: uppercase; font-family: monospace; font-weight: bold; display: inline-flex; align-items: center; gap: 5px;">
+                                                    {view_lol_icon("diamond")}
+                                                    <span>"OFFICIAL RIOT API (LIVE)"</span>
+                                                </span>
+                                            }.into_any()
                                         } else {
-                                            view! { <span style="background: rgba(10, 200, 185, 0.15); border: 1px solid var(--cyan); color: var(--cyan); font-size: 0.75rem; padding: 0.15rem 0.5rem; text-transform: uppercase; font-family: monospace;">"● RIOT TELEMETRY (LINKED)"</span> }.into_any()
+                                            view! {
+                                                <span style="background: rgba(10, 200, 185, 0.15); border: 1px solid var(--cyan); color: var(--cyan); font-size: 0.75rem; padding: 0.15rem 0.55rem; text-transform: uppercase; font-family: monospace; display: inline-flex; align-items: center; gap: 5px;">
+                                                    {view_lol_icon("diamond")}
+                                                    <span>"RIOT TELEMETRY (LINKED)"</span>
+                                                </span>
+                                            }.into_any()
                                         }}
                                     </div>
                                     <p style="margin: 0.3rem 0 0 0; font-family: monospace; color: var(--text-muted); font-size: 0.84rem;">
                                         "Riot Account: " <strong style="color: var(--gold);">{riot_label}</strong>
-                                        " • " <span style="color: var(--cyan);">{format!("{} Matches & {} Champions Analyzed", rep.total_analyzed_matches, rep.champion_performances.len())}</span>
+                                        " · " <span style="color: var(--cyan);">{format!("{} Matches & {} Champions Analyzed", rep.total_analyzed_matches, rep.champion_performances.len())}</span>
                                     </p>
                                 </div>
                             </div>
@@ -156,7 +254,7 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                             <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
                                 <button
                                     type="button"
-                                    style="background: rgba(10, 200, 185, 0.2); border: 1px solid var(--cyan); color: #fff; padding: 0.55rem 1.05rem; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; font-family: monospace; font-weight: bold; display: flex; align-items: center; gap: 6px;"
+                                    style="background: rgba(10, 200, 185, 0.2); border: 1px solid var(--cyan); color: #fff; padding: 0.55rem 1.05rem; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; font-family: monospace; font-weight: bold; display: inline-flex; align-items: center; gap: 7px;"
                                     disabled=move || state.with(|c| c.is_syncing_riot)
                                     on:click=move |_| {
                                         state.update(|c| c.set_syncing_riot(true));
@@ -170,34 +268,38 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                                         }
                                     }
                                 >
-                                    {move || if state.with(|c| c.is_syncing_riot) {
-                                        "⚡ Syncing Riot API..."
-                                    } else {
-                                        "↻ Sync Live Games"
-                                    }}
+                                    {view_lol_icon("nexus-pulse")}
+                                    <span>
+                                        {move || if state.with(|c| c.is_syncing_riot) {
+                                            "Syncing Riot API..."
+                                        } else {
+                                            "Sync Live Games"
+                                        }}
+                                    </span>
                                 </button>
                                 <button
                                     type="button"
-                                    style="background: rgba(200, 170, 110, 0.12); border: 1px solid var(--gold); color: var(--gold); padding: 0.55rem 1.05rem; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; font-family: monospace; font-weight: bold;"
+                                    style="background: rgba(200, 170, 110, 0.12); border: 1px solid var(--gold); color: var(--gold); padding: 0.55rem 1.05rem; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; font-family: monospace; font-weight: bold; display: inline-flex; align-items: center; gap: 7px;"
                                     on:click=move |_| state.update(|c| c.open_modal(Modal::LinkRiotAccount))
                                 >
-                                    "🔗 Link / Change Riot ID"
+                                    {view_lol_icon("soul-link")}
+                                    <span>"Link / Change Riot ID"</span>
                                 </button>
                             </div>
                         </div>
 
-                        // 5-Page Sub-Navigation Bar directly beneath/alongside Riot Controls
+                        // 5-Page Sub-Navigation Bar with Custom League of Legends Hextech SVG Crests
                         <div class="analytics-subnav-bar" style="display: flex; gap: 0.65rem; flex-wrap: wrap; padding-top: 1.1rem; align-items: center;">
                             <span style="font-family: monospace; font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.08em; margin-right: 0.25rem;">
-                                "TELEMETRY PAGES:"
+                                "HEXTECH TELEMETRY:"
                             </span>
                             {[
-                                ("overview", "📊 Overview & Radar"),
-                                ("ml_lab", "🤖 No-Quiz Riot ML Lab"),
-                                ("game_logs", "📜 Complete Game Logs"),
-                                ("champions_pool", "🏆 Played Champions Pool"),
-                                ("pinned_tracker", "📌 Pinned Champion Tracker"),
-                            ].into_iter().map(|(tab_id, tab_label)| {
+                                ("overview", "hex-compass", "Overview & Radar"),
+                                ("ml_lab", "hex-core", "No-Quiz Riot ML Lab"),
+                                ("game_logs", "match-blades", "Complete Game Logs"),
+                                ("champions_pool", "mastery-crest", "Played Champions Pool"),
+                                ("pinned_tracker", "warden-sigil", "Pinned Champion Tracker"),
+                            ].into_iter().map(|(tab_id, icon_id, tab_label)| {
                                 let is_active = cur_tab == tab_id;
                                 let bg = if is_active {
                                     "linear-gradient(135deg, rgba(10, 200, 185, 0.26), rgba(200, 170, 110, 0.22))"
@@ -216,10 +318,11 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                                     <button
                                         type="button"
                                         class="analytics-subnav-btn"
-                                        style=format!("background: {}; border: 1px solid {}; color: {}; padding: 0.5rem 0.95rem; cursor: pointer; font-family: monospace; font-size: 0.78rem; text-transform: uppercase; font-weight: bold; letter-spacing: 0.04em; transition: all 0.18s ease;", bg, border, color)
+                                        style=format!("background: {}; border: 1px solid {}; color: {}; padding: 0.5rem 0.95rem; cursor: pointer; font-family: monospace; font-size: 0.78rem; text-transform: uppercase; font-weight: bold; letter-spacing: 0.04em; transition: all 0.18s ease; display: inline-flex; align-items: center; gap: 0.45rem;", bg, border, color)
                                         on:click=move |_| active_tab.set(id_str.clone())
                                     >
-                                        {label_with_count}
+                                        {view_lol_icon(icon_id)}
+                                        <span>{label_with_count}</span>
                                     </button>
                                 }
                             }).collect::<Vec<_>>()}
@@ -289,34 +392,37 @@ fn view_page_overview_and_radar(
 
                 <div style="background: rgba(9, 20, 40, 0.85); border: 1px solid rgba(200, 170, 110, 0.3); border-top: 3px solid var(--gold); padding: 1.25rem;">
                     <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.5rem;">"Primary Anchor Pick"</div>
-                    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
                         <span style="font-size: 2.0rem; font-weight: 800; color: #fff; font-family: serif; text-transform: uppercase;">{anchor.clone()}</span>
                         <button
                             type="button"
-                            style="background: rgba(10, 200, 185, 0.15); border: 1px solid var(--cyan); color: var(--cyan); font-size: 0.7rem; padding: 0.25rem 0.55rem; cursor: pointer; font-family: monospace; text-transform: uppercase;"
+                            style="background: rgba(10, 200, 185, 0.15); border: 1px solid var(--cyan); color: var(--cyan); font-size: 0.7rem; padding: 0.25rem 0.55rem; cursor: pointer; font-family: monospace; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px;"
                             on:click=move |_| {
                                 selected_tracked_champion.set(anchor.clone());
                                 active_tab.set("pinned_tracker".into());
                             }
                         >
-                            "📌 Track ML →"
+                            {view_lol_icon("warden-sigil")}
+                            <span>"Track ML →"</span>
                         </button>
                     </div>
-                    <div style="font-size: 0.75rem; color: var(--gold); margin-top: 0.5rem;">
-                        "✦ Highest Empirical Mastery Anchor"
+                    <div style="font-size: 0.75rem; color: var(--gold); margin-top: 0.5rem; display: flex; align-items: center; gap: 5px;">
+                        {view_lol_icon("mastery-crest")}
+                        <span>"Highest Empirical Mastery Anchor"</span>
                     </div>
                 </div>
 
                 <div style="background: rgba(9, 20, 40, 0.85); border: 1px solid rgba(200, 170, 110, 0.3); border-top: 3px solid var(--cyan); padding: 1.25rem;">
                     <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.5rem;">"ML Validation Accuracy"</div>
-                    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
                         <span style="font-size: 2.2rem; font-weight: 800; color: #0ac8b9; font-family: monospace;">{format!("{:.1}%", val_acc)}</span>
                         <button
                             type="button"
-                            style="background: rgba(200, 170, 110, 0.15); border: 1px solid var(--gold); color: var(--gold); font-size: 0.7rem; padding: 0.25rem 0.55rem; cursor: pointer; font-family: monospace; text-transform: uppercase;"
+                            style="background: rgba(200, 170, 110, 0.15); border: 1px solid var(--gold); color: var(--gold); font-size: 0.7rem; padding: 0.25rem 0.55rem; cursor: pointer; font-family: monospace; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px;"
                             on:click=move |_| active_tab.set("ml_lab".into())
                         >
-                            "🤖 Open ML Lab →"
+                            {view_lol_icon("hex-core")}
+                            <span>"Open ML Lab →"</span>
                         </button>
                     </div>
                     <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
@@ -342,8 +448,14 @@ fn view_page_overview_and_radar(
                         </h3>
                         {view_radar_svg(evo.current_radar, evo.previous_radar)}
                         <div style="display: flex; justify-content: center; gap: 1.75rem; margin-top: 1rem; font-family: monospace; font-size: 0.8rem;">
-                            <span style="color: var(--gold); font-weight: bold;">"✦ Current Calibration"</span>
-                            <span style="color: var(--cyan);">"✦ Previous Calibration"</span>
+                            <span style="color: var(--gold); font-weight: bold; display: inline-flex; align-items: center; gap: 5px;">
+                                {view_lol_icon("diamond")}
+                                <span>"Current Calibration"</span>
+                            </span>
+                            <span style="color: var(--cyan); display: inline-flex; align-items: center; gap: 5px;">
+                                {view_lol_icon("diamond")}
+                                <span>"Previous Calibration"</span>
+                            </span>
                         </div>
                         <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0.85rem 0 0 0; line-height: 1.45;">
                             {evo.primary_drift_summary.clone()}
@@ -360,13 +472,14 @@ fn view_page_overview_and_radar(
                                     view! {
                                         <button
                                             type="button"
-                                            style="background: rgba(200, 170, 110, 0.15); border: 1px solid var(--gold); color: #fff; padding: 0.4rem 0.85rem; font-family: serif; text-transform: uppercase; font-size: 0.85rem; cursor: pointer;"
+                                            style="background: rgba(200, 170, 110, 0.15); border: 1px solid var(--gold); color: #fff; padding: 0.4rem 0.85rem; font-family: serif; text-transform: uppercase; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;"
                                             on:click=move |_| {
                                                 selected_tracked_champion.set(n_click.clone());
                                                 active_tab.set("pinned_tracker".into());
                                             }
                                         >
-                                            "✦ " {name.clone()} " (Inspect ML →)"
+                                            {view_lol_icon("mastery-crest")}
+                                            <span>{format!("{} (Inspect ML →)", name)}</span>
                                         </button>
                                     }
                                 }).collect::<Vec<_>>()}
@@ -436,8 +549,9 @@ where
             // Banner explaining No-Quiz Account ML Pipeline
             <div style="background: linear-gradient(90deg, rgba(10, 200, 185, 0.14), rgba(200, 170, 110, 0.12)); border: 1px solid var(--cyan); padding: 1.25rem 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div>
-                    <div style="font-family: monospace; font-size: 0.75rem; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.08em;">
-                        "⚡ ZERO-QUIZ EMPIRICAL MACHINE LEARNING PIPELINE"
+                    <div style="font-family: monospace; font-size: 0.75rem; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 6px;">
+                        {view_lol_icon("hex-core")}
+                        <span>"ZERO-QUIZ EMPIRICAL MACHINE LEARNING PIPELINE"</span>
                     </div>
                     <h2 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.35rem; margin: 0.25rem 0;">
                         "Trained & Validated Directly on Your Riot Account Match History"
@@ -447,8 +561,9 @@ where
                     </p>
                 </div>
                 <div style="font-family: monospace; text-align: right;">
-                    <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #10b981; padding: 0.35rem 0.75rem; font-size: 0.8rem; font-weight: bold;">
-                        {format!("✓ CONVERGED ({} TRAIN / {} VAL GAMES)", eval.train_samples, eval.val_samples)}
+                    <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #10b981; padding: 0.35rem 0.75rem; font-size: 0.8rem; font-weight: bold; display: inline-flex; align-items: center; gap: 6px;">
+                        {view_lol_icon("diamond")}
+                        <span>{format!("CONVERGED ({} TRAIN / {} VAL GAMES)", eval.train_samples, eval.val_samples)}</span>
                     </span>
                 </div>
             </div>
@@ -535,7 +650,7 @@ where
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; font-family: monospace;">
                             <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid #10b981; padding: 0.75rem; text-align: center;">
-                                <div style="font-size: 0.7rem; color: #10b981;">"TRUE POSITIVES (Predicted Win ✓)"</div>
+                                <div style="font-size: 0.7rem; color: #10b981;">"TRUE POSITIVES (Predicted Win)"</div>
                                 <div style="font-size: 1.5rem; font-weight: bold; color: #fff; margin-top: 0.2rem;">{tp}</div>
                             </div>
                             <div style="background: rgba(232, 64, 87, 0.12); border: 1px solid #e84057; padding: 0.75rem; text-align: center;">
@@ -547,7 +662,7 @@ where
                                 <div style="font-size: 1.5rem; font-weight: bold; color: #fff; margin-top: 0.2rem;">{fn_cnt}</div>
                             </div>
                             <div style="background: rgba(10, 200, 185, 0.12); border: 1px solid var(--cyan); padding: 0.75rem; text-align: center;">
-                                <div style="font-size: 0.7rem; color: var(--cyan);">"TRUE NEGATIVES (Predicted Loss ✓)"</div>
+                                <div style="font-size: 0.7rem; color: var(--cyan);">"TRUE NEGATIVES (Predicted Loss)"</div>
                                 <div style="font-size: 1.5rem; font-weight: bold; color: #fff; margin-top: 0.2rem;">{tn}</div>
                             </div>
                         </div>
@@ -616,14 +731,15 @@ where
                                     </span>
                                     <button
                                         type="button"
-                                        style="background: rgba(200, 170, 110, 0.16); border: 1px solid var(--gold); color: var(--gold); padding: 0.35rem 0.7rem; font-family: monospace; font-size: 0.74rem; text-transform: uppercase; cursor: pointer;"
+                                        style="background: rgba(200, 170, 110, 0.16); border: 1px solid var(--gold); color: var(--gold); padding: 0.35rem 0.7rem; font-family: monospace; font-size: 0.74rem; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;"
                                         on:click=move |_| {
                                             toggle_pin_champion(c_pin.clone());
                                             selected_tracked_champion.set(c_name.clone());
                                             active_tab.set("pinned_tracker".into());
                                         }
                                     >
-                                        "📌 Pin & Track Progress →"
+                                        {view_lol_icon("warden-sigil")}
+                                        <span>"Pin & Track Progress →"</span>
                                     </button>
                                 </div>
                             </div>
@@ -668,7 +784,6 @@ fn view_page_complete_game_logs(
 
                 // Filter Controls
                 <div style="display: flex; gap: 0.65rem; flex-wrap: wrap; align-items: center; font-family: monospace; font-size: 0.78rem;">
-                    // Outcome Filter
                     <select
                         style="background: rgba(9, 20, 40, 0.95); border: 1px solid var(--gold); color: var(--gold); padding: 0.4rem 0.65rem; font-family: monospace; font-size: 0.78rem;"
                         on:change=move |ev| log_outcome_filter.set(event_target_value(&ev))
@@ -678,7 +793,6 @@ fn view_page_complete_game_logs(
                         <option value="LOSS" selected=move || log_outcome_filter.get() == "LOSS">"Defeats Only"</option>
                     </select>
 
-                    // Role Filter
                     <select
                         style="background: rgba(9, 20, 40, 0.95); border: 1px solid var(--cyan); color: var(--cyan); padding: 0.4rem 0.65rem; font-family: monospace; font-size: 0.78rem;"
                         on:change=move |ev| log_role_filter.set(event_target_value(&ev))
@@ -691,7 +805,6 @@ fn view_page_complete_game_logs(
                         <option value="Support" selected=move || log_role_filter.get() == "Support">"Support"</option>
                     </select>
 
-                    // Champion Filter
                     <select
                         style="background: rgba(9, 20, 40, 0.95); border: 1px solid rgba(200, 170, 110, 0.5); color: #fff; padding: 0.4rem 0.65rem; font-family: monospace; font-size: 0.78rem;"
                         on:change=move |ev| log_champ_filter.set(event_target_value(&ev))
@@ -775,7 +888,7 @@ where
                         "Played Champions Pool & Bayesian Mastery Index"
                     </h2>
                     <p style="margin: 0.25rem 0 0 0; font-family: monospace; font-size: 0.8rem; color: var(--text-muted);">
-                        "Every champion collected from your Riot account games. Click 📌 Pin to track ongoing ML progress."
+                        "Every champion collected from your Riot account games. Click Pin to track ongoing ML progress."
                     </p>
                 </div>
                 <div style="display: flex; gap: 1.25rem; font-family: monospace; font-size: 0.82rem;">
@@ -832,9 +945,9 @@ where
                                                 style=move || {
                                                     let is_pinned = pinned_champions.get().iter().any(|x| x.eq_ignore_ascii_case(&c_pin));
                                                     if is_pinned {
-                                                        "background: rgba(200, 170, 110, 0.28); border: 1px solid var(--gold); color: #fff; padding: 0.3rem 0.65rem; font-family: monospace; font-size: 0.74rem; cursor: pointer; font-weight: bold;"
+                                                        "background: rgba(200, 170, 110, 0.28); border: 1px solid var(--gold); color: #fff; padding: 0.3rem 0.65rem; font-family: monospace; font-size: 0.74rem; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 5px;"
                                                     } else {
-                                                        "background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(200, 170, 110, 0.4); color: var(--gold); padding: 0.3rem 0.65rem; font-family: monospace; font-size: 0.74rem; cursor: pointer;"
+                                                        "background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(200, 170, 110, 0.4); color: var(--gold); padding: 0.3rem 0.65rem; font-family: monospace; font-size: 0.74rem; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;"
                                                     }
                                                 }
                                                 on:click={
@@ -842,26 +955,30 @@ where
                                                     move |_| toggle_pin_champion(c_pin.clone())
                                                 }
                                             >
-                                                {
-                                                    let c_check = p.champion_name.clone();
-                                                    move || {
-                                                        if pinned_champions.get().iter().any(|x| x.eq_ignore_ascii_case(&c_check)) {
-                                                            "📌 Pinned"
-                                                        } else {
-                                                            "📌 Pin"
+                                                {view_lol_icon("warden-sigil")}
+                                                <span>
+                                                    {
+                                                        let c_check = p.champion_name.clone();
+                                                        move || {
+                                                            if pinned_champions.get().iter().any(|x| x.eq_ignore_ascii_case(&c_check)) {
+                                                                "Pinned"
+                                                            } else {
+                                                                "Pin"
+                                                            }
                                                         }
                                                     }
-                                                }
+                                                </span>
                                             </button>
                                             <button
                                                 type="button"
-                                                style="background: rgba(10, 200, 185, 0.16); border: 1px solid var(--cyan); color: var(--cyan); padding: 0.3rem 0.65rem; font-family: monospace; font-size: 0.74rem; cursor: pointer;"
+                                                style="background: rgba(10, 200, 185, 0.16); border: 1px solid var(--cyan); color: var(--cyan); padding: 0.3rem 0.65rem; font-family: monospace; font-size: 0.74rem; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;"
                                                 on:click=move |_| {
                                                     selected_tracked_champion.set(c_inspect.clone());
                                                     active_tab.set("pinned_tracker".into());
                                                 }
                                             >
-                                                "🔬 ML Insights →"
+                                                {view_lol_icon("hex-core")}
+                                                <span>"ML Insights →"</span>
                                             </button>
                                         </div>
                                     </td>
@@ -899,8 +1016,9 @@ where
             // Top Bar: Pinned Champions Switcher + Dropdown Selector
             <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.25rem 1.5rem; margin-bottom: 1.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div>
-                    <div style="font-family: monospace; font-size: 0.74rem; color: var(--cyan); text-transform: uppercase;">
-                        "📌 DEDICATED CHAMPION ML TRACKER & LONGITUDINAL TELEMETRY"
+                    <div style="font-family: monospace; font-size: 0.74rem; color: var(--cyan); text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+                        {view_lol_icon("warden-sigil")}
+                        <span>"DEDICATED CHAMPION ML TRACKER & LONGITUDINAL TELEMETRY"</span>
                     </div>
                     <h2 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.3rem; margin: 0.2rem 0 0.5rem 0;">
                         "Select or Pin a Champion to Track Ongoing ML Progress"
@@ -914,7 +1032,7 @@ where
                             if pins.is_empty() {
                                 view! {
                                     <span style="font-family: monospace; font-size: 0.76rem; color: #888;">
-                                        "No champions pinned yet — click '📌 Pin This Champion' on the right to save to your dashboard."
+                                        "No champions pinned yet — click 'Pin This Champion' on the right to save to your dashboard."
                                     </span>
                                 }.into_any()
                             } else {
@@ -928,10 +1046,11 @@ where
                                             view! {
                                                 <button
                                                     type="button"
-                                                    style=format!("background: {}; border: 1px solid {}; color: #fff; padding: 0.3rem 0.7rem; font-family: monospace; font-size: 0.76rem; cursor: pointer; font-weight: bold;", bg, border)
+                                                    style=format!("background: {}; border: 1px solid {}; color: #fff; padding: 0.3rem 0.7rem; font-family: monospace; font-size: 0.76rem; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 5px;", bg, border)
                                                     on:click=move |_| selected_tracked_champion.set(p_click.clone())
                                                 >
-                                                    "📌 " {p_name}
+                                                    {view_lol_icon("warden-sigil")}
+                                                    <span>{p_name}</span>
                                                 </button>
                                             }
                                         }).collect::<Vec<_>>()}
@@ -950,7 +1069,7 @@ where
                     >
                         {insights.iter().map(|ins| {
                             let c_val = ins.champion_name.clone();
-                            let c_lbl = format!("{} ({} Games • {:.1}% WR)", ins.champion_name, ins.games_played, ins.win_rate);
+                            let c_lbl = format!("{} ({} Games · {:.1}% WR)", ins.champion_name, ins.games_played, ins.win_rate);
                             let c_check = ins.champion_name.clone();
                             let def_c = default_champ.clone();
                             view! {
@@ -978,15 +1097,16 @@ where
                                 cur
                             };
                             let is_pinned = pinned_champions.get().iter().any(|x| x.eq_ignore_ascii_case(&active_champ));
-                            let btn_label = if is_pinned { "📌 Unpin Champion" } else { "📌 Pin This Champion" };
+                            let btn_label = if is_pinned { "Unpin Champion" } else { "Pin This Champion" };
                             let c_toggle = active_champ.clone();
                             view! {
                                 <button
                                     type="button"
-                                    style="background: rgba(200, 170, 110, 0.22); border: 1px solid var(--gold); color: var(--gold); padding: 0.5rem 0.95rem; font-family: monospace; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; cursor: pointer;"
+                                    style="background: rgba(200, 170, 110, 0.22); border: 1px solid var(--gold); color: var(--gold); padding: 0.5rem 0.95rem; font-family: monospace; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;"
                                     on:click=move |_| toggle_pin_champion(c_toggle.clone())
                                 >
-                                    {btn_label}
+                                    {view_lol_icon("warden-sigil")}
+                                    <span>{btn_label}</span>
                                 </button>
                             }
                         }
@@ -1050,7 +1170,7 @@ where
                                             "Next-Game Target CS & GD@15"
                                         </div>
                                         <div style="font-size: 1.55rem; font-weight: 800; color: #10b981; font-family: monospace; margin-top: 0.4rem;">
-                                            {format!("≥ {:.1} CS/m • +{} GD", ins.target_cs_per_min, ins.target_gd_at_15)}
+                                            {format!("≥ {:.1} CS/m · +{} GD", ins.target_cs_per_min, ins.target_gd_at_15)}
                                         </div>
                                         <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem;">
                                             {format!("Current Avg GD@15: {}{}", gd_sign, ins.avg_gd_15)}
@@ -1073,8 +1193,9 @@ where
                                 // Actionable ML Directive & Bottleneck Banner
                                 <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid var(--gold); border-left: 4px solid var(--cyan); padding: 1.25rem 1.5rem; margin-bottom: 2rem;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.4rem;">
-                                        <span style="font-family: monospace; font-size: 0.78rem; color: var(--cyan); text-transform: uppercase; font-weight: bold;">
-                                            {format!("🔬 ML BOTTLENECK DIAGNOSIS FOR {}: {}", ins.champion_name.to_uppercase(), ins.primary_bottleneck)}
+                                        <span style="font-family: monospace; font-size: 0.78rem; color: var(--cyan); text-transform: uppercase; font-weight: bold; display: inline-flex; align-items: center; gap: 6px;">
+                                            {view_lol_icon("hex-core")}
+                                            <span>{format!("ML BOTTLENECK DIAGNOSIS FOR {}: {}", ins.champion_name.to_uppercase(), ins.primary_bottleneck)}</span>
                                         </span>
                                         <span style="font-family: monospace; font-size: 0.72rem; color: var(--gold);">
                                             "AUTO-UPDATES ON EVERY RIOT SYNC"
@@ -1268,12 +1389,13 @@ fn view_rich_match_row(
 
                 <div style="display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap;">
                     <strong style="font-family: serif; text-transform: uppercase; color: #fff; font-size: 1.08rem;">{champ_name}</strong>
-                    <span style="font-size: 0.76rem; color: var(--text-muted); font-family: monospace;">"• " {role_name}</span>
+                    <span style="font-size: 0.76rem; color: var(--text-muted); font-family: monospace;">"· " {role_name}</span>
                     {if is_calibrated {
                         let rank_str = calibrated_rank.map(|r| format!("Rank #{}", r)).unwrap_or_else(|| "Top Pick".into());
                         view! {
-                            <span style="background: rgba(200, 170, 110, 0.2); border: 1px solid var(--gold); color: var(--gold); font-size: 0.7rem; padding: 0.1rem 0.4rem; text-transform: uppercase; font-family: monospace;">
-                                "✦ CALIBRATED (" {rank_str} ") ✦"
+                            <span style="background: rgba(200, 170, 110, 0.2); border: 1px solid var(--gold); color: var(--gold); font-size: 0.7rem; padding: 0.1rem 0.45rem; text-transform: uppercase; font-family: monospace; display: inline-flex; align-items: center; gap: 4px;">
+                                {view_lol_icon("diamond")}
+                                <span>{format!("CALIBRATED ({})", rank_str)}</span>
                             </span>
                         }.into_any()
                     } else {
@@ -1304,13 +1426,14 @@ fn view_rich_match_row(
                 </span>
                 <button
                     type="button"
-                    style="background: transparent; border: 1px solid rgba(10, 200, 185, 0.45); color: var(--cyan); padding: 0.22rem 0.55rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
+                    style="background: transparent; border: 1px solid rgba(10, 200, 185, 0.45); color: var(--cyan); padding: 0.22rem 0.55rem; font-family: monospace; font-size: 0.72rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;"
                     on:click=move |_| {
                         selected_tracked_champion.set(champ_click.clone());
                         active_tab.set("pinned_tracker".into());
                     }
                 >
-                    "📌 Track →"
+                    {view_lol_icon("warden-sigil")}
+                    <span>"Track →"</span>
                 </button>
             </div>
         </div>
@@ -1324,7 +1447,10 @@ fn view_ml_insight_card(card: MachineLearningInsight) -> impl IntoView {
         <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.3); border-top: 3px solid var(--gold); padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between;">
             <div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                    <span style="font-size: 0.7rem; color: var(--cyan); text-transform: uppercase; font-family: monospace;">{card.category}</span>
+                    <span style="font-size: 0.7rem; color: var(--cyan); text-transform: uppercase; font-family: monospace; display: inline-flex; align-items: center; gap: 5px;">
+                        {view_lol_icon("hex-core")}
+                        <span>{card.category}</span>
+                    </span>
                     <span style="background: rgba(10, 200, 185, 0.15); border: 1px solid var(--cyan); color: var(--cyan); font-size: 0.65rem; padding: 0.1rem 0.4rem; font-family: monospace;">{card.badge}</span>
                 </div>
                 <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.05rem; margin: 0 0 0.5rem 0;">{card.title}</h3>

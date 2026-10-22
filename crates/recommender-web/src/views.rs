@@ -293,7 +293,8 @@ fn view_navbar(state: RwSignal<AppState>) -> impl IntoView {
                         "Champion Distribution"
                     </button>
                     <button type="button" class=analytics_class on:click=move |_| open_player_analytics(state)>
-                        "✦ Player Analytics ✦"
+                        {crate::player_analytics_view::view_lol_icon("hex-compass")}
+                        <span>" Player Analytics"</span>
                     </button>
                     {move || match state.with(|c| c.auth_user.clone()) {
                         Some(user) => {
@@ -427,7 +428,7 @@ fn view_start(
                     <span>"champions scored"</span>
                 </li>
                 <li>
-                    <strong>"3"</strong>
+                    <strong>"6"</strong>
                     <span>"models in the ensemble"</span>
                 </li>
                 <li>
@@ -1703,56 +1704,64 @@ fn view_math_matrices_inspector(
                     class=move || if active_tab.get() == 0 { "math-tab-btn active" } else { "math-tab-btn" }
                     on:click=move |_| active_tab.set(0)
                 >
-                    "📐 Vector Space Matrix"
+                    {crate::player_analytics_view::view_lol_icon("arcane-matrix")}
+                    <span>" Vector Space Matrix"</span>
                 </button>
                 <button
                     type="button"
                     class=move || if active_tab.get() == 1 { "math-tab-btn active" } else { "math-tab-btn" }
                     on:click=move |_| active_tab.set(1)
                 >
-                    {format!("🌲 Random Forest ({:.1}%)", rf_val)}
+                    {crate::player_analytics_view::view_lol_icon("hex-compass")}
+                    <span>{format!(" Random Forest ({:.1}%)", rf_val)}</span>
                 </button>
                 <button
                     type="button"
                     class=move || if active_tab.get() == 2 { "math-tab-btn active" } else { "math-tab-btn" }
                     on:click=move |_| active_tab.set(2)
                 >
-                    {format!("🌳 Decision Tree ({:.1}%)", dt_val)}
+                    {crate::player_analytics_view::view_lol_icon("warden-sigil")}
+                    <span>{format!(" Decision Tree ({:.1}%)", dt_val)}</span>
                 </button>
                 <button
                     type="button"
                     class=move || if active_tab.get() == 3 { "math-tab-btn active" } else { "math-tab-btn" }
                     on:click=move |_| active_tab.set(3)
                 >
-                    {format!("📍 KNN Distance ({:.1}%)", knn_val)}
+                    {crate::player_analytics_view::view_lol_icon("soul-link")}
+                    <span>{format!(" KNN Distance ({:.1}%)", knn_val)}</span>
                 </button>
                 <button
                     type="button"
                     class=move || if active_tab.get() == 4 { "math-tab-btn active" } else { "math-tab-btn" }
                     on:click=move |_| active_tab.set(4)
                 >
-                    {format!("🎲 Naive Bayes ({:.1}%)", nb_val)}
+                    {crate::player_analytics_view::view_lol_icon("hex-core")}
+                    <span>{format!(" Naive Bayes ({:.1}%)", nb_val)}</span>
                 </button>
                 <button
                     type="button"
                     class=move || if active_tab.get() == 5 { "math-tab-btn active" } else { "math-tab-btn" }
                     on:click=move |_| active_tab.set(5)
                 >
-                    {format!("📐 Cosine Angle ({:.1}%)", cos_val)}
+                    {crate::player_analytics_view::view_lol_icon("match-blades")}
+                    <span>{format!(" Cosine Angle ({:.1}%)", cos_val)}</span>
                 </button>
                 <button
                     type="button"
                     class=move || if active_tab.get() == 6 { "math-tab-btn active" } else { "math-tab-btn" }
                     on:click=move |_| active_tab.set(6)
                 >
-                    {format!("⚡ GBDT Boosted ({:.1}%)", gbdt_val)}
+                    {crate::player_analytics_view::view_lol_icon("nexus-pulse")}
+                    <span>{format!(" GBDT Boosted ({:.1}%)", gbdt_val)}</span>
                 </button>
                 <button
                     type="button"
                     class=move || if active_tab.get() == 7 { "math-tab-btn active" } else { "math-tab-btn" }
                     on:click=move |_| active_tab.set(7)
                 >
-                    {format!("🌟 Ensemble Meta ({:.1}%)", meta_val)}
+                    {crate::player_analytics_view::view_lol_icon("mastery-crest")}
+                    <span>{format!(" Ensemble Meta ({:.1}%)", meta_val)}</span>
                 </button>
             </div>
 
