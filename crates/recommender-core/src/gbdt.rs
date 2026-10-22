@@ -14,7 +14,7 @@ pub fn score(features: &Value, champion: &Value) -> Value {
     let champ_role = text(champion, "role");
     if user_role == "No Preference" || user_role == "no_preference" || user_role.is_empty() {
         total_score += 10.0 * learning_rate;
-    } else if user_role.eq_ignore_ascii_case(&champ_role) {
+    } else if user_role.eq_ignore_ascii_case(champ_role) {
         let delta = 25.0 * learning_rate;
         total_score += delta;
         matched_criteria.push(format!("Stump 1: Role match +{:.1}", delta));
@@ -71,7 +71,7 @@ pub fn score(features: &Value, champion: &Value) -> Value {
     let champ_res = text(champion, "resource_type");
     if !user_res.is_empty()
         && user_res != "No Preference"
-        && user_res.eq_ignore_ascii_case(&champ_res)
+        && user_res.eq_ignore_ascii_case(champ_res)
     {
         total_score += 10.0 * learning_rate;
         matched_criteria.push(format!("Stump 5: Resource verified: {champ_res}"));

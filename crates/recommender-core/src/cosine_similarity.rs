@@ -57,7 +57,7 @@ pub fn score(features: &Value, champion: &Value) -> Value {
     let champ_role = text(champion, "role");
     if user_role == "No Preference" || user_role == "no_preference" || user_role.is_empty() {
         // Universal fit
-    } else if user_role.eq_ignore_ascii_case(&champ_role) {
+    } else if user_role.eq_ignore_ascii_case(champ_role) {
         raw_score = (raw_score * 1.05).min(100.0);
         matched_criteria.push(format!("Role synergy boost: {champ_role}"));
     } else {

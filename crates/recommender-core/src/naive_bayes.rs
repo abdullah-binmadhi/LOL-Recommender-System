@@ -14,7 +14,7 @@ pub fn score(features: &Value, champion: &Value) -> Value {
     if user_role == "No Preference" || user_role == "no_preference" || user_role.is_empty() {
         log_likelihood += (0.95f64).ln();
         matched_criteria.push("Role: Universal prior applied".to_string());
-    } else if user_role.eq_ignore_ascii_case(&champ_role) {
+    } else if user_role.eq_ignore_ascii_case(champ_role) {
         log_likelihood += (0.90f64).ln();
         matched_criteria.push(format!("Role match: {champ_role} (P=0.90)"));
         contributing_factors.push(json!({
@@ -39,7 +39,7 @@ pub fn score(features: &Value, champion: &Value) -> Value {
 
     if user_pos == "No Preference" || user_pos == "no_preference" || user_pos.is_empty() {
         log_likelihood += (0.95f64).ln();
-    } else if positions.iter().any(|&p| p.eq_ignore_ascii_case(&user_pos)) {
+    } else if positions.iter().any(|&p| p.eq_ignore_ascii_case(user_pos)) {
         log_likelihood += (0.85f64).ln();
         matched_criteria.push(format!("Position verified: {user_pos}"));
         contributing_factors.push(json!({
@@ -75,7 +75,7 @@ pub fn score(features: &Value, champion: &Value) -> Value {
     let user_res = text(features, "resource");
     if !user_res.is_empty() && user_res != "No Preference" {
         let champ_res = text(champion, "resource_type");
-        if champ_res.eq_ignore_ascii_case(&user_res) {
+        if champ_res.eq_ignore_ascii_case(user_res) {
             log_likelihood += (0.80f64).ln();
             matched_criteria.push(format!("Resource verified: {champ_res}"));
         } else {
