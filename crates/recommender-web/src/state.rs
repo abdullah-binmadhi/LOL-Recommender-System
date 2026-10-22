@@ -382,6 +382,9 @@ impl AppState {
     pub fn begin_scoring(&mut self) -> Answers {
         self.scoring = true;
         self.error = None;
+        self.answers
+            .0
+            .insert("quiz_version".to_string(), Some("2".to_string()));
         self.answers.clone()
     }
 
@@ -455,13 +458,16 @@ pub fn filtered_options(question: &EffectiveQuestion, answers: &Answers) -> Vec<
             Some("Support" | "Mage") => Some(&["Magic", "No Preference"]),
             _ => None,
         },
-        1 => match answer(10) {
-            Some("Focus on long-term improvement") => {
-                Some(&["Medium (4-6)", "Hard (7-8)", "Very Hard (9-10)"])
+        1 => {
+            let challenge_answer = answer(12).or_else(|| answer(10));
+            match challenge_answer {
+                Some("Focus on long-term improvement") => {
+                    Some(&["Medium (4-6)", "Hard (7-8)", "Very Hard (9-10)"])
+                }
+                Some("Play cautiously to avoid mistakes") => Some(&["Easy (1-3)", "Medium (4-6)"]),
+                _ => None,
             }
-            Some("Play cautiously to avoid mistakes") => Some(&["Easy (1-3)", "Medium (4-6)"]),
-            _ => None,
-        },
+        }
         _ => None,
     };
 

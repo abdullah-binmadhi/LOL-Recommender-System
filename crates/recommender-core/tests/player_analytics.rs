@@ -105,10 +105,16 @@ fn test_for_player_shentrick_middle_east() {
     assert_eq!(report.total_analyzed_matches, 10);
 
     // Primary champion must be Shen
-    assert!(report.evolution.anchor_champions.contains(&"Shen".to_string()));
+    assert!(report
+        .evolution
+        .anchor_champions
+        .contains(&"Shen".to_string()));
 
     // Match IDs must use ME1- prefix
-    assert!(report.recent_matches.iter().all(|m| m.match_id.starts_with("ME1-")));
+    assert!(report
+        .recent_matches
+        .iter()
+        .all(|m| m.match_id.starts_with("ME1-")));
 
     // Role must be Top
     assert!(report.recent_matches.iter().all(|m| m.role == "Top"));

@@ -901,7 +901,14 @@ impl PlayerAnalyticsReport {
                 },
             ];
 
-            Self::new(s_name, Some(r_id), Some(reg), is_demo, matches, calibrations)
+            Self::new(
+                s_name,
+                Some(r_id),
+                Some(reg),
+                is_demo,
+                matches,
+                calibrations,
+            )
         } else {
             // General player fallback tailored to their name and region
             let mut demo_report = Self::demo();

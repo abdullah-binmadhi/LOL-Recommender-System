@@ -31,10 +31,13 @@ pub fn from_answers(answers: &Value) -> Value {
         .and_then(Value::as_str)
         .map_or_else(|| "no_preference".to_owned(), str::to_lowercase);
 
-    // If explicit semantic keys exist or quiz_version >= 2, use direct mapping; otherwise preserve legacy Q6-10 mapping
+    // If explicit semantic keys exist or quiz_version >= 2, use modern mapping; otherwise preserve legacy Q6-10 mapping
     let is_v2 = answers
         .get("quiz_version")
-        .and_then(Value::as_u64)
+        .and_then(|v| {
+            v.as_u64()
+                .or_else(|| v.as_str().and_then(|s| s.parse::<u64>().ok()))
+        })
         .unwrap_or(1)
         >= 2
         || answers.get("pressure_response").is_some();

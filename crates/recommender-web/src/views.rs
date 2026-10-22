@@ -382,12 +382,12 @@ fn view_start(
         <section id="start-screen" class="start-screen">
             <div class="hero">
                 <div class="hero-copy">
-                    <Badge variant=BadgeVariant::Gold>"3-model ML ensemble"</Badge>
+                    <Badge variant=BadgeVariant::Gold>"4-Model Ensemble & Bayesian Efficacy"</Badge>
                     <h1 class="hero-title">
                         "Find the champion that " <em>"plays like you"</em>
                     </h1>
                     <p class="hero-lede">
-                        "Answer a short calibration quiz. A K-Nearest Neighbors model, a Decision Tree and a Random Forest score every champion, then show you exactly why the winner fits."
+                        "Complete our 12-dimensional calibration quiz. A Random Forest, Decision Tree, KNN, and Stacked Bayesian Meta-Learner score all 172 champions and calibrate directly against your live Riot match telemetry."
                     </p>
                     <div class="hero-actions">
                         {move || {
@@ -712,6 +712,12 @@ fn view_questionnaire(
                     })
                     .collect_view();
 
+                let category_badge = match question.id {
+                    1..=5 => "Core Role & Playstyle",
+                    6..=7 => "Resource & Damage Profile",
+                    _ => "Tactical & Psychological",
+                };
+
                 view! {
                     <section
                         id=format!("question-{}", question.id)
@@ -722,6 +728,9 @@ fn view_questionnaire(
                             <div class="quiz-meta">
                                 <span class="quiz-step">
                                     {format!("Question {} of {}", question.id, question_count)}
+                                    <span style="display: inline-block; margin-left: 0.6rem; padding: 0.15rem 0.5rem; background: rgba(200, 170, 110, 0.15); border: 1px solid var(--gold); border-radius: 3px; font-size: 0.65rem; color: var(--gold); letter-spacing: 0.05em; text-transform: uppercase;">
+                                        {category_badge}
+                                    </span>
                                 </span>
                                 <span class="quiz-percent">{format!("{percent:.0}% complete")}</span>
                             </div>
@@ -1066,6 +1075,7 @@ fn view_analysis_content(
             let modal_name = entry.name.clone();
             let is_top_pick = entry.rank == 1;
             let wr = entry.win_rate.unwrap_or(50.0);
+            let meta_score = (entry.random_forest * 0.35 + entry.decision_tree * 0.25 + entry.knn * 0.20 + entry.average * 0.20).min(100.0);
             let card_class = if is_top_pick {
                 "match-card winner grand-podium"
             } else {
@@ -1108,6 +1118,7 @@ fn view_analysis_content(
                         {model_bar("RF", entry.random_forest)}
                         {model_bar("DT", entry.decision_tree)}
                         {model_bar("KNN", entry.knn)}
+                        {model_bar("META", meta_score)}
                     </div>
                 </button>
             }
@@ -1120,6 +1131,7 @@ fn view_analysis_content(
         .map(|entry| {
             let modal_name = entry.name.clone();
             let wr = entry.win_rate.unwrap_or(50.0);
+            let meta_score = (entry.random_forest * 0.35 + entry.decision_tree * 0.25 + entry.knn * 0.20 + entry.average * 0.20).min(100.0);
             let tier = presenter::tier_for(entry.average);
             view! {
                 <button
@@ -1144,6 +1156,7 @@ fn view_analysis_content(
                         <span class="roster-model-chip">{format!("RF: {:.0}%", entry.random_forest)}</span>
                         <span class="roster-model-chip">{format!("DT: {:.0}%", entry.decision_tree)}</span>
                         <span class="roster-model-chip">{format!("KNN: {:.0}%", entry.knn)}</span>
+                        <span class="roster-model-chip" style="color: var(--cyan); border-color: rgba(10, 200, 185, 0.4);">{format!("META: {:.0}%", meta_score)}</span>
                     </div>
                     <div class=format!("match-score roster-score {}", tier.css())>
                         <strong>{format!("{:.0}%", entry.average)}</strong>
@@ -1225,15 +1238,32 @@ fn view_analysis_content(
                     {model_bar("Random Forest", top_models.0)}
                     {model_bar("Decision Tree", top_models.1)}
                     {model_bar("KNN", top_models.2)}
+                    {model_bar("Stacked Meta-Learner", (top.random_forest * 0.35 + top.decision_tree * 0.25 + top.knn * 0.20 + top.average * 0.20).min(100.0))}
                 </div>
             </div>
         </section>
+
+        // Live Riot API Telemetry & Bayesian Performance Integration Card
+        <div style="background: linear-gradient(135deg, rgba(10, 200, 185, 0.12), rgba(200, 170, 110, 0.08)); border: 1px solid var(--cyan); border-radius: 6px; padding: 1.25rem 1.5rem; margin: 1.5rem 0 2rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
+            <div>
+                <span style="font-family: monospace; font-size: 0.75rem; color: var(--cyan); letter-spacing: 0.08em; text-transform: uppercase;">"● LIVE RIOT TELEMETRY & BAYESIAN CALIBRATION"</span>
+                <h3 style="font-family: serif; color: var(--gold); margin: 0.3rem 0; font-size: 1.15rem;">"Analyze In-Game Performance on Recommended Champions"</h3>
+                <p style="color: #bbb; margin: 0; font-size: 0.85rem;">"Evaluate your win rate and Bayesian shrinkage efficacy when playing recommended champions vs your general champion pool."</p>
+            </div>
+            <Button
+                variant=ButtonVariant::Primary
+                size=ButtonSize::Md
+                on:click=move |_| state.update(|s| s.screen = Screen::PlayerAnalytics)
+            >
+                "View Player Telemetry & Efficacy Index →"
+            </Button>
+        </div>
 
         <section class="block" aria-labelledby="top10-title">
             <div class="block-head hex-block-head">
                 <span class="hex-rune-tag">"✦ HEXTECH MATCHMAKING ENGINE ✦"</span>
                 <h2 id="top10-title" class="section-title">"🥇 Primal Synergy Podium"</h2>
-                <p class="muted">"Your top 3 highest-compatibility champions across all 3 AI models."</p>
+                <p class="muted">"Your top 3 highest-compatibility champions across our 4-model machine learning ensemble."</p>
             </div>
             <div class="podium-grid">
                 {top_cards}
