@@ -1,7 +1,8 @@
 use crate::compat::truthy;
 use serde_json::{json, Value};
 
-/// Preserve the production numeric answer IDs, including the legacy Q6–10 mismatch.
+/// Converts user questionnaire answers into normalized feature vectors.
+/// Supports both modern 12-question format and legacy Q6–10 numeric answer IDs.
 pub fn from_answers(answers: &Value) -> Value {
     let answer = |id: &str, default: &str| -> String {
         answers
@@ -29,20 +30,91 @@ pub fn from_answers(answers: &Value) -> Value {
         .filter(|v| truthy(v))
         .and_then(Value::as_str)
         .map_or_else(|| "no_preference".to_owned(), str::to_lowercase);
-    json!({
+
+    // If explicit semantic keys exist or quiz_version >= 2, use direct mapping; otherwise preserve legacy Q6-10 mapping
+    let is_v2 = answers
+        .get("quiz_version")
+        .and_then(Value::as_u64)
+        .unwrap_or(1)
+        >= 2
+        || answers.get("pressure_response").is_some();
+
+    let (pressure, aesthetic, team_contrib, char_id, problem) = if is_v2 {
+        (
+            answers
+                .get("pressure_response")
+                .or_else(|| answers.get("8"))
+                .and_then(Value::as_str)
+                .unwrap_or("Stay calm and strategic")
+                .to_owned(),
+            answers
+                .get("aesthetic_preference")
+                .or_else(|| answers.get("9"))
+                .and_then(Value::as_str)
+                .unwrap_or("Heroic")
+                .to_owned(),
+            answers
+                .get("team_contribution")
+                .or_else(|| answers.get("10"))
+                .and_then(Value::as_str)
+                .unwrap_or("Balance between both")
+                .to_owned(),
+            answers
+                .get("character_identity")
+                .or_else(|| answers.get("11"))
+                .and_then(Value::as_str)
+                .unwrap_or("No preference")
+                .to_owned(),
+            answers
+                .get("problem_solving")
+                .or_else(|| answers.get("12"))
+                .and_then(Value::as_str)
+                .unwrap_or("Analyze carefully before acting")
+                .to_owned(),
+        )
+    } else {
+        (
+            answer("6", "Stay calm and strategic"),
+            answer("7", "Heroic"),
+            answer("8", "Balance between both"),
+            answer("9", "No preference"),
+            answer("10", "Analyze carefully before acting"),
+        )
+    };
+
+    let mut feat = json!({
         "role": answer("2", "No Preference"),
         "position": answer("3", "No Preference"),
         "difficulty": difficulty,
         "damage": damage, "toughness": toughness, "mobility": mobility,
         "control": control, "utility": utility,
         "playstyle": playstyle, "range": range,
-        "pressure_response": answer("6", "Stay calm and strategic"),
-        "aesthetic_preference": answer("7", "Heroic"),
-        "team_contribution": answer("8", "Balance between both"),
-        "character_identity": answer("9", "No preference"),
-        "problem_solving": answer("10", "Analyze carefully before acting"),
+        "pressure_response": pressure,
+        "aesthetic_preference": aesthetic,
+        "team_contribution": team_contrib,
+        "character_identity": char_id,
+        "problem_solving": problem,
         "burst": ((damage / 3.33) * 0.7 + (mobility / 3.33) * 0.3) / 3.0 * 100.0,
         "sustain": ((toughness / 3.33) * 0.7 + (utility / 3.33) * 0.3) / 3.0 * 100.0,
         "cc": (control / 3.33) / 3.0 * 100.0
-    })
+    });
+
+    if is_v2 {
+        if let Some(map) = feat.as_object_mut() {
+            let res = answers
+                .get("resource")
+                .or_else(|| answers.get("6"))
+                .and_then(Value::as_str)
+                .unwrap_or("No Preference");
+            let dmg_type = answers
+                .get("damage_type")
+                .or_else(|| answers.get("7"))
+                .and_then(Value::as_str)
+                .unwrap_or("No Preference");
+            map.insert("resource".to_string(), json!(res));
+            map.insert("damage_type".to_string(), json!(dmg_type));
+        }
+    }
+
+    feat
 }

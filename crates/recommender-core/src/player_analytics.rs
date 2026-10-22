@@ -83,6 +83,20 @@ pub struct MachineLearningInsight {
     pub confidence_score: u8,
 }
 
+/// Detailed statistical performance record on an individual champion with Bayesian smoothing.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ChampionPerformanceRecord {
+    pub champion_name: String,
+    pub games_played: usize,
+    pub wins: usize,
+    pub win_rate: f64,
+    pub avg_kda: f64,
+    pub avg_cs_per_min: f64,
+    pub performance_index: f64,
+    pub confidence_rating: String,
+    pub is_calibrated_recommendation: bool,
+}
+
 /// Complete personalized Summoner Intelligence report.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PlayerAnalyticsReport {
@@ -95,6 +109,9 @@ pub struct PlayerAnalyticsReport {
     pub evolution: ArchetypeEvolution,
     pub ml_insights: Vec<MachineLearningInsight>,
     pub recent_matches: Vec<AdoptedMatch>,
+    pub champion_performances: Vec<ChampionPerformanceRecord>,
+    pub recommendation_hit_rate: f64,
+    pub calibrated_perf_delta: f64,
 }
 
 impl PlayerAnalyticsReport {
@@ -232,6 +249,121 @@ impl PlayerAnalyticsReport {
             top_adopted_champions: top_adopted,
         };
 
+        // Compute per-champion performance records with Bayesian shrinkage
+        struct ChampAccumulator {
+            games: usize,
+            wins: usize,
+            total_kda: f64,
+            total_cs: f64,
+            is_calibrated: bool,
+        }
+
+        let mut champ_stats: HashMap<String, ChampAccumulator> = HashMap::new();
+        for m in &matches {
+            let entry = champ_stats
+                .entry(m.champion_name.clone())
+                .or_insert(ChampAccumulator {
+                    games: 0,
+                    wins: 0,
+                    total_kda: 0.0,
+                    total_cs: 0.0,
+                    is_calibrated: false,
+                });
+            entry.games += 1;
+            if m.win {
+                entry.wins += 1;
+            }
+            entry.total_kda += m.kda_ratio();
+            entry.total_cs += m.cs_per_min;
+            if m.is_calibrated {
+                entry.is_calibrated = true;
+            }
+        }
+
+        let mut champion_performances: Vec<ChampionPerformanceRecord> = champ_stats
+            .into_iter()
+            .map(|(champ_name, acc)| {
+                let win_rate = if acc.games > 0 {
+                    (acc.wins as f64 / acc.games as f64) * 100.0
+                } else {
+                    0.0
+                };
+                let avg_kda = if acc.games > 0 {
+                    acc.total_kda / acc.games as f64
+                } else {
+                    0.0
+                };
+                let avg_cs = if acc.games > 0 {
+                    acc.total_cs / acc.games as f64
+                } else {
+                    0.0
+                };
+
+                // Bayesian shrinkage: anchor small sample sizes against 50.0% win rate prior with M=5 games
+                let shrunk_wr = ((acc.wins as f64 + 2.5) / (acc.games as f64 + 5.0)) * 100.0;
+                let kda_component = (avg_kda / 4.0).clamp(0.0, 1.0) * 25.0;
+                let cs_component = (avg_cs / 8.0).clamp(0.0, 1.0) * 25.0;
+                let perf_index = (shrunk_wr * 0.5) + kda_component + cs_component;
+
+                let confidence_rating = if acc.games >= 10 {
+                    "High Sample (10+ Games)".to_string()
+                } else if acc.games >= 5 {
+                    "Moderate Sample (5-9 Games)".to_string()
+                } else {
+                    "Developing (<5 Games)".to_string()
+                };
+
+                ChampionPerformanceRecord {
+                    champion_name: champ_name,
+                    games_played: acc.games,
+                    wins: acc.wins,
+                    win_rate: (win_rate * 10.0).round() / 10.0,
+                    avg_kda: (avg_kda * 10.0).round() / 10.0,
+                    avg_cs_per_min: (avg_cs * 10.0).round() / 10.0,
+                    performance_index: (perf_index * 10.0).round() / 10.0,
+                    confidence_rating,
+                    is_calibrated_recommendation: acc.is_calibrated,
+                }
+            })
+            .collect();
+
+        champion_performances.sort_by(|a, b| {
+            b.games_played
+                .cmp(&a.games_played)
+                .then_with(|| b.performance_index.total_cmp(&a.performance_index))
+        });
+
+        let recommendation_hit_rate = if total_matches > 0 {
+            ((cal_games as f64 / total_matches as f64) * 1000.0).round() / 10.0
+        } else {
+            0.0
+        };
+
+        let (cal_perf_sum, cal_perf_count) = champion_performances
+            .iter()
+            .filter(|c| c.is_calibrated_recommendation)
+            .fold((0.0, 0), |(s, n), c| (s + c.performance_index, n + 1));
+        let (uncal_perf_sum, uncal_perf_count) = champion_performances
+            .iter()
+            .filter(|c| !c.is_calibrated_recommendation)
+            .fold((0.0, 0), |(s, n), c| (s + c.performance_index, n + 1));
+
+        let avg_cal_perf = if cal_perf_count > 0 {
+            cal_perf_sum / cal_perf_count as f64
+        } else {
+            0.0
+        };
+        let avg_uncal_perf = if uncal_perf_count > 0 {
+            uncal_perf_sum / uncal_perf_count as f64
+        } else {
+            0.0
+        };
+        let calibrated_perf_delta = if cal_perf_count > 0 && uncal_perf_count > 0 {
+            ((avg_cal_perf - avg_uncal_perf) * 10.0).round() / 10.0
+        } else {
+            0.0
+        };
+
         let ml_insights = Self::generate_ml_insights(&efficacy, &evolution);
 
         Self {
@@ -244,6 +376,9 @@ impl PlayerAnalyticsReport {
             evolution,
             ml_insights,
             recent_matches: matches,
+            champion_performances,
+            recommendation_hit_rate,
+            calibrated_perf_delta,
         }
     }
 

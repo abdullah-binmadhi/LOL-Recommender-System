@@ -99,8 +99,10 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                                         <span style="background: rgba(10, 200, 185, 0.15); border: 1px solid var(--cyan); color: var(--cyan); font-size: 0.75rem; padding: 0.15rem 0.5rem; text-transform: uppercase; font-family: monospace;">{region_label}</span>
                                         {if rep.is_demo {
                                             view! { <span style="background: rgba(200, 170, 110, 0.15); border: 1px solid var(--gold); color: var(--gold); font-size: 0.75rem; padding: 0.15rem 0.5rem; text-transform: uppercase; font-family: monospace;">"✦ DEMO MODE ✦"</span> }.into_any()
+                                        } else if state.with(|c| c.riot_data_source.as_deref() == Some("live")) {
+                                            view! { <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #10b981; font-size: 0.75rem; padding: 0.15rem 0.5rem; text-transform: uppercase; font-family: monospace; font-weight: bold;">"● OFFICIAL RIOT API (LIVE)"</span> }.into_any()
                                         } else {
-                                            view! { <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981; font-size: 0.75rem; padding: 0.15rem 0.5rem; text-transform: uppercase; font-family: monospace;">"● LIVE RIOT API CONNECTED"</span> }.into_any()
+                                            view! { <span style="background: rgba(10, 200, 185, 0.15); border: 1px solid var(--cyan); color: var(--cyan); font-size: 0.75rem; padding: 0.15rem 0.5rem; text-transform: uppercase; font-family: monospace;">"● RIOT TELEMETRY (LINKED)"</span> }.into_any()
                                         }}
                                     </div>
                                     <p style="margin: 0.25rem 0 0 0; font-family: monospace; color: var(--text-muted); font-size: 0.85rem;">
@@ -121,7 +123,8 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                                         let reg = rep.region.unwrap_or_else(|| "ME".into());
                                         crate::storage::supabase_fetch_riot_telemetry(&r_id, &reg);
                                         if let Some(matches) = crate::storage::load_cached_riot_matches() {
-                                            state.update(|c| c.set_live_matches(Some(matches)));
+                                            let src = crate::storage::load_cached_riot_data_source();
+                                            state.update(|c| c.set_live_matches(Some(matches), src));
                                         }
                                     }
                                 >
@@ -244,11 +247,82 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                 </div>
             </div>
 
+            // MODULE 1B: Per-Champion Performance & Bayesian Confidence Index
+            <div style="margin-bottom: 3rem;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; border-bottom: 1px solid rgba(200, 170, 110, 0.3); padding-bottom: 0.5rem;">
+                    <h2 style="font-family: serif; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); font-size: 1.3rem; margin: 0;">
+                        "2. Champion Performance & Bayesian Efficacy Index"
+                    </h2>
+                    <span style="font-family: monospace; font-size: 0.8rem; color: var(--gold);">"BAYESIAN SHRINKAGE (M=5)"</span>
+                </div>
+
+                {move || {
+                    let rep = report();
+                    let perfs = rep.champion_performances.clone();
+                    let hit_rate = rep.recommendation_hit_rate;
+                    let perf_delta = rep.calibrated_perf_delta;
+                    view! {
+                        <div style="background: rgba(9, 20, 40, 0.85); border: 1px solid rgba(200, 170, 110, 0.3); padding: 1.25rem; overflow-x: auto;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-family: monospace; font-size: 0.85rem; flex-wrap: wrap; gap: 0.75rem;">
+                                <div>
+                                    <span style="color: var(--text-muted);">"Recommendation Hit Rate: "</span>
+                                    <strong style="color: var(--cyan);">{format!("{:.1}%", hit_rate)}</strong>
+                                </div>
+                                <div>
+                                    <span style="color: var(--text-muted);">"Calibrated Performance Delta: "</span>
+                                    <strong style="color: var(--gold);">{format!("+{} Index Points", perf_delta)}</strong>
+                                </div>
+                            </div>
+                            <table style="width: 100%; border-collapse: collapse; text-align: left; font-family: monospace; font-size: 0.82rem;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid rgba(200, 170, 110, 0.3); color: var(--gold); text-transform: uppercase;">
+                                        <th style="padding: 0.6rem;">"Champion"</th>
+                                        <th style="padding: 0.6rem;">"Games"</th>
+                                        <th style="padding: 0.6rem;">"Win Rate"</th>
+                                        <th style="padding: 0.6rem;">"Avg KDA"</th>
+                                        <th style="padding: 0.6rem;">"CS/Min"</th>
+                                        <th style="padding: 0.6rem;">"Performance Index"</th>
+                                        <th style="padding: 0.6rem;">"Sample Confidence"</th>
+                                        <th style="padding: 0.6rem;">"Status"</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {perfs.into_iter().map(|p| {
+                                        let status_badge = if p.is_calibrated_recommendation {
+                                            view! { <span style="background: rgba(10, 200, 185, 0.15); border: 1px solid var(--cyan); color: var(--cyan); padding: 0.1rem 0.4rem; font-size: 0.7rem;">"RECOMMENDED"</span> }.into_any()
+                                        } else {
+                                            view! { <span style="background: rgba(255, 255, 255, 0.05); border: 1px solid #555; color: #888; padding: 0.1rem 0.4rem; font-size: 0.7rem;">"OFF-CAL"</span> }.into_any()
+                                        };
+                                        let win_rate_style = if p.win_rate >= 50.0 {
+                                            "padding: 0.6rem; color: var(--cyan); font-weight: bold;"
+                                        } else {
+                                            "padding: 0.6rem; color: #e84057; font-weight: bold;"
+                                        };
+                                        view! {
+                                            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                                                <td style="padding: 0.6rem; color: #fff; font-weight: bold;">{p.champion_name}</td>
+                                                <td style="padding: 0.6rem; color: #ccc;">{format!("{}/{}W", p.games_played, p.wins)}</td>
+                                                <td style=win_rate_style>{format!("{:.1}%", p.win_rate)}</td>
+                                                <td style="padding: 0.6rem; color: #ccc;">{format!("{:.1}", p.avg_kda)}</td>
+                                                <td style="padding: 0.6rem; color: #ccc;">{format!("{:.1}", p.avg_cs_per_min)}</td>
+                                                <td style="padding: 0.6rem; color: var(--gold); font-weight: bold;">{format!("{:.1}", p.performance_index)}</td>
+                                                <td style="padding: 0.6rem; color: var(--text-muted); font-size: 0.75rem;">{p.confidence_rating}</td>
+                                                <td style="padding: 0.6rem;">{status_badge}</td>
+                                            </tr>
+                                        }
+                                    }).collect::<Vec<_>>()}
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                }}
+            </div>
+
             // MODULE 2: Multi-Quiz Calibration & Archetype Drift
             <div style="margin-bottom: 3rem;">
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; border-bottom: 1px solid rgba(200, 170, 110, 0.3); padding-bottom: 0.5rem;">
                     <h2 style="font-family: serif; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); font-size: 1.3rem; margin: 0;">
-                        "2. Multi-Quiz Calibration & Archetype Drift"
+                        "3. Multi-Quiz Calibration & Archetype Drift"
                     </h2>
                     <span style="font-family: monospace; font-size: 0.8rem; color: var(--gold);">"LONGITUDINAL TELEMETRY"</span>
                 </div>
@@ -313,11 +387,11 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                 }}
             </div>
 
-            // MODULE 3: Hextech Oracle (Machine Learning Insights)
+            // MODULE 4: Hextech Oracle (Machine Learning Insights)
             <div style="margin-bottom: 2rem;">
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; border-bottom: 1px solid rgba(200, 170, 110, 0.3); padding-bottom: 0.5rem;">
                     <h2 style="font-family: serif; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); font-size: 1.3rem; margin: 0;">
-                        "3. Hextech Oracle (Machine Learning Coaching)"
+                        "4. Hextech Oracle (Machine Learning Coaching)"
                     </h2>
                     <span style="font-family: monospace; font-size: 0.8rem; color: var(--cyan);">"PREDICTIVE MODELS"</span>
                 </div>

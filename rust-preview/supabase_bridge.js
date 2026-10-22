@@ -249,6 +249,17 @@
       const targetRiotId = riotId || (currentUser && currentUser.riot_id) || "SHENTRICK#SHEN";
       const targetRegion = region || (currentUser && currentUser.riot_region) || "ME";
 
+      // Extract recommended champions from cached recommendation runs to calculate actual calibration accuracy
+      let recommendedChamps = [];
+      try {
+        const lastRec = window.localStorage.getItem("lastRecommendationResult");
+        if (lastRec) {
+          const parsed = JSON.parse(lastRec);
+          const topList = parsed.top10 || parsed.top_champions || [];
+          recommendedChamps = topList.map(c => (typeof c === "string" ? c : c.champion_name || c.championName)).filter(Boolean);
+        }
+      } catch (_) {}
+
       try {
         const edgeFunctionUrl = `${SUPABASE_URL}/functions/v1/riot-proxy`;
         const res = await fetch(edgeFunctionUrl, {
@@ -261,7 +272,8 @@
           body: JSON.stringify({
             riot_id: targetRiotId,
             region: targetRegion.toLowerCase(),
-            api_key: apiKey || undefined
+            api_key: apiKey || undefined,
+            recommended_champions: recommendedChamps
           })
         });
 

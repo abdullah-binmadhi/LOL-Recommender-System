@@ -122,4 +122,22 @@ fn test_for_player_shentrick_middle_east() {
     assert_eq!(report.efficacy.calibrated_games, 8);
     assert_eq!(report.efficacy.calibrated_wins, 8);
     assert_eq!(report.efficacy.calibrated_win_rate, 100.0);
+
+    // Champion performance records with Bayesian shrinkage
+    assert!(!report.champion_performances.is_empty());
+    let shen_perf = report
+        .champion_performances
+        .iter()
+        .find(|c| c.champion_name == "Shen")
+        .expect("Shen performance must be present");
+    assert_eq!(shen_perf.games_played, 6);
+    assert_eq!(shen_perf.wins, 6);
+    assert_eq!(shen_perf.win_rate, 100.0);
+    assert!(shen_perf.performance_index > 60.0);
+    assert_eq!(shen_perf.confidence_rating, "Moderate Sample (5-9 Games)");
+    assert!(shen_perf.is_calibrated_recommendation);
+
+    // Recommendation hit rate & performance delta
+    assert_eq!(report.recommendation_hit_rate, 80.0);
+    assert!(report.calibrated_perf_delta > 0.0);
 }

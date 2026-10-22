@@ -13,6 +13,7 @@ interface RiotProxyRequest {
   riot_id: string; // "GameName#TagLine"
   region?: string; // "me", "euw", "sea", "na", "kr", etc.
   api_key?: string; // Optional user-supplied developer API key
+  recommended_champions?: string[]; // Top recommended champions to check against
 }
 
 function getRegionalCluster(reg: string): string {
@@ -219,6 +220,7 @@ function getFallbackTelemetry(gameName: string, tagLine: string, region: string)
 
   return {
     status: "simulated_telemetry",
+    data_source: "fallback",
     summoner: {
       gameName,
       tagLine,
@@ -230,13 +232,33 @@ function getFallbackTelemetry(gameName: string, tagLine: string, region: string)
   };
 }
 
+async function resolveAccountPuuid(gameName: string, tagLine: string, preferredCluster: string, riotApiKey: string) {
+  // Try preferred cluster first, then fallback to americas / asia
+  const clusters = [preferredCluster, "americas", "asia", "europe"].filter((v, i, a) => a.indexOf(v) === i);
+  for (const cluster of clusters) {
+    try {
+      const url = `https://${cluster}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(
+        gameName
+      )}/${encodeURIComponent(tagLine)}`;
+      const res = await fetch(url, { headers: { "X-Riot-Token": riotApiKey } });
+      if (res.ok) {
+        const data = await res.json();
+        return { puuid: data.puuid, gameName: data.gameName, tagLine: data.tagLine, workingCluster: cluster };
+      }
+    } catch (_) {
+      // Continue to next cluster
+    }
+  }
+  return null;
+}
+
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    const { riot_id, region = "me", api_key } = (await req.json()) as RiotProxyRequest;
+    const { riot_id, region = "me", api_key, recommended_champions = [] } = (await req.json()) as RiotProxyRequest;
 
     if (!riot_id || !riot_id.includes("#")) {
       return new Response(
@@ -261,17 +283,10 @@ serve(async (req: Request) => {
       });
     }
 
-    // 1. Resolve PUUID from Riot Account API
-    const accountUrl = `https://${cluster}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(
-      gameName
-    )}/${encodeURIComponent(tagLine)}`;
-
-    const accountRes = await fetch(accountUrl, {
-      headers: { "X-Riot-Token": riotApiKey },
-    });
-
-    if (!accountRes.ok) {
-      console.warn("Riot Account API lookup failed, returning fallback telemetry");
+    // 1. Resolve PUUID from Riot Account API with fallback clusters
+    const accountData = await resolveAccountPuuid(gameName, tagLine, cluster, riotApiKey);
+    if (!accountData) {
+      console.warn("Riot Account API lookup failed across clusters, returning fallback telemetry");
       const fallback = getFallbackTelemetry(gameName, tagLine, region);
       return new Response(JSON.stringify(fallback), {
         status: 200,
@@ -279,10 +294,10 @@ serve(async (req: Request) => {
       });
     }
 
-    const accountData = await accountRes.json();
     const puuid = accountData.puuid;
 
     // 2. Fetch Recent Match-V5 IDs
+    // For ME1/EUW, match-v5 runs on regional cluster (europe)
     const matchesUrl = `https://${cluster}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?count=10`;
     const matchesRes = await fetch(matchesUrl, {
       headers: { "X-Riot-Token": riotApiKey },
@@ -321,18 +336,30 @@ serve(async (req: Request) => {
               ? "Bottom"
               : "Top";
 
+          // Calculate real calibration rank based on user recommendations
+          const champName = participant.championName || "Unknown";
+          const recIdx = recommended_champions.findIndex(
+            (c: string) => c.toLowerCase() === champName.toLowerCase()
+          );
+          const isCalibrated = recIdx !== -1;
+          const calibratedRank = isCalibrated ? recIdx + 1 : null;
+
+          const goldDiff15 = participant.challenges?.goldDiffAtMin15
+            ? Math.round(participant.challenges.goldDiffAtMin15)
+            : 0;
+
           adoptedMatches.push({
             match_id: matchId,
-            champion_name: participant.championName,
+            champion_name: champName,
             role,
             win: Boolean(participant.win),
             kills: participant.kills || 0,
             deaths: participant.deaths || 0,
             assists: participant.assists || 0,
             cs_per_min: csPerMin,
-            gold_diff_15: participant.challenges?.goldDiffAtMin15 ? Math.round(participant.challenges.goldDiffAtMin15) : 0,
-            is_calibrated: true,
-            calibrated_rank: 1,
+            gold_diff_15: goldDiff15,
+            is_calibrated: isCalibrated,
+            calibrated_rank: calibratedRank,
           });
         } catch (e) {
           console.warn("Failed to parse match", matchId, e);
@@ -351,15 +378,16 @@ serve(async (req: Request) => {
       topMasteries = await masteryRes.json();
     }
 
-    // If no matches were retrieved (e.g. rate limit), use fallback matches
-    const finalMatches =
-      adoptedMatches.length > 0
-        ? adoptedMatches
-        : getFallbackTelemetry(gameName, tagLine, region).matches;
+    // Determine final matches and data source
+    const isLive = adoptedMatches.length > 0;
+    const finalMatches = isLive
+      ? adoptedMatches
+      : getFallbackTelemetry(gameName, tagLine, region).matches;
 
     return new Response(
       JSON.stringify({
         status: "success",
+        data_source: isLive ? "live" : "fallback",
         summoner: {
           puuid,
           gameName: accountData.gameName,

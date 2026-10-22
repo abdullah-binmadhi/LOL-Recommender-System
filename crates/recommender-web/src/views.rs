@@ -76,7 +76,8 @@ pub fn App() -> impl IntoView {
     }
 
     if let Some(matches) = storage::load_cached_riot_matches() {
-        state.update(|c| c.set_live_matches(Some(matches)));
+        let src = storage::load_cached_riot_data_source();
+        state.update(|c| c.set_live_matches(Some(matches), src));
     }
 
     let auth_listener = window_event_listener(
@@ -91,7 +92,8 @@ pub fn App() -> impl IntoView {
         leptos::ev::Custom::new("riot-telemetry-synced"),
         move |_: web_sys::CustomEvent| {
             if let Some(matches) = storage::load_cached_riot_matches() {
-                state.update(|c| c.set_live_matches(Some(matches)));
+                let src = storage::load_cached_riot_data_source();
+                state.update(|c| c.set_live_matches(Some(matches), src));
             } else {
                 state.update(|c| c.set_syncing_riot(false));
             }

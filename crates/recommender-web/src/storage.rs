@@ -296,3 +296,18 @@ pub fn load_cached_riot_matches() -> Option<Vec<recommender_core::player_analyti
 pub fn load_cached_riot_matches() -> Option<Vec<recommender_core::player_analytics::AdoptedMatch>> {
     None
 }
+
+#[cfg(target_arch = "wasm32")]
+pub fn load_cached_riot_data_source() -> Option<String> {
+    let storage = get_storage()?;
+    let json_str = storage.get_item("lol_riot_telemetry").ok()??;
+    let val: serde_json::Value = serde_json::from_str(&json_str).ok()?;
+    val.get("data_source")
+        .and_then(|v| v.as_str())
+        .map(|s| s.to_string())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn load_cached_riot_data_source() -> Option<String> {
+    None
+}

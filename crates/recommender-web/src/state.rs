@@ -149,6 +149,7 @@ pub struct AppState {
     pub demo_telemetry: bool,
     pub live_player_matches: Option<Vec<recommender_core::player_analytics::AdoptedMatch>>,
     pub is_syncing_riot: bool,
+    pub riot_data_source: Option<String>,
 }
 
 impl Default for AppState {
@@ -167,6 +168,7 @@ impl Default for AppState {
             demo_telemetry: false,
             live_player_matches: None,
             is_syncing_riot: false,
+            riot_data_source: None,
         }
     }
 }
@@ -259,8 +261,10 @@ impl AppState {
     pub fn set_live_matches(
         &mut self,
         matches: Option<Vec<recommender_core::player_analytics::AdoptedMatch>>,
+        data_source: Option<String>,
     ) {
         self.live_player_matches = matches;
+        self.riot_data_source = data_source;
         self.demo_telemetry = false;
         self.is_syncing_riot = false;
     }
