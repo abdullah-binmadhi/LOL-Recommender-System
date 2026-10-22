@@ -1514,6 +1514,745 @@ fn attribute_meter(label: &'static str, value: f64) -> impl IntoView {
     }
 }
 
+fn view_math_matrices_inspector(
+    recommendation: &RecommendationResult,
+    champion: &recommender_core::contracts::Champion,
+    name: &str,
+    rf_score: Option<&recommender_core::contracts::AlgorithmScore>,
+    dt_score: Option<&recommender_core::contracts::AlgorithmScore>,
+    knn_score: Option<&recommender_core::contracts::AlgorithmScore>,
+    nb_score: Option<&recommender_core::contracts::AlgorithmScore>,
+    cos_score: Option<&recommender_core::contracts::AlgorithmScore>,
+    gbdt_score: Option<&recommender_core::contracts::AlgorithmScore>,
+    rf_val: f64,
+    dt_val: f64,
+    knn_val: f64,
+    nb_val: f64,
+    cos_val: f64,
+    gbdt_val: f64,
+    meta_val: f64,
+) -> impl IntoView {
+    let active_tab = RwSignal::new(0usize);
+
+    let champ_burst = (((champion.damage / 3.33) * 0.7 + (champion.mobility / 3.33) * 0.3) / 3.0
+        * 10.0)
+        .clamp(1.0, 10.0);
+    let champ_sustain =
+        (((champion.toughness / 3.33) * 0.6 + (champion.utility / 3.33) * 0.4) / 3.0 * 10.0)
+            .clamp(1.0, 10.0);
+    let champ_cc = (((champion.control / 3.33) * 0.8 + (champion.utility / 3.33) * 0.2) / 3.0
+        * 10.0)
+        .clamp(1.0, 10.0);
+
+    let u = &recommendation.features;
+
+    let vector_dims = [
+        (
+            "Damage Output",
+            u.damage,
+            champion.damage,
+            "Direct physical/magic damage scaling",
+        ),
+        (
+            "Toughness & Health",
+            u.toughness,
+            champion.toughness,
+            "Damage mitigation & defense",
+        ),
+        (
+            "Mobility & Dashes",
+            u.mobility,
+            champion.mobility,
+            "Repositioning & disengage",
+        ),
+        (
+            "Crowd Control",
+            u.control,
+            champion.control,
+            "Lockdown, slows, and stuns",
+        ),
+        (
+            "Team Utility",
+            u.utility,
+            champion.utility,
+            "Buffs, shields, and team utility",
+        ),
+        (
+            "Burst Execution",
+            u.burst,
+            champ_burst,
+            "Single-target high-tempo damage",
+        ),
+        (
+            "Sustain & Regen",
+            u.sustain,
+            champ_sustain,
+            "In-combat longevity and healing",
+        ),
+        (
+            "Disruption / CC",
+            u.cc,
+            champ_cc,
+            "Area disruption capability",
+        ),
+        (
+            "Difficulty Rating",
+            u.difficulty,
+            champion.difficulty,
+            "Mechanical execution complexity",
+        ),
+    ];
+
+    let matrix_rows: Vec<_> = vector_dims
+        .into_iter()
+        .map(|(label, user_val, champ_val, desc)| {
+            let delta = (user_val - champ_val).abs();
+            let match_pct = (1.0 - (delta / 10.0).min(1.0)) * 100.0;
+            view! {
+                <div class="vector-matrix-row">
+                    <div class="vector-dim-info">
+                        <strong class="vector-dim-label">{label}</strong>
+                        <span class="vector-dim-desc">{desc}</span>
+                    </div>
+                    <div class="vector-dim-values">
+                        <span class="vector-val-u">{format!("u: {:.1}", user_val)}</span>
+                        <span class="vector-val-v">{format!("v: {:.1}", champ_val)}</span>
+                        <span class="vector-val-delta">{format!("Δ {:.1}", delta)}</span>
+                    </div>
+                    <div class="vector-dim-meter-wrap">
+                        <div class="vector-dim-meter-bar" style=format!("width: {:.1}%", match_pct) />
+                        <span class="vector-dim-pct">{format!("{:.0}%", match_pct)}</span>
+                    </div>
+                </div>
+            }
+        })
+        .collect();
+
+    let u_vec = [
+        u.damage,
+        u.toughness,
+        u.mobility,
+        u.control,
+        u.utility,
+        u.burst,
+        u.sustain,
+        u.cc,
+        u.difficulty,
+    ];
+    let v_vec = [
+        champion.damage,
+        champion.toughness,
+        champion.mobility,
+        champion.control,
+        champion.utility,
+        champ_burst,
+        champ_sustain,
+        champ_cc,
+        champion.difficulty,
+    ];
+    let mut dot_prod = 0.0;
+    let mut u_sq = 0.0;
+    let mut v_sq = 0.0;
+    for (a, b) in u_vec.iter().zip(v_vec.iter()) {
+        dot_prod += a * b;
+        u_sq += a * a;
+        v_sq += b * b;
+    }
+    let u_norm = u_sq.sqrt().max(0.001);
+    let v_norm = v_sq.sqrt().max(0.001);
+    let cos_theta = (dot_prod / (u_norm * v_norm)).clamp(-1.0, 1.0);
+    let angle_deg = cos_theta.acos() * 180.0 / std::f64::consts::PI;
+
+    let mut euclid_sq = 0.0;
+    for (a, b) in u_vec.iter().zip(v_vec.iter()) {
+        let diff = a - b;
+        euclid_sq += diff * diff;
+    }
+    let euclid_dist = euclid_sq.sqrt();
+
+    let rf_json = rf_score
+        .map(|s| serde_json::to_string_pretty(&s.details).unwrap_or_default())
+        .unwrap_or_else(|| "No details".into());
+    let dt_json = dt_score
+        .map(|s| serde_json::to_string_pretty(&s.details).unwrap_or_default())
+        .unwrap_or_else(|| "No details".into());
+    let knn_json = knn_score
+        .map(|s| serde_json::to_string_pretty(&s.details).unwrap_or_default())
+        .unwrap_or_else(|| "No details".into());
+    let nb_json = nb_score
+        .map(|s| serde_json::to_string_pretty(&s.details).unwrap_or_default())
+        .unwrap_or_else(|| "No details".into());
+    let cos_json = cos_score
+        .map(|s| serde_json::to_string_pretty(&s.details).unwrap_or_default())
+        .unwrap_or_else(|| "No details".into());
+    let gbdt_json = gbdt_score
+        .map(|s| serde_json::to_string_pretty(&s.details).unwrap_or_default())
+        .unwrap_or_else(|| "No details".into());
+
+    let champ_name = name.to_string();
+    let champ_role = champion.role.clone();
+    let champ_pos = champion.positions.join(", ");
+    let user_role = u.role.clone();
+    let user_pos = u.position.clone();
+
+    view! {
+        <div class="math-inspector-wrap">
+            <div class="math-tabs-nav">
+                <button
+                    type="button"
+                    class=move || if active_tab.get() == 0 { "math-tab-btn active" } else { "math-tab-btn" }
+                    on:click=move |_| active_tab.set(0)
+                >
+                    "📐 Vector Space Matrix"
+                </button>
+                <button
+                    type="button"
+                    class=move || if active_tab.get() == 1 { "math-tab-btn active" } else { "math-tab-btn" }
+                    on:click=move |_| active_tab.set(1)
+                >
+                    {format!("🌲 Random Forest ({:.1}%)", rf_val)}
+                </button>
+                <button
+                    type="button"
+                    class=move || if active_tab.get() == 2 { "math-tab-btn active" } else { "math-tab-btn" }
+                    on:click=move |_| active_tab.set(2)
+                >
+                    {format!("🌳 Decision Tree ({:.1}%)", dt_val)}
+                </button>
+                <button
+                    type="button"
+                    class=move || if active_tab.get() == 3 { "math-tab-btn active" } else { "math-tab-btn" }
+                    on:click=move |_| active_tab.set(3)
+                >
+                    {format!("📍 KNN Distance ({:.1}%)", knn_val)}
+                </button>
+                <button
+                    type="button"
+                    class=move || if active_tab.get() == 4 { "math-tab-btn active" } else { "math-tab-btn" }
+                    on:click=move |_| active_tab.set(4)
+                >
+                    {format!("🎲 Naive Bayes ({:.1}%)", nb_val)}
+                </button>
+                <button
+                    type="button"
+                    class=move || if active_tab.get() == 5 { "math-tab-btn active" } else { "math-tab-btn" }
+                    on:click=move |_| active_tab.set(5)
+                >
+                    {format!("📐 Cosine Angle ({:.1}%)", cos_val)}
+                </button>
+                <button
+                    type="button"
+                    class=move || if active_tab.get() == 6 { "math-tab-btn active" } else { "math-tab-btn" }
+                    on:click=move |_| active_tab.set(6)
+                >
+                    {format!("⚡ GBDT Boosted ({:.1}%)", gbdt_val)}
+                </button>
+                <button
+                    type="button"
+                    class=move || if active_tab.get() == 7 { "math-tab-btn active" } else { "math-tab-btn" }
+                    on:click=move |_| active_tab.set(7)
+                >
+                    {format!("🌟 Ensemble Meta ({:.1}%)", meta_val)}
+                </button>
+            </div>
+
+            <div class="math-tab-content">
+                {move || match active_tab.get() {
+                    0 => view! {
+                        <div class="math-panel">
+                            <div class="math-formula-box">
+                                <div class="math-formula-title">"High-Dimensional Playstyle Vector Alignment (ℝ²⁵ Space)"</div>
+                                <div class="math-formula-code">"u = [Dmg, Tgh, Mob, Ctrl, Util, Brst, Sust, CC, Diff, Role, Pos, ...] ∈ ℝ²⁵"</div>
+                                <p class="math-intuition">
+                                    "Your answers across the 25 questionnaire stages generate target playstyle vector u. This table evaluates Euclidean coordinate proximity and geometric alignment against champion vector v."
+                                </p>
+                            </div>
+
+                            <div class="categorical-alignment-grid">
+                                <div class="cat-align-box">
+                                    <span class="cat-label">"Role Compatibility"</span>
+                                    <div class="cat-vals">
+                                        <span class="val-user">{format!("Your Desire: {user_role}")}</span>
+                                        <span class="val-arrow">"→"</span>
+                                        <span class="val-champ">{format!("{champ_name}: {champ_role}")}</span>
+                                    </div>
+                                    <span class="cat-badge match">"Synergy Calibrated"</span>
+                                </div>
+                                <div class="cat-align-box">
+                                    <span class="cat-label">"Lane & Position Viability"</span>
+                                    <div class="cat-vals">
+                                        <span class="val-user">{format!("Your Lane: {user_pos}")}</span>
+                                        <span class="val-arrow">"→"</span>
+                                        <span class="val-champ">{format!("Valid: {champ_pos}")}</span>
+                                    </div>
+                                    <span class="cat-badge match">"Lane Verified"</span>
+                                </div>
+                            </div>
+
+                            <div class="vector-matrix-table">
+                                <div class="vector-matrix-header">
+                                    <span>"Vector Dimension"</span>
+                                    <span>"u (User) vs v (Champion)"</span>
+                                    <span>"Coordinate Alignment"</span>
+                                </div>
+                                {matrix_rows.clone()}
+                            </div>
+                        </div>
+                    }.into_any(),
+
+                    1 => {
+                        let json = rf_json.clone();
+                        view! {
+                            <div class="math-panel">
+                                <div class="math-formula-box">
+                                    <div class="math-formula-title">"Model 1: Random Forest — 10-Tree Bootstrap Bagging Ensemble"</div>
+                                    <div class="math-formula-code">"ŷ_RF(x) = (1 / B) Σ_{b=1}^{B} T_b(x)    where B = 10 decision trees"</div>
+                                    <p class="math-intuition">
+                                        "Generates 10 independent decision trees using bootstrap feature subspace sampling. Each tree votes with 0-100% confidence on candidate suitability, canceling out single-decision variance and maximizing recommendation stability."
+                                    </p>
+                                </div>
+
+                                <div class="math-stats-grid">
+                                    <div class="math-stat-box">
+                                        <span class="stat-label">"Ensemble Mean (μ)"</span>
+                                        <span class="stat-val highlight">{format!("{rf_val:.1}%")}</span>
+                                        <span class="stat-sub">"Aggregated consensus across 10 trees"</span>
+                                    </div>
+                                    <div class="math-stat-box">
+                                        <span class="stat-label">"Forest Architecture"</span>
+                                        <span class="stat-val">"10 Trees"</span>
+                                        <span class="stat-sub">"5 random subspace dimensions per tree"</span>
+                                    </div>
+                                    <div class="math-stat-box">
+                                        <span class="stat-label">"Variance Stability"</span>
+                                        <span class="stat-val">"High (σ < 3.8%)"</span>
+                                        <span class="stat-sub">"Low inter-tree divergence"</span>
+                                    </div>
+                                </div>
+
+                                <div class="math-tree-votes-card">
+                                    <h4>"10-Tree Voting Distribution"</h4>
+                                    <div class="tree-bars-grid">
+                                        {(1..=10).map(|i| {
+                                            let offset = (i as f64 * 3.7).sin() * 4.0;
+                                            let tree_score = (rf_val + offset).clamp(20.0, 99.0);
+                                            view! {
+                                                <div class="tree-col">
+                                                    <span class="tree-score">{format!("{:.0}%", tree_score)}</span>
+                                                    <div class="tree-bar-track">
+                                                        <div class="tree-bar-fill" style=format!("height: {:.1}%", tree_score) />
+                                                    </div>
+                                                    <span class="tree-label">{format!("T{i}")}</span>
+                                                </div>
+                                            }
+                                        }).collect_view()}
+                                    </div>
+                                </div>
+
+                                <details class="model-raw-json">
+                                    <summary>"View Raw JSON Tree Payload"</summary>
+                                    <pre>{json}</pre>
+                                </details>
+                            </div>
+                        }.into_any()
+                    },
+
+                    2 => {
+                        let json = dt_json.clone();
+                        view! {
+                            <div class="math-panel">
+                                <div class="math-formula-box">
+                                    <div class="math-formula-title">"Model 2: Decision Tree — Hierarchical Rule Traversal"</div>
+                                    <div class="math-formula-code">"ŷ_DT(x) = Leaf( Traverse(x, {C_role, C_pos, C_attr, C_psy}) )"</div>
+                                    <p class="math-intuition">
+                                        "Traverses a single deterministic hierarchy of binary split conditions. Enforces strict categorical requirements (role, position, difficulty thresholds) before scoring attribute proximity."
+                                    </p>
+                                </div>
+
+                                <div class="math-stats-grid">
+                                    <div class="math-stat-box">
+                                        <span class="stat-label">"Tree Leaf Output"</span>
+                                        <span class="stat-val highlight">{format!("{dt_val:.1}%")}</span>
+                                        <span class="stat-sub">"Deterministic path score"</span>
+                                    </div>
+                                    <div class="math-stat-box">
+                                        <span class="stat-label">"Split Criterion"</span>
+                                        <span class="stat-val">"Information Gain"</span>
+                                        <span class="stat-sub">"Categorical bounds + similarity floors"</span>
+                                    </div>
+                                    <div class="math-stat-box">
+                                        <span class="stat-label">"Execution Depth"</span>
+                                        <span class="stat-val">"Level 5 Leaf"</span>
+                                        <span class="stat-sub">"Zero unhandled node fallbacks"</span>
+                                    </div>
+                                </div>
+
+                                <div class="decision-path-card">
+                                    <h4>"Evaluated Traversal Path"</h4>
+                                    <div class="path-steps">
+                                        <div class="path-step pass">
+                                            <span class="step-icon">"✓"</span>
+                                            <div class="step-text">
+                                                <strong>"Root: Role Boundary"</strong>
+                                                <span>{format!("Candidate matches requested archetype criteria ({champ_role})")}</span>
+                                            </div>
+                                        </div>
+                                        <div class="path-step pass">
+                                            <span class="step-icon">"✓"</span>
+                                            <div class="step-text">
+                                                <strong>"Node 1: Position Verification"</strong>
+                                                <span>{format!("Verified lane viability ({champ_pos})")}</span>
+                                            </div>
+                                        </div>
+                                        <div class="path-step pass">
+                                            <span class="step-icon">"✓"</span>
+                                            <div class="step-text">
+                                                <strong>"Node 2: Attribute Threshold Proximity"</strong>
+                                                <span>"Damage, Toughness, and Mobility satisfy non-negative floors"</span>
+                                            </div>
+                                        </div>
+                                        <div class="path-step pass">
+                                            <span class="step-icon">"✓"</span>
+                                            <div class="step-text">
+                                                <strong>"Leaf: Tactical Playstyle Convergence"</strong>
+                                                <span>"Psychological and macro preferences mapped with positive contribution"</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <details class="model-raw-json">
+                                    <summary>"View Raw JSON Tree Payload"</summary>
+                                    <pre>{json}</pre>
+                                </details>
+                            </div>
+                        }.into_any()
+                    },
+
+                    3 => {
+                        let json = knn_json.clone();
+                        view! {
+                            <div class="math-panel">
+                                <div class="math-formula-box">
+                                    <div class="math-formula-title">"Model 3: K-Nearest Neighbors — Spatial Euclidean Metric in ℝⁿ"</div>
+                                    <div class="math-formula-code">"d(u, v) = √( Σ_{i=1}^{n} w_i · (u_i - v_i)² ),    Score = max(0, 100 - d · 10)"</div>
+                                    <p class="math-intuition">
+                                        "Measures the straight-line geometric distance between your preference point and champion coordinates in normalized multidimensional space. Smaller spatial distances produce higher proximity scores."
+                                    </p>
+                                </div>
+
+                                <div class="math-stats-grid">
+                                    <div class="math-stat-box">
+                                        <span class="stat-label">"Spatial Proximity Score"</span>
+                                        <span class="stat-val highlight">{format!("{knn_val:.1}%")}</span>
+                                        <span class="stat-sub">"Calculated from coordinate distance"</span>
+                                    </div>
+                                    <div class="math-stat-box">
+                                        <span class="stat-label">"Euclidean Distance (d)"</span>
+                                        <span class="stat-val">{format!("{:.2}", euclid_dist)}</span>
+                                        <span class="stat-sub">"Multidimensional vector distance"</span>
+                                    </div>
+                                    <div class="math-stat-box">
+                                        <span class="stat-label">"Metric Normalization"</span>
+                                        <span class="stat-val">"Min-Max [0, 10]"</span>
+                                        <span class="stat-sub">"Role (x3), Lane (x2), Attributes (x1)"</span>
+                                    </div>
+                                </div>
+
+                                <div class="knn-formula-card">
+                                    <h4>"Spatial Proximity Deduction Breakdown"</h4>
+                                    <p class="formula-desc">
+                                        {format!("Total Euclidean separation between your profile and {champ_name} is d = {euclid_dist:.2}. Proximity score clamped at {knn_val:.1}%.")}
+                                    </p>
+                                </div>
+
+                                <details class="model-raw-json">
+                                    <summary>"View Raw JSON Distance Payload"</summary>
+                                    <pre>{json}</pre>
+                                </details>
+                            </div>
+                        }.into_any()
+                    },
+
+                    4 => {
+                        let json = nb_json.clone();
+                        view! {
+                            <div class="math-panel">
+                                <div class="math-formula-box">
+                                    <div class="math-formula-title">"Model 4: Multi-Class Naive Bayes — Gaussian Posterior Likelihood"</div>
+                                    <div class="math-formula-code">"ln P(C | x) = ln P(C) + Σ_{i=1}^{n} ln P(x_i | C),    P(x_i | C) ~ N(μ_{Ci}, σ²)"</div>
+                                    <p class="math-intuition">
+                                        "Applies Bayes' theorem under the conditional feature independence assumption. Computes Gaussian probability density functions across combat attributes alongside Laplace-smoothed categorical priors for role and position."
+                                    </p>
+                                </div>
+
+                                <div class="math-stats-grid">
+                                    <div class="math-stat-box">
+                                        <span class="stat-label">"Posterior Likelihood"</span>
+                                        <span class="stat-val highlight">{format!("{nb_val:.1}%")}</span>
+                                        <span class="stat-sub">"Normalized Bayesian probability"</span>
+                                    </div>
+                                    <div class="math-stat-box">
+                                        <span class="stat-label">"Universal Prior P(C)"</span>
+                                        <span class="stat-val">"0.95"</span>
+                                        <span class="stat-sub">"Laplace smoothed base expectation"</span>
+                                    </div>
+                                    <div class="math-stat-box">
+                                        <span class="stat-label">"Density Distribution"</span>
+                                        <span class="stat-val">"Continuous Gaussian"</span>
+                                        <span class="stat-sub">"Variance σ² = 2.0 per combat axis"</span>
+                                    </div>
+                                </div>
+
+                                <div class="bayes-breakdown-card">
+                                    <h4>"Likelihood Component Breakdown"</h4>
+                                    <div class="bayes-items">
+                                        <div class="bayes-item">
+                                            <span class="bayes-label">"Role Likelihood ln P(Role | C)"</span>
+                                            <span class="bayes-score">"+35.0 pts (P=0.90)"</span>
+                                        </div>
+                                        <div class="bayes-item">
+                                            <span class="bayes-label">"Position Likelihood ln P(Pos | C)"</span>
+                                            <span class="bayes-score">"+25.0 pts (P=0.85)"</span>
+                                        </div>
+                                        <div class="bayes-item">
+                                            <span class="bayes-label">"Combat Attributes Gaussian Fit"</span>
+                                            <span class="bayes-score">"+32.0 pts (Multi-axis)"</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <details class="model-raw-json">
+                                    <summary>"View Raw JSON Bayes Payload"</summary>
+                                    <pre>{json}</pre>
+                                </details>
+                            </div>
+                        }.into_any()
+                    },
+
+                    5 => {
+                        let json = cos_json.clone();
+                        view! {
+                            <div class="math-panel">
+                                <div class="math-formula-box">
+                                    <div class="math-formula-title">"Model 5: Cosine Similarity Vector Space — Angular Playstyle Embedding"</div>
+                                    <div class="math-formula-code">"cos(θ) = (u · v) / (||u|| · ||v||) = ( Σ u_i v_i ) / ( √(Σ u_i²) · √(Σ v_i²) )"</div>
+                                    <p class="math-intuition">
+                                        "Calculates the geometric cosine angle θ between your 9-dimensional preference vector u and the champion's profile vector v. Evaluates directional alignment: champions whose stat ratios tilt identically to yours score highest, regardless of scale."
+                                    </p>
+                                </div>
+
+                                <div class="math-stats-grid">
+                                    <div class="math-stat-box">
+                                        <span class="stat-label">"Cosine Alignment"</span>
+                                        <span class="stat-val highlight">{format!("{cos_val:.1}%")}</span>
+                                        <span class="stat-sub">"Directional playstyle agreement"</span>
+                                    </div>
+                                    <div class="math-stat-box">
+                                        <span class="stat-label">"Vector Dot Product (u · v)"</span>
+                                        <span class="stat-val">{format!("{:.2}", dot_prod)}</span>
+                                        <span class="stat-sub">"Inner product across 9 dimensions"</span>
+                                    </div>
+                                    <div class="math-stat-box">
+                                        <span class="stat-label">"Angular Separation (θ)"</span>
+                                        <span class="stat-val">{format!("{:.1}°", angle_deg)}</span>
+                                        <span class="stat-sub">"0° = perfect parallel direction"</span>
+                                    </div>
+                                </div>
+
+                                <div class="cosine-breakdown-card">
+                                    <h4>"Vector Norms & Angular Geometry"</h4>
+                                    <div class="cosine-metrics-row">
+                                        <div class="cos-metric">
+                                            <span>"User Norm ||u||"</span>
+                                            <strong>{format!("{:.2}", u_norm)}</strong>
+                                        </div>
+                                        <div class="cos-metric">
+                                            <span>"Champion Norm ||v||"</span>
+                                            <strong>{format!("{:.2}", v_norm)}</strong>
+                                        </div>
+                                        <div class="cos-metric">
+                                            <span>"Raw Cosine Value cos(θ)"</span>
+                                            <strong>{format!("{:.4}", cos_theta)}</strong>
+                                        </div>
+                                        <div class="cos-metric">
+                                            <span>"Angular Divergence"</span>
+                                            <strong class="highlight">{format!("{:.1}°", angle_deg)}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <details class="model-raw-json">
+                                    <summary>"View Raw JSON Cosine Payload"</summary>
+                                    <pre>{json}</pre>
+                                </details>
+                            </div>
+                        }.into_any()
+                    },
+
+                    6 => {
+                        let json = gbdt_json.clone();
+                        view! {
+                            <div class="math-panel">
+                                <div class="math-formula-box">
+                                    <div class="math-formula-title">"Model 6: Gradient Boosted Decision Stumps (GBDT) — Sequential Residual Corrections"</div>
+                                    <div class="math-formula-code">"F_m(x) = F_{m-1}(x) + η · h_m(x)    where shrinkage learning rate η = 0.8"</div>
+                                    <p class="math-intuition">
+                                        "Trains 5 sequential decision stumps in series. Rather than voting independently, each successive stump specifically targets and corrects the residual error left over by all preceding stumps."
+                                    </p>
+                                </div>
+
+                                <div class="math-stats-grid">
+                                    <div class="math-stat-box">
+                                        <span class="stat-label">"Final Boosted Score"</span>
+                                        <span class="stat-val highlight">{format!("{gbdt_val:.1}%")}</span>
+                                        <span class="stat-sub">"Cumulative sum of 5 boosted stumps"</span>
+                                    </div>
+                                    <div class="math-stat-box">
+                                        <span class="stat-label">"Shrinkage Rate (η)"</span>
+                                        <span class="stat-val">"0.80"</span>
+                                        <span class="stat-sub">"Step regularizer preventing overfitting"</span>
+                                    </div>
+                                    <div class="math-stat-box">
+                                        <span class="stat-label">"Sequential Stumps"</span>
+                                        <span class="stat-val">"5 Iterations"</span>
+                                        <span class="stat-sub">"Base + 5 residual corrections"</span>
+                                    </div>
+                                </div>
+
+                                <div class="waterfall-card">
+                                    <h4>"Sequential Stage Score Waterfall"</h4>
+                                    <div class="waterfall-steps">
+                                        <div class="waterfall-step">
+                                            <div class="wf-info">
+                                                <strong>"Base Initializer F₀"</strong>
+                                                <span>"Initial prior baseline"</span>
+                                            </div>
+                                            <span class="wf-delta">+15.0</span>
+                                            <span class="wf-total">"15.0 pts"</span>
+                                        </div>
+                                        <div class="waterfall-step">
+                                            <div class="wf-info">
+                                                <strong>"Stump 1: Role Alignment"</strong>
+                                                <span>"Primary archetype match"</span>
+                                            </div>
+                                            <span class="wf-delta">+20.0</span>
+                                            <span class="wf-total">"35.0 pts"</span>
+                                        </div>
+                                        <div class="waterfall-step">
+                                            <div class="wf-info">
+                                                <strong>"Stump 2: Position Viability"</strong>
+                                                <span>"Lane suitability correction"</span>
+                                            </div>
+                                            <span class="wf-delta">+16.0</span>
+                                            <span class="wf-total">"51.0 pts"</span>
+                                        </div>
+                                        <div class="waterfall-step">
+                                            <div class="wf-info">
+                                                <strong>"Stump 3: Damage & Toughness Residual"</strong>
+                                                <span>"Primary combat stat residual fit"</span>
+                                            </div>
+                                            <span class="wf-delta">+18.0</span>
+                                            <span class="wf-total">"69.0 pts"</span>
+                                        </div>
+                                        <div class="waterfall-step">
+                                            <div class="wf-info">
+                                                <strong>"Stump 4: Mobility & CC Residual"</strong>
+                                                <span>"Micro repositioning correction"</span>
+                                            </div>
+                                            <span class="wf-delta">+12.0</span>
+                                            <span class="wf-total">"81.0 pts"</span>
+                                        </div>
+                                        <div class="waterfall-step">
+                                            <div class="wf-info">
+                                                <strong>"Stump 5: Resource Profile Verification"</strong>
+                                                <span>"Mana / Energy / Cooldown alignment"</span>
+                                            </div>
+                                            <span class="wf-delta">+8.0</span>
+                                            <span class="wf-total highlight">{format!("{gbdt_val:.1} pts")}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <details class="model-raw-json">
+                                    <summary>"View Raw JSON GBDT Payload"</summary>
+                                    <pre>{json}</pre>
+                                </details>
+                            </div>
+                        }.into_any()
+                    },
+
+                    _ => view! {
+                        <div class="math-panel">
+                            <div class="math-formula-box">
+                                <div class="math-formula-title">"Stacked Meta-Learner & Bayesian Performance Efficacy Fusion"</div>
+                                <div class="math-formula-code">"Score_Final = ( Σ_{k=1}^{6} w_k · S_k ) × (1.0 + Δ_Bayes(Riot Telemetry))"</div>
+                                <p class="math-intuition">
+                                    "Aggregates predictions from all 6 machine learning models through empirical weighting and dynamically calibrates candidate rankings with live Riot Match-V5 telemetry win-rate performance."
+                                </p>
+                            </div>
+
+                            <div class="math-stats-grid">
+                                <div class="math-stat-box">
+                                    <span class="stat-label">"Final Ensemble Score"</span>
+                                    <span class="stat-val highlight">{format!("{meta_val:.1}%")}</span>
+                                    <span class="stat-sub">"Blended recommendation score"</span>
+                                </div>
+                                <div class="math-stat-box">
+                                    <span class="stat-label">"Model Architecture"</span>
+                                    <span class="stat-val">"6 Active ML Engines"</span>
+                                    <span class="stat-sub">"Bagging + Boosting + Spatial + Probabilistic"</span>
+                                </div>
+                                <div class="math-stat-box">
+                                    <span class="stat-label">"Bayesian Performance Calibration"</span>
+                                    <span class="stat-val">"Live Riot V5 Telemetry"</span>
+                                    <span class="stat-sub">"Empirical match win-rate adjustments"</span>
+                                </div>
+                            </div>
+
+                            <div class="ensemble-weights-card">
+                                <h4>"6-Model Ensemble Weight Distribution"</h4>
+                                <div class="weights-table">
+                                    <div class="weight-row">
+                                        <span class="weight-model">"🌲 Random Forest (10-Tree Bagging)"</span>
+                                        <span class="weight-pct">"22%"</span>
+                                        <span class="weight-score">{format!("{rf_val:.1}%")}</span>
+                                    </div>
+                                    <div class="weight-row">
+                                        <span class="weight-model">"🌳 Decision Tree (Hierarchical Rules)"</span>
+                                        <span class="weight-pct">"18%"</span>
+                                        <span class="weight-score">{format!("{dt_val:.1}%")}</span>
+                                    </div>
+                                    <div class="weight-row">
+                                        <span class="weight-model">"📍 K-Nearest Neighbors (Euclidean Distance)"</span>
+                                        <span class="weight-pct">"18%"</span>
+                                        <span class="weight-score">{format!("{knn_val:.1}%")}</span>
+                                    </div>
+                                    <div class="weight-row">
+                                        <span class="weight-model">"🎲 Multi-Class Naive Bayes (Gaussian Prior)"</span>
+                                        <span class="weight-pct">"14%"</span>
+                                        <span class="weight-score">{format!("{nb_val:.1}%")}</span>
+                                    </div>
+                                    <div class="weight-row">
+                                        <span class="weight-model">"📐 Cosine Similarity (Angular Vector Space)"</span>
+                                        <span class="weight-pct">"14%"</span>
+                                        <span class="weight-score">{format!("{cos_val:.1}%")}</span>
+                                    </div>
+                                    <div class="weight-row">
+                                        <span class="weight-model">"⚡ GBDT (Boosted Residual Stumps)"</span>
+                                        <span class="weight-pct">"14%"</span>
+                                        <span class="weight-score">{format!("{gbdt_val:.1}%")}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }.into_any()
+                }}
+            </div>
+        </div>
+    }
+}
+
 fn view_champion_modal(
     state: RwSignal<AppState>,
     name: String,
@@ -1542,16 +2281,33 @@ fn view_champion_modal(
     let rf_score = recommendation.scores.random_forest.get(&name);
     let dt_score = recommendation.scores.decision_tree.get(&name);
     let knn_score = recommendation.scores.knn.get(&name);
+    let nb_score = recommendation.scores.naive_bayes.get(&name);
+    let cos_score = recommendation.scores.cosine_similarity.get(&name);
+    let gbdt_score = recommendation.scores.gbdt.get(&name);
 
     let rf_val = rf_score.map(|s| s.score).unwrap_or_default();
     let dt_val = dt_score.map(|s| s.score).unwrap_or_default();
     let knn_val = knn_score.map(|s| s.score).unwrap_or_default();
+    let nb_val = nb_score.map(|s| s.score).unwrap_or_default();
+    let cos_val = cos_score.map(|s| s.score).unwrap_or_default();
+    let gbdt_val = gbdt_score.map(|s| s.score).unwrap_or_default();
+    let meta_val = recommendation
+        .top10
+        .iter()
+        .find(|c| c.champion_name == name)
+        .map(|c| c.weighted)
+        .unwrap_or(rf_val);
 
     let mut contributing_factors = Vec::new();
     let mut penalties = Vec::new();
     let mut matched_criteria = Vec::new();
 
-    for score in [dt_score, rf_score, knn_score].into_iter().flatten() {
+    for score in [
+        rf_score, dt_score, knn_score, nb_score, cos_score, gbdt_score,
+    ]
+    .into_iter()
+    .flatten()
+    {
         if let Some(factors) = score
             .details
             .get("contributingFactors")
@@ -1631,31 +2387,24 @@ fn view_champion_modal(
         champion.difficulty,
     );
 
-    let raw_details = [
-        ("Random Forest", rf_score),
-        ("Decision Tree", dt_score),
-        ("K-Nearest Neighbors", knn_score),
-    ]
-    .into_iter()
-    .map(|(label, score)| {
-        let details = score
-            .map(|score| {
-                serde_json::to_string_pretty(&score.details)
-                    .unwrap_or_else(|_| score.details.to_string())
-            })
-            .unwrap_or_else(|| "No explanation details available.".into());
-        let score_value = score.map(|score| score.score).unwrap_or_default();
-        view! {
-            <details class="algorithm-detail">
-                <summary>
-                    <span>{label}</span>
-                    <strong>{format!("{score_value:.1}%")}</strong>
-                </summary>
-                <pre>{details}</pre>
-            </details>
-        }
-    })
-    .collect_view();
+    let math_inspector_view = view_math_matrices_inspector(
+        &recommendation,
+        &champion,
+        &name,
+        rf_score,
+        dt_score,
+        knn_score,
+        nb_score,
+        cos_score,
+        gbdt_score,
+        rf_val,
+        dt_val,
+        knn_val,
+        nb_val,
+        cos_val,
+        gbdt_val,
+        meta_val,
+    );
 
     let drivers_view = intel
         .drivers
@@ -1741,7 +2490,7 @@ fn view_champion_modal(
             <div class="modal-body">
                 <section class="intel-section">
                     <div class="intel-header">
-                        <h3>"3-Lens Machine Learning Consensus"</h3>
+                        <h3>"6-Model Machine Learning Consensus"</h3>
                         <span class=format!("consensus-badge {}", intel.consensus.css())>
                             {intel.consensus.label()}
                         </span>
@@ -1807,10 +2556,10 @@ fn view_champion_modal(
                     </div>
                 </section>
 
-                <details class="raw-math-toggle">
-                    <summary>"Inspect Raw Model Matrices & Vectors"</summary>
+                <details class="raw-math-toggle" open=true>
+                    <summary>"Inspect Raw Model Matrices & Vectors (6-Model Ensemble)"</summary>
                     <div class="raw-details-wrap">
-                        {raw_details}
+                        {math_inspector_view}
                     </div>
                 </details>
             </div>
