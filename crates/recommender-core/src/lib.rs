@@ -4,11 +4,14 @@ mod aggregation;
 pub mod analytics;
 mod compat;
 pub mod contracts;
+mod cosine_similarity;
 mod decision_tree;
 pub mod evaluation;
 pub mod export;
 mod features;
+mod gbdt;
 mod knn;
+mod naive_bayes;
 pub mod player_analytics;
 mod random_forest;
 pub mod riot_api;
@@ -206,32 +209,98 @@ impl Engine {
                 return Err(Error(format!("Feature {key} must be a string")));
             }
         }
+        let is_v2 = features.get("resource").is_some()
+            || features.get("power_curve").is_some()
+            || features
+                .get("is_v2")
+                .and_then(Value::as_bool)
+                .unwrap_or(false);
+
         let mut rf_scores = Map::new();
         let mut dt_scores = Map::new();
         let mut knn_scores = Map::new();
+        let mut nb_scores = Map::new();
+        let mut cos_scores = Map::new();
+        let mut gbdt_scores = Map::new();
         let mut aggregated = Vec::with_capacity(self.catalog.len());
         for entry in &self.catalog {
             let rf = random_forest::score(features, &entry.data, &self.forest);
             let dt = decision_tree::score(features, &entry.data);
             let knn = knn::score(features, &entry.data);
-            // Reject overflow rather than serialize non-finite scores silently as JSON null.
-            for value in [&rf, &dt, &knn] {
-                for key in ["score", "rawScore"] {
-                    if !value[key].is_number() {
-                        return Err(Error("Scoring produced a non-finite value".into()));
+
+            if is_v2 {
+                let nb = naive_bayes::score(features, &entry.data);
+                let cos = cosine_similarity::score(features, &entry.data);
+                let gbdt = gbdt::score(features, &entry.data);
+
+                // Reject overflow rather than serialize non-finite scores silently as JSON null.
+                for value in [&rf, &dt, &knn, &nb, &cos, &gbdt] {
+                    for key in ["score", "rawScore"] {
+                        if !value[key].is_number() {
+                            return Err(Error("Scoring produced a non-finite value".into()));
+                        }
                     }
                 }
+                aggregated.push(aggregation::aggregate(
+                    &entry.name,
+                    &rf,
+                    &dt,
+                    &knn,
+                    Some(&nb),
+                    Some(&cos),
+                    Some(&gbdt),
+                ));
+                nb_scores.insert(entry.name.clone(), nb);
+                cos_scores.insert(entry.name.clone(), cos);
+                gbdt_scores.insert(entry.name.clone(), gbdt);
+            } else {
+                for value in [&rf, &dt, &knn] {
+                    for key in ["score", "rawScore"] {
+                        if !value[key].is_number() {
+                            return Err(Error("Scoring produced a non-finite value".into()));
+                        }
+                    }
+                }
+                aggregated.push(aggregation::aggregate(
+                    &entry.name,
+                    &rf,
+                    &dt,
+                    &knn,
+                    None,
+                    None,
+                    None,
+                ));
             }
-            aggregated.push(aggregation::aggregate(&entry.name, &rf, &dt, &knn));
+
             rf_scores.insert(entry.name.clone(), rf);
             dt_scores.insert(entry.name.clone(), dt);
             knn_scores.insert(entry.name.clone(), knn);
         }
         let top10 = aggregation::top10(&aggregated, &self.catalog, true);
-        Ok(
-            json!({"features": features, "scores": {"randomForest": rf_scores,
-            "decisionTree": dt_scores, "knn": knn_scores}, "aggregated": aggregated, "top10": top10}),
-        )
+
+        let scores = if is_v2 {
+            json!({
+                "randomForest": rf_scores,
+                "decisionTree": dt_scores,
+                "knn": knn_scores,
+                "naiveBayes": nb_scores,
+                "cosineSimilarity": cos_scores,
+                "gbdt": gbdt_scores,
+            })
+        } else {
+            json!({
+                "randomForest": rf_scores,
+                "decisionTree": dt_scores,
+                "knn": knn_scores,
+            })
+        };
+
+        Ok(json!({
+            "features": features,
+            "scores": scores,
+            "aggregated": aggregated,
+            "top10": top10
+        }))
     }
 }
 

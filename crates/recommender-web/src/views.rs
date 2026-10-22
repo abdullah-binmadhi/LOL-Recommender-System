@@ -55,7 +55,8 @@ fn close_modal_callback(state: RwSignal<AppState>) -> Callback<()> {
 #[component]
 pub fn App() -> impl IntoView {
     let questions = Arc::new(
-        QuestionnaireDefinition::current()
+        QuestionnaireDefinition::modern()
+            .or_else(|_| QuestionnaireDefinition::current())
             .expect("bundled production questionnaire must remain valid")
             .effective_questions(),
     );
@@ -382,12 +383,12 @@ fn view_start(
         <section id="start-screen" class="start-screen">
             <div class="hero">
                 <div class="hero-copy">
-                    <Badge variant=BadgeVariant::Gold>"4-Model Ensemble & Bayesian Efficacy"</Badge>
+                    <Badge variant=BadgeVariant::Gold>"6-Model Ensemble & Bayesian Efficacy"</Badge>
                     <h1 class="hero-title">
                         "Find the champion that " <em>"plays like you"</em>
                     </h1>
                     <p class="hero-lede">
-                        "Complete our 12-dimensional calibration quiz. A Random Forest, Decision Tree, KNN, and Stacked Bayesian Meta-Learner score all 172 champions and calibrate directly against your live Riot match telemetry."
+                        "Complete our 25-dimensional calibration assessment across 5 tactical stages. A 6-model machine learning suite (Random Forest, Decision Tree, KNN, Naive Bayes, Cosine Vector Space, and GBDT) scores all 172 champions and calibrates directly against your live Riot match telemetry."
                     </p>
                     <div class="hero-actions">
                         {move || {
@@ -712,10 +713,12 @@ fn view_questionnaire(
                     })
                     .collect_view();
 
-                let category_badge = match question.id {
-                    1..=5 => "Core Role & Playstyle",
-                    6..=7 => "Resource & Damage Profile",
-                    _ => "Tactical & Psychological",
+                let stage_info = match question.id {
+                    1..=5 => ("STAGE 1 OF 5", "Core Archetype & Lanes"),
+                    6..=10 => ("STAGE 2 OF 5", "Combat & Resource Systems"),
+                    11..=15 => ("STAGE 3 OF 5", "Tactical Engagement & Range"),
+                    16..=20 => ("STAGE 4 OF 5", "Macro & Scaling Strategy"),
+                    _ => ("STAGE 5 OF 5", "Mindset, Sensory & Fantasy"),
                 };
 
                 view! {
@@ -725,13 +728,15 @@ fn view_questionnaire(
                         aria-label="Questionnaire"
                     >
                         <header class="quiz-head">
-                            <div class="quiz-meta">
-                                <span class="quiz-step">
-                                    {format!("Question {} of {}", question.id, question_count)}
-                                    <span style="display: inline-block; margin-left: 0.6rem; padding: 0.15rem 0.5rem; background: rgba(200, 170, 110, 0.15); border: 1px solid var(--gold); border-radius: 3px; font-size: 0.65rem; color: var(--gold); letter-spacing: 0.05em; text-transform: uppercase;">
-                                        {category_badge}
+                            <div class="quiz-meta" style="align-items: flex-start;">
+                                <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                                    <span style="font-family: monospace; font-size: 0.7rem; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase;">
+                                        {stage_info.0} " · " {stage_info.1}
                                     </span>
-                                </span>
+                                    <span class="quiz-step">
+                                        {format!("Question {} of {}", question.id, question_count)}
+                                    </span>
+                                </div>
                                 <span class="quiz-percent">{format!("{percent:.0}% complete")}</span>
                             </div>
                             <Progress percent=Signal::derive(move || percent) label="Quiz progress" />
@@ -819,6 +824,9 @@ struct MatchEntry {
     random_forest: f64,
     decision_tree: f64,
     knn: f64,
+    naive_bayes: f64,
+    cosine_similarity: f64,
+    gbdt: f64,
     difficulty: f64,
     attributes: Attributes,
     breakdown: MatchBreakdown,
@@ -858,6 +866,9 @@ fn build_entries(
                 random_forest: score.random_forest,
                 decision_tree: score.decision_tree,
                 knn: score.knn,
+                naive_bayes: score.naive_bayes.unwrap_or(score.average),
+                cosine_similarity: score.cosine_similarity.unwrap_or(score.average),
+                gbdt: score.gbdt.unwrap_or(score.average),
                 difficulty: champion.difficulty,
                 attributes: Attributes {
                     damage: champion.damage,
@@ -1075,7 +1086,6 @@ fn view_analysis_content(
             let modal_name = entry.name.clone();
             let is_top_pick = entry.rank == 1;
             let wr = entry.win_rate.unwrap_or(50.0);
-            let meta_score = (entry.random_forest * 0.35 + entry.decision_tree * 0.25 + entry.knn * 0.20 + entry.average * 0.20).min(100.0);
             let card_class = if is_top_pick {
                 "match-card winner grand-podium"
             } else {
@@ -1118,7 +1128,9 @@ fn view_analysis_content(
                         {model_bar("RF", entry.random_forest)}
                         {model_bar("DT", entry.decision_tree)}
                         {model_bar("KNN", entry.knn)}
-                        {model_bar("META", meta_score)}
+                        {model_bar("NB", entry.naive_bayes)}
+                        {model_bar("COS", entry.cosine_similarity)}
+                        {model_bar("GBDT", entry.gbdt)}
                     </div>
                 </button>
             }
@@ -1131,7 +1143,6 @@ fn view_analysis_content(
         .map(|entry| {
             let modal_name = entry.name.clone();
             let wr = entry.win_rate.unwrap_or(50.0);
-            let meta_score = (entry.random_forest * 0.35 + entry.decision_tree * 0.25 + entry.knn * 0.20 + entry.average * 0.20).min(100.0);
             let tier = presenter::tier_for(entry.average);
             view! {
                 <button
@@ -1156,7 +1167,9 @@ fn view_analysis_content(
                         <span class="roster-model-chip">{format!("RF: {:.0}%", entry.random_forest)}</span>
                         <span class="roster-model-chip">{format!("DT: {:.0}%", entry.decision_tree)}</span>
                         <span class="roster-model-chip">{format!("KNN: {:.0}%", entry.knn)}</span>
-                        <span class="roster-model-chip" style="color: var(--cyan); border-color: rgba(10, 200, 185, 0.4);">{format!("META: {:.0}%", meta_score)}</span>
+                        <span class="roster-model-chip">{format!("NB: {:.0}%", entry.naive_bayes)}</span>
+                        <span class="roster-model-chip">{format!("COS: {:.0}%", entry.cosine_similarity)}</span>
+                        <span class="roster-model-chip">{format!("GBDT: {:.0}%", entry.gbdt)}</span>
                     </div>
                     <div class=format!("match-score roster-score {}", tier.css())>
                         <strong>{format!("{:.0}%", entry.average)}</strong>
@@ -1238,7 +1251,9 @@ fn view_analysis_content(
                     {model_bar("Random Forest", top_models.0)}
                     {model_bar("Decision Tree", top_models.1)}
                     {model_bar("KNN", top_models.2)}
-                    {model_bar("Stacked Meta-Learner", (top.random_forest * 0.35 + top.decision_tree * 0.25 + top.knn * 0.20 + top.average * 0.20).min(100.0))}
+                    {model_bar("Naive Bayes", top.naive_bayes)}
+                    {model_bar("Cosine Similarity", top.cosine_similarity)}
+                    {model_bar("GBDT", top.gbdt)}
                 </div>
             </div>
         </section>
@@ -1263,7 +1278,7 @@ fn view_analysis_content(
             <div class="block-head hex-block-head">
                 <span class="hex-rune-tag">"✦ HEXTECH MATCHMAKING ENGINE ✦"</span>
                 <h2 id="top10-title" class="section-title">"🥇 Primal Synergy Podium"</h2>
-                <p class="muted">"Your top 3 highest-compatibility champions across our 4-model machine learning ensemble."</p>
+                <p class="muted">"Your top 3 highest-compatibility champions across our 6-model machine learning ensemble."</p>
             </div>
             <div class="podium-grid">
                 {top_cards}

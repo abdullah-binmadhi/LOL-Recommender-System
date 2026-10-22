@@ -42,7 +42,44 @@ pub fn from_answers(answers: &Value) -> Value {
         >= 2
         || answers.get("pressure_response").is_some();
 
-    let (pressure, aesthetic, team_contrib, char_id, problem) = if is_v2 {
+    let is_25q = answers.get("25").is_some()
+        || answers.get("20").is_some()
+        || answers.get("power_curve").is_some();
+
+    let (pressure, aesthetic, team_contrib, char_id, problem) = if is_25q {
+        (
+            answers
+                .get("pressure_response")
+                .or_else(|| answers.get("21"))
+                .and_then(Value::as_str)
+                .unwrap_or("Stay calm and strategic")
+                .to_owned(),
+            answers
+                .get("aesthetic_preference")
+                .or_else(|| answers.get("23"))
+                .and_then(Value::as_str)
+                .unwrap_or("Heroic")
+                .to_owned(),
+            answers
+                .get("team_contribution")
+                .or_else(|| answers.get("20"))
+                .and_then(Value::as_str)
+                .unwrap_or("Balance between both")
+                .to_owned(),
+            answers
+                .get("thematic_fantasy")
+                .or_else(|| answers.get("23"))
+                .and_then(Value::as_str)
+                .unwrap_or("No preference")
+                .to_owned(),
+            answers
+                .get("problem_solving")
+                .or_else(|| answers.get("25"))
+                .and_then(Value::as_str)
+                .unwrap_or("Analyze carefully before acting")
+                .to_owned(),
+        )
+    } else if is_v2 {
         (
             answers
                 .get("pressure_response")
@@ -102,7 +139,7 @@ pub fn from_answers(answers: &Value) -> Value {
         "cc": (control / 3.33) / 3.0 * 100.0
     });
 
-    if is_v2 {
+    if is_v2 || is_25q {
         if let Some(map) = feat.as_object_mut() {
             let res = answers
                 .get("resource")
@@ -116,6 +153,33 @@ pub fn from_answers(answers: &Value) -> Value {
                 .unwrap_or("No Preference");
             map.insert("resource".to_string(), json!(res));
             map.insert("damage_type".to_string(), json!(dmg_type));
+
+            if is_25q {
+                let add_dim = |m: &mut serde_json::Map<String, Value>, key: &str, id: &str| {
+                    if let Some(v) = answers
+                        .get(key)
+                        .or_else(|| answers.get(id))
+                        .and_then(Value::as_str)
+                    {
+                        m.insert(key.to_string(), json!(v));
+                    }
+                };
+                add_dim(map, "power_curve", "8");
+                add_dim(map, "targeting_style", "9");
+                add_dim(map, "cooldown_cadence", "10");
+                add_dim(map, "teamfight_stance", "11");
+                add_dim(map, "defensive_style", "12");
+                add_dim(map, "crowd_control", "13");
+                add_dim(map, "mobility_type", "14");
+                add_dim(map, "waveclear_speed", "15");
+                add_dim(map, "split_vs_teamfight", "16");
+                add_dim(map, "objective_affinity", "17");
+                add_dim(map, "volatility_tolerance", "18");
+                add_dim(map, "roaming_tendency", "19");
+                add_dim(map, "duelist_orientation", "20");
+                add_dim(map, "combat_sensation", "22");
+                add_dim(map, "risk_profile", "24");
+            }
         }
     }
 

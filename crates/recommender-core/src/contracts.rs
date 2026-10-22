@@ -133,9 +133,14 @@ impl QuestionnaireDefinition {
         Ok(questionnaire)
     }
 
-    /// Read the existing questionnaire unchanged; its JSON remains the canonical source during
-    /// the staged UI migration.
+    /// Read the historical questionnaire unchanged; its JSON remains the canonical source during
+    /// parity checks against legacy migration fixtures.
     pub fn current() -> Result<Self, Error> {
+        Self::from_json(include_str!("../data/questions_legacy.json"))
+    }
+
+    /// Modern 25-question comprehensive assessment across 5 tactical stages.
+    pub fn modern() -> Result<Self, Error> {
         Self::from_json(include_str!("../../../src/data/questions.json"))
     }
 
@@ -206,6 +211,8 @@ pub struct UserFeatures {
     pub burst: f64,
     pub sustain: f64,
     pub cc: f64,
+    #[serde(flatten, default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub extra: BTreeMap<String, Value>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -224,6 +231,12 @@ pub struct AlgorithmScores {
     pub random_forest: BTreeMap<String, AlgorithmScore>,
     pub decision_tree: BTreeMap<String, AlgorithmScore>,
     pub knn: BTreeMap<String, AlgorithmScore>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub naive_bayes: BTreeMap<String, AlgorithmScore>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub cosine_similarity: BTreeMap<String, AlgorithmScore>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub gbdt: BTreeMap<String, AlgorithmScore>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -233,6 +246,12 @@ pub struct AggregatedChampionScore {
     pub random_forest: f64,
     pub decision_tree: f64,
     pub knn: f64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub naive_bayes: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cosine_similarity: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gbdt: Option<f64>,
     pub average: f64,
     pub weighted: f64,
 }
@@ -335,6 +354,15 @@ mod tests {
         .unwrap();
         assert_eq!(actual, expected);
         assert_eq!(actual.len(), 12);
+    }
+
+    #[test]
+    fn modern_questionnaire_contains_all_25_questions_across_5_stages() {
+        let questionnaire = QuestionnaireDefinition::modern().unwrap();
+        let actual = questionnaire.effective_questions();
+        assert_eq!(actual.len(), 25);
+        assert_eq!(actual[0].id, 1);
+        assert_eq!(actual[24].id, 25);
     }
 
     #[test]
