@@ -10,16 +10,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 3.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 3,
+        "control": 2,
+        "mobility": 2,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Blood Well"
     },
     {
       "id": "ahri",
@@ -31,16 +32,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "akali",
@@ -52,16 +54,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Middle', 'Top'}",
-      "herotype": "Assassin"
+      "herotype": "Assassin",
+      "resource_type": "Energy"
     },
     {
       "id": "akshan",
@@ -73,16 +76,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 3.0,
-        "utility": 2.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 3,
+        "utility": 2,
+        "difficulty": 3
       },
       "range_type": "Ranged",
       "position": "{'Middle'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "alistar",
@@ -94,16 +98,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 3.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 1.0
+        "damage": 1,
+        "toughness": 3,
+        "control": 3,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Support'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "ambessa",
@@ -115,16 +120,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 1.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 1,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 3
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Energy"
     },
     {
       "id": "amumu",
@@ -136,16 +142,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 3,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Support'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "anivia",
@@ -157,16 +164,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 3
       },
       "range_type": "Ranged",
       "position": "{'Middle'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "annie",
@@ -178,16 +186,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 1.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 1
       },
       "range_type": "Ranged",
       "position": "{'Middle'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "aphelios",
@@ -199,16 +208,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 3
       },
       "range_type": "Ranged",
       "position": "{'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "ashe",
@@ -220,16 +230,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 1
       },
       "range_type": "Ranged",
       "position": "{'Support', 'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "aurelionsol",
@@ -241,16 +252,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 3
       },
       "range_type": "Ranged",
       "position": "{'Middle'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "aurora",
@@ -262,16 +274,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle', 'Top'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "azir",
@@ -283,16 +296,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 3
       },
       "range_type": "Ranged",
       "position": "{'Middle'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "bard",
@@ -304,16 +318,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 2.0,
-        "utility": 3.0,
-        "difficulty": 3.0
+        "damage": 1,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 2,
+        "utility": 3,
+        "difficulty": 3
       },
       "range_type": "Ranged",
       "position": "{'Support'}",
-      "herotype": "Support"
+      "herotype": "Support",
+      "resource_type": "Mana"
     },
     {
       "id": "belveth",
@@ -325,16 +340,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "None"
     },
     {
       "id": "blitzcrank",
@@ -346,16 +362,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 2.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 1,
+        "toughness": 2,
+        "control": 3,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Support'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "brand",
@@ -367,16 +384,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Jungle', 'Middle', 'Support'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "braum",
@@ -388,16 +406,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 2.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 1,
+        "toughness": 2,
+        "control": 3,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Support'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "briar",
@@ -409,16 +428,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 3.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 3,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Fury"
     },
     {
       "id": "caitlyn",
@@ -430,16 +450,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Ranged",
       "position": "{'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "camille",
@@ -451,16 +472,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 3
       },
       "range_type": "Melee",
       "position": "{'Support', 'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "cassiopeia",
@@ -472,16 +494,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 3
       },
       "range_type": "Ranged",
       "position": "{'Middle'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "chogath",
@@ -493,16 +516,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 2,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "corki",
@@ -514,16 +538,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "darius",
@@ -535,16 +560,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "diana",
@@ -556,16 +582,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Middle'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "drmundo",
@@ -577,16 +604,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 1.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 1,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "None"
     },
     {
       "id": "draven",
@@ -598,16 +626,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "ekko",
@@ -619,16 +648,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 3
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Middle'}",
-      "herotype": "Assassin"
+      "herotype": "Assassin",
+      "resource_type": "Mana"
     },
     {
       "id": "elise",
@@ -640,16 +670,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Jungle'}",
-      "herotype": "Assassin"
+      "herotype": "Assassin",
+      "resource_type": "Mana"
     },
     {
       "id": "evelynn",
@@ -661,16 +692,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 1.0,
-        "mobility": 2.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 1,
+        "mobility": 2,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Assassin"
+      "herotype": "Assassin",
+      "resource_type": "Mana"
     },
     {
       "id": "ezreal",
@@ -682,16 +714,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Ranged",
       "position": "{'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "fiddlesticks",
@@ -703,16 +736,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Jungle'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "fiora",
@@ -724,16 +758,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 2,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "fizz",
@@ -745,16 +780,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Middle'}",
-      "herotype": "Assassin"
+      "herotype": "Assassin",
+      "resource_type": "Mana"
     },
     {
       "id": "galio",
@@ -766,16 +802,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 3.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 3,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Middle', 'Support'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "gangplank",
@@ -787,16 +824,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 3
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "garen",
@@ -808,16 +846,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 1.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 1,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "None"
     },
     {
       "id": "gnar",
@@ -829,37 +868,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 3.0
+        "damage": 2,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 3
       },
       "range_type": "Ranged",
       "position": "{'Top'}",
-      "herotype": "Fighter"
-    },
-    {
-      "id": "gnarbig",
-      "name": "GnarBig",
-      "title": "the Missing Link",
-      "role": "Fighter",
-      "difficulty": 2,
-      "tags": [
-        "Fighter"
-      ],
-      "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
-      },
-      "range_type": "Melee",
-      "position": "{'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Rage"
     },
     {
       "id": "gragas",
@@ -871,16 +890,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 3.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 3,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Middle', 'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "graves",
@@ -892,16 +912,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 1.0,
-        "mobility": 2.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 1,
+        "mobility": 2,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Jungle'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "gwen",
@@ -913,16 +934,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 1.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 1,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "hecarim",
@@ -934,16 +956,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "heimerdinger",
@@ -955,16 +978,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle', 'Support', 'Top'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "hwei",
@@ -976,16 +1000,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 3
       },
       "range_type": "Ranged",
       "position": "{'Middle', 'Support'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "illaoi",
@@ -997,16 +1022,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 1.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 1,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "irelia",
@@ -1018,16 +1044,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 3.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 3,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Middle', 'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "ivern",
@@ -1039,16 +1066,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 2.0,
-        "utility": 3.0,
-        "difficulty": 3.0
+        "damage": 1,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 2,
+        "utility": 3,
+        "difficulty": 3
       },
       "range_type": "Ranged",
       "position": "{'Jungle'}",
-      "herotype": "Support"
+      "herotype": "Support",
+      "resource_type": "Mana"
     },
     {
       "id": "janna",
@@ -1060,16 +1088,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 3.0,
-        "difficulty": 1.0
+        "damage": 1,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 1,
+        "utility": 3,
+        "difficulty": 1
       },
       "range_type": "Ranged",
       "position": "{'Support'}",
-      "herotype": "Support"
+      "herotype": "Support",
+      "resource_type": "Mana"
     },
     {
       "id": "jarvaniv",
@@ -1081,16 +1110,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 2.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 2,
+        "utility": 2,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "jax",
@@ -1102,16 +1132,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "jayce",
@@ -1123,16 +1154,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 2.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 2,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Middle', 'Top'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "jhin",
@@ -1144,16 +1176,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "jinx",
@@ -1165,16 +1198,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "ksante",
@@ -1186,16 +1220,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 3.0,
-        "mobility": 2.0,
-        "utility": 2.0,
-        "difficulty": 3.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 3,
+        "mobility": 2,
+        "utility": 2,
+        "difficulty": 3
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "kaisa",
@@ -1207,16 +1242,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "kalista",
@@ -1228,16 +1264,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 3.0,
-        "utility": 2.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 3,
+        "utility": 2,
+        "difficulty": 3
       },
       "range_type": "Ranged",
       "position": "{'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "karma",
@@ -1249,16 +1286,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 1
       },
       "range_type": "Ranged",
       "position": "{'Middle', 'Support', 'Top'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "karthus",
@@ -1270,16 +1308,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Jungle'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "kassadin",
@@ -1291,16 +1330,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 1.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 1,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Middle'}",
-      "herotype": "Assassin"
+      "herotype": "Assassin",
+      "resource_type": "Mana"
     },
     {
       "id": "katarina",
@@ -1312,16 +1352,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Middle'}",
-      "herotype": "Assassin"
+      "herotype": "Assassin",
+      "resource_type": "None"
     },
     {
       "id": "kayle",
@@ -1333,16 +1374,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 1.0,
-        "utility": 3.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 1,
+        "utility": 3,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "kayn",
@@ -1354,16 +1396,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "kennen",
@@ -1375,16 +1418,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Top'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Energy"
     },
     {
       "id": "khazix",
@@ -1396,16 +1440,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Assassin"
+      "herotype": "Assassin",
+      "resource_type": "Mana"
     },
     {
       "id": "kindred",
@@ -1417,16 +1462,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 3.0,
-        "utility": 2.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 3,
+        "utility": 2,
+        "difficulty": 3
       },
       "range_type": "Ranged",
       "position": "{'Jungle'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "kled",
@@ -1438,16 +1484,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 1.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 1,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Courage"
     },
     {
       "id": "kogmaw",
@@ -1459,16 +1506,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "leblanc",
@@ -1480,16 +1528,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle'}",
-      "herotype": "Assassin"
+      "herotype": "Assassin",
+      "resource_type": "Mana"
     },
     {
       "id": "leesin",
@@ -1501,16 +1550,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Energy"
     },
     {
       "id": "leona",
@@ -1522,16 +1572,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 3.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 1,
+        "toughness": 3,
+        "control": 3,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Support'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "lillia",
@@ -1543,16 +1594,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 2.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 2,
+        "utility": 2,
+        "difficulty": 3
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "lissandra",
@@ -1564,16 +1616,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "lucian",
@@ -1585,16 +1638,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "lulu",
@@ -1606,16 +1660,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 3.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 3,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Support'}",
-      "herotype": "Support"
+      "herotype": "Support",
+      "resource_type": "Mana"
     },
     {
       "id": "lux",
@@ -1627,16 +1682,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 1.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 1
       },
       "range_type": "Ranged",
       "position": "{'Middle', 'Support'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "malphite",
@@ -1648,16 +1704,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 3.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 1,
+        "toughness": 3,
+        "control": 3,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Middle', 'Support', 'Top'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "malzahar",
@@ -1669,16 +1726,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 1.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 1
       },
       "range_type": "Ranged",
       "position": "{'Middle'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "maokai",
@@ -1690,16 +1748,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 3.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 1.0
+        "damage": 1,
+        "toughness": 3,
+        "control": 3,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Support'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "masteryi",
@@ -1711,16 +1770,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Assassin"
+      "herotype": "Assassin",
+      "resource_type": "Mana"
     },
     {
       "id": "mel",
@@ -1732,16 +1792,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle', 'Support'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "milio",
@@ -1753,16 +1814,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 3.0,
-        "utility": 3.0,
-        "difficulty": 1.0
+        "damage": 1,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 3,
+        "utility": 3,
+        "difficulty": 1
       },
       "range_type": "Ranged",
       "position": "{'Support'}",
-      "herotype": "Support"
+      "herotype": "Support",
+      "resource_type": "Mana"
     },
     {
       "id": "missfortune",
@@ -1774,16 +1836,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Ranged",
       "position": "{'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "mordekaiser",
@@ -1795,16 +1858,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 1.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 1,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Shield"
     },
     {
       "id": "morgana",
@@ -1816,16 +1880,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 1
       },
       "range_type": "Ranged",
       "position": "{'Support'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "naafiri",
@@ -1837,16 +1902,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Middle'}",
-      "herotype": "Assassin"
+      "herotype": "Assassin",
+      "resource_type": "Mana"
     },
     {
       "id": "nami",
@@ -1858,16 +1924,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 1,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Support'}",
-      "herotype": "Support"
+      "herotype": "Support",
+      "resource_type": "Mana"
     },
     {
       "id": "nasus",
@@ -1879,16 +1946,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 2,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "nautilus",
@@ -1900,16 +1968,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 3.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 1,
+        "toughness": 3,
+        "control": 3,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Support'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "neeko",
@@ -1921,16 +1990,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Ranged",
       "position": "{'Middle', 'Support'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "nidalee",
@@ -1942,16 +2012,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 3.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 3,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Jungle'}",
-      "herotype": "Assassin"
+      "herotype": "Assassin",
+      "resource_type": "Mana"
     },
     {
       "id": "nilah",
@@ -1963,16 +2034,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 3.0,
-        "utility": 2.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 3,
+        "utility": 2,
+        "difficulty": 3
       },
       "range_type": "Melee",
       "position": "{'Bottom'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "nocturne",
@@ -1984,16 +2056,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 2.0,
-        "difficulty": 1.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 2,
+        "utility": 2,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "nunu",
@@ -2005,16 +2078,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 3.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 1.0
+        "damage": 1,
+        "toughness": 3,
+        "control": 2,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "olaf",
@@ -2026,16 +2100,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "orianna",
@@ -2047,16 +2122,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "ornn",
@@ -2068,16 +2144,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 3.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 1,
+        "toughness": 3,
+        "control": 3,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "pantheon",
@@ -2089,16 +2166,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Middle', 'Support', 'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "poppy",
@@ -2110,16 +2188,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 3.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 3,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Top'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "pyke",
@@ -2131,16 +2210,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Support'}",
-      "herotype": "Support"
+      "herotype": "Support",
+      "resource_type": "Mana"
     },
     {
       "id": "qiyana",
@@ -2152,16 +2232,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 3
       },
       "range_type": "Melee",
       "position": "{'Middle'}",
-      "herotype": "Assassin"
+      "herotype": "Assassin",
+      "resource_type": "Mana"
     },
     {
       "id": "quinn",
@@ -2173,16 +2254,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Top'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "rakan",
@@ -2194,16 +2276,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 2.0,
-        "control": 3.0,
-        "mobility": 3.0,
-        "utility": 3.0,
-        "difficulty": 2.0
+        "damage": 1,
+        "toughness": 2,
+        "control": 3,
+        "mobility": 3,
+        "utility": 3,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Support'}",
-      "herotype": "Support"
+      "herotype": "Support",
+      "resource_type": "Mana"
     },
     {
       "id": "rammus",
@@ -2215,16 +2298,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 3.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 3,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "reksai",
@@ -2236,16 +2320,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 2,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Rage"
     },
     {
       "id": "rell",
@@ -2257,16 +2342,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 3.0,
-        "control": 3.0,
-        "mobility": 2.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 1,
+        "toughness": 3,
+        "control": 3,
+        "mobility": 2,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Support'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "renata",
@@ -2278,16 +2364,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Support'}",
-      "herotype": "Support"
+      "herotype": "Support",
+      "resource_type": "Mana"
     },
     {
       "id": "renekton",
@@ -2299,16 +2386,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Fury"
     },
     {
       "id": "rengar",
@@ -2320,16 +2408,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Top'}",
-      "herotype": "Assassin"
+      "herotype": "Assassin",
+      "resource_type": "Ferocity"
     },
     {
       "id": "riven",
@@ -2341,16 +2430,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "None"
     },
     {
       "id": "rumble",
@@ -2362,16 +2452,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Middle', 'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Heat"
     },
     {
       "id": "ryze",
@@ -2383,16 +2474,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 2,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "samira",
@@ -2404,16 +2496,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 1.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 1,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "sejuani",
@@ -2425,16 +2518,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 3.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 3,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "senna",
@@ -2446,16 +2540,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 3.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 3,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Support', 'Bottom'}",
-      "herotype": "Support"
+      "herotype": "Support",
+      "resource_type": "Mana"
     },
     {
       "id": "seraphine",
@@ -2467,16 +2562,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 1.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 1
       },
       "range_type": "Ranged",
       "position": "{'Support', 'Bottom'}",
-      "herotype": "Support"
+      "herotype": "Support",
+      "resource_type": "Mana"
     },
     {
       "id": "sett",
@@ -2488,16 +2584,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Grit"
     },
     {
       "id": "shaco",
@@ -2509,16 +2606,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 2,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Support'}",
-      "herotype": "Assassin"
+      "herotype": "Assassin",
+      "resource_type": "Mana"
     },
     {
       "id": "shen",
@@ -2530,16 +2628,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 3.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 2,
+        "mobility": 2,
+        "utility": 3,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Support', 'Top'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Energy"
     },
     {
       "id": "shyvana",
@@ -2551,16 +2650,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 1.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 1,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Fury"
     },
     {
       "id": "singed",
@@ -2572,16 +2672,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "sion",
@@ -2593,16 +2694,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 3,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "sivir",
@@ -2614,16 +2716,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "skarner",
@@ -2635,16 +2738,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 3.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 3,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Top'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "smolder",
@@ -2656,16 +2760,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle', 'Bottom', 'Top'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "sona",
@@ -2677,16 +2782,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 1
       },
       "range_type": "Ranged",
       "position": "{'Support'}",
-      "herotype": "Support"
+      "herotype": "Support",
+      "resource_type": "Mana"
     },
     {
       "id": "soraka",
@@ -2698,16 +2804,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 3.0,
-        "difficulty": 1.0
+        "damage": 1,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 3,
+        "difficulty": 1
       },
       "range_type": "Ranged",
       "position": "{'Support'}",
-      "herotype": "Support"
+      "herotype": "Support",
+      "resource_type": "Mana"
     },
     {
       "id": "swain",
@@ -2719,16 +2826,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle', 'Support'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "sylas",
@@ -2740,16 +2848,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 1.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 3.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 1,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 3
       },
       "range_type": "Melee",
       "position": "{'Middle', 'Top'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "syndra",
@@ -2761,16 +2870,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "tahmkench",
@@ -2782,16 +2892,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 3.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 2,
+        "mobility": 1,
+        "utility": 3,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Support', 'Top'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "Mana"
     },
     {
       "id": "taliyah",
@@ -2803,16 +2914,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 3.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 3,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Jungle', 'Middle'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "talon",
@@ -2824,16 +2936,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Assassin"
+      "herotype": "Assassin",
+      "resource_type": "Mana"
     },
     {
       "id": "taric",
@@ -2845,16 +2958,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 3.0,
-        "difficulty": 2.0
+        "damage": 1,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 1,
+        "utility": 3,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Middle', 'Support'}",
-      "herotype": "Support"
+      "herotype": "Support",
+      "resource_type": "Mana"
     },
     {
       "id": "teemo",
@@ -2866,16 +2980,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 1.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 1
       },
       "range_type": "Ranged",
       "position": "{'Jungle', 'Support', 'Top'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "thresh",
@@ -2887,16 +3002,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 2.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 3.0,
-        "difficulty": 3.0
+        "damage": 1,
+        "toughness": 2,
+        "control": 3,
+        "mobility": 1,
+        "utility": 3,
+        "difficulty": 3
       },
       "range_type": "Ranged",
       "position": "{'Support'}",
-      "herotype": "Support"
+      "herotype": "Support",
+      "resource_type": "Mana"
     },
     {
       "id": "tristana",
@@ -2908,16 +3024,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Ranged",
       "position": "{'Middle', 'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "trundle",
@@ -2929,16 +3046,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 1.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 1,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "tryndamere",
@@ -2950,16 +3068,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 1.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 1,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Fury"
     },
     {
       "id": "twistedfate",
@@ -2971,16 +3090,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 2,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle', 'Bottom', 'Top'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "twitch",
@@ -2992,16 +3112,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Support', 'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "udyr",
@@ -3013,16 +3134,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "urgot",
@@ -3034,16 +3156,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "varus",
@@ -3055,16 +3178,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "vayne",
@@ -3076,16 +3200,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Bottom', 'Top'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "veigar",
@@ -3097,16 +3222,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle', 'Support'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "velkoz",
@@ -3118,16 +3244,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle', 'Support'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "vex",
@@ -3139,16 +3266,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "vi",
@@ -3160,16 +3288,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 3.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 3,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "viego",
@@ -3181,16 +3310,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 3
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "None"
     },
     {
       "id": "viktor",
@@ -3202,16 +3332,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 3
       },
       "range_type": "Ranged",
       "position": "{'Middle'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "vladimir",
@@ -3223,16 +3354,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 1.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 1,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle', 'Top'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Crimson Rush"
     },
     {
       "id": "volibear",
@@ -3244,16 +3376,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "warwick",
@@ -3265,16 +3398,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "monkeyking",
@@ -3286,16 +3420,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "xayah",
@@ -3307,16 +3442,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 2.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 2,
+        "control": 3,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "xerath",
@@ -3328,16 +3464,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle', 'Support'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "xinzhao",
@@ -3349,16 +3486,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "yasuo",
@@ -3370,16 +3508,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 3.0,
-        "utility": 2.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 3,
+        "utility": 2,
+        "difficulty": 3
       },
       "range_type": "Melee",
       "position": "{'Middle', 'Bottom', 'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Flow"
     },
     {
       "id": "yone",
@@ -3391,16 +3530,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 3
       },
       "range_type": "Melee",
       "position": "{'Middle', 'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Flow"
     },
     {
       "id": "yorick",
@@ -3412,16 +3552,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 2.0,
-        "control": 2.0,
-        "mobility": 1.0,
-        "utility": 2.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 2,
+        "control": 2,
+        "mobility": 1,
+        "utility": 2,
+        "difficulty": 2
       },
       "range_type": "Melee",
       "position": "{'Top'}",
-      "herotype": "Fighter"
+      "herotype": "Fighter",
+      "resource_type": "Mana"
     },
     {
       "id": "yuumi",
@@ -3433,16 +3574,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 1.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 3.0,
-        "utility": 3.0,
-        "difficulty": 1.0
+        "damage": 1,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 3,
+        "utility": 3,
+        "difficulty": 1
       },
       "range_type": "Ranged",
       "position": "{'Support'}",
-      "herotype": "Support"
+      "herotype": "Support",
+      "resource_type": "Mana"
     },
     {
       "id": "zac",
@@ -3454,16 +3596,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 3.0,
-        "control": 3.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 1.0
+        "damage": 2,
+        "toughness": 3,
+        "control": 3,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 1
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Support', 'Top'}",
-      "herotype": "Tank"
+      "herotype": "Tank",
+      "resource_type": "None"
     },
     {
       "id": "zed",
@@ -3475,16 +3618,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 1.0,
-        "mobility": 3.0,
-        "utility": 1.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 1,
+        "mobility": 3,
+        "utility": 1,
+        "difficulty": 3
       },
       "range_type": "Melee",
       "position": "{'Jungle', 'Middle'}",
-      "herotype": "Assassin"
+      "herotype": "Assassin",
+      "resource_type": "Energy"
     },
     {
       "id": "zeri",
@@ -3496,16 +3640,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 3.0,
-        "utility": 0.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 3,
+        "utility": 0,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Bottom'}",
-      "herotype": "Marksman"
+      "herotype": "Marksman",
+      "resource_type": "Mana"
     },
     {
       "id": "ziggs",
@@ -3517,16 +3662,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Middle', 'Bottom'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "zilean",
@@ -3538,16 +3684,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 2.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 3.0,
-        "difficulty": 2.0
+        "damage": 2,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 2,
+        "utility": 3,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Support'}",
-      "herotype": "Support"
+      "herotype": "Support",
+      "resource_type": "Mana"
     },
     {
       "id": "zoe",
@@ -3559,16 +3706,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 2.0,
-        "mobility": 2.0,
-        "utility": 1.0,
-        "difficulty": 3.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 2,
+        "mobility": 2,
+        "utility": 1,
+        "difficulty": 3
       },
       "range_type": "Ranged",
       "position": "{'Middle'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     },
     {
       "id": "zyra",
@@ -3580,16 +3728,17 @@
         "Fighter"
       ],
       "attributes": {
-        "damage": 3.0,
-        "toughness": 1.0,
-        "control": 3.0,
-        "mobility": 1.0,
-        "utility": 1.0,
-        "difficulty": 2.0
+        "damage": 3,
+        "toughness": 1,
+        "control": 3,
+        "mobility": 1,
+        "utility": 1,
+        "difficulty": 2
       },
       "range_type": "Ranged",
       "position": "{'Support'}",
-      "herotype": "Mage"
+      "herotype": "Mage",
+      "resource_type": "Mana"
     }
   ]
 }

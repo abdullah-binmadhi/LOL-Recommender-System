@@ -22,6 +22,7 @@ fn champion_avatar(name: &str) -> String {
         "Bel'Veth" => "Belveth",
         "Cho'Gath" => "Chogath",
         "Dr. Mundo" => "DrMundo",
+        "Gnar" | "GnarBig" => "Gnar",
         "Jarvan IV" => "JarvanIV",
         "Kai'Sa" => "Kaisa",
         "Kha'Zix" => "Khazix",

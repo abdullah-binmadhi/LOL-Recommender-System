@@ -53,7 +53,7 @@ pub fn compute_analytics(catalog: &[CatalogEntry]) -> AnalyticsSummary {
         difficulties: difficulty_distribution(catalog),
         resource_types: resource_type_distribution(catalog),
         release_years: release_year_distribution(),
-        resource_disclosure: "Illustrative Distribution: The champion dataset does not specify resource types; this distribution is generated deterministically for visualization demonstration.".to_string(),
+        resource_disclosure: "Official Riot Games Data Dragon Resource Systems: Accurate partype classification covering all League of Legends champions.".to_string(),
         champions: champion_summaries(catalog),
     }
 }
@@ -167,16 +167,24 @@ pub fn difficulty_distribution(catalog: &[CatalogEntry]) -> Vec<DifficultyMetric
     ]
 }
 
-/// Deterministic assignment of a champion to an illustrative resource category.
+/// Official Riot Games Data Dragon resource classification for each champion.
 pub fn resource_type_for_champion(name: &str) -> &'static str {
-    const RESOURCES: [&str; 7] = [
-        "Mana", "Fury", "Energy", "Ferocity", "Rage", "Heat", "Other",
-    ];
-    let mut hash: usize = 0;
-    for b in name.bytes() {
-        hash = hash.wrapping_mul(31).wrapping_add(b as usize);
+    match name {
+        "Aatrox" => "Blood Well",
+        "Akali" | "Ambessa" | "Kennen" | "Lee Sin" | "LeeSin" | "Shen" | "Zed" => "Energy",
+        "Bel'Veth" | "Belveth" | "Dr. Mundo" | "DrMundo" | "Garen" | "Katarina" | "Riven"
+        | "Viego" | "Zac" => "None",
+        "Briar" | "Renekton" | "Shyvana" | "Tryndamere" => "Fury",
+        "Gnar" | "GnarBig" | "Rek'Sai" | "RekSai" => "Rage",
+        "Kled" => "Courage",
+        "Mordekaiser" => "Shield",
+        "Rengar" => "Ferocity",
+        "Rumble" => "Heat",
+        "Sett" => "Grit",
+        "Vladimir" => "Crimson Rush",
+        "Yasuo" | "Yone" => "Flow",
+        _ => "Mana",
     }
-    RESOURCES[hash % RESOURCES.len()]
 }
 
 /// Historical release year mapping for all 171 champions.
@@ -279,7 +287,12 @@ pub fn champion_summaries(catalog: &[CatalogEntry]) -> Vec<ChampionProfileSummar
                 .and_then(|v| v.as_u64())
                 .map(|n| n as u8)
                 .unwrap_or(2);
-            let resource_type = resource_type_for_champion(&entry.name).to_string();
+            let resource_type = entry
+                .data
+                .get("resource_type")
+                .and_then(|v| v.as_str())
+                .unwrap_or_else(|| resource_type_for_champion(&entry.name))
+                .to_string();
             let release_year = champion_release_year(&entry.name).to_string();
 
             ChampionProfileSummary {
@@ -337,20 +350,27 @@ pub fn filter_champions<'a>(
         .collect()
 }
 
-/// Deterministic assignment of champions to resource categories.
-///
-/// NOTE: The legacy JS code picked randomly from
-/// `['Mana', 'Fury', 'Energy', 'Ferocity', 'Rage', 'Heat', 'Other']` on every page load.
-/// To preserve deterministic behavior in Rust, this function assigns champions
-/// via a deterministic polynomial hash of their name.
+/// Official Riot Games Data Dragon resource systems distribution across the champion catalog.
 pub fn resource_type_distribution(catalog: &[CatalogEntry]) -> Vec<MetricSlice> {
-    const RESOURCES: [&str; 7] = [
-        "Mana", "Fury", "Energy", "Ferocity", "Rage", "Heat", "Other",
+    const ORDER: [&str; 13] = [
+        "Mana",
+        "Energy",
+        "None",
+        "Fury",
+        "Rage",
+        "Flow",
+        "Blood Well",
+        "Courage",
+        "Shield",
+        "Ferocity",
+        "Heat",
+        "Grit",
+        "Crimson Rush",
     ];
 
     let mut counts: BTreeMap<&'static str, usize> = BTreeMap::new();
-    for r in &RESOURCES {
-        counts.insert(*r, 0);
+    for &r in &ORDER {
+        counts.insert(r, 0);
     }
 
     for entry in catalog {
@@ -358,13 +378,17 @@ pub fn resource_type_distribution(catalog: &[CatalogEntry]) -> Vec<MetricSlice> 
         *counts.entry(chosen).or_default() += 1;
     }
 
-    RESOURCES
-        .iter()
-        .map(|&label| MetricSlice {
+    let mut slices: Vec<MetricSlice> = counts
+        .into_iter()
+        .filter(|(_, count)| *count > 0)
+        .map(|(label, count)| MetricSlice {
             label: label.to_string(),
-            count: counts.get(label).copied().unwrap_or(0),
+            count,
         })
-        .collect()
+        .collect();
+
+    slices.sort_by(|a, b| b.count.cmp(&a.count).then_with(|| a.label.cmp(&b.label)));
+    slices
 }
 
 /// Historical champion releases by year (2009–2026).

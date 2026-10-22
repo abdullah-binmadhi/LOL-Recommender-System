@@ -27,7 +27,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Blood Well"
     },
     {
       "id": "ahri",
@@ -56,7 +57,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "akali",
@@ -85,7 +87,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Early",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Energy"
     },
     {
       "id": "akshan",
@@ -114,7 +117,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "alistar",
@@ -143,7 +147,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "ambessa",
@@ -172,7 +177,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Energy"
     },
     {
       "id": "amumu",
@@ -201,7 +207,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "anivia",
@@ -230,7 +237,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "annie",
@@ -259,7 +267,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "aphelios",
@@ -288,7 +297,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "ashe",
@@ -317,7 +327,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "aurelionsol",
@@ -346,7 +357,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "aurora",
@@ -375,7 +387,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "azir",
@@ -404,7 +417,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "bard",
@@ -433,7 +447,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Mid",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "belveth",
@@ -462,7 +477,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "None"
     },
     {
       "id": "blitzcrank",
@@ -491,7 +507,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "brand",
@@ -520,7 +537,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "braum",
@@ -549,7 +567,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "briar",
@@ -578,7 +597,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Fury"
     },
     {
       "id": "caitlyn",
@@ -607,7 +627,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "camille",
@@ -636,7 +657,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "cassiopeia",
@@ -665,7 +687,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "chogath",
@@ -694,7 +717,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "corki",
@@ -723,7 +747,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "darius",
@@ -752,7 +777,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "diana",
@@ -781,7 +807,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "drmundo",
@@ -810,7 +837,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "None"
     },
     {
       "id": "draven",
@@ -839,7 +867,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "ekko",
@@ -868,7 +897,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Early",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "elise",
@@ -897,7 +927,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Early",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "evelynn",
@@ -926,7 +957,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Early",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "ezreal",
@@ -955,7 +987,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "fiddlesticks",
@@ -984,7 +1017,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "fiora",
@@ -1013,7 +1047,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "fizz",
@@ -1042,7 +1077,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Early",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "galio",
@@ -1071,7 +1107,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "gangplank",
@@ -1100,7 +1137,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "garen",
@@ -1129,7 +1167,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "None"
     },
     {
       "id": "gnar",
@@ -1158,36 +1197,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "High"
-    },
-    {
-      "id": "gnarbig",
-      "name": "GnarBig",
-      "title": "the Missing Link",
-      "role": "Fighter",
-      "difficulty": 2,
-      "tags": [
-        "Fighter"
-      ],
-      "attributes": {
-        "damage": 2,
-        "toughness": 3,
-        "control": 2,
-        "mobility": 1,
-        "utility": 1,
-        "difficulty": 2
-      },
-      "range_type": "Melee",
-      "position": "{'Top'}",
-      "herotype": "Fighter",
-      "derived_stats": {
-        "burst": 56.67,
-        "sustain": 80,
-        "cc": 66.67
-      },
-      "damage_type": "Physical",
-      "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "High",
+      "resource_type": "Rage"
     },
     {
       "id": "gragas",
@@ -1216,7 +1227,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "graves",
@@ -1245,7 +1257,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "gwen",
@@ -1274,7 +1287,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "hecarim",
@@ -1303,7 +1317,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "heimerdinger",
@@ -1332,7 +1347,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "hwei",
@@ -1361,7 +1377,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "illaoi",
@@ -1390,7 +1407,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "irelia",
@@ -1419,7 +1437,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "ivern",
@@ -1448,7 +1467,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Mid",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "janna",
@@ -1477,7 +1497,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "jarvaniv",
@@ -1506,7 +1527,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "jax",
@@ -1535,7 +1557,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "jayce",
@@ -1564,7 +1587,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "jhin",
@@ -1593,7 +1617,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "jinx",
@@ -1622,7 +1647,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "ksante",
@@ -1651,7 +1677,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "kaisa",
@@ -1680,7 +1707,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "kalista",
@@ -1709,7 +1737,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "karma",
@@ -1738,7 +1767,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "karthus",
@@ -1767,7 +1797,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "kassadin",
@@ -1796,7 +1827,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Early",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "katarina",
@@ -1825,7 +1857,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Early",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "None"
     },
     {
       "id": "kayle",
@@ -1854,7 +1887,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "kayn",
@@ -1883,7 +1917,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "kennen",
@@ -1912,7 +1947,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Energy"
     },
     {
       "id": "khazix",
@@ -1941,7 +1977,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Early",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "kindred",
@@ -1970,7 +2007,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "kled",
@@ -1999,7 +2037,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Courage"
     },
     {
       "id": "kogmaw",
@@ -2028,7 +2067,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "leblanc",
@@ -2057,7 +2097,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Early",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "leesin",
@@ -2086,7 +2127,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Energy"
     },
     {
       "id": "leona",
@@ -2115,7 +2157,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "lillia",
@@ -2144,7 +2187,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "lissandra",
@@ -2173,7 +2217,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "lucian",
@@ -2202,7 +2247,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "lulu",
@@ -2231,7 +2277,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "lux",
@@ -2260,7 +2307,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "malphite",
@@ -2289,7 +2337,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "malzahar",
@@ -2318,7 +2367,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "maokai",
@@ -2347,7 +2397,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "masteryi",
@@ -2376,7 +2427,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Early",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "mel",
@@ -2405,7 +2457,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "milio",
@@ -2434,7 +2487,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "missfortune",
@@ -2463,7 +2517,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "mordekaiser",
@@ -2492,7 +2547,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Shield"
     },
     {
       "id": "morgana",
@@ -2521,7 +2577,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "naafiri",
@@ -2550,7 +2607,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Early",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "nami",
@@ -2579,7 +2637,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "nasus",
@@ -2608,7 +2667,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "nautilus",
@@ -2637,7 +2697,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "neeko",
@@ -2666,7 +2727,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "nidalee",
@@ -2695,7 +2757,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Early",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "nilah",
@@ -2724,7 +2787,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "nocturne",
@@ -2753,7 +2817,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "nunu",
@@ -2782,7 +2847,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "olaf",
@@ -2811,7 +2877,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "orianna",
@@ -2840,7 +2907,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "ornn",
@@ -2869,7 +2937,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "pantheon",
@@ -2898,7 +2967,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "poppy",
@@ -2927,7 +2997,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "pyke",
@@ -2956,7 +3027,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "qiyana",
@@ -2985,7 +3057,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Early",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "quinn",
@@ -3014,7 +3087,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "rakan",
@@ -3043,7 +3117,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "rammus",
@@ -3072,7 +3147,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "reksai",
@@ -3101,7 +3177,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Rage"
     },
     {
       "id": "rell",
@@ -3130,7 +3207,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "renata",
@@ -3159,7 +3237,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "renekton",
@@ -3188,7 +3267,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Fury"
     },
     {
       "id": "rengar",
@@ -3217,7 +3297,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Early",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Ferocity"
     },
     {
       "id": "riven",
@@ -3246,7 +3327,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "None"
     },
     {
       "id": "rumble",
@@ -3275,7 +3357,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Heat"
     },
     {
       "id": "ryze",
@@ -3304,7 +3387,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "samira",
@@ -3333,7 +3417,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "sejuani",
@@ -3362,7 +3447,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "senna",
@@ -3391,7 +3477,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "seraphine",
@@ -3420,7 +3507,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "sett",
@@ -3449,7 +3537,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Grit"
     },
     {
       "id": "shaco",
@@ -3478,7 +3567,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Early",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "shen",
@@ -3507,7 +3597,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Energy"
     },
     {
       "id": "shyvana",
@@ -3536,7 +3627,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Fury"
     },
     {
       "id": "singed",
@@ -3565,7 +3657,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "sion",
@@ -3594,7 +3687,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "sivir",
@@ -3623,7 +3717,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "skarner",
@@ -3652,7 +3747,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "smolder",
@@ -3681,7 +3777,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "sona",
@@ -3710,7 +3807,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "soraka",
@@ -3739,7 +3837,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "swain",
@@ -3768,7 +3867,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "sylas",
@@ -3797,7 +3897,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "syndra",
@@ -3826,7 +3927,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "tahmkench",
@@ -3855,7 +3957,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "taliyah",
@@ -3884,7 +3987,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "talon",
@@ -3913,7 +4017,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Early",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "taric",
@@ -3942,7 +4047,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "teemo",
@@ -3971,7 +4077,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "thresh",
@@ -4000,7 +4107,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Mid",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "tristana",
@@ -4029,7 +4137,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "trundle",
@@ -4058,7 +4167,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "tryndamere",
@@ -4087,7 +4197,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Fury"
     },
     {
       "id": "twistedfate",
@@ -4116,7 +4227,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "twitch",
@@ -4145,7 +4257,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "udyr",
@@ -4174,7 +4287,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "urgot",
@@ -4203,7 +4317,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "varus",
@@ -4232,7 +4347,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "vayne",
@@ -4261,7 +4377,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "veigar",
@@ -4290,7 +4407,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "velkoz",
@@ -4319,7 +4437,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "vex",
@@ -4348,7 +4467,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "vi",
@@ -4377,7 +4497,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "viego",
@@ -4406,7 +4527,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "None"
     },
     {
       "id": "viktor",
@@ -4435,7 +4557,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "vladimir",
@@ -4464,7 +4587,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Crimson Rush"
     },
     {
       "id": "volibear",
@@ -4493,7 +4617,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "warwick",
@@ -4522,7 +4647,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "monkeyking",
@@ -4551,7 +4677,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "xayah",
@@ -4580,7 +4707,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "xerath",
@@ -4609,7 +4737,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "xinzhao",
@@ -4638,7 +4767,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "yasuo",
@@ -4667,7 +4797,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Flow"
     },
     {
       "id": "yone",
@@ -4696,7 +4827,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Flow"
     },
     {
       "id": "yorick",
@@ -4725,7 +4857,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "yuumi",
@@ -4754,7 +4887,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "Mana"
     },
     {
       "id": "zac",
@@ -4783,7 +4917,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Mid",
-      "skill_cap": "Low"
+      "skill_cap": "Low",
+      "resource_type": "None"
     },
     {
       "id": "zed",
@@ -4812,7 +4947,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Early",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Energy"
     },
     {
       "id": "zeri",
@@ -4841,7 +4977,8 @@
       },
       "damage_type": "Physical",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "ziggs",
@@ -4870,7 +5007,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "zilean",
@@ -4899,7 +5037,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Mid",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     },
     {
       "id": "zoe",
@@ -4928,7 +5067,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "High"
+      "skill_cap": "High",
+      "resource_type": "Mana"
     },
     {
       "id": "zyra",
@@ -4957,7 +5097,8 @@
       },
       "damage_type": "Magic",
       "power_spike": "Late",
-      "skill_cap": "Medium"
+      "skill_cap": "Medium",
+      "resource_type": "Mana"
     }
   ]
 }
