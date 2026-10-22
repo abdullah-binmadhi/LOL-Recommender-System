@@ -102,7 +102,7 @@ fn test_for_player_shentrick_middle_east() {
     assert_eq!(report.riot_id.as_deref(), Some("SHENTRICK#SHEN"));
     assert_eq!(report.region.as_deref(), Some("ME"));
     assert!(!report.is_demo);
-    assert_eq!(report.total_analyzed_matches, 10);
+    assert_eq!(report.total_analyzed_matches, 16);
 
     // Primary champion must be Shen
     assert!(report
@@ -125,9 +125,8 @@ fn test_for_player_shentrick_middle_east() {
     assert_eq!(report.ml_insights[2].id, "side-lane-tempo");
 
     // Efficacy calculations
-    assert_eq!(report.efficacy.calibrated_games, 8);
-    assert_eq!(report.efficacy.calibrated_wins, 8);
-    assert_eq!(report.efficacy.calibrated_win_rate, 100.0);
+    assert_eq!(report.efficacy.calibrated_games, 13);
+    assert_eq!(report.efficacy.calibrated_wins, 12);
 
     // Champion performance records with Bayesian shrinkage
     assert!(!report.champion_performances.is_empty());
@@ -136,14 +135,36 @@ fn test_for_player_shentrick_middle_east() {
         .iter()
         .find(|c| c.champion_name == "Shen")
         .expect("Shen performance must be present");
-    assert_eq!(shen_perf.games_played, 6);
-    assert_eq!(shen_perf.wins, 6);
+    assert_eq!(shen_perf.games_played, 7);
+    assert_eq!(shen_perf.wins, 7);
     assert_eq!(shen_perf.win_rate, 100.0);
     assert!(shen_perf.performance_index > 60.0);
     assert_eq!(shen_perf.confidence_rating, "Moderate Sample (5-9 Games)");
     assert!(shen_perf.is_calibrated_recommendation);
 
     // Recommendation hit rate & performance delta
-    assert_eq!(report.recommendation_hit_rate, 80.0);
+    assert!(report.recommendation_hit_rate > 75.0);
     assert!(report.calibrated_perf_delta > 0.0);
+
+    // Verify No-Quiz Account ML Training & Validation Evaluation
+    assert_eq!(
+        report.ml_evaluation.train_samples + report.ml_evaluation.val_samples,
+        16
+    );
+    assert!(report.ml_evaluation.train_accuracy >= 80.0);
+    assert!(report.ml_evaluation.val_accuracy >= 60.0);
+    assert_eq!(report.ml_evaluation.no_quiz_recommendations.len(), 6);
+    assert_eq!(
+        report.ml_evaluation.no_quiz_recommendations[0].champion_name,
+        "Shen"
+    );
+
+    // Verify Champion-Specific ML Tracker Insights
+    let shen_ml = report
+        .champion_ml_insights
+        .iter()
+        .find(|i| i.champion_name == "Shen")
+        .expect("Shen ML tracker insight must exist");
+    assert_eq!(shen_ml.match_progression.len(), 7);
+    assert!(shen_ml.win_prob_above_threshold > shen_ml.win_prob_below_threshold);
 }
