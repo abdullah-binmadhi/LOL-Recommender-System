@@ -11,6 +11,7 @@ mod features;
 mod knn;
 pub mod player_analytics;
 mod random_forest;
+pub mod riot_api;
 #[cfg(target_arch = "wasm32")]
 mod wasm_abi;
 

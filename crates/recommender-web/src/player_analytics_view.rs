@@ -68,7 +68,11 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
             {move || {
                 let rep = report();
                 let riot_label = rep.riot_id.clone().unwrap_or_else(|| "No Riot ID Linked".into());
-                let region_label = rep.region.clone().unwrap_or_else(|| "Global".into());
+                let region_label = rep
+                    .region
+                    .as_deref()
+                    .and_then(|r| recommender_core::riot_api::RiotRegion::from_code(r).map(|reg| format!("{} · {}", reg.code(), reg.platform_id().to_uppercase())))
+                    .unwrap_or_else(|| rep.region.clone().unwrap_or_else(|| "Global".into()));
                 let demo_btn_label = if rep.is_demo { "Disable Demo Telemetry" } else { "Load Demo Telemetry" };
 
                 view! {

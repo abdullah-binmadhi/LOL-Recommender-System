@@ -1953,17 +1953,25 @@ fn view_link_riot_modal(state: RwSignal<AppState>) -> impl IntoView {
                         prop:value=move || region.get()
                         on:change=move |ev| region.set(event_target_value(&ev))
                     >
-                        <option value="NA">"North America (NA)"</option>
-                        <option value="EUW">"Europe West (EUW)"</option>
-                        <option value="EUNE">"Europe Nordic & East (EUNE)"</option>
+                        <option value="ME">"Middle East (ME / ME1)"</option>
+                        <option value="SEA">"Southeast Asia (SEA / SG2)"</option>
+                        <option value="SG">"Singapore, Malaysia, Indonesia (SG2)"</option>
+                        <option value="PH">"Philippines (PH2)"</option>
+                        <option value="VN">"Vietnam (VN2)"</option>
+                        <option value="TW">"Taiwan, Hong Kong, Macau (TW2)"</option>
+                        <option value="TH">"Thailand (TH2)"</option>
+                        <option value="EUW">"Europe West (EUW1)"</option>
+                        <option value="EUNE">"Europe Nordic & East (EUN1)"</option>
+                        <option value="NA">"North America (NA1)"</option>
                         <option value="KR">"Korea (KR)"</option>
-                        <option value="BR">"Brazil (BR)"</option>
-                        <option value="LAN">"Latin America North (LAN)"</option>
-                        <option value="LAS">"Latin America South (LAS)"</option>
-                        <option value="OCE">"Oceania (OCE)"</option>
-                        <option value="JP">"Japan (JP)"</option>
-                        <option value="TR">"Turkey (TR)"</option>
+                        <option value="JP">"Japan (JP1)"</option>
+                        <option value="BR">"Brazil (BR1)"</option>
+                        <option value="LAN">"Latin America North (LA1)"</option>
+                        <option value="LAS">"Latin America South (LA2)"</option>
+                        <option value="OCE">"Oceania (OC1)"</option>
+                        <option value="TR">"Turkey (TR1)"</option>
                         <option value="RU">"Russia (RU)"</option>
+                        <option value="PBE">"Public Beta Environment (PBE1)"</option>
                     </select>
                 </div>
                 <p class="notice">
