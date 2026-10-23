@@ -1881,7 +1881,7 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
             </div>
 
             // 4. Validated Single-Game ML Models + Single-Game SHAP Attribution Bars
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem; align-items: start;">
                 // Left: 6 Action-First Validated Single-Game ML Models
                 <div style="background: rgba(9, 20, 40, 0.92); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.15rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.65rem;">
@@ -1898,7 +1898,7 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                         </span>
                     </div>
 
-                    <div style="max-height: 680px; overflow-y: auto; padding-right: 0.4rem; display: flex; flex-direction: column; gap: 0.85rem; font-family: monospace; font-size: 0.76rem;">
+                    <div style="max-height: 540px; overflow-y: auto; padding-right: 0.4rem; display: flex; flex-direction: column; gap: 0.85rem; font-family: monospace; font-size: 0.76rem;">
                         {c.ml_models.iter().enumerate().map(|(idx, m)| {
                             let sev_col = if m.severity_status.contains("ELITE") {
                                 "#10b981"
@@ -2004,10 +2004,10 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                         }).collect::<Vec<_>>()}
                     </div>
 
-                    // 8-Axis Single-Game Percentile Summary vs Career & Master+ Benchmark
+                    // 8-Axis Single-Game Percentile Summary vs Career & Diamond+ Benchmark
                     <div style="border-top: 1px solid rgba(200, 170, 110, 0.25); padding-top: 0.75rem;">
                         <div style="font-family: monospace; font-size: 0.72rem; color: var(--gold); text-transform: uppercase; margin-bottom: 0.45rem;">
-                            "8-Axis Single-Game Execution vs. Career Avg & Master+ Benchmark"
+                            "8-Axis Single-Game Execution vs. Career Avg & Diamond+ Benchmark"
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.45rem; font-family: monospace; font-size: 0.72rem;">
                             {c.radar_axes.iter().map(|(ax_name, this_score, career_avg, bench)| {
@@ -2030,7 +2030,7 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
             </div>
 
             // 5. Item Build Spike Timeline, Skill Order & Rune Telemetry + Scrollable 18+ Event Timestamped Mistake Autopsy
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 1.25rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 1.25rem; align-items: start;">
                 // Left: Item Spike Timeline + Skill Order + Rune Value Extracted
                 <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.3); padding: 1.15rem; font-family: monospace; font-size: 0.76rem;">
                     <h4 style="margin: 0 0 0.65rem 0; font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 0.98rem;">
@@ -2918,79 +2918,379 @@ where
                             </p>
                         </div>
 
-                        // 4-Chart Visual ML Telemetry Grid (2x2)
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 1.5rem; margin-bottom: 1.75rem;">
-                            // CHART 1: Longitudinal ML Performance Curve
-                            <div style="background: rgba(9, 20, 40, 0.88); border: 1px solid rgba(200, 170, 110, 0.3); padding: 1.35rem;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
-                                    <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
-                                        {format!("1. {} Longitudinal ML Performance Curve", ins.champion_name)}
-                                    </h3>
-                                    <span style="font-family: monospace; font-size: 0.7rem; color: var(--cyan);">"ML RATING (20-100)"</span>
-                                </div>
-                                {view_champion_progression_svg(&ins.match_progression)}
-                            </div>
+                        // Interactive 6-Chart Longitudinal ML Telemetry Lab (Dropdowns + Sliders + Matchup Hover Popup)
+                        {
+                            let champ_for_charts = ins.champion_name.clone();
+                            let all_pts = ins.match_progression.clone();
+                            let season_pts_for_charts = ins.season_career_history();
+                            let max_avail = all_pts.len().max(5);
+                            let default_window = max_avail.min(10);
 
-                            // CHART 2: Early Lane Tempo Trajectory (GD@15 Diverging Bar Chart)
-                            <div style="background: rgba(9, 20, 40, 0.88); border: 1px solid rgba(200, 170, 110, 0.3); padding: 1.35rem;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
-                                    <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
-                                        {format!("2. {} Early Lane Gold Diff @ 15m Trajectory", ins.champion_name)}
-                                    </h3>
-                                    <span style="font-family: monospace; font-size: 0.7rem; color: #10b981;">"LANE ADVANTAGE (GD@15)"</span>
-                                </div>
-                                {view_champion_gd15_bars_svg(&ins.match_progression)}
-                            </div>
+                            // Interactive Signals: Slider window count, Outcome filter, Per-Graph X-Axis dropdowns, and Hovered Match Point
+                            let (game_window, set_game_window) = signal(default_window);
+                            let (outcome_filter, set_outcome_filter) = signal(0u8); // 0 = All, 1 = Wins Only, 2 = Losses Only
+                            let (xaxis_g1, set_xaxis_g1) = signal(0u8); // 0 = By Games (vs Laner), 1 = By Season (2015-2026), 2 = Rolling 3-Game Avg, 3 = By Matchup
+                            let (xaxis_g2, set_xaxis_g2) = signal(0u8);
+                            let (xaxis_g3, set_xaxis_g3) = signal(0u8);
+                            let (xaxis_g4, set_xaxis_g4) = signal(0u8);
+                            let (xaxis_g5, set_xaxis_g5) = signal(0u8);
+                            let (xaxis_g6, set_xaxis_g6) = signal(0u8);
+                            let (hovered_pt, set_hovered_pt) = signal(all_pts.last().cloned());
 
-                            // CHART 3: CS/Min & KDA Dual-Line Consistency Chart
-                            <div style="background: rgba(9, 20, 40, 0.88); border: 1px solid rgba(200, 170, 110, 0.3); padding: 1.35rem;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
-                                    <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
-                                        {format!("3. {} Economy (CS/m) & KDA Consistency Curve", ins.champion_name)}
-                                    </h3>
-                                    <span style="font-family: monospace; font-size: 0.7rem; color: var(--gold);">"GOLD = CS/M · CYAN = KDA"</span>
-                                </div>
-                                {view_champion_cs_kda_dual_svg(&ins.match_progression)}
-                            </div>
+                            let filtered_pts = Memo::new(move |_| -> Vec<ChampionMatchPoint> {
+                                let out_mode = outcome_filter.get();
+                                let win_filtered: Vec<ChampionMatchPoint> = all_pts
+                                    .iter()
+                                    .filter(|p| match out_mode {
+                                        1 => p.win,
+                                        2 => !p.win,
+                                        _ => true,
+                                    })
+                                    .cloned()
+                                    .collect();
+                                let w_cnt = game_window.get().clamp(3, win_filtered.len().max(3));
+                                let start = win_filtered.len().saturating_sub(w_cnt);
+                                win_filtered[start..].to_vec()
+                            });
 
-                            // CHART 4: ML Decision-Tree Win Rules & Phase Breakdown
-                            <div style="background: rgba(9, 20, 40, 0.88); border: 1px solid rgba(200, 170, 110, 0.3); padding: 1.35rem; display: flex; flex-direction: column; justify-content: space-between;">
-                                <div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
-                                        <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
-                                            {format!("4. {} Decision-Tree Win Conditions", ins.champion_name)}
-                                        </h3>
-                                        <span style="font-family: monospace; font-size: 0.7rem; color: var(--cyan);">"LEARNED SPLIT RULES"</span>
+                            let c1 = champ_for_charts.clone();
+                            let c2 = champ_for_charts.clone();
+                            let c3 = champ_for_charts.clone();
+                            let c4 = champ_for_charts.clone();
+                            let c5 = champ_for_charts.clone();
+                            let c6 = champ_for_charts.clone();
+                            let c_popup = champ_for_charts.clone();
+                            let s1 = season_pts_for_charts.clone();
+                            let s2 = season_pts_for_charts.clone();
+                            let s3 = season_pts_for_charts.clone();
+                            let s4 = season_pts_for_charts.clone();
+                            let s5 = season_pts_for_charts.clone();
+                            let s6 = season_pts_for_charts.clone();
+
+                            view! {
+                                <div style="margin-bottom: 1.75rem;">
+                                    // Master Interactive Graph Controls & Slider Bar
+                                    <div style="background: rgba(9, 20, 40, 0.94); border: 1px solid var(--gold); padding: 1.15rem 1.35rem; margin-bottom: 1.15rem;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.9rem;">
+                                            <div>
+                                                <div style="font-family: monospace; font-size: 0.72rem; color: var(--cyan); text-transform: uppercase;">
+                                                    "INTERACTIVE 6-CHART ML TELEMETRY LAB · HOVER ANY NODE FOR MATCHUP POPUP"
+                                                </div>
+                                                <h3 style="margin: 0.2rem 0 0 0; font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.1rem;">
+                                                    {format!("{} Interactive Performance Curves & Matchup Telemetry Explorer", champ_for_charts)}
+                                                </h3>
+                                            </div>
+
+                                            // Interactive Controls: Match Window Slider + Outcome Filter + Sync All X-Axes
+                                            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; font-family: monospace; font-size: 0.75rem;">
+                                                <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(10, 200, 185, 0.4); padding: 0.45rem 0.75rem; display: flex; align-items: center; gap: 0.65rem;">
+                                                    <span style="color: var(--gold); font-weight: bold;">
+                                                        {move || format!("Games Shown: Last {} / {}", game_window.get().min(max_avail), max_avail)}
+                                                    </span>
+                                                    <input
+                                                        type="range"
+                                                        min="4"
+                                                        max=max_avail.to_string()
+                                                        prop:value=move || game_window.get().to_string()
+                                                        style="width: 120px; accent-color: var(--cyan); cursor: pointer;"
+                                                        on:input=move |ev| {
+                                                            if let Ok(v) = event_target_value(&ev).parse::<usize>() {
+                                                                set_game_window.set(v);
+                                                            }
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(200, 170, 110, 0.4); padding: 0.4rem 0.65rem; display: flex; align-items: center; gap: 0.45rem;">
+                                                    <span style="color: var(--text-muted);">"Filter:"</span>
+                                                    <select
+                                                        style="background: #091428; color: var(--gold); border: 1px solid rgba(200,170,110,0.45); padding: 0.2rem 0.45rem; font-family: monospace; font-size: 0.73rem; cursor: pointer;"
+                                                        on:change=move |ev| {
+                                                            let v = event_target_value(&ev).parse::<u8>().unwrap_or(0);
+                                                            set_outcome_filter.set(v);
+                                                        }
+                                                    >
+                                                        <option value="0" selected=true>"All Matches (Wins & Losses)"</option>
+                                                        <option value="1">"Victories Only"</option>
+                                                        <option value="2">"Defeats Only"</option>
+                                                    </select>
+                                                </div>
+
+                                                <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(200, 170, 110, 0.4); padding: 0.4rem 0.65rem; display: flex; align-items: center; gap: 0.45rem;">
+                                                    <span style="color: var(--text-muted);">"Set All X-Axes:"</span>
+                                                    <select
+                                                        style="background: #091428; color: var(--cyan); border: 1px solid var(--cyan); padding: 0.2rem 0.45rem; font-family: monospace; font-size: 0.73rem; cursor: pointer;"
+                                                        on:change=move |ev| {
+                                                            let v = event_target_value(&ev).parse::<u8>().unwrap_or(0);
+                                                            set_xaxis_g1.set(v);
+                                                            set_xaxis_g2.set(v);
+                                                            set_xaxis_g3.set(v);
+                                                            set_xaxis_g4.set(v);
+                                                            set_xaxis_g5.set(v);
+                                                            set_xaxis_g6.set(v);
+                                                        }
+                                                    >
+                                                        <option value="0" selected=true>"By Games (Matchup vs. Enemy Laner)"</option>
+                                                        <option value="1">"By Career Season (S5 2015 → S16 2026)"</option>
+                                                        <option value="2">"By Rolling 3-Game Moving Average"</option>
+                                                        <option value="3">"By Opponent Matchup Grouping"</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        // Interactive Matchup Hover Popup HUD Card (Shows exact Player vs Enemy Laner for hovered/selected game)
+                                        {move || {
+                                            if let Some(pt) = hovered_pt.get() {
+                                                let opp = pt.opponent_champion(&c_popup);
+                                                let (k, d, a) = pt.kda_breakdown();
+                                                let user_img = crate::champion_image_url(&c_popup, None);
+                                                let opp_img = crate::champion_image_url(&opp, None);
+                                                let res_col = if pt.win { "#10b981" } else { "#e84057" };
+                                                let res_txt = if pt.win { "VICTORY" } else { "DEFEAT" };
+                                                let gd_col = if pt.gold_diff_15 >= 0 { "#10b981" } else { "#e84057" };
+                                                let wpa = pt.wpa_pct();
+                                                let wpa_col = if wpa >= 0.0 { "#10b981" } else { "#e84057" };
+                                                view! {
+                                                    <div style=format!("background: rgba(1, 10, 19, 0.92); border: 1px solid {}; border-left: 4px solid {}; padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.85rem; font-family: monospace; font-size: 0.76rem;", res_col, res_col)>
+                                                        <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                                            <span style="background: rgba(200,170,110,0.18); border: 1px solid var(--gold); color: var(--gold); padding: 0.15rem 0.5rem; font-weight: bold;">
+                                                                {format!("GAME #{} ({})", pt.game_number, pt.match_id)}
+                                                            </span>
+                                                            <img src=user_img alt="" style="width: 28px; height: 28px; border: 1px solid var(--cyan); object-fit: cover;" />
+                                                            <strong style="color: #fff; font-size: 0.86rem;">{c_popup.clone()}</strong>
+                                                            <span style="color: var(--gold); font-weight: bold;">"vs."</span>
+                                                            <img src=opp_img alt="" style="width: 28px; height: 28px; border: 1px solid #e84057; object-fit: cover;" />
+                                                            <strong style="color: #fde68a; font-size: 0.86rem;">{opp}</strong>
+                                                            <span style=format!("background: rgba(0,0,0,0.55); border: 1px solid {}; color: {}; padding: 0.1rem 0.45rem; font-weight: bold;", res_col, res_col)>
+                                                                {format!("{} · {}m", res_txt, pt.duration_mins())}
+                                                            </span>
+                                                        </div>
+                                                        <div style="display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap;">
+                                                            <span>
+                                                                <span style="color: var(--text-muted);">"KDA: "</span>
+                                                                <strong style="color: #fff;">{format!("{}/{}/{} ({:.1})", k, d, a, pt.kda)}</strong>
+                                                            </span>
+                                                            <span>
+                                                                <span style="color: var(--text-muted);">"GD@15: "</span>
+                                                                <strong style=format!("color: {};", gd_col)>{format!("{:+}g", pt.gold_diff_15)}</strong>
+                                                            </span>
+                                                            <span>
+                                                                <span style="color: var(--text-muted);">"CS/m: "</span>
+                                                                <strong style="color: var(--gold);">{format!("{:.1}", pt.cs_per_min)}</strong>
+                                                            </span>
+                                                            <span>
+                                                                <span style="color: var(--text-muted);">"ML Rating: "</span>
+                                                                <strong style="color: var(--cyan);">{format!("{:.0}/100", pt.perf_score)}</strong>
+                                                            </span>
+                                                            <span>
+                                                                <span style="color: var(--text-muted);">"Net WPA: "</span>
+                                                                <strong style=format!("color: {};", wpa_col)>{format!("{:+.1}%", wpa)}</strong>
+                                                            </span>
+                                                            <span>
+                                                                <span style="color: var(--text-muted);">"DPM / Mit: "</span>
+                                                                <strong style="color: #ddd;">{format!("{:.0} / {:.0}/m", pt.dpm(), pt.mitigated_per_min())}</strong>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                }.into_any()
+                                            } else {
+                                                view! { <div></div> }.into_any()
+                                            }
+                                        }}
                                     </div>
-                                    <div style="display: flex; flex-direction: column; gap: 0.65rem; font-family: monospace; font-size: 0.78rem;">
-                                        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 0.65rem 0.85rem;">
-                                            <div style="color: #10b981; font-weight: bold;">
-                                                {format!("IF GD@15 ≥ +{}g AND Deaths ≤ {}:", ins.target_gd_at_15, ins.max_deaths_threshold)}
+
+                                    // Spacious 6-Chart Interactive Grid (minmax 540px per card so graphs are never cramped)
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(540px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; align-items: start;">
+                                        // CHART 1: Longitudinal ML Performance Curve
+                                        <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
+                                                <div>
+                                                    <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
+                                                        {format!("1. {} Longitudinal ML Performance Curve", ins.champion_name)}
+                                                    </h3>
+                                                    <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
+                                                        "Hover any node to inspect Player vs. Enemy Laner popup · Cyan = Win, Crimson = Loss"
+                                                    </div>
+                                                </div>
+                                                <select
+                                                    style="background: #091428; color: var(--cyan); border: 1px solid rgba(10,200,185,0.45); padding: 0.25rem 0.5rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
+                                                    prop:value=move || xaxis_g1.get().to_string()
+                                                    on:change=move |ev| set_xaxis_g1.set(event_target_value(&ev).parse::<u8>().unwrap_or(0))
+                                                >
+                                                    <option value="0">"X-Axis: By Games (vs. Enemy Laner)"</option>
+                                                    <option value="1">"X-Axis: By Career Season (2015–2026)"</option>
+                                                    <option value="2">"X-Axis: Rolling 3-Game Avg"</option>
+                                                    <option value="3">"X-Axis: By Opponent Matchup"</option>
+                                                </select>
                                             </div>
-                                            <div style="color: #fff; margin-top: 0.2rem;">
-                                                {format!("→ Empirical Win Probability reaches {:.1}% (Tier S+ Execution)", ins.win_prob_above_threshold)}
-                                            </div>
+                                            {move || view_interactive_ml_curve_svg(&filtered_pts.get(), &s1, &c1, xaxis_g1.get(), 1, set_hovered_pt)}
                                         </div>
-                                        <div style="background: rgba(10, 200, 185, 0.1); border: 1px solid var(--cyan); padding: 0.65rem 0.85rem;">
-                                            <div style="color: var(--cyan); font-weight: bold;">
-                                                {format!("IF CS/Min ≥ {:.1} by 20 Minutes:", ins.target_cs_per_min)}
+
+                                        // CHART 2: Early Lane Gold Diff @ 15m Trajectory
+                                        <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
+                                                <div>
+                                                    <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
+                                                        {format!("2. {} Early Lane Gold Diff @ 15m Trajectory", ins.champion_name)}
+                                                    </h3>
+                                                    <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
+                                                        "15-Minute Gold Advantage vs. Direct Lane Opponent · Hover bars for matchup details"
+                                                    </div>
+                                                </div>
+                                                <select
+                                                    style="background: #091428; color: #10b981; border: 1px solid rgba(16,185,129,0.45); padding: 0.25rem 0.5rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
+                                                    prop:value=move || xaxis_g2.get().to_string()
+                                                    on:change=move |ev| set_xaxis_g2.set(event_target_value(&ev).parse::<u8>().unwrap_or(0))
+                                                >
+                                                    <option value="0">"X-Axis: By Games (vs. Enemy Laner)"</option>
+                                                    <option value="1">"X-Axis: By Career Season (2015–2026)"</option>
+                                                    <option value="2">"X-Axis: Rolling 3-Game Avg"</option>
+                                                    <option value="3">"X-Axis: By Opponent Matchup"</option>
+                                                </select>
                                             </div>
-                                            <div style="color: #fff; margin-top: 0.2rem;">
-                                                "→ Completes 2-item core spike 1:45 ahead of lane opponent (+19.4% objective fight win rate)"
-                                            </div>
+                                            {move || view_interactive_gd15_bars_svg(&filtered_pts.get(), &s2, &c2, xaxis_g2.get(), set_hovered_pt)}
                                         </div>
-                                        <div style="background: rgba(232, 64, 87, 0.1); border: 1px solid #e84057; padding: 0.65rem 0.85rem;">
-                                            <div style="color: #e84057; font-weight: bold;">
-                                                {format!("IF Deaths ≥ {} Before 20 Minutes:", ins.max_deaths_threshold + 2)}
+
+                                        // CHART 3: Economy (CS/m) & KDA Consistency Curve
+                                        <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
+                                                <div>
+                                                    <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
+                                                        {format!("3. {} Economy (CS/m) & KDA Consistency Curve", ins.champion_name)}
+                                                    </h3>
+                                                    <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
+                                                        "Gold Solid Line = CS/Min (Top Band) · Cyan Dashed Line = KDA Ratio (Bottom Band)"
+                                                    </div>
+                                                </div>
+                                                <select
+                                                    style="background: #091428; color: var(--gold); border: 1px solid rgba(200,170,110,0.45); padding: 0.25rem 0.5rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
+                                                    prop:value=move || xaxis_g3.get().to_string()
+                                                    on:change=move |ev| set_xaxis_g3.set(event_target_value(&ev).parse::<u8>().unwrap_or(0))
+                                                >
+                                                    <option value="0">"X-Axis: By Games (vs. Enemy Laner)"</option>
+                                                    <option value="1">"X-Axis: By Career Season (2015–2026)"</option>
+                                                    <option value="2">"X-Axis: Rolling 3-Game Avg"</option>
+                                                    <option value="3">"X-Axis: By Opponent Matchup"</option>
+                                                </select>
                                             </div>
-                                            <div style="color: #fff; margin-top: 0.2rem;">
-                                                {format!("→ Win Probability drops to {:.1}% — pivot to defensive peel & vision control", ins.win_prob_below_threshold)}
+                                            {move || view_interactive_cs_kda_dual_svg(&filtered_pts.get(), &s3, &c3, xaxis_g3.get(), set_hovered_pt)}
+                                        </div>
+
+                                        // CHART 4 (NEW): Win Probability Added (WPA %) & Clutch Leverage Trajectory
+                                        <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
+                                                <div>
+                                                    <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
+                                                        {format!("4. {} Win-Probability Added (WPA %) & Carry Impact", ins.champion_name)}
+                                                    </h3>
+                                                    <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
+                                                        "Net Win-Probability Swing Added by Your Plays & Objective Rotations"
+                                                    </div>
+                                                </div>
+                                                <select
+                                                    style="background: #091428; color: var(--cyan); border: 1px solid rgba(10,200,185,0.45); padding: 0.25rem 0.5rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
+                                                    prop:value=move || xaxis_g4.get().to_string()
+                                                    on:change=move |ev| set_xaxis_g4.set(event_target_value(&ev).parse::<u8>().unwrap_or(0))
+                                                >
+                                                    <option value="0">"X-Axis: By Games (vs. Enemy Laner)"</option>
+                                                    <option value="1">"X-Axis: By Career Season (2015–2026)"</option>
+                                                    <option value="2">"X-Axis: Rolling 3-Game Avg"</option>
+                                                    <option value="3">"X-Axis: By Opponent Matchup"</option>
+                                                </select>
+                                            </div>
+                                            {move || view_interactive_ml_curve_svg(&filtered_pts.get(), &s4, &c4, xaxis_g4.get(), 4, set_hovered_pt)}
+                                        </div>
+
+                                        // CHART 5 (NEW): Combat Output (DPM) & Frontline Mitigation Curve
+                                        <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
+                                                <div>
+                                                    <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
+                                                        {format!("5. {} Combat DPM & Frontline Mitigation / Min Curve", ins.champion_name)}
+                                                    </h3>
+                                                    <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
+                                                        "Cyan Line = Self-Mitigated Dmg/Min · Gold Line = Champion Damage/Min (DPM)"
+                                                    </div>
+                                                </div>
+                                                <select
+                                                    style="background: #091428; color: var(--gold); border: 1px solid rgba(200,170,110,0.45); padding: 0.25rem 0.5rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
+                                                    prop:value=move || xaxis_g5.get().to_string()
+                                                    on:change=move |ev| set_xaxis_g5.set(event_target_value(&ev).parse::<u8>().unwrap_or(0))
+                                                >
+                                                    <option value="0">"X-Axis: By Games (vs. Enemy Laner)"</option>
+                                                    <option value="1">"X-Axis: By Career Season (2015–2026)"</option>
+                                                    <option value="2">"X-Axis: Rolling 3-Game Avg"</option>
+                                                    <option value="3">"X-Axis: By Opponent Matchup"</option>
+                                                </select>
+                                            </div>
+                                            {move || view_interactive_combat_mitigation_svg(&filtered_pts.get(), &s5, &c5, xaxis_g5.get(), set_hovered_pt)}
+                                        </div>
+
+                                        // CHART 6 (NEW): Kill Participation (KP %) & Vision Control Trajectory
+                                        <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
+                                                <div>
+                                                    <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
+                                                        {format!("6. {} Cross-Map Kill Participation (KP%) & Vision Curve", ins.champion_name)}
+                                                    </h3>
+                                                    <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
+                                                        "Global Map Presence, River Skirmish Involvement & Vision Score/Min"
+                                                    </div>
+                                                </div>
+                                                <select
+                                                    style="background: #091428; color: #10b981; border: 1px solid rgba(16,185,129,0.45); padding: 0.25rem 0.5rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
+                                                    prop:value=move || xaxis_g6.get().to_string()
+                                                    on:change=move |ev| set_xaxis_g6.set(event_target_value(&ev).parse::<u8>().unwrap_or(0))
+                                                >
+                                                    <option value="0">"X-Axis: By Games (vs. Enemy Laner)"</option>
+                                                    <option value="1">"X-Axis: By Career Season (2015–2026)"</option>
+                                                    <option value="2">"X-Axis: Rolling 3-Game Avg"</option>
+                                                    <option value="3">"X-Axis: By Opponent Matchup"</option>
+                                                </select>
+                                            </div>
+                                            {move || view_interactive_ml_curve_svg(&filtered_pts.get(), &s6, &c6, xaxis_g6.get(), 6, set_hovered_pt)}
+                                        </div>
+                                    </div>
+
+                                    // Learned Decision-Tree Win Conditions Banner
+                                    <div style="background: rgba(9, 20, 40, 0.88); border: 1px solid rgba(200, 170, 110, 0.3); padding: 1.25rem;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                            <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.0rem; margin: 0;">
+                                                {format!("Learned ML Decision-Tree Win Conditions for {}", ins.champion_name)}
+                                            </h3>
+                                            <span style="font-family: monospace; font-size: 0.7rem; color: var(--cyan);">"EMPIRICAL SPLIT RULES"</span>
+                                        </div>
+                                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.85rem; font-family: monospace; font-size: 0.77rem;">
+                                            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 0.65rem 0.85rem;">
+                                                <div style="color: #10b981; font-weight: bold;">
+                                                    {format!("IF GD@15 ≥ +{}g AND Deaths ≤ {}:", ins.target_gd_at_15, ins.max_deaths_threshold)}
+                                                </div>
+                                                <div style="color: #fff; margin-top: 0.2rem;">
+                                                    {format!("→ Empirical Win Probability reaches {:.1}% (Diamond I Peak Execution)", ins.win_prob_above_threshold)}
+                                                </div>
+                                            </div>
+                                            <div style="background: rgba(10, 200, 185, 0.1); border: 1px solid var(--cyan); padding: 0.65rem 0.85rem;">
+                                                <div style="color: var(--cyan); font-weight: bold;">
+                                                    {format!("IF CS/Min ≥ {:.1} by 20 Minutes:", ins.target_cs_per_min)}
+                                                </div>
+                                                <div style="color: #fff; margin-top: 0.2rem;">
+                                                    "→ Completes 2-item core spike 1:45 ahead of lane opponent (+19.4% objective fight win rate)"
+                                                </div>
+                                            </div>
+                                            <div style="background: rgba(232, 64, 87, 0.1); border: 1px solid #e84057; padding: 0.65rem 0.85rem;">
+                                                <div style="color: #e84057; font-weight: bold;">
+                                                    {format!("IF Deaths ≥ {} Before 20 Minutes:", ins.max_deaths_threshold + 2)}
+                                                </div>
+                                                <div style="color: #fff; margin-top: 0.2rem;">
+                                                    {format!("→ Win Probability drops to {:.1}% — pivot to defensive peel & vision control", ins.win_prob_below_threshold)}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
+                            }
+                        }
 
                         // 5. 12-Season Career Evolution (Season 5 / 2015 → Season 16 / 2026) SVG & Table
                         {
@@ -3184,72 +3484,208 @@ fn view_season_career_evolution_svg(pts: &[SeasonCareerPoint]) -> impl IntoView 
     }
 }
 
-/// CHART 1: Renders an SVG longitudinal progression curve for a pinned/selected champion.
+/// Helper to transform `ChampionMatchPoint` list according to the selected X-axis mode:
+/// `0` = By Games (vs Enemy Laner), `1` = By Career Season (2015–2026), `2` = Rolling 3-Game Avg, `3` = By Opponent Matchup.
 #[cfg(target_arch = "wasm32")]
-fn view_champion_progression_svg(points: &[ChampionMatchPoint]) -> impl IntoView {
-    let w = 420.0;
-    let h = 200.0;
-    let pad_x = 40.0;
-    let pad_y = 26.0;
-    let plot_w = w - 2.0 * pad_x;
-    let plot_h = h - 2.0 * pad_y;
+fn build_xaxis_series(
+    points: &[ChampionMatchPoint],
+    seasons: &[SeasonCareerPoint],
+    user_champ: &str,
+    xaxis_mode: u8,
+) -> Vec<(String, ChampionMatchPoint)> {
+    match xaxis_mode {
+        1 => seasons
+            .iter()
+            .enumerate()
+            .map(|(i, s)| {
+                let win = s.win_rate >= 52.0;
+                let gd = ((s.win_rate - 52.0) * 68.0).round() as i32;
+                let perf = (s.win_rate * 1.18 + s.avg_kda * 3.2).clamp(35.0, 96.0);
+                let pt = ChampionMatchPoint {
+                    game_number: i + 1,
+                    match_id: format!("{}-{}", s.season_label, s.year),
+                    win,
+                    kda: s.avg_kda,
+                    cs_per_min: s.avg_cs_per_min,
+                    gold_diff_15: if gd == 0 { 240 } else { gd },
+                    perf_score: (perf * 10.0).round() / 10.0,
+                };
+                (format!("{} '{} ", s.season_label, s.year % 100), pt)
+            })
+            .collect(),
+        2 => points
+            .iter()
+            .enumerate()
+            .map(|(i, p)| {
+                let start = i.saturating_sub(2);
+                let slice = &points[start..=i];
+                let cnt = slice.len() as f64;
+                let avg_kda = (slice.iter().map(|x| x.kda).sum::<f64>() / cnt * 10.0).round() / 10.0;
+                let avg_cs =
+                    (slice.iter().map(|x| x.cs_per_min).sum::<f64>() / cnt * 10.0).round() / 10.0;
+                let avg_gd = (slice.iter().map(|x| x.gold_diff_15 as f64).sum::<f64>() / cnt)
+                    .round() as i32;
+                let avg_perf =
+                    (slice.iter().map(|x| x.perf_score).sum::<f64>() / cnt * 10.0).round() / 10.0;
+                let mut smoothed = p.clone();
+                smoothed.kda = avg_kda;
+                smoothed.cs_per_min = avg_cs;
+                smoothed.gold_diff_15 = if avg_gd == 0 { 180 } else { avg_gd };
+                smoothed.perf_score = avg_perf;
+                (format!("Avg #{}", p.game_number), smoothed)
+            })
+            .collect(),
+        3 => {
+            let mut sorted = points.to_vec();
+            sorted.sort_by(|a, b| {
+                a.opponent_champion(user_champ)
+                    .cmp(&b.opponent_champion(user_champ))
+            });
+            sorted
+                .into_iter()
+                .map(|p| {
+                    let opp = p.opponent_champion(user_champ);
+                    let short_opp = if opp.len() > 6 { &opp[..6] } else { &opp };
+                    (format!("vs {}", short_opp), p)
+                })
+                .collect()
+        }
+        _ => points
+            .iter()
+            .cloned()
+            .map(|p| (p.short_axis_label(user_champ), p))
+            .collect(),
+    }
+}
 
-    let n = points.len();
+/// Interactive SVG Builder for Charts 1 (ML Performance), 4 (WPA %), and 6 (KP % & Vision).
+#[cfg(target_arch = "wasm32")]
+fn view_interactive_ml_curve_svg(
+    points: &[ChampionMatchPoint],
+    seasons: &[SeasonCareerPoint],
+    user_champ: &str,
+    xaxis_mode: u8,
+    chart_kind: u8, // 1 = ML Performance (20..100), 4 = WPA (-25..+30), 6 = KP% (40..95)
+    set_hovered: WriteSignal<Option<ChampionMatchPoint>>,
+) -> impl IntoView {
+    let series = build_xaxis_series(points, seasons, user_champ, xaxis_mode);
+    let n = series.len();
     if n == 0 {
         return view! {
             <div style="padding: 2rem; text-align: center; color: var(--text-muted); font-family: monospace;">
-                "Sync games to populate longitudinal progression."
+                "No matches match the current filter."
             </div>
         }
         .into_any();
     }
 
-    let coords: Vec<(f64, f64, ChampionMatchPoint)> = points
-        .iter()
+    let w = 660.0;
+    let h = 225.0;
+    let pad_x = 46.0;
+    let pad_top = 26.0;
+    let pad_bot = 38.0;
+    let plot_w = w - 2.0 * pad_x;
+    let plot_h = h - pad_top - pad_bot;
+
+    let (min_v, max_v, stroke_col, unit_suffix) = match chart_kind {
+        4 => (-25.0, 30.0, "#0ac8b9", "%"),
+        6 => (40.0, 95.0, "#10b981", "%"),
+        _ => (20.0, 100.0, "#0ac8b9", ""),
+    };
+
+    let coords: Vec<(f64, f64, f64, String, ChampionMatchPoint)> = series
+        .into_iter()
         .enumerate()
-        .map(|(i, pt)| {
+        .map(|(i, (lbl, pt))| {
             let x = if n == 1 {
                 w / 2.0
             } else {
                 pad_x + (i as f64 / (n - 1) as f64) * plot_w
             };
-            let norm_y = (pt.perf_score.clamp(20.0, 100.0) - 20.0) / 80.0;
-            let y = (h - pad_y) - norm_y * plot_h;
-            (x, y, pt.clone())
+            let val = match chart_kind {
+                4 => pt.wpa_pct(),
+                6 => pt.kill_participation_pct(),
+                _ => pt.perf_score,
+            };
+            let norm_y = ((val.clamp(min_v, max_v) - min_v) / (max_v - min_v)).clamp(0.0, 1.0);
+            let y = (h - pad_bot) - norm_y * plot_h;
+            (x, y, val, lbl, pt)
         })
         .collect();
 
     let polyline_pts = coords
         .iter()
-        .map(|(x, y, _)| format!("{:.1},{:.1}", x, y))
+        .map(|(x, y, _, _, _)| format!("{:.1},{:.1}", x, y))
         .collect::<Vec<_>>()
         .join(" ");
 
+    let grid_steps: Vec<f64> = match chart_kind {
+        4 => vec![-15.0, 0.0, 15.0, 25.0],
+        6 => vec![50.0, 65.0, 80.0, 90.0],
+        _ => vec![40.0, 60.0, 80.0, 95.0],
+    };
+    let u_champ_owned = user_champ.to_string();
+
     view! {
-        <svg viewBox="0 0 420 200" width="100%" style="max-width: 460px; height: auto; display: block; margin: 0 auto; overflow: visible;">
-            {[40.0, 60.0, 80.0, 100.0].into_iter().map(|val| {
-                let norm = (val - 20.0) / 80.0;
-                let y = (h - pad_y) - norm * plot_h;
+        <svg viewBox="0 0 660 225" width="100%" style="max-width: 100%; height: auto; display: block; margin: 0 auto; overflow: visible;">
+            {grid_steps.into_iter().map(|val| {
+                let norm = (val - min_v) / (max_v - min_v);
+                let y = (h - pad_bot) - norm * plot_h;
+                let is_zero = val.abs() < 0.1;
+                let line_col = if is_zero { "rgba(200, 170, 110, 0.45)" } else { "rgba(200, 170, 110, 0.15)" };
                 view! {
                     <g>
-                        <line x1=pad_x y1=y x2={w - pad_x} y2=y stroke="rgba(200, 170, 110, 0.16)" stroke-dasharray="3,3" stroke-width="1" />
-                        <text x={pad_x - 8.0} y={y + 3.0} text-anchor="end" fill="#888" font-size="9" font-family="monospace">{format!("{:.0}", val)}</text>
+                        <line x1=pad_x y1=y x2={w - pad_x} y2=y stroke=line_col stroke-dasharray="3,3" stroke-width="1" />
+                        <text x={pad_x - 8.0} y={y + 3.0} text-anchor="end" fill="#888" font-size="9.5" font-family="monospace">
+                            {format!("{:.0}{}", val, unit_suffix)}
+                        </text>
                     </g>
                 }
             }).collect::<Vec<_>>()}
 
-            <polyline points=polyline_pts fill="none" stroke="#0ac8b9" stroke-width="2.5" />
+            <polyline points=polyline_pts fill="none" stroke=stroke_col stroke-width="2.6" />
 
-            {coords.into_iter().map(|(x, y, pt)| {
+            {coords.into_iter().enumerate().map(|(idx, (x, y, val, lbl, pt))| {
                 let dot_col = if pt.win { "#0ac8b9" } else { "#e84057" };
+                let opp = pt.opponent_champion(&u_champ_owned);
+                let (k, d, a) = pt.kda_breakdown();
+                let tooltip_txt = format!(
+                    "Game #{} ({}) · {} vs {} ({}) · KDA: {}/{}/{} ({:.1}) · GD@15: {:+}g · CS/m: {:.1} · ML Score: {:.0}",
+                    pt.game_number,
+                    pt.match_id,
+                    u_champ_owned,
+                    opp,
+                    if pt.win { "WIN" } else { "LOSS" },
+                    k, d, a, pt.kda,
+                    pt.gold_diff_15,
+                    pt.cs_per_min,
+                    pt.perf_score
+                );
+                let pt_for_hover = pt.clone();
+                let pt_for_click = pt.clone();
+                // Stagger value & axis labels when many games are displayed so numbers never overlap
+                let val_y = if n > 11 && idx % 2 == 1 { y - 13.0 } else { y - 7.0 };
+                let axis_y = if n > 10 && idx % 2 == 1 { h - 6.0 } else { h - 18.0 };
+                let val_txt = if chart_kind == 4 {
+                    format!("{:+.1}%", val)
+                } else if chart_kind == 6 {
+                    format!("{:.0}%", val)
+                } else {
+                    format!("{:.0}", val)
+                };
                 view! {
-                    <g>
-                        <circle cx=x cy=y r="4.8" fill=dot_col stroke="#091428" stroke-width="1.5" />
-                        <text x=x y={y - 8.0} text-anchor="middle" fill="#c8aa6e" font-size="9" font-family="monospace" font-weight="bold">
-                            {format!("{:.0}", pt.perf_score)}
+                    <g
+                        style="cursor: pointer;"
+                        on:mouseenter=move |_| set_hovered.set(Some(pt_for_hover.clone()))
+                        on:click=move |_| set_hovered.set(Some(pt_for_click.clone()))
+                    >
+                        <title>{tooltip_txt}</title>
+                        <circle cx=x cy=y r="5.5" fill=dot_col stroke="#091428" stroke-width="1.6" />
+                        <text x=x y=val_y text-anchor="middle" fill="#c8aa6e" font-size="9" font-family="monospace" font-weight="bold">
+                            {val_txt}
                         </text>
-                        <text x=x y={h - 6.0} text-anchor="middle" fill="#aaa" font-size="8.5" font-family="monospace">
-                            {format!("G{}", pt.game_number)}
+                        <text x=x y=axis_y text-anchor="middle" fill="#cbd5e1" font-size="8.2" font-family="monospace">
+                            {lbl}
                         </text>
                     </g>
                 }
@@ -3259,37 +3695,64 @@ fn view_champion_progression_svg(points: &[ChampionMatchPoint]) -> impl IntoView
     .into_any()
 }
 
-/// CHART 2: Early Lane Tempo Trajectory (GD@15 Diverging Bar Chart SVG).
+/// Interactive CHART 2: Early Lane Gold Diff @ 15m Diverging Bar Chart with Matchup Labels & Hover Popup.
 #[cfg(target_arch = "wasm32")]
-fn view_champion_gd15_bars_svg(points: &[ChampionMatchPoint]) -> impl IntoView {
-    let w = 420.0;
-    let h = 200.0;
-    let pad_x = 40.0;
-    let mid_y = 100.0;
-    let max_bar_h = 68.0;
-    let n = points.len().max(1);
+fn view_interactive_gd15_bars_svg(
+    points: &[ChampionMatchPoint],
+    seasons: &[SeasonCareerPoint],
+    user_champ: &str,
+    xaxis_mode: u8,
+    set_hovered: WriteSignal<Option<ChampionMatchPoint>>,
+) -> impl IntoView {
+    let series = build_xaxis_series(points, seasons, user_champ, xaxis_mode);
+    let w = 660.0;
+    let h = 225.0;
+    let pad_x = 46.0;
+    let mid_y = 104.0;
+    let max_bar_h = 72.0;
+    let n = series.len().max(1);
     let slot_w = (w - 2.0 * pad_x) / (n as f64);
+    let u_champ_owned = user_champ.to_string();
 
     view! {
-        <svg viewBox="0 0 420 200" width="100%" style="max-width: 460px; height: auto; display: block; margin: 0 auto;">
-            <line x1=pad_x y1=mid_y x2={w - pad_x} y2=mid_y stroke="rgba(200,170,110,0.4)" stroke-width="1.2" />
-            <text x={pad_x - 6.0} y={mid_y + 3.0} text-anchor="end" fill="#c8aa6e" font-size="8.5" font-family="monospace">"0g"</text>
-            {points.iter().enumerate().map(|(i, pt)| {
+        <svg viewBox="0 0 660 225" width="100%" style="max-width: 100%; height: auto; display: block; margin: 0 auto; overflow: visible;">
+            <line x1=pad_x y1={mid_y - 36.0} x2={w - pad_x} y2={mid_y - 36.0} stroke="rgba(200,170,110,0.13)" stroke-dasharray="3,3" stroke-width="1" />
+            <line x1=pad_x y1={mid_y + 36.0} x2={w - pad_x} y2={mid_y + 36.0} stroke="rgba(200,170,110,0.13)" stroke-dasharray="3,3" stroke-width="1" />
+            <line x1=pad_x y1=mid_y x2={w - pad_x} y2=mid_y stroke="rgba(200,170,110,0.48)" stroke-width="1.4" />
+            <text x={pad_x - 7.0} y={mid_y + 3.0} text-anchor="end" fill="#c8aa6e" font-size="9" font-family="monospace">"0g"</text>
+            <text x={pad_x - 7.0} y={mid_y - 33.0} text-anchor="end" fill="#10b981" font-size="8.5" font-family="monospace">"+1k"</text>
+            <text x={pad_x - 7.0} y={mid_y + 39.0} text-anchor="end" fill="#e84057" font-size="8.5" font-family="monospace">"-1k"</text>
+
+            {series.into_iter().enumerate().map(|(i, (lbl, pt))| {
                 let cx = pad_x + (i as f64 + 0.5) * slot_w;
-                let bar_w = (slot_w * 0.56).clamp(12.0, 28.0);
-                let frac = (pt.gold_diff_15 as f64 / 2200.0).clamp(-1.0, 1.0);
-                let bh = (frac.abs() * max_bar_h).max(4.0);
+                let bar_w = (slot_w * 0.56).clamp(12.0, 32.0);
+                let frac = (pt.gold_diff_15 as f64 / 2100.0).clamp(-1.0, 1.0);
+                let bh = (frac.abs() * max_bar_h).max(6.0);
                 let by = if frac >= 0.0 { mid_y - bh } else { mid_y };
                 let col = if frac >= 0.0 { "#0ac8b9" } else { "#e84057" };
-                let lbl_y = if frac >= 0.0 { by - 5.0 } else { by + bh + 10.0 };
+                let stagger = if n > 11 && i % 2 == 1 { 8.0 } else { 0.0 };
+                let lbl_y = if frac >= 0.0 { by - 5.0 - stagger } else { by + bh + 11.0 + stagger };
+                let axis_y = if n > 10 && i % 2 == 1 { h - 6.0 } else { h - 18.0 };
+                let opp = pt.opponent_champion(&u_champ_owned);
+                let tooltip_txt = format!(
+                    "Game #{} · {} vs {} · GD@15: {:+}g · CS/m: {:.1} · KDA: {:.1}",
+                    pt.game_number, u_champ_owned, opp, pt.gold_diff_15, pt.cs_per_min, pt.kda
+                );
+                let pt_hover = pt.clone();
+                let pt_click = pt.clone();
                 view! {
-                    <g>
-                        <rect x={cx - bar_w / 2.0} y=by width=bar_w height=bh fill=col opacity="0.85" />
-                        <text x=cx y=lbl_y text-anchor="middle" fill=col font-size="8" font-family="monospace" font-weight="bold">
+                    <g
+                        style="cursor: pointer;"
+                        on:mouseenter=move |_| set_hovered.set(Some(pt_hover.clone()))
+                        on:click=move |_| set_hovered.set(Some(pt_click.clone()))
+                    >
+                        <title>{tooltip_txt}</title>
+                        <rect x={cx - bar_w / 2.0} y=by width=bar_w height=bh fill=col opacity="0.88" stroke="#091428" stroke-width="1" />
+                        <text x=cx y=lbl_y text-anchor="middle" fill=col font-size="8.4" font-family="monospace" font-weight="bold">
                             {format!("{:+}", pt.gold_diff_15)}
                         </text>
-                        <text x=cx y={h - 6.0} text-anchor="middle" fill="#aaa" font-size="8.5" font-family="monospace">
-                            {format!("G{}", pt.game_number)}
+                        <text x=cx y=axis_y text-anchor="middle" fill="#cbd5e1" font-size="8.2" font-family="monospace">
+                            {lbl}
                         </text>
                     </g>
                 }
@@ -3298,68 +3761,212 @@ fn view_champion_gd15_bars_svg(points: &[ChampionMatchPoint]) -> impl IntoView {
     }
 }
 
-/// CHART 3: CS/Min & KDA Dual-Line Consistency SVG.
+/// Interactive CHART 3: Split-Band CS/Min (Top Band) & KDA (Bottom Band) Curve so Labels Never Collide.
 #[cfg(target_arch = "wasm32")]
-fn view_champion_cs_kda_dual_svg(points: &[ChampionMatchPoint]) -> impl IntoView {
-    let w = 420.0;
-    let h = 200.0;
-    let pad_x = 40.0;
-    let pad_y = 26.0;
+fn view_interactive_cs_kda_dual_svg(
+    points: &[ChampionMatchPoint],
+    seasons: &[SeasonCareerPoint],
+    user_champ: &str,
+    xaxis_mode: u8,
+    set_hovered: WriteSignal<Option<ChampionMatchPoint>>,
+) -> impl IntoView {
+    let series = build_xaxis_series(points, seasons, user_champ, xaxis_mode);
+    let w = 660.0;
+    let h = 225.0;
+    let pad_x = 46.0;
     let plot_w = w - 2.0 * pad_x;
-    let plot_h = h - 2.0 * pad_y;
-    let n = points.len().max(2);
+    let n = series.len().max(2);
+    let u_champ_owned = user_champ.to_string();
 
-    let cs_coords: Vec<(f64, f64, f64, usize)> = points
+    // Separate vertical bands so CS/m (top half: y=26..96) and KDA (bottom half: y=112..176) never overlap!
+    let cs_coords: Vec<(f64, f64, f64, String, ChampionMatchPoint)> = series
         .iter()
         .enumerate()
-        .map(|(i, pt)| {
+        .map(|(i, (lbl, pt))| {
             let x = pad_x + (i as f64 / (n - 1) as f64) * plot_w;
-            let norm = (pt.cs_per_min.clamp(4.0, 10.0) - 4.0) / 6.0;
-            let y = (h - pad_y) - norm * plot_h;
-            (x, y, pt.cs_per_min, pt.game_number)
+            let norm = ((pt.cs_per_min.clamp(3.0, 10.0) - 3.0) / 7.0).clamp(0.0, 1.0);
+            let y = 94.0 - norm * 64.0;
+            (x, y, pt.cs_per_min, lbl.clone(), pt.clone())
         })
         .collect();
 
-    let kda_coords: Vec<(f64, f64, f64)> = points
+    let kda_coords: Vec<(f64, f64, f64, ChampionMatchPoint)> = series
         .iter()
         .enumerate()
-        .map(|(i, pt)| {
+        .map(|(i, (_, pt))| {
             let x = pad_x + (i as f64 / (n - 1) as f64) * plot_w;
-            let norm = (pt.kda.clamp(0.5, 12.0)) / 12.0;
-            let y = (h - pad_y) - norm * plot_h;
-            (x, y, pt.kda)
+            let norm = (pt.kda.clamp(0.5, 18.0) / 18.0).clamp(0.0, 1.0);
+            let y = 176.0 - norm * 58.0;
+            (x, y, pt.kda, pt.clone())
         })
         .collect();
 
     let cs_poly = cs_coords
         .iter()
-        .map(|(x, y, _, _)| format!("{:.1},{:.1}", x, y))
+        .map(|(x, y, _, _, _)| format!("{:.1},{:.1}", x, y))
         .collect::<Vec<_>>()
         .join(" ");
     let kda_poly = kda_coords
         .iter()
-        .map(|(x, y, _)| format!("{:.1},{:.1}", x, y))
+        .map(|(x, y, _, _)| format!("{:.1},{:.1}", x, y))
         .collect::<Vec<_>>()
         .join(" ");
 
     view! {
-        <svg viewBox="0 0 420 200" width="100%" style="max-width: 460px; height: auto; display: block; margin: 0 auto;">
-            <polyline points=cs_poly fill="none" stroke="#c8aa6e" stroke-width="2.2" />
-            <polyline points=kda_poly fill="none" stroke="#0ac8b9" stroke-width="2" stroke-dasharray="4,3" />
-            {cs_coords.into_iter().map(|(x, y, cs, gnum)| {
+        <svg viewBox="0 0 660 225" width="100%" style="max-width: 100%; height: auto; display: block; margin: 0 auto; overflow: visible;">
+            <line x1=pad_x y1="104.0" x2={w - pad_x} y2="104.0" stroke="rgba(200,170,110,0.22)" stroke-dasharray="4,4" stroke-width="1" />
+            <text x={pad_x - 6.0} y="62.0" text-anchor="end" fill="#c8aa6e" font-size="8.5" font-family="monospace">"CS/m"</text>
+            <text x={pad_x - 6.0} y="148.0" text-anchor="end" fill="#0ac8b9" font-size="8.5" font-family="monospace">"KDA"</text>
+
+            <polyline points=cs_poly fill="none" stroke="#c8aa6e" stroke-width="2.4" />
+            <polyline points=kda_poly fill="none" stroke="#0ac8b9" stroke-width="2.2" stroke-dasharray="4,3" />
+
+            {cs_coords.into_iter().enumerate().map(|(idx, (x, y, cs, lbl, pt))| {
+                let opp = pt.opponent_champion(&u_champ_owned);
+                let tooltip_txt = format!(
+                    "Game #{} · {} vs {} · CS/m: {:.1} · KDA: {:.1} · GD@15: {:+}g",
+                    pt.game_number, u_champ_owned, opp, cs, pt.kda, pt.gold_diff_15
+                );
+                let pt_h = pt.clone();
+                let pt_c = pt.clone();
+                let val_y = if n > 11 && idx % 2 == 1 { y - 12.0 } else { y - 6.0 };
+                let axis_y = if n > 10 && idx % 2 == 1 { h - 6.0 } else { h - 18.0 };
                 view! {
-                    <g>
-                        <circle cx=x cy=y r="4" fill="#c8aa6e" />
-                        <text x=x y={y - 7.0} text-anchor="middle" fill="#c8aa6e" font-size="8.2" font-family="monospace">{format!("{:.1}", cs)}</text>
-                        <text x=x y={h - 6.0} text-anchor="middle" fill="#aaa" font-size="8.5" font-family="monospace">{format!("G{}", gnum)}</text>
+                    <g
+                        style="cursor: pointer;"
+                        on:mouseenter=move |_| set_hovered.set(Some(pt_h.clone()))
+                        on:click=move |_| set_hovered.set(Some(pt_c.clone()))
+                    >
+                        <title>{tooltip_txt}</title>
+                        <circle cx=x cy=y r="4.5" fill="#c8aa6e" stroke="#091428" stroke-width="1.2" />
+                        <text x=x y=val_y text-anchor="middle" fill="#c8aa6e" font-size="8.4" font-family="monospace" font-weight="bold">
+                            {format!("{:.1}", cs)}
+                        </text>
+                        <text x=x y=axis_y text-anchor="middle" fill="#cbd5e1" font-size="8.2" font-family="monospace">
+                            {lbl}
+                        </text>
                     </g>
                 }
             }).collect::<Vec<_>>()}
-            {kda_coords.into_iter().map(|(x, y, kda)| {
+
+            {kda_coords.into_iter().enumerate().map(|(idx, (x, y, kda, pt))| {
+                let pt_h = pt.clone();
+                let val_y = if n > 11 && idx % 2 == 1 { y + 15.0 } else { y - 6.0 };
                 view! {
-                    <g>
-                        <circle cx=x cy=y r="3.5" fill="#0ac8b9" />
-                        <text x=x y={y + 13.0} text-anchor="middle" fill="#0ac8b9" font-size="8" font-family="monospace">{format!("{:.1}", kda)}</text>
+                    <g
+                        style="cursor: pointer;"
+                        on:mouseenter=move |_| set_hovered.set(Some(pt_h.clone()))
+                    >
+                        <circle cx=x cy=y r="4.0" fill="#0ac8b9" stroke="#091428" stroke-width="1.2" />
+                        <text x=x y=val_y text-anchor="middle" fill="#0ac8b9" font-size="8.2" font-family="monospace">
+                            {format!("{:.1}", kda)}
+                        </text>
+                    </g>
+                }
+            }).collect::<Vec<_>>()}
+        </svg>
+    }
+}
+
+/// Interactive CHART 5 (NEW): Combat DPM & Self-Mitigated Damage / Min Dual-Curve SVG.
+#[cfg(target_arch = "wasm32")]
+fn view_interactive_combat_mitigation_svg(
+    points: &[ChampionMatchPoint],
+    seasons: &[SeasonCareerPoint],
+    user_champ: &str,
+    xaxis_mode: u8,
+    set_hovered: WriteSignal<Option<ChampionMatchPoint>>,
+) -> impl IntoView {
+    let series = build_xaxis_series(points, seasons, user_champ, xaxis_mode);
+    let w = 660.0;
+    let h = 225.0;
+    let pad_x = 46.0;
+    let plot_w = w - 2.0 * pad_x;
+    let n = series.len().max(2);
+    let u_champ_owned = user_champ.to_string();
+
+    let mit_coords: Vec<(f64, f64, f64, String, ChampionMatchPoint)> = series
+        .iter()
+        .enumerate()
+        .map(|(i, (lbl, pt))| {
+            let x = pad_x + (i as f64 / (n - 1) as f64) * plot_w;
+            let mit = pt.mitigated_per_min();
+            let norm = ((mit.clamp(700.0, 1600.0) - 700.0) / 900.0).clamp(0.0, 1.0);
+            let y = 94.0 - norm * 62.0;
+            (x, y, mit, lbl.clone(), pt.clone())
+        })
+        .collect();
+
+    let dpm_coords: Vec<(f64, f64, f64, ChampionMatchPoint)> = series
+        .iter()
+        .enumerate()
+        .map(|(i, (_, pt))| {
+            let x = pad_x + (i as f64 / (n - 1) as f64) * plot_w;
+            let dpm = pt.dpm();
+            let norm = ((dpm.clamp(400.0, 1100.0) - 400.0) / 700.0).clamp(0.0, 1.0);
+            let y = 176.0 - norm * 58.0;
+            (x, y, dpm, pt.clone())
+        })
+        .collect();
+
+    let mit_poly = mit_coords
+        .iter()
+        .map(|(x, y, _, _, _)| format!("{:.1},{:.1}", x, y))
+        .collect::<Vec<_>>()
+        .join(" ");
+    let dpm_poly = dpm_coords
+        .iter()
+        .map(|(x, y, _, _)| format!("{:.1},{:.1}", x, y))
+        .collect::<Vec<_>>()
+        .join(" ");
+
+    view! {
+        <svg viewBox="0 0 660 225" width="100%" style="max-width: 100%; height: auto; display: block; margin: 0 auto; overflow: visible;">
+            <line x1=pad_x y1="104.0" x2={w - pad_x} y2="104.0" stroke="rgba(200,170,110,0.22)" stroke-dasharray="4,4" stroke-width="1" />
+            <text x={pad_x - 6.0} y="62.0" text-anchor="end" fill="#0ac8b9" font-size="8.2" font-family="monospace">"Mit/m"</text>
+            <text x={pad_x - 6.0} y="148.0" text-anchor="end" fill="#c8aa6e" font-size="8.2" font-family="monospace">"DPM"</text>
+
+            <polyline points=mit_poly fill="none" stroke="#0ac8b9" stroke-width="2.4" />
+            <polyline points=dpm_poly fill="none" stroke="#c8aa6e" stroke-width="2.2" />
+
+            {mit_coords.into_iter().enumerate().map(|(idx, (x, y, mit, lbl, pt))| {
+                let opp = pt.opponent_champion(&u_champ_owned);
+                let tooltip_txt = format!(
+                    "Game #{} · {} vs {} · Mitigated/m: {:.0} · DPM: {:.0}",
+                    pt.game_number, u_champ_owned, opp, mit, pt.dpm()
+                );
+                let pt_h = pt.clone();
+                let val_y = if n > 11 && idx % 2 == 1 { y - 12.0 } else { y - 6.0 };
+                let axis_y = if n > 10 && idx % 2 == 1 { h - 6.0 } else { h - 18.0 };
+                view! {
+                    <g
+                        style="cursor: pointer;"
+                        on:mouseenter=move |_| set_hovered.set(Some(pt_h.clone()))
+                    >
+                        <title>{tooltip_txt}</title>
+                        <circle cx=x cy=y r="4.5" fill="#0ac8b9" stroke="#091428" stroke-width="1.2" />
+                        <text x=x y=val_y text-anchor="middle" fill="#0ac8b9" font-size="8.2" font-family="monospace" font-weight="bold">
+                            {format!("{:.0}", mit)}
+                        </text>
+                        <text x=x y=axis_y text-anchor="middle" fill="#cbd5e1" font-size="8.2" font-family="monospace">
+                            {lbl}
+                        </text>
+                    </g>
+                }
+            }).collect::<Vec<_>>()}
+
+            {dpm_coords.into_iter().enumerate().map(|(idx, (x, y, dpm, pt))| {
+                let pt_h = pt.clone();
+                let val_y = if n > 11 && idx % 2 == 1 { y + 14.0 } else { y - 6.0 };
+                view! {
+                    <g
+                        style="cursor: pointer;"
+                        on:mouseenter=move |_| set_hovered.set(Some(pt_h.clone()))
+                    >
+                        <circle cx=x cy=y r="4.0" fill="#c8aa6e" stroke="#091428" stroke-width="1.2" />
+                        <text x=x y=val_y text-anchor="middle" fill="#c8aa6e" font-size="8.2" font-family="monospace">
+                            {format!("{:.0}", dpm)}
+                        </text>
                     </g>
                 }
             }).collect::<Vec<_>>()}
