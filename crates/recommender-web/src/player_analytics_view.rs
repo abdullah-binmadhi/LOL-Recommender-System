@@ -1882,28 +1882,94 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
 
             // 4. Validated Single-Game ML Models + Single-Game SHAP Attribution Bars
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
-                // Left: 4 Validated Single-Game ML Models
-                <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.3); padding: 1.15rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
-                        <h4 style="margin: 0; font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 0.98rem;">
-                            "Validated Single-Game ML Models (Trained on Match Telemetry)"
-                        </h4>
-                        <span style="font-family: monospace; font-size: 0.7rem; color: #10b981;">"4-MODEL ENSEMBLE VERIFIED"</span>
+                // Left: 6 Action-First Validated Single-Game ML Models
+                <div style="background: rgba(9, 20, 40, 0.92); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.15rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.65rem;">
+                        <div>
+                            <h4 style="margin: 0; font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.0rem;">
+                                "Validated Single-Game ML Models (Trained on Match Telemetry)"
+                            </h4>
+                            <div style="font-family: monospace; font-size: 0.71rem; color: var(--text-muted); margin-top: 0.15rem;">
+                                "Direct Plain-English Meaning · Critical Alerts & Warnings · Exact Next-Game Improvement Directives"
+                            </div>
+                        </div>
+                        <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; padding: 0.2rem 0.55rem; font-family: monospace; font-size: 0.7rem; color: #10b981; font-weight: bold;">
+                            "6-MODEL ENSEMBLE · SCROLL FOR ALL 6 ↓"
+                        </span>
                     </div>
-                    <div style="display: flex; flex-direction: column; gap: 0.75rem; font-family: monospace; font-size: 0.76rem;">
-                        {c.ml_models.iter().map(|m| {
+
+                    <div style="max-height: 680px; overflow-y: auto; padding-right: 0.4rem; display: flex; flex-direction: column; gap: 0.85rem; font-family: monospace; font-size: 0.76rem;">
+                        {c.ml_models.iter().enumerate().map(|(idx, m)| {
+                            let sev_col = if m.severity_status.contains("ELITE") {
+                                "#10b981"
+                            } else if m.severity_status.contains("STRONG") {
+                                "var(--cyan)"
+                            } else if m.severity_status.contains("WARNING") {
+                                "#f59e0b"
+                            } else {
+                                "#e84057"
+                            };
+                            let bar_w = m.impact_score_pct.clamp(12.0, 100.0);
                             view! {
-                                <div style="background: rgba(1, 10, 19, 0.8); border: 1px solid rgba(10, 200, 185, 0.28); border-left: 3px solid var(--cyan); padding: 0.75rem;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                                        <strong style="color: #fff; font-size: 0.8rem;">{m.model_name.clone()}</strong>
-                                        <span style="background: rgba(16, 185, 129, 0.16); border: 1px solid #10b981; color: #10b981; padding: 0.1rem 0.45rem; font-size: 0.7rem; font-weight: bold;">
-                                            {m.score_badge.clone()}
-                                        </span>
+                                <div style=format!("background: rgba(1, 10, 19, 0.88); border: 1px solid rgba(200, 170, 110, 0.25); border-left: 4px solid {}; padding: 0.85rem 0.95rem;", sev_col)>
+                                    // Top Header: Model Name + Severity Status + Score Badge
+                                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.45rem;">
+                                        <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap;">
+                                            <span style="background: rgba(200, 170, 110, 0.16); border: 1px solid var(--gold); color: var(--gold); padding: 0.08rem 0.4rem; font-size: 0.68rem; font-weight: bold;">
+                                                {format!("ML #{}", idx + 1)}
+                                            </span>
+                                            <strong style="color: #fff; font-size: 0.83rem;">{m.model_name.clone()}</strong>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+                                            <span style=format!("background: rgba(0, 0, 0, 0.55); border: 1px solid {}; color: {}; padding: 0.1rem 0.45rem; font-size: 0.67rem; font-weight: bold;", sev_col, sev_col)>
+                                                {m.severity_status.clone()}
+                                            </span>
+                                            <span style="background: rgba(16, 185, 129, 0.16); border: 1px solid #10b981; color: #10b981; padding: 0.1rem 0.5rem; font-size: 0.72rem; font-weight: bold;">
+                                                {m.score_badge.clone()}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div style="color: var(--gold); font-size: 0.7rem; margin: 0.2rem 0;">
-                                        {format!("{} · {} · {}", m.architecture, m.train_metric_label, m.val_metric_label)}
+
+                                    // Visual Impact Gauge Bar + Model Architecture & Validation Telemetry
+                                    <div style="margin-bottom: 0.55rem;">
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.69rem; color: var(--gold); margin-bottom: 0.2rem;">
+                                            <span>{format!("{} · {} · {}", m.architecture, m.train_metric_label, m.val_metric_label)}</span>
+                                            <strong style=format!("color: {};", sev_col)>{format!("{:.1}% Diagnostic Index", m.impact_score_pct)}</strong>
+                                        </div>
+                                        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); overflow: hidden;">
+                                            <div style=format!("width: {:.1}%; height: 100%; background: {};", bar_w, sev_col)></div>
+                                        </div>
                                     </div>
-                                    <div style="color: #ccc; line-height: 1.4;">{m.game_verdict.clone()}</div>
+
+                                    // 1. WHAT THIS RESULT MEANS (Plain-English Direct Explanation)
+                                    <div style="background: rgba(10, 200, 185, 0.08); border-left: 3px solid var(--cyan); padding: 0.45rem 0.65rem; margin-bottom: 0.45rem; line-height: 1.42;">
+                                        <div style="color: var(--cyan); font-size: 0.68rem; font-weight: bold; text-transform: uppercase; margin-bottom: 0.12rem;">
+                                            "1. What This ML Result Means For Your Game:"
+                                        </div>
+                                        <div style="color: #f0f6fc; font-size: 0.74rem;">
+                                            {m.plain_english_meaning.clone()}
+                                        </div>
+                                    </div>
+
+                                    // 2. CRITICAL ALERT / WHAT YOU NEED TO BE AWARE OF
+                                    <div style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b; padding: 0.45rem 0.65rem; margin-bottom: 0.45rem; line-height: 1.42;">
+                                        <div style="color: #f59e0b; font-size: 0.68rem; font-weight: bold; text-transform: uppercase; margin-bottom: 0.12rem;">
+                                            "2. Highlighted Alert — What To Be Aware Of / Notified:"
+                                        </div>
+                                        <div style="color: #fde68a; font-size: 0.73rem;">
+                                            {m.key_alert_notification.clone()}
+                                        </div>
+                                    </div>
+
+                                    // 3. WHAT TO DO TO IMPROVE NEXT GAME
+                                    <div style="background: rgba(16, 185, 129, 0.1); border-left: 3px solid #10b981; padding: 0.45rem 0.65rem; line-height: 1.42;">
+                                        <div style="color: #10b981; font-size: 0.68rem; font-weight: bold; text-transform: uppercase; margin-bottom: 0.12rem;">
+                                            "3. Actionable Directive — How To Improve Next Game:"
+                                        </div>
+                                        <div style="color: #ecfdf5; font-size: 0.74rem;">
+                                            {m.actionable_improvement.clone()}
+                                        </div>
+                                    </div>
                                 </div>
                             }
                         }).collect::<Vec<_>>()}
@@ -1963,7 +2029,7 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                 </div>
             </div>
 
-            // 5. Item Build Spike Timeline, Skill Order & Rune Telemetry + Timestamped Mistake Autopsy
+            // 5. Item Build Spike Timeline, Skill Order & Rune Telemetry + Scrollable 18+ Event Timestamped Mistake Autopsy
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 1.25rem;">
                 // Left: Item Spike Timeline + Skill Order + Rune Value Extracted
                 <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.3); padding: 1.15rem; font-family: monospace; font-size: 0.76rem;">
@@ -2011,41 +2077,162 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                     </div>
                 </div>
 
-                // Right: Timestamped Single-Game Mistake Autopsy & Actionable Coaching Plan
-                <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.3); padding: 1.15rem; font-family: monospace; font-size: 0.76rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                        <h4 style="margin: 0; font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 0.98rem;">
-                            "Timestamped Game Autopsy: Mistakes, Key Plays & How to Improve"
-                        </h4>
-                        <span style="font-size: 0.7rem; color: var(--cyan);">"FRAME-LEVEL COACHING"</span>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 0.65rem;">
-                        {c.timestamped_moments.iter().map(|tm| {
-                            let border_col = if tm.is_mistake { "#e84057" } else { "#10b981" };
-                            let badge_txt = if tm.is_mistake { "MISTAKE / TEMPO LEAK" } else { "HIGH-LEVERAGE PLAY" };
-                            view! {
-                                <div style=format!("background: rgba(1, 10, 19, 0.82); border: 1px solid rgba(255,255,255,0.08); border-left: 3px solid {}; padding: 0.65rem 0.8rem;", border_col)>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.25rem;">
-                                        <div>
-                                            <span style=format!("color: {}; font-weight: bold;", border_col)>{format!("[{}] ", tm.timestamp)}</span>
-                                            <strong style="color: #fff;">{tm.event_title.clone()}</strong>
-                                        </div>
-                                        <span style=format!("background: rgba(0,0,0,0.45); border: 1px solid {}; color: {}; padding: 0.08rem 0.4rem; font-size: 0.68rem; font-weight: bold;", border_col, border_col)>
-                                            {format!("{} ({:+.1}% P(Win))", badge_txt, tm.win_prob_delta_pct)}
-                                        </span>
-                                    </div>
-                                    <div style="color: #ccc; font-size: 0.73rem; margin-bottom: 0.3rem; line-height: 1.4;">
-                                        {tm.what_happened.clone()}
-                                    </div>
-                                    <div style="background: rgba(200, 170, 110, 0.1); border-left: 2px solid var(--gold); padding: 0.35rem 0.55rem; color: var(--gold); font-size: 0.72rem;">
-                                        <strong>"What to Improve: "</strong>
-                                        <span style="color: #fff;">{tm.improvement_action.clone()}</span>
+                // Right: Exhaustive Scrollable Timestamped Single-Game Mistake Autopsy & Actionable Coaching Plan
+                {
+                    let (autopsy_filter, set_autopsy_filter) = signal(0u8); // 0 = All, 1 = Mistakes Only, 2 = Key Plays Only
+                    let all_moments = c.timestamped_moments.clone();
+                    let total_cnt = all_moments.len();
+                    let mistake_cnt = all_moments.iter().filter(|m| m.is_mistake).count();
+                    let key_play_cnt = total_cnt.saturating_sub(mistake_cnt);
+                    let net_pwin: f64 = all_moments.iter().map(|m| m.win_prob_delta_pct).sum();
+                    let net_col = if net_pwin >= 0.0 { "#10b981" } else { "#e84057" };
+
+                    view! {
+                        <div style="background: rgba(9, 20, 40, 0.92); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.15rem; font-family: monospace; font-size: 0.76rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.6rem;">
+                                <div>
+                                    <h4 style="margin: 0; font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.0rem;">
+                                        "Timestamped Game Autopsy: Mistakes, Key Plays & How to Improve"
+                                    </h4>
+                                    <div style="font-size: 0.71rem; color: var(--text-muted); margin-top: 0.15rem;">
+                                        {format!("Complete Chronological Match Telemetry (01:35 → {}m) · Zero Missed Windows", c.duration_mins)}
                                     </div>
                                 </div>
-                            }
-                        }).collect::<Vec<_>>()}
-                    </div>
-                </div>
+                                <span style="background: rgba(10, 200, 185, 0.15); border: 1px solid var(--cyan); padding: 0.2rem 0.55rem; font-size: 0.69rem; color: var(--cyan); font-weight: bold;">
+                                    {format!("{} TIMESTAMPS · SCROLL DOWN ↓", total_cnt)}
+                                </span>
+                            </div>
+
+                            // Autopsy Telemetry Summary Ribbon
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.45rem; margin-bottom: 0.65rem;">
+                                <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(200, 170, 110, 0.25); padding: 0.4rem 0.55rem; text-align: center;">
+                                    <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">"Total Logged"</div>
+                                    <strong style="color: #fff; font-size: 0.86rem;">{format!("{} Events", total_cnt)}</strong>
+                                </div>
+                                <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(232, 64, 87, 0.35); padding: 0.4rem 0.55rem; text-align: center;">
+                                    <div style="font-size: 0.65rem; color: #e84057; text-transform: uppercase;">"Mistakes / Leaks"</div>
+                                    <strong style="color: #e84057; font-size: 0.86rem;">{format!("{} Flagged", mistake_cnt)}</strong>
+                                </div>
+                                <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(16, 185, 129, 0.35); padding: 0.4rem 0.55rem; text-align: center;">
+                                    <div style="font-size: 0.65rem; color: #10b981; text-transform: uppercase;">"Key Plays"</div>
+                                    <strong style="color: #10b981; font-size: 0.86rem;">{format!("{} Executed", key_play_cnt)}</strong>
+                                </div>
+                                <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(10, 200, 185, 0.3); padding: 0.4rem 0.55rem; text-align: center;">
+                                    <div style="font-size: 0.65rem; color: var(--cyan); text-transform: uppercase;">"Net P(Win) Swing"</div>
+                                    <strong style=format!("color: {}; font-size: 0.86rem;", net_col)>{format!("{:+.1}%", net_pwin)}</strong>
+                                </div>
+                            </div>
+
+                            // Interactive Filter Pills
+                            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 0.65rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(200, 170, 110, 0.22);">
+                                <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                                    <button
+                                        type="button"
+                                        style=move || format!(
+                                            "padding: 0.25rem 0.6rem; font-family: monospace; font-size: 0.7rem; cursor: pointer; border: 1px solid {}; background: {}; color: {}; font-weight: bold;",
+                                            if autopsy_filter.get() == 0 { "var(--gold)" } else { "rgba(255,255,255,0.18)" },
+                                            if autopsy_filter.get() == 0 { "rgba(200, 170, 110, 0.22)" } else { "rgba(1, 10, 19, 0.7)" },
+                                            if autopsy_filter.get() == 0 { "var(--gold)" } else { "#ccc" }
+                                        )
+                                        on:click=move |_| set_autopsy_filter.set(0)
+                                    >
+                                        {format!("All Timestamps ({})", total_cnt)}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        style=move || format!(
+                                            "padding: 0.25rem 0.6rem; font-family: monospace; font-size: 0.7rem; cursor: pointer; border: 1px solid {}; background: {}; color: {}; font-weight: bold;",
+                                            if autopsy_filter.get() == 1 { "#e84057" } else { "rgba(255,255,255,0.18)" },
+                                            if autopsy_filter.get() == 1 { "rgba(232, 64, 87, 0.22)" } else { "rgba(1, 10, 19, 0.7)" },
+                                            if autopsy_filter.get() == 1 { "#e84057" } else { "#ccc" }
+                                        )
+                                        on:click=move |_| set_autopsy_filter.set(1)
+                                    >
+                                        {format!("Mistakes & Leaks Only ({})", mistake_cnt)}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        style=move || format!(
+                                            "padding: 0.25rem 0.6rem; font-family: monospace; font-size: 0.7rem; cursor: pointer; border: 1px solid {}; background: {}; color: {}; font-weight: bold;",
+                                            if autopsy_filter.get() == 2 { "#10b981" } else { "rgba(255,255,255,0.18)" },
+                                            if autopsy_filter.get() == 2 { "rgba(16, 185, 129, 0.22)" } else { "rgba(1, 10, 19, 0.7)" },
+                                            if autopsy_filter.get() == 2 { "#10b981" } else { "#ccc" }
+                                        )
+                                        on:click=move |_| set_autopsy_filter.set(2)
+                                    >
+                                        {format!("High-Leverage Plays Only ({})", key_play_cnt)}
+                                    </button>
+                                </div>
+                                <span style="font-size: 0.68rem; color: var(--gold);">
+                                    "↕ Scroll Inside Timeline to View All 18 Windows"
+                                </span>
+                            </div>
+
+                            // Scrollable Chronological Timeline Viewport
+                            <div style="max-height: 620px; overflow-y: auto; padding-right: 0.45rem; display: flex; flex-direction: column; gap: 0.7rem;">
+                                {move || {
+                                    let mode = autopsy_filter.get();
+                                    all_moments
+                                        .iter()
+                                        .enumerate()
+                                        .filter(|(_, tm)| match mode {
+                                            1 => tm.is_mistake,
+                                            2 => !tm.is_mistake,
+                                            _ => true,
+                                        })
+                                        .map(|(idx, tm)| {
+                                            let border_col = if tm.is_mistake { "#e84057" } else { "#10b981" };
+                                            view! {
+                                                <div style=format!("background: rgba(1, 10, 19, 0.88); border: 1px solid rgba(255,255,255,0.1); border-left: 4px solid {}; padding: 0.75rem 0.85rem;", border_col)>
+                                                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.35rem;">
+                                                        <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+                                                            <span style="background: rgba(255,255,255,0.08); color: #aaa; padding: 0.06rem 0.35rem; font-size: 0.66rem;">
+                                                                {format!("#{}", idx + 1)}
+                                                            </span>
+                                                            <span style=format!("color: {}; font-weight: bold; font-size: 0.82rem;", border_col)>
+                                                                {format!("[{}]", tm.timestamp)}
+                                                            </span>
+                                                            <span style="background: rgba(10, 200, 185, 0.12); border: 1px solid rgba(10, 200, 185, 0.35); color: var(--cyan); padding: 0.05rem 0.4rem; font-size: 0.66rem;">
+                                                                {tm.phase_label.clone()}
+                                                            </span>
+                                                            <strong style="color: #fff; font-size: 0.8rem;">{tm.event_title.clone()}</strong>
+                                                        </div>
+                                                        <div style="display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
+                                                            <span style="background: rgba(200, 170, 110, 0.14); border: 1px solid var(--gold); color: var(--gold); padding: 0.08rem 0.42rem; font-size: 0.67rem; font-weight: bold;">
+                                                                {tm.gold_xp_swing_label.clone()}
+                                                            </span>
+                                                            <span style=format!("background: rgba(0,0,0,0.55); border: 1px solid {}; color: {}; padding: 0.08rem 0.45rem; font-size: 0.68rem; font-weight: bold;", border_col, border_col)>
+                                                                {format!("{} ({:+.1}% P(Win))", tm.severity_badge, tm.win_prob_delta_pct)}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    // What Happened
+                                                    <div style="color: #e5e7eb; font-size: 0.74rem; margin-bottom: 0.4rem; line-height: 1.42;">
+                                                        <strong style="color: #9ca3af;">"What Happened: "</strong>
+                                                        {tm.what_happened.clone()}
+                                                    </div>
+
+                                                    // Alert / Be Aware Of
+                                                    <div style="background: rgba(245, 158, 11, 0.09); border-left: 2px solid #f59e0b; padding: 0.32rem 0.55rem; margin-bottom: 0.35rem; font-size: 0.71rem; line-height: 1.38;">
+                                                        <strong style="color: #f59e0b;">"Be Aware / Tactical Alert: "</strong>
+                                                        <span style="color: #fde68a;">{tm.warning_notification.clone()}</span>
+                                                    </div>
+
+                                                    // What to Improve
+                                                    <div style="background: rgba(200, 170, 110, 0.12); border-left: 2px solid var(--gold); padding: 0.35rem 0.55rem; color: var(--gold); font-size: 0.72rem; line-height: 1.38;">
+                                                        <strong>"How to Improve: "</strong>
+                                                        <span style="color: #fff;">{tm.improvement_action.clone()}</span>
+                                                    </div>
+                                                </div>
+                                            }
+                                        })
+                                        .collect::<Vec<_>>()
+                                }}
+                            </div>
+                        </div>
+                    }
+                }
             </div>
         </div>
     }

@@ -194,11 +194,16 @@ fn test_for_player_shentrick_middle_east() {
     assert_eq!(curve.cs_tempo_curve.len(), 7);
     assert_eq!(curve.damage_mitigation_curve.len(), 7);
     assert_eq!(curve.radar_axes.len(), 8);
-    assert_eq!(curve.ml_models.len(), 4);
+    assert_eq!(curve.ml_models.len(), 6);
+    assert!(!curve.ml_models[0].plain_english_meaning.is_empty());
+    assert!(!curve.ml_models[0].key_alert_notification.is_empty());
+    assert!(!curve.ml_models[0].actionable_improvement.is_empty());
     assert_eq!(curve.shap_attributions.len(), 6);
     assert_eq!(curve.item_spikes.len(), 5);
     assert_eq!(curve.rune_telemetry.len(), 4);
-    assert_eq!(curve.timestamped_moments.len(), 4);
+    assert_eq!(curve.timestamped_moments.len(), 18);
+    assert!(!curve.timestamped_moments[0].warning_notification.is_empty());
+    assert!(!curve.timestamped_moments[0].gold_xp_swing_label.is_empty());
 
     // Verify Tab 4 Lifetime Champion Pool (18+ champions from Season 5 / 2015 to Season 16 / 2026)
     let lifetime_pool = report.lifetime_champion_pool();
