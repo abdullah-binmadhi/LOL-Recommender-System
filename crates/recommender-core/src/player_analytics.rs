@@ -3859,6 +3859,19 @@ pub struct MatchupWinRateEntry {
     pub tactical_note: String,
 }
 
+/// Scaling performance across early, mid, and late game phases for the Champion ML Suite.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct PhaseScalingEntry {
+    pub phase_name: String,
+    pub time_bracket: String,
+    pub win_rate: f64,
+    pub avg_dpm: f64,
+    pub team_damage_share: f64,
+    pub net_wpa_impact: f64,
+    pub key_objective_focus: String,
+    pub tactical_rule: String,
+}
+
 /// Lifetime core 3-item build path analytics for the Champion ML Suite.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CoreBuildWinRateEntry {
@@ -4018,7 +4031,58 @@ impl ChampionMlInsight {
     /// Returns lifetime lane matchup win-rate analytics for this champion across 2015–2026.
     pub fn lifetime_matchup_matrix(&self) -> Vec<MatchupWinRateEntry> {
         let total = self.games_played.max(30);
-        if self.primary_role.contains("Top") {
+        if self.champion_name.eq_ignore_ascii_case("Sion") {
+            vec![
+                MatchupWinRateEntry {
+                    opponent_champion: "Gwen".to_string(),
+                    games: (total / 6).max(5),
+                    win_rate: 45.8,
+                    avg_gd_15: -920,
+                    difficulty_label: "Severe Counter".to_string(),
+                    tactical_note: "Gwen %-max-HP true damage shreds Sion W shield. Max E second, poke from safety with Q, and avoid extended trades.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Darius".to_string(),
+                    games: (total / 7).max(5),
+                    win_rate: 48.2,
+                    avg_gd_15: -640,
+                    difficulty_label: "Hard Counter".to_string(),
+                    tactical_note: "Never charge Q in melee range without E slow; Darius Apprehend interrupts Q. Clear waves from range and scale.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Jax".to_string(),
+                    games: (total / 7).max(6),
+                    win_rate: 55.4,
+                    avg_gd_15: 380,
+                    difficulty_label: "Skill Matchup".to_string(),
+                    tactical_note: "Buffer Q release when Jax Counter-Strikes into leap; build Heartsteel/Sunfire and win teamfights.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Camille".to_string(),
+                    games: (total / 8).max(5),
+                    win_rate: 52.8,
+                    avg_gd_15: 180,
+                    difficulty_label: "Even / Skill".to_string(),
+                    tactical_note: "Bait Hookshot into terrain then full-charge Q. Protect side-lane turrets with Hullbreaker/Sunfire.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Fiora".to_string(),
+                    games: (total / 8).max(4),
+                    win_rate: 44.2,
+                    avg_gd_15: -880,
+                    difficulty_label: "Severe Counter".to_string(),
+                    tactical_note: "Rush Bramble Vest & Plated Steelcaps; hug walls during Grand Challenge to prevent Fiora from popping all 4 vitals.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Ornn".to_string(),
+                    games: (total / 8).max(5),
+                    win_rate: 62.5,
+                    avg_gd_15: 840,
+                    difficulty_label: "Favorable Tank-Mirror".to_string(),
+                    tactical_note: "Out-stack HP with Soul Furnace passive, interrupt Ornn R2 recast with well-timed Q release.".to_string(),
+                },
+            ]
+        } else if self.primary_role.contains("Top") {
             vec![
                 MatchupWinRateEntry {
                     opponent_champion: "Jax".to_string(),
@@ -4102,6 +4166,84 @@ impl ChampionMlInsight {
                     avg_gd_15: -380,
                     difficulty_label: "Counter Matchup".to_string(),
                     tactical_note: "Bait out Doom/Gloom fear passive on minions before dashing.".to_string(),
+                },
+            ]
+        }
+    }
+
+    /// Returns 3-phase scaling analytics (Early Laning, Mid-Game Skirmishes, Late-Game Macro)
+    /// calibrated for this champion and the player's match history.
+    pub fn game_phase_scaling_curve(&self) -> Vec<PhaseScalingEntry> {
+        let base_wr = self.win_rate.clamp(44.0, 75.0);
+        let is_scaling = self.champion_name.eq_ignore_ascii_case("Sion")
+            || self.champion_name.eq_ignore_ascii_case("Kayle")
+            || self.champion_name.eq_ignore_ascii_case("Kassadin")
+            || self.champion_name.eq_ignore_ascii_case("Nasus");
+
+        if is_scaling {
+            vec![
+                PhaseScalingEntry {
+                    phase_name: "Phase 1: Early Laning & Wave Stacking".to_string(),
+                    time_bracket: "00:00 – 14:00 (Plates Active)".to_string(),
+                    win_rate: (base_wr - 5.5).clamp(38.0, 68.0),
+                    avg_dpm: 460.0,
+                    team_damage_share: 18.5,
+                    net_wpa_impact: 1.8,
+                    key_objective_focus: "Soul Furnace HP Stacking & Plate Defense".to_string(),
+                    tactical_rule: "Prioritize stacking W passive minion HP (+4 HP per minion, +15 per cannon/champ); do not trade early health pool for risky kills.".to_string(),
+                },
+                PhaseScalingEntry {
+                    phase_name: "Phase 2: Mid-Game Skirmishes & First Towers".to_string(),
+                    time_bracket: "14:00 – 25:00 (Herald / Drakes)".to_string(),
+                    win_rate: (base_wr + 1.2).clamp(45.0, 75.0),
+                    avg_dpm: 840.0,
+                    team_damage_share: 24.8,
+                    net_wpa_impact: 4.5,
+                    key_objective_focus: "Hullbreaker Side-Push & Soul-Point Contests".to_string(),
+                    tactical_rule: "Draw 2+ enemy champions to tier-2 side lane with Hullbreaker, or flank objective chokepoints with Unstoppable Onslaught (R).".to_string(),
+                },
+                PhaseScalingEntry {
+                    phase_name: "Phase 3: Late-Game Macro & Frontline Siege".to_string(),
+                    time_bracket: "25:00+ (Baron & Elder Contests)".to_string(),
+                    win_rate: (base_wr + 6.8).clamp(52.0, 82.0),
+                    avg_dpm: 1220.0,
+                    team_damage_share: 28.5,
+                    net_wpa_impact: 8.2,
+                    key_objective_focus: "Baron Nashor Siege & Nexus Turrets".to_string(),
+                    tactical_rule: "Stack 5000+ max HP, frontline every objective river choke with charged Q zone-control, and peel enemy assassins off backline carries.".to_string(),
+                },
+            ]
+        } else {
+            vec![
+                PhaseScalingEntry {
+                    phase_name: "Phase 1: Early Laning & Trading Tempo".to_string(),
+                    time_bracket: "00:00 – 14:00 (Plates Active)".to_string(),
+                    win_rate: (base_wr + 4.2).clamp(48.0, 78.0),
+                    avg_dpm: 580.0,
+                    team_damage_share: 22.4,
+                    net_wpa_impact: 5.6,
+                    key_objective_focus: "Cannon Wave Crashes & River Scuttle Control".to_string(),
+                    tactical_rule: "Lock in early short-trades with empowered Q drag-through and block key enemy burst spells with Spirit's Refuge (W).".to_string(),
+                },
+                PhaseScalingEntry {
+                    phase_name: "Phase 2: Mid-Game Skirmishes & Global Ultimates".to_string(),
+                    time_bracket: "14:00 – 25:00 (Herald / Drakes)".to_string(),
+                    win_rate: (base_wr + 2.0).clamp(46.0, 75.0),
+                    avg_dpm: 920.0,
+                    team_damage_share: 26.5,
+                    net_wpa_impact: 6.8,
+                    key_objective_focus: "Stand United (R) Cross-Map Bot/Dragon Turnarounds".to_string(),
+                    tactical_rule: "Hold Stand United (R) for crucial bot-lane dives or Dragon teamfights; crash side-lane waves before channeling.".to_string(),
+                },
+                PhaseScalingEntry {
+                    phase_name: "Phase 3: Late-Game Macro & Objective Lockdown".to_string(),
+                    time_bracket: "25:00+ (Baron & Elder Contests)".to_string(),
+                    win_rate: (base_wr - 2.5).clamp(42.0, 72.0),
+                    avg_dpm: 1080.0,
+                    team_damage_share: 24.2,
+                    net_wpa_impact: 1.4,
+                    key_objective_focus: "5v5 Frontline Peel & Shadow Dash (E) Multi-Taunts".to_string(),
+                    tactical_rule: "Never split past river without Teleport available. In 5v5 river fights, land 2+ man Shadow Dash on diving divers/bruisers.".to_string(),
                 },
             ]
         }

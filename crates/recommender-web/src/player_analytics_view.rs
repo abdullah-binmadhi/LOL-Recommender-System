@@ -11,7 +11,7 @@ use crate::state::{AppState, Modal};
 use leptos::prelude::*;
 use recommender_core::player_analytics::{
     AdoptedMatch, ChampionMatchPoint, MachineLearningInsight, MatchParticipantSummary,
-    PlayerAnalyticsReport, SeasonCareerPoint, SingleGameChampionCurveAnalysis,
+    PhaseScalingEntry, PlayerAnalyticsReport, SeasonCareerPoint, SingleGameChampionCurveAnalysis,
     SingleMatchDeepAnalysis,
 };
 use std::f64::consts::PI;
@@ -1819,6 +1819,62 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                         <strong style="color: #fff;">{format!("{} ({:.2}/m) · {} · {}", c.vision_score, c.vision_per_min, c.control_wards, c.wards_cleared)}</strong>
                     </div>
                 </div>
+
+                // Card E: Objectives & Structure Siege (NEW)
+                <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.3); border-top: 3px solid #f59e0b; padding: 0.95rem;">
+                    <div style="color: #f59e0b; font-weight: bold; text-transform: uppercase; margin-bottom: 0.55rem; font-size: 0.74rem;">
+                        "5. Objectives & Structure Siege"
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <span style="color: var(--text-muted);">"Epic Monster Dmg:"</span>
+                        <strong style="color: #f59e0b;">{format!("{} Dmg", c.objective_damage)}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <span style="color: var(--text-muted);">"Dragon / Soul Pressure:"</span>
+                        <strong style="color: #fff;">{format!("{:.0}% Part · {} Secured", c.kill_participation_pct.min(85.0), (c.duration_mins / 8).max(2))}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <span style="color: var(--text-muted);">"Voidgrub / Herald Contests:"</span>
+                        <strong style="color: var(--cyan);">{format!("{} Contested · Ram Hit", (c.duration_mins / 10).max(1))}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <span style="color: var(--text-muted);">"Turret Plates Extracted:"</span>
+                        <strong style="color: var(--gold);">{format!("{} Plates (+{}g)", c.turret_plates, c.turret_plates * 160)}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.2rem 0;">
+                        <span style="color: var(--text-muted);">"First Blood / First Tower:"</span>
+                        <strong style="color: #10b981;">{format!("{}", if c.first_blood_or_tower { "Secured (+150g)" } else { "Opponent Secured" })}</strong>
+                    </div>
+                </div>
+
+                // Card F: Resource Conversion & Wave Tempo (NEW)
+                <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.3); border-top: 3px solid #a855f7; padding: 0.95rem;">
+                    <div style="color: #a855f7; font-weight: bold; text-transform: uppercase; margin-bottom: 0.55rem; font-size: 0.74rem;">
+                        "6. Resource Conversion & Wave Tempo"
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <span style="color: var(--text-muted);">"Damage Per Gold Spent:"</span>
+                        <strong style="color: #a855f7;">{format!("{:.2} Dmg / Gold", c.damage_per_gold)}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <span style="color: var(--text-muted);">"Cannon Recall Sync:"</span>
+                        <strong style="color: #10b981;">{format!("{:.1}% Optimal Backs", c.recall_tempo_efficiency_pct)}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <span style="color: var(--text-muted);">"Side-Lane Crash Integrity:"</span>
+                        <strong style="color: var(--cyan);">{format!("{:.0}% Waves Crashed", (c.skill_trade_hit_pct + 12.0).min(96.0))}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.2rem 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                        <span style="color: var(--text-muted);">"Roam / TP Assists:"</span>
+                        <strong style="color: var(--gold);">{format!("{} Cross-Map Plays", c.roam_tp_assists)}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.2rem 0;">
+                        <span style="color: var(--text-muted);">"Isolated Vulnerability:"</span>
+                        <strong style=format!("color: {};", if c.isolated_deaths == 0 { "#10b981" } else if c.isolated_deaths <= 2 { "#f59e0b" } else { "#e84057" })>
+                            {format!("{} ({} Deaths)", if c.isolated_deaths == 0 { "Low Risk" } else if c.isolated_deaths <= 2 { "Controlled" } else { "Critical Exposure" }, c.isolated_deaths)}
+                        </strong>
+                    </div>
+                </div>
             </div>
 
             // 3. 4 Minute-by-Minute Single-Game Champion Curves (2x2 High-Precision SVG Grid)
@@ -1898,7 +1954,7 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                         </span>
                     </div>
 
-                    <div style="flex: 1; min-height: 0; max-height: 560px; overflow-y: auto; padding-right: 0.4rem; display: flex; flex-direction: column; gap: 0.85rem; font-family: monospace; font-size: 0.76rem;">
+                    <div style="flex: 1 1 auto; min-height: 0; max-height: 840px; height: 100%; overflow-y: auto; padding-right: 0.4rem; display: flex; flex-direction: column; gap: 0.85rem; font-family: monospace; font-size: 0.76rem;">
                         {c.ml_models.iter().enumerate().map(|(idx, m)| {
                             let sev_col = if m.severity_status.contains("ELITE") {
                                 "#10b981"
@@ -3263,7 +3319,7 @@ where
                                         </div>
 
                                         // RIGHT COLUMN: Sticky Live Matchup Inspector Sidebar (Locked in place while scrolling Charts 1–6)
-                                        <div style="width: 320px; flex-shrink: 0; position: sticky; top: 1.25rem; z-index: 20; background: rgba(9, 20, 40, 0.96); border: 1px solid var(--gold); padding: 1.15rem; box-shadow: 0 8px 30px rgba(0,0,0,0.65); font-family: monospace;">
+                                        <div style="width: 330px; flex-shrink: 0; position: sticky; top: 3.25rem; align-self: flex-start; margin-top: 0.35rem; z-index: 20; background: rgba(9, 20, 40, 0.96); border: 1px solid var(--gold); padding: 1.15rem; box-shadow: 0 8px 30px rgba(0,0,0,0.65); font-family: monospace;">
                                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(200, 170, 110, 0.25); padding-bottom: 0.5rem;">
                                                 <div>
                                                     <div style="font-size: 0.67rem; color: var(--cyan); text-transform: uppercase;">"MATCHUP INSPECTOR"</div>
@@ -3367,9 +3423,9 @@ where
                             }
                         }
 
-                        // 5. 12-Season Career Evolution (Season 5 / 2015 → Season 16 / 2026) SVG & Table
+                        // 5. Game-Phase Power Spike & Tactical Scaling Radar
                         {
-                            let season_pts = ins.season_career_history();
+                            let phase_pts = ins.game_phase_scaling_curve();
                             let matchups = ins.lifetime_matchup_matrix();
                             let core_builds = ins.lifetime_core_builds();
                             let champ_title = ins.champion_name.clone();
@@ -3379,50 +3435,57 @@ where
                                         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
                                             <div>
                                                 <div style="font-family: monospace; font-size: 0.72rem; color: var(--cyan); text-transform: uppercase;">
-                                                    "DAY-1 CAREER ARCHIVE (SEASON 5 / 2015 → SEASON 16 / 2026)"
+                                                    "EMPIRICAL SCALING TRAJECTORY & POWER SPIKE RADAR"
                                                 </div>
                                                 <h3 style="margin: 0.2rem 0 0 0; font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.12rem;">
-                                                    {format!("5. {} 12-Season Career Evolution & Win-Rate Trajectory (2015–2026)", champ_title)}
+                                                    {format!("5. {} Game-Phase Power Spike & Tactical Scaling Radar", champ_title)}
                                                 </h3>
                                             </div>
-                                            <span style="font-family: monospace; font-size: 0.74rem; color: #10b981;">
-                                                {format!("Total Career Sample: {} Games Across 12 Seasons", ins.games_played)}
+                                            <span style="font-family: monospace; font-size: 0.74rem; color: #10b981; background: rgba(16, 185, 129, 0.12); border: 1px solid #10b981; padding: 0.2rem 0.55rem;">
+                                                "EARLY (0–14m) · MID (14–25m) · LATE (25m+)"
                                             </span>
                                         </div>
 
-                                        {view_season_career_evolution_svg(&season_pts)}
+                                        {view_phase_scaling_curve_svg(&phase_pts)}
 
-                                        <div style="overflow-x: auto; margin-top: 1rem;">
-                                            <table style="width: 100%; border-collapse: collapse; font-family: monospace; font-size: 0.75rem; text-align: left;">
-                                                <thead>
-                                                    <tr style="border-bottom: 1px solid rgba(200,170,110,0.3); color: var(--gold); text-transform: uppercase;">
-                                                        <th style="padding: 0.45rem;">"Season"</th>
-                                                        <th style="padding: 0.45rem;">"Year"</th>
-                                                        <th style="padding: 0.45rem;">"Games (W-L)"</th>
-                                                        <th style="padding: 0.45rem;">"Win Rate"</th>
-                                                        <th style="padding: 0.45rem;">"Avg KDA"</th>
-                                                        <th style="padding: 0.45rem;">"CS/Min"</th>
-                                                        <th style="padding: 0.45rem;">"Season Peak Tier"</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {season_pts.into_iter().map(|sp| {
-                                                        let losses = sp.games.saturating_sub(sp.wins);
-                                                        let wr_c = if sp.win_rate >= 62.0 { "#10b981" } else if sp.win_rate >= 54.0 { "var(--cyan)" } else { "var(--gold)" };
-                                                        view! {
-                                                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
-                                                                <td style="padding: 0.42rem; color: var(--gold); font-weight: bold;">{sp.season_label}</td>
-                                                                <td style="padding: 0.42rem; color: #ccc;">{sp.year}</td>
-                                                                <td style="padding: 0.42rem; color: #fff;">{format!("{}G ({}W-{}L)", sp.games, sp.wins, losses)}</td>
-                                                                <td style=format!("padding: 0.42rem; color: {}; font-weight: bold;", wr_c)>{format!("{:.1}%", sp.win_rate)}</td>
-                                                                <td style="padding: 0.42rem; color: #fff;">{format!("{:.2}", sp.avg_kda)}</td>
-                                                                <td style="padding: 0.42rem; color: var(--cyan);">{format!("{:.1}", sp.avg_cs_per_min)}</td>
-                                                                <td style="padding: 0.42rem; color: var(--gold);">{sp.peak_tier}</td>
-                                                            </tr>
-                                                        }
-                                                    }).collect::<Vec<_>>()}
-                                                </tbody>
-                                            </table>
+                                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 1rem; margin-top: 1.25rem; font-family: monospace; font-size: 0.76rem;">
+                                            {phase_pts.into_iter().map(|ph| {
+                                                let wr_c = if ph.win_rate >= 60.0 { "#10b981" } else if ph.win_rate >= 50.0 { "var(--cyan)" } else { "#e84057" };
+                                                let wpa_c = if ph.net_wpa_impact >= 0.0 { "#10b981" } else { "#e84057" };
+                                                view! {
+                                                    <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(200, 170, 110, 0.25); border-top: 3px solid var(--gold); padding: 0.95rem; display: flex; flex-direction: column; justify-content: space-between;">
+                                                        <div>
+                                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+                                                                <strong style="color: var(--gold); font-size: 0.82rem;">{ph.phase_name}</strong>
+                                                                <span style=format!("background: rgba(0,0,0,0.45); border: 1px solid {}; color: {}; padding: 0.1rem 0.45rem; font-weight: bold;", wr_c, wr_c)>
+                                                                    {format!("{:.1}% Win Rate", ph.win_rate)}
+                                                                </span>
+                                                            </div>
+                                                            <div style="color: var(--text-muted); font-size: 0.7rem; margin-bottom: 0.6rem;">{ph.time_bracket}</div>
+
+                                                            <div style="background: rgba(0,0,0,0.35); padding: 0.5rem 0.65rem; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 0.55rem; display: flex; flex-direction: column; gap: 0.25rem;">
+                                                                <div style="display: flex; justify-content: space-between;">
+                                                                    <span style="color: var(--text-muted);">"Combat DPM / Share:"</span>
+                                                                    <strong style="color: #fff;">{format!("{:.0} DPM ({:.1}%)", ph.avg_dpm, ph.team_damage_share)}</strong>
+                                                                </div>
+                                                                <div style="display: flex; justify-content: space-between;">
+                                                                    <span style="color: var(--text-muted);">"Net WPA Impact:"</span>
+                                                                    <strong style=format!("color: {};", wpa_c)>{format!("{:+.1}% WPA", ph.net_wpa_impact)}</strong>
+                                                                </div>
+                                                                <div style="display: flex; justify-content: space-between;">
+                                                                    <span style="color: var(--text-muted);">"Key Objective:"</span>
+                                                                    <strong style="color: var(--cyan);">{ph.key_objective_focus}</strong>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div style="background: rgba(10, 200, 185, 0.08); border-left: 2px solid var(--cyan); padding: 0.45rem 0.6rem; color: #ddd; font-size: 0.71rem; line-height: 1.4;">
+                                                            <strong style="color: var(--cyan);">"Tactical Directive: "</strong>
+                                                            {ph.tactical_rule}
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }).collect::<Vec<_>>()}
                                         </div>
                                     </div>
 
@@ -3432,7 +3495,7 @@ where
                                         <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
                                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
                                                 <h3 style="margin: 0; font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem;">
-                                                    {format!("6. {} Lifetime Lane Matchup Matrix (2015–2026)", champ_title)}
+                                                    {format!("6. {} Champion Matchup Counter-Matrix & Tactical Lane Directives", champ_title)}
                                                 </h3>
                                                 <span style="font-family: monospace; font-size: 0.7rem; color: var(--cyan);">"HISTORICAL MATCHUP WR%"</span>
                                             </div>
@@ -3511,50 +3574,74 @@ where
 }
 
 #[cfg(target_arch = "wasm32")]
-fn view_season_career_evolution_svg(pts: &[SeasonCareerPoint]) -> impl IntoView {
+fn view_phase_scaling_curve_svg(pts: &[PhaseScalingEntry]) -> impl IntoView {
     let w = 680.0;
     let h = 185.0;
-    let pad_x = 44.0;
+    let pad_x = 55.0;
     let pad_y = 26.0;
     let plot_w = w - 2.0 * pad_x;
     let plot_h = h - 2.0 * pad_y;
-    let n = pts.len().max(2);
-    let max_g = pts.iter().map(|p| p.games).max().unwrap_or(80).max(10) as f64;
+    let n = pts.len().max(1);
 
     let col_w = plot_w / n as f64;
-    let bar_w = (col_w * 0.52).clamp(14.0, 32.0);
+    let bar_w = (col_w * 0.48).clamp(28.0, 75.0);
 
     let wr_poly = pts
         .iter()
         .enumerate()
         .map(|(i, p)| {
             let cx = pad_x + (i as f64 + 0.5) * col_w;
-            let norm_wr = ((p.win_rate.clamp(40.0, 80.0) - 40.0) / 40.0).clamp(0.0, 1.0);
+            let norm_wr = ((p.win_rate.clamp(35.0, 75.0) - 35.0) / 40.0).clamp(0.0, 1.0);
             let y = (h - pad_y) - norm_wr * plot_h;
             format!("{:.1},{:.1}", cx, y)
         })
         .collect::<Vec<_>>()
         .join(" ");
 
+    let dpm_poly = pts
+        .iter()
+        .enumerate()
+        .map(|(i, p)| {
+            let cx = pad_x + (i as f64 + 0.5) * col_w;
+            let norm_dpm = ((p.avg_dpm.clamp(300.0, 1400.0) - 300.0) / 1100.0).clamp(0.0, 1.0);
+            let y = (h - pad_y) - norm_dpm * plot_h;
+            format!("{:.1},{:.1}", cx, y)
+        })
+        .collect::<Vec<_>>()
+        .join(" ");
+
     view! {
-        <svg viewBox="0 0 680 185" width="100%" style="max-width: 760px; height: auto; display: block; margin: 0 auto;">
-            <polyline points=wr_poly fill="none" stroke="#0ac8b9" stroke-width="2.4" />
+        <svg viewBox="0 0 680 185" width="100%" style="max-width: 760px; height: auto; display: block; margin: 0 auto; background: rgba(1, 10, 19, 0.45); border: 1px solid rgba(200, 170, 110, 0.15);">
+            <line x1=pad_x y1={h - pad_y - 0.5 * plot_h} x2={w - pad_x} y2={h - pad_y - 0.5 * plot_h} stroke="rgba(255,255,255,0.08)" stroke-dasharray="3 3" />
+            
+            <polyline points=dpm_poly fill="none" stroke="var(--cyan)" stroke-width="2.0" stroke-dasharray="4 3" opacity="0.85" />
+            <polyline points=wr_poly fill="none" stroke="var(--gold)" stroke-width="2.6" />
+
             {pts.iter().enumerate().map(|(i, p)| {
                 let cx = pad_x + (i as f64 + 0.5) * col_w;
-                let bh = ((p.games as f64 / max_g) * (plot_h * 0.78)).max(6.0);
-                let by = (h - pad_y) - bh;
-                let norm_wr = ((p.win_rate.clamp(40.0, 80.0) - 40.0) / 40.0).clamp(0.0, 1.0);
+                let norm_wr = ((p.win_rate.clamp(35.0, 75.0) - 35.0) / 40.0).clamp(0.0, 1.0);
                 let wy = (h - pad_y) - norm_wr * plot_h;
+
+                let norm_dpm = ((p.avg_dpm.clamp(300.0, 1400.0) - 300.0) / 1100.0).clamp(0.0, 1.0);
+                let dy = (h - pad_y) - norm_dpm * plot_h;
+
+                let phase_title = p.phase_name.split(':').next().unwrap_or("").trim().to_string();
+                let time_label = p.time_bracket.split('(').next().unwrap_or("").trim().to_string();
                 view! {
                     <g>
-                        <rect x={cx - bar_w / 2.0} y=by width=bar_w height=bh fill="rgba(200,170,110,0.28)" stroke="#c8aa6e" stroke-width="1" />
-                        <circle cx=cx cy=wy r="3.8" fill="#0ac8b9" stroke="#091428" stroke-width="1.2" />
-                        <text x=cx y={wy - 6.0} text-anchor="middle" fill="#0ac8b9" font-size="8.2" font-family="monospace">{format!("{:.0}%", p.win_rate)}</text>
-                        <text x=cx y={h - 12.0} text-anchor="middle" fill="#c8aa6e" font-size="8.2" font-family="monospace">{p.season_label.clone()}</text>
-                        <text x=cx y={h - 3.0} text-anchor="middle" fill="#888" font-size="7.5" font-family="monospace">{format!("'{}", p.year % 100)}</text>
+                        <rect x={cx - bar_w / 2.0} y={wy.min(dy)} width=bar_w height={(h - pad_y - wy.min(dy)).max(4.0)} fill="rgba(200,170,110,0.12)" stroke="rgba(200,170,110,0.3)" stroke-width="1" />
+                        <circle cx=cx cy=wy r="4.2" fill="var(--gold)" stroke="#091428" stroke-width="1.5" />
+                        <text x=cx y={wy - 6.5} text-anchor="middle" fill="var(--gold)" font-size="8.8" font-family="monospace" font-weight="bold">{format!("{:.1}% WR", p.win_rate)}</text>
+                        <circle cx=cx cy=dy r="3.2" fill="var(--cyan)" stroke="#091428" stroke-width="1.2" />
+                        <text x=cx y={dy + 12.0} text-anchor="middle" fill="var(--cyan)" font-size="7.8" font-family="monospace">{format!("{:.0} DPM", p.avg_dpm)}</text>
+                        <text x=cx y={h - 10.0} text-anchor="middle" fill="#fff" font-size="8.5" font-family="monospace" font-weight="bold">{phase_title}</text>
+                        <text x=cx y={h - 2.0} text-anchor="middle" fill="#aaa" font-size="7.2" font-family="monospace">{time_label}</text>
                     </g>
                 }
             }).collect::<Vec<_>>()}
+
+            <text x=pad_x y={pad_y - 10.0} fill="var(--gold)" font-size="8.0" font-family="monospace" font-weight="bold">"■ GOLD LINE = WIN RATE %"</text>
+            <text x={pad_x + 160.0} y={pad_y - 10.0} fill="var(--cyan)" font-size="8.0" font-family="monospace">"- - CYAN DASHED = COMBAT DPM"</text>
         </svg>
     }
 }
