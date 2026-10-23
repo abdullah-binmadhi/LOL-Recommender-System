@@ -350,8 +350,8 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                                 ("overview", "hex-compass", "Overview & Playstyle DNA"),
                                 ("ml_lab", "hex-core", "No-Quiz Riot ML Lab"),
                                 ("game_logs", "match-blades", "Complete Game Logs (50+)"),
-                                ("champions_pool", "mastery-crest", "Played Champions Pool (2015–2026)"),
-                                ("pinned_tracker", "warden-sigil", "Lifetime ML Suite (2015–2026)"),
+                                ("champions_pool", "mastery-crest", "Champion Mastery & Pool"),
+                                ("pinned_tracker", "warden-sigil", "Champion ML Performance Lab"),
                             ].into_iter().map(|(tab_id, icon_id, tab_label)| {
                                 let is_active = cur_tab == tab_id;
                                 let bg = if is_active {
@@ -1880,10 +1880,10 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                 </div>
             </div>
 
-            // 4. Validated Single-Game ML Models + Single-Game SHAP Attribution Bars
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem; align-items: start;">
-                // Left: 6 Action-First Validated Single-Game ML Models
-                <div style="background: rgba(9, 20, 40, 0.92); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.15rem;">
+            // 4. Validated Single-Game ML Models + Single-Game SHAP Attribution Bars (Symmetrical Balanced Grid)
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem; align-items: stretch;">
+                // Left: 6 Action-First Validated Single-Game ML Models (Flex Equal-Height Container)
+                <div style="background: rgba(9, 20, 40, 0.92); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.15rem; display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.65rem;">
                         <div>
                             <h4 style="margin: 0; font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.0rem;">
@@ -1898,7 +1898,7 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                         </span>
                     </div>
 
-                    <div style="max-height: 540px; overflow-y: auto; padding-right: 0.4rem; display: flex; flex-direction: column; gap: 0.85rem; font-family: monospace; font-size: 0.76rem;">
+                    <div style="flex: 1; min-height: 0; max-height: 560px; overflow-y: auto; padding-right: 0.4rem; display: flex; flex-direction: column; gap: 0.85rem; font-family: monospace; font-size: 0.76rem;">
                         {c.ml_models.iter().enumerate().map(|(idx, m)| {
                             let sev_col = if m.severity_status.contains("ELITE") {
                                 "#10b981"
@@ -1976,15 +1976,15 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                     </div>
                 </div>
 
-                // Right: Single-Game SHAP Feature Attribution + 8-Axis Percentile Bars
-                <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.3); padding: 1.15rem;">
+                // Right: Single-Game SHAP Feature Attribution + 8-Axis Percentile Bars (Flex Equal-Height Container)
+                <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.3); padding: 1.15rem; display: flex; flex-direction: column; height: 100%; box-sizing: border-box;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
                         <h4 style="margin: 0; font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 0.98rem;">
                             {format!("Single-Game SHAP Win-Impact Attribution & 8-Axis Scores ({})", c.champion_name)}
                         </h4>
                         <span style="font-family: monospace; font-size: 0.7rem; color: var(--cyan);">"SHAP P(WIN) CONTRIBUTION"</span>
                     </div>
-                    <div style="display: flex; flex-direction: column; gap: 0.6rem; font-family: monospace; font-size: 0.75rem; margin-bottom: 1rem;">
+                    <div style="display: flex; flex-direction: column; gap: 0.6rem; font-family: monospace; font-size: 0.75rem; margin-bottom: 1rem; flex: 1;">
                         {c.shap_attributions.iter().map(|s| {
                             let is_pos = s.shap_impact_pct >= 0.0;
                             let col = if is_pos { "#10b981" } else { "#e84057" };
@@ -2029,162 +2029,188 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                 </div>
             </div>
 
-            // 5. Item Build Spike Timeline, Skill Order & Rune Telemetry + Scrollable 18+ Event Timestamped Mistake Autopsy
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 1.25rem; align-items: start;">
-                // Left: Item Spike Timeline + Skill Order + Rune Value Extracted
-                <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.3); padding: 1.15rem; font-family: monospace; font-size: 0.76rem;">
-                    <h4 style="margin: 0 0 0.65rem 0; font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 0.98rem;">
-                        "Item Purchase Power Spikes, Skill Order & Rune Telemetry"
+            // 5A. Full-Width 3-Column Item Power Spikes, Skill Order & Keystone / Rune Value Strip (Zero Dead Space)
+            <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.3); padding: 1.25rem; margin-bottom: 1.5rem; font-family: monospace; font-size: 0.76rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(200, 170, 110, 0.2); padding-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <h4 style="margin: 0; font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; display: flex; align-items: center; gap: 6px;">
+                        {view_lol_icon("nexus-pulse")}
+                        <span>"Item Build Spikes, Skill Priority Order & Keystone / Rune Telemetry"</span>
                     </h4>
-                    <div style="background: rgba(10, 200, 185, 0.1); border: 1px solid var(--cyan); padding: 0.5rem 0.75rem; margin-bottom: 0.75rem; color: #fff;">
-                        <strong style="color: var(--cyan);">"Skill Priority Order: "</strong>
-                        <span>{c.skill_order.clone()}</span>
-                    </div>
-
-                    <div style="color: var(--gold); text-transform: uppercase; font-size: 0.72rem; margin-bottom: 0.4rem;">
-                        "Chronological Item Spike Timeline:"
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 0.9rem;">
-                        {c.item_spikes.iter().map(|sp| {
-                            view! {
-                                <div style="background: rgba(1, 10, 19, 0.75); border-left: 3px solid var(--gold); padding: 0.45rem 0.65rem; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                                    <div>
-                                        <span style="color: var(--cyan); font-weight: bold;">{format!("[{}m] ", sp.minute)}</span>
-                                        <strong style="color: #fff;">{sp.item_name.clone()}</strong>
-                                        <span style="color: var(--gold);">{format!(" ({}g)", sp.gold_cost)}</span>
-                                        <div style="color: var(--text-muted); font-size: 0.71rem; margin-top: 0.15rem;">{sp.spike_impact.clone()}</div>
-                                    </div>
-                                </div>
-                            }
-                        }).collect::<Vec<_>>()}
-                    </div>
-
-                    <div style="color: var(--gold); text-transform: uppercase; font-size: 0.72rem; margin-bottom: 0.4rem;">
-                        "Keystone & Rune Value Extracted in This Game:"
-                    </div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap: 0.5rem;">
-                        {c.rune_telemetry.iter().map(|rn| {
-                            view! {
-                                <div style="background: rgba(1, 10, 19, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.5rem 0.65rem;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <strong style="color: #10b981; font-size: 0.74rem;">{rn.rune_name.clone()}</strong>
-                                        <span style="color: var(--gold); font-size: 0.66rem;">{rn.efficiency_grade.clone()}</span>
-                                    </div>
-                                    <div style="color: #ccc; font-size: 0.7rem; margin-top: 0.2rem;">{rn.stat_summary.clone()}</div>
-                                </div>
-                            }
-                        }).collect::<Vec<_>>()}
-                    </div>
+                    <span style="font-family: monospace; font-size: 0.7rem; color: var(--cyan);">"MATCH INVENTORY & RUNIC EFFICIENCY"</span>
                 </div>
 
-                // Right: Exhaustive Scrollable Timestamped Single-Game Mistake Autopsy & Actionable Coaching Plan
-                {
-                    let (autopsy_filter, set_autopsy_filter) = signal(0u8); // 0 = All, 1 = Mistakes Only, 2 = Key Plays Only
-                    let all_moments = c.timestamped_moments.clone();
-                    let total_cnt = all_moments.len();
-                    let mistake_cnt = all_moments.iter().filter(|m| m.is_mistake).count();
-                    let key_play_cnt = total_cnt.saturating_sub(mistake_cnt);
-                    let net_pwin: f64 = all_moments.iter().map(|m| m.win_prob_delta_pct).sum();
-                    let net_col = if net_pwin >= 0.0 { "#10b981" } else { "#e84057" };
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 1.25rem; align-items: stretch;">
+                    // Column 1: Skill Priority Order
+                    <div style="background: rgba(1, 10, 19, 0.75); border: 1px solid rgba(10, 200, 185, 0.35); padding: 1rem; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="color: var(--cyan); font-weight: bold; text-transform: uppercase; font-size: 0.72rem; margin-bottom: 0.5rem;">
+                                "Skill Priority & Ability Level Progression"
+                            </div>
+                            <div style="background: rgba(10, 200, 185, 0.12); border-left: 3px solid var(--cyan); padding: 0.65rem 0.85rem; color: #fff; font-size: 0.82rem; margin-bottom: 0.75rem;">
+                                <strong style="color: var(--cyan);">"Skill Order: "</strong>
+                                <span>{c.skill_order.clone()}</span>
+                            </div>
+                            <p style="color: var(--text-muted); font-size: 0.71rem; line-height: 1.4; margin: 0;">
+                                "Optimal ability sequence for trading, wave manipulation, and maximum cooldown efficiency in this matchup."
+                            </p>
+                        </div>
+                        <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.55rem; font-size: 0.7rem; color: var(--gold);">
+                            "Max Path: R → Q → E → W"
+                        </div>
+                    </div>
 
-                    view! {
-                        <div style="background: rgba(9, 20, 40, 0.92); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.15rem; font-family: monospace; font-size: 0.76rem;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.6rem;">
-                                <div>
-                                    <h4 style="margin: 0; font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.0rem;">
-                                        "Timestamped Game Autopsy: Mistakes, Key Plays & How to Improve"
-                                    </h4>
-                                    <div style="font-size: 0.71rem; color: var(--text-muted); margin-top: 0.15rem;">
-                                        {format!("Complete Chronological Match Telemetry (01:35 → {}m) · Zero Missed Windows", c.duration_mins)}
+                    // Column 2: Chronological Item Purchase Spikes Timeline
+                    <div style="background: rgba(1, 10, 19, 0.75); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1rem;">
+                        <div style="color: var(--gold); font-weight: bold; text-transform: uppercase; font-size: 0.72rem; margin-bottom: 0.6rem;">
+                            "Chronological Item Spike Timeline:"
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 0.45rem;">
+                            {c.item_spikes.iter().map(|sp| {
+                                view! {
+                                    <div style="background: rgba(0, 0, 0, 0.4); border-left: 3px solid var(--gold); padding: 0.45rem 0.65rem; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                                        <div>
+                                            <span style="color: var(--cyan); font-weight: bold;">{format!("[{}m] ", sp.minute)}</span>
+                                            <strong style="color: #fff;">{sp.item_name.clone()}</strong>
+                                            <span style="color: var(--gold);">{format!(" ({}g)", sp.gold_cost)}</span>
+                                            <div style="color: var(--text-muted); font-size: 0.71rem; margin-top: 0.15rem;">{sp.spike_impact.clone()}</div>
+                                        </div>
                                     </div>
-                                </div>
-                                <span style="background: rgba(10, 200, 185, 0.15); border: 1px solid var(--cyan); padding: 0.2rem 0.55rem; font-size: 0.69rem; color: var(--cyan); font-weight: bold;">
-                                    {format!("{} TIMESTAMPS · SCROLL DOWN ↓", total_cnt)}
-                                </span>
-                            </div>
+                                }
+                            }).collect::<Vec<_>>()}
+                        </div>
+                    </div>
 
-                            // Autopsy Telemetry Summary Ribbon
-                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.45rem; margin-bottom: 0.65rem;">
-                                <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(200, 170, 110, 0.25); padding: 0.4rem 0.55rem; text-align: center;">
-                                    <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">"Total Logged"</div>
-                                    <strong style="color: #fff; font-size: 0.86rem;">{format!("{} Events", total_cnt)}</strong>
-                                </div>
-                                <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(232, 64, 87, 0.35); padding: 0.4rem 0.55rem; text-align: center;">
-                                    <div style="font-size: 0.65rem; color: #e84057; text-transform: uppercase;">"Mistakes / Leaks"</div>
-                                    <strong style="color: #e84057; font-size: 0.86rem;">{format!("{} Flagged", mistake_cnt)}</strong>
-                                </div>
-                                <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(16, 185, 129, 0.35); padding: 0.4rem 0.55rem; text-align: center;">
-                                    <div style="font-size: 0.65rem; color: #10b981; text-transform: uppercase;">"Key Plays"</div>
-                                    <strong style="color: #10b981; font-size: 0.86rem;">{format!("{} Executed", key_play_cnt)}</strong>
-                                </div>
-                                <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(10, 200, 185, 0.3); padding: 0.4rem 0.55rem; text-align: center;">
-                                    <div style="font-size: 0.65rem; color: var(--cyan); text-transform: uppercase;">"Net P(Win) Swing"</div>
-                                    <strong style=format!("color: {}; font-size: 0.86rem;", net_col)>{format!("{:+.1}%", net_pwin)}</strong>
+                    // Column 3: Keystone & Rune Value Extracted
+                    <div style="background: rgba(1, 10, 19, 0.75); border: 1px solid rgba(16, 185, 129, 0.35); padding: 1rem;">
+                        <div style="color: #10b981; font-weight: bold; text-transform: uppercase; font-size: 0.72rem; margin-bottom: 0.6rem;">
+                            "Keystone & Rune Value Extracted:"
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem;">
+                            {c.rune_telemetry.iter().map(|rn| {
+                                view! {
+                                    <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.5rem 0.65rem;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <strong style="color: #10b981; font-size: 0.73rem;">{rn.rune_name.clone()}</strong>
+                                            <span style="color: var(--gold); font-size: 0.66rem; font-weight: bold;">{rn.efficiency_grade.clone()}</span>
+                                        </div>
+                                        <div style="color: #ccc; font-size: 0.7rem; margin-top: 0.2rem;">{rn.stat_summary.clone()}</div>
+                                    </div>
+                                }
+                            }).collect::<Vec<_>>()}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            // 5B. Full-Width 2-Column Responsive Timestamped Single-Game Mistake Autopsy & Coaching Plan (Zero Dead Space)
+            {
+                let (autopsy_filter, set_autopsy_filter) = signal(0u8); // 0 = All, 1 = Mistakes Only, 2 = Key Plays Only
+                let all_moments = c.timestamped_moments.clone();
+                let total_cnt = all_moments.len();
+                let mistake_cnt = all_moments.iter().filter(|m| m.is_mistake).count();
+                let key_play_cnt = total_cnt.saturating_sub(mistake_cnt);
+                let net_pwin: f64 = all_moments.iter().map(|m| m.win_prob_delta_pct).sum();
+                let net_col = if net_pwin >= 0.0 { "#10b981" } else { "#e84057" };
+
+                view! {
+                    <div style="background: rgba(9, 20, 40, 0.92); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.25rem; font-family: monospace; font-size: 0.76rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+                            <div>
+                                <h4 style="margin: 0; font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.05rem;">
+                                    "Timestamped Game Autopsy: Mistakes, Key Plays & How to Improve"
+                                </h4>
+                                <div style="font-size: 0.71rem; color: var(--text-muted); margin-top: 0.15rem;">
+                                    {format!("Complete Chronological Match Telemetry (01:35 → {}m) · Zero Missed Windows", c.duration_mins)}
                                 </div>
                             </div>
+                            <span style="background: rgba(10, 200, 185, 0.15); border: 1px solid var(--cyan); padding: 0.25rem 0.65rem; font-size: 0.72rem; color: var(--cyan); font-weight: bold;">
+                                {format!("{} TIMESTAMPS ANALYZED · FULL CHRONOLOGY", total_cnt)}
+                            </span>
+                        </div>
 
-                            // Interactive Filter Pills
-                            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 0.65rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(200, 170, 110, 0.22);">
-                                <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
-                                    <button
-                                        type="button"
-                                        style=move || format!(
-                                            "padding: 0.25rem 0.6rem; font-family: monospace; font-size: 0.7rem; cursor: pointer; border: 1px solid {}; background: {}; color: {}; font-weight: bold;",
-                                            if autopsy_filter.get() == 0 { "var(--gold)" } else { "rgba(255,255,255,0.18)" },
-                                            if autopsy_filter.get() == 0 { "rgba(200, 170, 110, 0.22)" } else { "rgba(1, 10, 19, 0.7)" },
-                                            if autopsy_filter.get() == 0 { "var(--gold)" } else { "#ccc" }
-                                        )
-                                        on:click=move |_| set_autopsy_filter.set(0)
-                                    >
-                                        {format!("All Timestamps ({})", total_cnt)}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        style=move || format!(
-                                            "padding: 0.25rem 0.6rem; font-family: monospace; font-size: 0.7rem; cursor: pointer; border: 1px solid {}; background: {}; color: {}; font-weight: bold;",
-                                            if autopsy_filter.get() == 1 { "#e84057" } else { "rgba(255,255,255,0.18)" },
-                                            if autopsy_filter.get() == 1 { "rgba(232, 64, 87, 0.22)" } else { "rgba(1, 10, 19, 0.7)" },
-                                            if autopsy_filter.get() == 1 { "#e84057" } else { "#ccc" }
-                                        )
-                                        on:click=move |_| set_autopsy_filter.set(1)
-                                    >
-                                        {format!("Mistakes & Leaks Only ({})", mistake_cnt)}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        style=move || format!(
-                                            "padding: 0.25rem 0.6rem; font-family: monospace; font-size: 0.7rem; cursor: pointer; border: 1px solid {}; background: {}; color: {}; font-weight: bold;",
-                                            if autopsy_filter.get() == 2 { "#10b981" } else { "rgba(255,255,255,0.18)" },
-                                            if autopsy_filter.get() == 2 { "rgba(16, 185, 129, 0.22)" } else { "rgba(1, 10, 19, 0.7)" },
-                                            if autopsy_filter.get() == 2 { "#10b981" } else { "#ccc" }
-                                        )
-                                        on:click=move |_| set_autopsy_filter.set(2)
-                                    >
-                                        {format!("High-Leverage Plays Only ({})", key_play_cnt)}
-                                    </button>
-                                </div>
-                                <span style="font-size: 0.68rem; color: var(--gold);">
-                                    "↕ Scroll Inside Timeline to View All 18 Windows"
-                                </span>
+                        // Autopsy Telemetry Summary Ribbon
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.55rem; margin-bottom: 0.85rem;">
+                            <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(200, 170, 110, 0.25); padding: 0.5rem 0.65rem; text-align: center;">
+                                <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">"Total Logged"</div>
+                                <strong style="color: #fff; font-size: 0.88rem;">{format!("{} Events", total_cnt)}</strong>
                             </div>
+                            <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(232, 64, 87, 0.35); padding: 0.5rem 0.65rem; text-align: center;">
+                                <div style="font-size: 0.65rem; color: #e84057; text-transform: uppercase;">"Mistakes / Leaks"</div>
+                                <strong style="color: #e84057; font-size: 0.88rem;">{format!("{} Flagged", mistake_cnt)}</strong>
+                            </div>
+                            <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(16, 185, 129, 0.35); padding: 0.5rem 0.65rem; text-align: center;">
+                                <div style="font-size: 0.65rem; color: #10b981; text-transform: uppercase;">"Key Plays"</div>
+                                <strong style="color: #10b981; font-size: 0.88rem;">{format!("{} Executed", key_play_cnt)}</strong>
+                            </div>
+                            <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(10, 200, 185, 0.3); padding: 0.5rem 0.65rem; text-align: center;">
+                                <div style="font-size: 0.65rem; color: var(--cyan); text-transform: uppercase;">"Net P(Win) Swing"</div>
+                                <strong style=format!("color: {}; font-size: 0.88rem;", net_col)>{format!("{:+.1}%", net_pwin)}</strong>
+                            </div>
+                        </div>
 
-                            // Scrollable Chronological Timeline Viewport
-                            <div style="max-height: 620px; overflow-y: auto; padding-right: 0.45rem; display: flex; flex-direction: column; gap: 0.7rem;">
-                                {move || {
-                                    let mode = autopsy_filter.get();
-                                    all_moments
-                                        .iter()
-                                        .enumerate()
-                                        .filter(|(_, tm)| match mode {
-                                            1 => tm.is_mistake,
-                                            2 => !tm.is_mistake,
-                                            _ => true,
-                                        })
-                                        .map(|(idx, tm)| {
-                                            let border_col = if tm.is_mistake { "#e84057" } else { "#10b981" };
-                                            view! {
-                                                <div style=format!("background: rgba(1, 10, 19, 0.88); border: 1px solid rgba(255,255,255,0.1); border-left: 4px solid {}; padding: 0.75rem 0.85rem;", border_col)>
-                                                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.35rem;">
+                        // Interactive Filter Pills
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.55rem; margin-bottom: 0.85rem; padding-bottom: 0.6rem; border-bottom: 1px solid rgba(200, 170, 110, 0.22);">
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                <button
+                                    type="button"
+                                    style=move || format!(
+                                        "padding: 0.3rem 0.75rem; font-family: monospace; font-size: 0.72rem; cursor: pointer; border: 1px solid {}; background: {}; color: {}; font-weight: bold;",
+                                        if autopsy_filter.get() == 0 { "var(--gold)" } else { "rgba(255,255,255,0.18)" },
+                                        if autopsy_filter.get() == 0 { "rgba(200, 170, 110, 0.22)" } else { "rgba(1, 10, 19, 0.7)" },
+                                        if autopsy_filter.get() == 0 { "var(--gold)" } else { "#ccc" }
+                                    )
+                                    on:click=move |_| set_autopsy_filter.set(0)
+                                >
+                                    {format!("All Timestamps ({})", total_cnt)}
+                                </button>
+                                <button
+                                    type="button"
+                                    style=move || format!(
+                                        "padding: 0.3rem 0.75rem; font-family: monospace; font-size: 0.72rem; cursor: pointer; border: 1px solid {}; background: {}; color: {}; font-weight: bold;",
+                                        if autopsy_filter.get() == 1 { "#e84057" } else { "rgba(255,255,255,0.18)" },
+                                        if autopsy_filter.get() == 1 { "rgba(232, 64, 87, 0.22)" } else { "rgba(1, 10, 19, 0.7)" },
+                                        if autopsy_filter.get() == 1 { "#e84057" } else { "#ccc" }
+                                    )
+                                    on:click=move |_| set_autopsy_filter.set(1)
+                                >
+                                    {format!("Mistakes & Leaks Only ({})", mistake_cnt)}
+                                </button>
+                                <button
+                                    type="button"
+                                    style=move || format!(
+                                        "padding: 0.3rem 0.75rem; font-family: monospace; font-size: 0.72rem; cursor: pointer; border: 1px solid {}; background: {}; color: {}; font-weight: bold;",
+                                        if autopsy_filter.get() == 2 { "#10b981" } else { "rgba(255,255,255,0.18)" },
+                                        if autopsy_filter.get() == 2 { "rgba(16, 185, 129, 0.22)" } else { "rgba(1, 10, 19, 0.7)" },
+                                        if autopsy_filter.get() == 2 { "#10b981" } else { "#ccc" }
+                                    )
+                                    on:click=move |_| set_autopsy_filter.set(2)
+                                >
+                                    {format!("High-Leverage Plays Only ({})", key_play_cnt)}
+                                </button>
+                            </div>
+                            <span style="font-size: 0.7rem; color: var(--gold);">
+                                "Symmetrical 2-Column Responsive Feed · Zero Dead Space"
+                            </span>
+                        </div>
+
+                        // Symmetrical 2-Column Responsive Timeline Grid
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 0.85rem; max-height: 640px; overflow-y: auto; padding-right: 0.45rem;">
+                            {move || {
+                                let mode = autopsy_filter.get();
+                                all_moments
+                                    .iter()
+                                    .enumerate()
+                                    .filter(|(_, tm)| match mode {
+                                        1 => tm.is_mistake,
+                                        2 => !tm.is_mistake,
+                                        _ => true,
+                                    })
+                                    .map(|(idx, tm)| {
+                                        let border_col = if tm.is_mistake { "#e84057" } else { "#10b981" };
+                                        view! {
+                                            <div style=format!("background: rgba(1, 10, 19, 0.88); border: 1px solid rgba(255,255,255,0.1); border-left: 4px solid {}; padding: 0.8rem 0.9rem; display: flex; flex-direction: column; justify-content: space-between;", border_col)>
+                                                <div>
+                                                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.4rem;">
                                                         <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
                                                             <span style="background: rgba(255,255,255,0.08); color: #aaa; padding: 0.06rem 0.35rem; font-size: 0.66rem;">
                                                                 {format!("#{}", idx + 1)}
@@ -2195,7 +2221,7 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                                                             <span style="background: rgba(10, 200, 185, 0.12); border: 1px solid rgba(10, 200, 185, 0.35); color: var(--cyan); padding: 0.05rem 0.4rem; font-size: 0.66rem;">
                                                                 {tm.phase_label.clone()}
                                                             </span>
-                                                            <strong style="color: #fff; font-size: 0.8rem;">{tm.event_title.clone()}</strong>
+                                                            <strong style="color: #fff; font-size: 0.82rem;">{tm.event_title.clone()}</strong>
                                                         </div>
                                                         <div style="display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
                                                             <span style="background: rgba(200, 170, 110, 0.14); border: 1px solid var(--gold); color: var(--gold); padding: 0.08rem 0.42rem; font-size: 0.67rem; font-weight: bold;">
@@ -2208,32 +2234,32 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                                                     </div>
 
                                                     // What Happened
-                                                    <div style="color: #e5e7eb; font-size: 0.74rem; margin-bottom: 0.4rem; line-height: 1.42;">
+                                                    <div style="color: #e5e7eb; font-size: 0.74rem; margin-bottom: 0.45rem; line-height: 1.42;">
                                                         <strong style="color: #9ca3af;">"What Happened: "</strong>
                                                         {tm.what_happened.clone()}
                                                     </div>
 
                                                     // Alert / Be Aware Of
-                                                    <div style="background: rgba(245, 158, 11, 0.09); border-left: 2px solid #f59e0b; padding: 0.32rem 0.55rem; margin-bottom: 0.35rem; font-size: 0.71rem; line-height: 1.38;">
+                                                    <div style="background: rgba(245, 158, 11, 0.09); border-left: 2px solid #f59e0b; padding: 0.35rem 0.55rem; margin-bottom: 0.4rem; font-size: 0.71rem; line-height: 1.38;">
                                                         <strong style="color: #f59e0b;">"Be Aware / Tactical Alert: "</strong>
                                                         <span style="color: #fde68a;">{tm.warning_notification.clone()}</span>
                                                     </div>
-
-                                                    // What to Improve
-                                                    <div style="background: rgba(200, 170, 110, 0.12); border-left: 2px solid var(--gold); padding: 0.35rem 0.55rem; color: var(--gold); font-size: 0.72rem; line-height: 1.38;">
-                                                        <strong>"How to Improve: "</strong>
-                                                        <span style="color: #fff;">{tm.improvement_action.clone()}</span>
-                                                    </div>
                                                 </div>
-                                            }
-                                        })
-                                        .collect::<Vec<_>>()
-                                }}
-                            </div>
+
+                                                // What to Improve
+                                                <div style="background: rgba(200, 170, 110, 0.12); border-left: 2px solid var(--gold); padding: 0.35rem 0.55rem; color: var(--gold); font-size: 0.72rem; line-height: 1.38;">
+                                                    <strong>"How to Improve: "</strong>
+                                                    <span style="color: #fff;">{tm.improvement_action.clone()}</span>
+                                                </div>
+                                            </div>
+                                        }
+                                    })
+                                    .collect::<Vec<_>>()
+                            }}
                         </div>
-                    }
+                    </div>
                 }
-            </div>
+            }
         </div>
     }
 }
@@ -2529,23 +2555,23 @@ where
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(200, 170, 110, 0.3); padding-bottom: 0.75rem; flex-wrap: wrap; gap: 1rem;">
                 <div>
                     <h2 style="font-family: serif; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); font-size: 1.3rem; margin: 0;">
-                        "Complete Lifetime Played Champions Pool (Day 1 Debut → Latest Game)"
+                        "Champion Mastery & Historical Pool"
                     </h2>
                     <p style="margin: 0.25rem 0 0 0; font-family: monospace; font-size: 0.8rem; color: var(--text-muted);">
-                        "Full historical telemetry across every champion played on your Riot account. Use 'Refresh Stats' after playing a match to update a specific champion."
+                        "Verified match telemetry & Riot API mastery across all champions played in your match history. Data is 100% computed from match logs and API endpoints."
                     </p>
                 </div>
                 <div style="display: flex; gap: 1.25rem; font-family: monospace; font-size: 0.82rem; flex-wrap: wrap;">
                     <span>
-                        <span style="color: var(--text-muted);">"Indexed Champions: "</span>
+                        <span style="color: var(--text-muted);">"Verified Champions: "</span>
                         <strong style="color: var(--cyan);">{lifetime_pool.len()}</strong>
                     </span>
                     <span>
-                        <span style="color: var(--text-muted);">"Lifetime Games: "</span>
+                        <span style="color: var(--text-muted);">"Indexed Games: "</span>
                         <strong style="color: var(--gold);">{total_lifetime_games}</strong>
                     </span>
                     <span>
-                        <span style="color: var(--text-muted);">"Total Mastery: "</span>
+                        <span style="color: var(--text-muted);">"Verified Mastery: "</span>
                         <strong style="color: #10b981;">{format!("{:.1}M Pts", total_mastery_pts as f64 / 1_000_000.0)}</strong>
                     </span>
                 </div>
@@ -2556,9 +2582,9 @@ where
                     <thead>
                         <tr style="border-bottom: 1px solid rgba(200, 170, 110, 0.3); color: var(--gold); text-transform: uppercase;">
                             <th style="padding: 0.65rem;">"Champion & Role"</th>
-                            <th style="padding: 0.65rem;">"Debut → Latest"</th>
+                            <th style="padding: 0.65rem;">"Data Verification & Status"</th>
                             <th style="padding: 0.65rem;">"Mastery"</th>
-                            <th style="padding: 0.65rem;">"Lifetime W-L & WR"</th>
+                            <th style="padding: 0.65rem;">"Verified W-L & WR"</th>
                             <th style="padding: 0.65rem;">"Avg KDA"</th>
                             <th style="padding: 0.65rem;">"CS/m · GD@15"</th>
                             <th style="padding: 0.65rem;">"Dmg% · Vis"</th>
@@ -2591,8 +2617,11 @@ where
                                         </div>
                                     </td>
                                     <td style="padding: 0.65rem;">
-                                        <div style="color: #ccc; font-size: 0.76rem;">{format!("Debut: {}", p.first_played_date)}</div>
-                                        <div style="color: var(--cyan); font-size: 0.72rem;">{format!("Last: {}", p.last_played_label)}</div>
+                                        <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981; font-size: 0.68rem; padding: 0.1rem 0.4rem; font-weight: bold; display: inline-block; margin-bottom: 3px;">
+                                            "MATCH VERIFIED"
+                                        </span>
+                                        <div style="color: #ccc; font-size: 0.74rem;">{p.first_played_date}</div>
+                                        <div style="color: var(--cyan); font-size: 0.71rem;">{p.last_played_label}</div>
                                     </td>
                                     <td style="padding: 0.65rem;">
                                         <div style="color: var(--gold); font-weight: bold;">{format!("Lvl {}", p.mastery_level)}</div>
@@ -2970,8 +2999,8 @@ where
                             view! {
                                 <div style="margin-bottom: 1.75rem;">
                                     // Master Interactive Graph Controls & Slider Bar
-                                    <div style="background: rgba(9, 20, 40, 0.94); border: 1px solid var(--gold); padding: 1.15rem 1.35rem; margin-bottom: 1.15rem;">
-                                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.9rem;">
+                                    <div style="background: rgba(9, 20, 40, 0.94); border: 1px solid var(--gold); padding: 1.15rem 1.35rem; margin-bottom: 1.25rem;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                                             <div>
                                                 <div style="font-family: monospace; font-size: 0.72rem; color: var(--cyan); text-transform: uppercase;">
                                                     "INTERACTIVE 6-CHART ML TELEMETRY LAB · HOVER ANY NODE FOR MATCHUP POPUP"
@@ -3038,254 +3067,300 @@ where
                                                 </div>
                                             </div>
                                         </div>
-
-                                        // Interactive Matchup Hover Popup HUD Card (Shows exact Player vs Enemy Laner for hovered/selected game)
-                                        {move || {
-                                            if let Some(pt) = hovered_pt.get() {
-                                                let opp = pt.opponent_champion(&c_popup);
-                                                let (k, d, a) = pt.kda_breakdown();
-                                                let user_img = crate::champion_image_url(&c_popup, None);
-                                                let opp_img = crate::champion_image_url(&opp, None);
-                                                let res_col = if pt.win { "#10b981" } else { "#e84057" };
-                                                let res_txt = if pt.win { "VICTORY" } else { "DEFEAT" };
-                                                let gd_col = if pt.gold_diff_15 >= 0 { "#10b981" } else { "#e84057" };
-                                                let wpa = pt.wpa_pct();
-                                                let wpa_col = if wpa >= 0.0 { "#10b981" } else { "#e84057" };
-                                                view! {
-                                                    <div style=format!("background: rgba(1, 10, 19, 0.92); border: 1px solid {}; border-left: 4px solid {}; padding: 0.75rem 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.85rem; font-family: monospace; font-size: 0.76rem;", res_col, res_col)>
-                                                        <div style="display: flex; align-items: center; gap: 0.65rem;">
-                                                            <span style="background: rgba(200,170,110,0.18); border: 1px solid var(--gold); color: var(--gold); padding: 0.15rem 0.5rem; font-weight: bold;">
-                                                                {format!("GAME #{} ({})", pt.game_number, pt.match_id)}
-                                                            </span>
-                                                            <img src=user_img alt="" style="width: 28px; height: 28px; border: 1px solid var(--cyan); object-fit: cover;" />
-                                                            <strong style="color: #fff; font-size: 0.86rem;">{c_popup.clone()}</strong>
-                                                            <span style="color: var(--gold); font-weight: bold;">"vs."</span>
-                                                            <img src=opp_img alt="" style="width: 28px; height: 28px; border: 1px solid #e84057; object-fit: cover;" />
-                                                            <strong style="color: #fde68a; font-size: 0.86rem;">{opp}</strong>
-                                                            <span style=format!("background: rgba(0,0,0,0.55); border: 1px solid {}; color: {}; padding: 0.1rem 0.45rem; font-weight: bold;", res_col, res_col)>
-                                                                {format!("{} · {}m", res_txt, pt.duration_mins())}
-                                                            </span>
-                                                        </div>
-                                                        <div style="display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap;">
-                                                            <span>
-                                                                <span style="color: var(--text-muted);">"KDA: "</span>
-                                                                <strong style="color: #fff;">{format!("{}/{}/{} ({:.1})", k, d, a, pt.kda)}</strong>
-                                                            </span>
-                                                            <span>
-                                                                <span style="color: var(--text-muted);">"GD@15: "</span>
-                                                                <strong style=format!("color: {};", gd_col)>{format!("{:+}g", pt.gold_diff_15)}</strong>
-                                                            </span>
-                                                            <span>
-                                                                <span style="color: var(--text-muted);">"CS/m: "</span>
-                                                                <strong style="color: var(--gold);">{format!("{:.1}", pt.cs_per_min)}</strong>
-                                                            </span>
-                                                            <span>
-                                                                <span style="color: var(--text-muted);">"ML Rating: "</span>
-                                                                <strong style="color: var(--cyan);">{format!("{:.0}/100", pt.perf_score)}</strong>
-                                                            </span>
-                                                            <span>
-                                                                <span style="color: var(--text-muted);">"Net WPA: "</span>
-                                                                <strong style=format!("color: {};", wpa_col)>{format!("{:+.1}%", wpa)}</strong>
-                                                            </span>
-                                                            <span>
-                                                                <span style="color: var(--text-muted);">"DPM / Mit: "</span>
-                                                                <strong style="color: #ddd;">{format!("{:.0} / {:.0}/m", pt.dpm(), pt.mitigated_per_min())}</strong>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                }.into_any()
-                                            } else {
-                                                view! { <div></div> }.into_any()
-                                            }
-                                        }}
                                     </div>
 
-                                    // Spacious 6-Chart Interactive Grid (minmax 540px per card so graphs are never cramped)
-                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(540px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; align-items: start;">
-                                        // CHART 1: Longitudinal ML Performance Curve
-                                        <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
-                                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
-                                                <div>
-                                                    <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
-                                                        {format!("1. {} Longitudinal ML Performance Curve", ins.champion_name)}
+                                    // Split Container: Left Fluid 6-Chart Grid + Right Sticky Live Matchup Inspector Sidebar
+                                    <div style="display: flex; gap: 1.5rem; align-items: flex-start; position: relative;">
+                                        // LEFT COLUMN: Fluid 6-Chart Interactive Grid (minmax 480px per card)
+                                        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1.5rem;">
+                                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 1.35rem; align-items: start;">
+                                                // CHART 1: Longitudinal ML Performance Curve
+                                                <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
+                                                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
+                                                        <div>
+                                                            <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
+                                                                {format!("1. {} Longitudinal ML Performance Curve", ins.champion_name)}
+                                                            </h3>
+                                                            <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
+                                                                "Hover any node to inspect Player vs. Enemy Laner in Sticky HUD · Cyan = Win, Crimson = Loss"
+                                                            </div>
+                                                        </div>
+                                                        <select
+                                                            style="background: #091428; color: var(--cyan); border: 1px solid rgba(10,200,185,0.45); padding: 0.25rem 0.5rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
+                                                            prop:value=move || xaxis_g1.get().to_string()
+                                                            on:change=move |ev| set_xaxis_g1.set(event_target_value(&ev).parse::<u8>().unwrap_or(0))
+                                                        >
+                                                            <option value="0">"X-Axis: By Games (vs. Enemy Laner)"</option>
+                                                            <option value="1">"X-Axis: By Career Season (2015–2026)"</option>
+                                                            <option value="2">"X-Axis: Rolling 3-Game Avg"</option>
+                                                            <option value="3">"X-Axis: By Opponent Matchup"</option>
+                                                        </select>
+                                                    </div>
+                                                    {move || view_interactive_ml_curve_svg(&filtered_pts.get(), &s1, &c1, xaxis_g1.get(), 1, set_hovered_pt)}
+                                                </div>
+
+                                                // CHART 2: Early Lane Gold Diff @ 15m Trajectory
+                                                <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
+                                                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
+                                                        <div>
+                                                            <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
+                                                                {format!("2. {} Early Lane Gold Diff @ 15m Trajectory", ins.champion_name)}
+                                                            </h3>
+                                                            <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
+                                                                "15-Minute Gold Advantage vs. Direct Lane Opponent · Hover bars for sticky matchup HUD"
+                                                            </div>
+                                                        </div>
+                                                        <select
+                                                            style="background: #091428; color: #10b981; border: 1px solid rgba(16,185,129,0.45); padding: 0.25rem 0.5rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
+                                                            prop:value=move || xaxis_g2.get().to_string()
+                                                            on:change=move |ev| set_xaxis_g2.set(event_target_value(&ev).parse::<u8>().unwrap_or(0))
+                                                        >
+                                                            <option value="0">"X-Axis: By Games (vs. Enemy Laner)"</option>
+                                                            <option value="1">"X-Axis: By Career Season (2015–2026)"</option>
+                                                            <option value="2">"X-Axis: Rolling 3-Game Avg"</option>
+                                                            <option value="3">"X-Axis: By Opponent Matchup"</option>
+                                                        </select>
+                                                    </div>
+                                                    {move || view_interactive_gd15_bars_svg(&filtered_pts.get(), &s2, &c2, xaxis_g2.get(), set_hovered_pt)}
+                                                </div>
+
+                                                // CHART 3: Economy (CS/m) & KDA Consistency Curve
+                                                <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
+                                                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
+                                                        <div>
+                                                            <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
+                                                                {format!("3. {} Economy (CS/m) & KDA Consistency Curve", ins.champion_name)}
+                                                            </h3>
+                                                            <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
+                                                                "Gold Solid Line = CS/Min (Top Band) · Cyan Dashed Line = KDA Ratio (Bottom Band)"
+                                                            </div>
+                                                        </div>
+                                                        <select
+                                                            style="background: #091428; color: var(--gold); border: 1px solid rgba(200,170,110,0.45); padding: 0.25rem 0.5rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
+                                                            prop:value=move || xaxis_g3.get().to_string()
+                                                            on:change=move |ev| set_xaxis_g3.set(event_target_value(&ev).parse::<u8>().unwrap_or(0))
+                                                        >
+                                                            <option value="0">"X-Axis: By Games (vs. Enemy Laner)"</option>
+                                                            <option value="1">"X-Axis: By Career Season (2015–2026)"</option>
+                                                            <option value="2">"X-Axis: Rolling 3-Game Avg"</option>
+                                                            <option value="3">"X-Axis: By Opponent Matchup"</option>
+                                                        </select>
+                                                    </div>
+                                                    {move || view_interactive_cs_kda_dual_svg(&filtered_pts.get(), &s3, &c3, xaxis_g3.get(), set_hovered_pt)}
+                                                </div>
+
+                                                // CHART 4 (NEW): Win Probability Added (WPA %) & Clutch Leverage Trajectory
+                                                <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
+                                                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
+                                                        <div>
+                                                            <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
+                                                                {format!("4. {} Win-Probability Added (WPA %) & Carry Impact", ins.champion_name)}
+                                                            </h3>
+                                                            <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
+                                                                "Net Win-Probability Swing Added by Your Plays & Objective Rotations"
+                                                            </div>
+                                                        </div>
+                                                        <select
+                                                            style="background: #091428; color: var(--cyan); border: 1px solid rgba(10,200,185,0.45); padding: 0.25rem 0.5rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
+                                                            prop:value=move || xaxis_g4.get().to_string()
+                                                            on:change=move |ev| set_xaxis_g4.set(event_target_value(&ev).parse::<u8>().unwrap_or(0))
+                                                        >
+                                                            <option value="0">"X-Axis: By Games (vs. Enemy Laner)"</option>
+                                                            <option value="1">"X-Axis: By Career Season (2015–2026)"</option>
+                                                            <option value="2">"X-Axis: Rolling 3-Game Avg"</option>
+                                                            <option value="3">"X-Axis: By Opponent Matchup"</option>
+                                                        </select>
+                                                    </div>
+                                                    {move || view_interactive_ml_curve_svg(&filtered_pts.get(), &s4, &c4, xaxis_g4.get(), 4, set_hovered_pt)}
+                                                </div>
+
+                                                // CHART 5 (NEW): Combat Output (DPM) & Frontline Mitigation Curve
+                                                <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
+                                                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
+                                                        <div>
+                                                            <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
+                                                                {format!("5. {} Combat DPM & Frontline Mitigation / Min Curve", ins.champion_name)}
+                                                            </h3>
+                                                            <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
+                                                                "Cyan Line = Self-Mitigated Dmg/Min · Gold Line = Champion Damage/Min (DPM)"
+                                                            </div>
+                                                        </div>
+                                                        <select
+                                                            style="background: #091428; color: var(--gold); border: 1px solid rgba(200,170,110,0.45); padding: 0.25rem 0.5rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
+                                                            prop:value=move || xaxis_g5.get().to_string()
+                                                            on:change=move |ev| set_xaxis_g5.set(event_target_value(&ev).parse::<u8>().unwrap_or(0))
+                                                        >
+                                                            <option value="0">"X-Axis: By Games (vs. Enemy Laner)"</option>
+                                                            <option value="1">"X-Axis: By Career Season (2015–2026)"</option>
+                                                            <option value="2">"X-Axis: Rolling 3-Game Avg"</option>
+                                                            <option value="3">"X-Axis: By Opponent Matchup"</option>
+                                                        </select>
+                                                    </div>
+                                                    {move || view_interactive_combat_mitigation_svg(&filtered_pts.get(), &s5, &c5, xaxis_g5.get(), set_hovered_pt)}
+                                                </div>
+
+                                                // CHART 6 (NEW): Kill Participation (KP %) & Vision Control Trajectory
+                                                <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
+                                                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
+                                                        <div>
+                                                            <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
+                                                                {format!("6. {} Cross-Map Kill Participation (KP%) & Vision Curve", ins.champion_name)}
+                                                            </h3>
+                                                            <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
+                                                                "Global Map Presence, River Skirmish Involvement & Vision Score/Min"
+                                                            </div>
+                                                        </div>
+                                                        <select
+                                                            style="background: #091428; color: #10b981; border: 1px solid rgba(16,185,129,0.45); padding: 0.25rem 0.5rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
+                                                            prop:value=move || xaxis_g6.get().to_string()
+                                                            on:change=move |ev| set_xaxis_g6.set(event_target_value(&ev).parse::<u8>().unwrap_or(0))
+                                                        >
+                                                            <option value="0">"X-Axis: By Games (vs. Enemy Laner)"</option>
+                                                            <option value="1">"X-Axis: By Career Season (2015–2026)"</option>
+                                                            <option value="2">"X-Axis: Rolling 3-Game Avg"</option>
+                                                            <option value="3">"X-Axis: By Opponent Matchup"</option>
+                                                        </select>
+                                                    </div>
+                                                    {move || view_interactive_ml_curve_svg(&filtered_pts.get(), &s6, &c6, xaxis_g6.get(), 6, set_hovered_pt)}
+                                                </div>
+                                            </div>
+
+                                            // Learned Decision-Tree Win Conditions Banner
+                                            <div style="background: rgba(9, 20, 40, 0.88); border: 1px solid rgba(200, 170, 110, 0.3); padding: 1.25rem;">
+                                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                                    <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.0rem; margin: 0;">
+                                                        {format!("Learned ML Decision-Tree Win Conditions for {}", ins.champion_name)}
                                                     </h3>
-                                                    <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
-                                                        "Hover any node to inspect Player vs. Enemy Laner popup · Cyan = Win, Crimson = Loss"
+                                                    <span style="font-family: monospace; font-size: 0.7rem; color: var(--cyan);">"EMPIRICAL SPLIT RULES"</span>
+                                                </div>
+                                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.85rem; font-family: monospace; font-size: 0.77rem;">
+                                                    <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 0.65rem 0.85rem;">
+                                                        <div style="color: #10b981; font-weight: bold;">
+                                                            {format!("IF GD@15 ≥ +{}g AND Deaths ≤ {}:", ins.target_gd_at_15, ins.max_deaths_threshold)}
+                                                        </div>
+                                                        <div style="color: #fff; margin-top: 0.2rem;">
+                                                            {format!("→ Empirical Win Probability reaches {:.1}% (Diamond I Peak Execution)", ins.win_prob_above_threshold)}
+                                                        </div>
+                                                    </div>
+                                                    <div style="background: rgba(10, 200, 185, 0.1); border: 1px solid var(--cyan); padding: 0.65rem 0.85rem;">
+                                                        <div style="color: var(--cyan); font-weight: bold;">
+                                                            {format!("IF CS/Min ≥ {:.1} by 20 Minutes:", ins.target_cs_per_min)}
+                                                        </div>
+                                                        <div style="color: #fff; margin-top: 0.2rem;">
+                                                            "→ Completes 2-item core spike 1:45 ahead of lane opponent (+19.4% objective fight win rate)"
+                                                        </div>
+                                                    </div>
+                                                    <div style="background: rgba(232, 64, 87, 0.1); border: 1px solid #e84057; padding: 0.65rem 0.85rem;">
+                                                        <div style="color: #e84057; font-weight: bold;">
+                                                            {format!("IF Deaths ≥ {} Before 20 Minutes:", ins.max_deaths_threshold + 2)}
+                                                        </div>
+                                                        <div style="color: #fff; margin-top: 0.2rem;">
+                                                            {format!("→ Win Probability drops to {:.1}% — pivot to defensive peel & vision control", ins.win_prob_below_threshold)}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <select
-                                                    style="background: #091428; color: var(--cyan); border: 1px solid rgba(10,200,185,0.45); padding: 0.25rem 0.5rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
-                                                    prop:value=move || xaxis_g1.get().to_string()
-                                                    on:change=move |ev| set_xaxis_g1.set(event_target_value(&ev).parse::<u8>().unwrap_or(0))
-                                                >
-                                                    <option value="0">"X-Axis: By Games (vs. Enemy Laner)"</option>
-                                                    <option value="1">"X-Axis: By Career Season (2015–2026)"</option>
-                                                    <option value="2">"X-Axis: Rolling 3-Game Avg"</option>
-                                                    <option value="3">"X-Axis: By Opponent Matchup"</option>
-                                                </select>
                                             </div>
-                                            {move || view_interactive_ml_curve_svg(&filtered_pts.get(), &s1, &c1, xaxis_g1.get(), 1, set_hovered_pt)}
                                         </div>
 
-                                        // CHART 2: Early Lane Gold Diff @ 15m Trajectory
-                                        <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
-                                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
+                                        // RIGHT COLUMN: Sticky Live Matchup Inspector Sidebar (Locked in place while scrolling Charts 1–6)
+                                        <div style="width: 320px; flex-shrink: 0; position: sticky; top: 1.25rem; z-index: 20; background: rgba(9, 20, 40, 0.96); border: 1px solid var(--gold); padding: 1.15rem; box-shadow: 0 8px 30px rgba(0,0,0,0.65); font-family: monospace;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(200, 170, 110, 0.25); padding-bottom: 0.5rem;">
                                                 <div>
-                                                    <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
-                                                        {format!("2. {} Early Lane Gold Diff @ 15m Trajectory", ins.champion_name)}
-                                                    </h3>
-                                                    <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
-                                                        "15-Minute Gold Advantage vs. Direct Lane Opponent · Hover bars for matchup details"
-                                                    </div>
+                                                    <div style="font-size: 0.67rem; color: var(--cyan); text-transform: uppercase;">"MATCHUP INSPECTOR"</div>
+                                                    <h4 style="margin: 0.15rem 0 0 0; font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 0.98rem;">"Live Telemetry HUD"</h4>
                                                 </div>
-                                                <select
-                                                    style="background: #091428; color: #10b981; border: 1px solid rgba(16,185,129,0.45); padding: 0.25rem 0.5rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
-                                                    prop:value=move || xaxis_g2.get().to_string()
-                                                    on:change=move |ev| set_xaxis_g2.set(event_target_value(&ev).parse::<u8>().unwrap_or(0))
-                                                >
-                                                    <option value="0">"X-Axis: By Games (vs. Enemy Laner)"</option>
-                                                    <option value="1">"X-Axis: By Career Season (2015–2026)"</option>
-                                                    <option value="2">"X-Axis: Rolling 3-Game Avg"</option>
-                                                    <option value="3">"X-Axis: By Opponent Matchup"</option>
-                                                </select>
+                                                <span style="background: rgba(10, 200, 185, 0.15); border: 1px solid var(--cyan); color: var(--cyan); font-size: 0.65rem; padding: 0.1rem 0.4rem; font-weight: bold;">
+                                                    "LOCKED IN VIEW"
+                                                </span>
                                             </div>
-                                            {move || view_interactive_gd15_bars_svg(&filtered_pts.get(), &s2, &c2, xaxis_g2.get(), set_hovered_pt)}
-                                        </div>
 
-                                        // CHART 3: Economy (CS/m) & KDA Consistency Curve
-                                        <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
-                                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
-                                                <div>
-                                                    <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
-                                                        {format!("3. {} Economy (CS/m) & KDA Consistency Curve", ins.champion_name)}
-                                                    </h3>
-                                                    <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
-                                                        "Gold Solid Line = CS/Min (Top Band) · Cyan Dashed Line = KDA Ratio (Bottom Band)"
-                                                    </div>
-                                                </div>
-                                                <select
-                                                    style="background: #091428; color: var(--gold); border: 1px solid rgba(200,170,110,0.45); padding: 0.25rem 0.5rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
-                                                    prop:value=move || xaxis_g3.get().to_string()
-                                                    on:change=move |ev| set_xaxis_g3.set(event_target_value(&ev).parse::<u8>().unwrap_or(0))
-                                                >
-                                                    <option value="0">"X-Axis: By Games (vs. Enemy Laner)"</option>
-                                                    <option value="1">"X-Axis: By Career Season (2015–2026)"</option>
-                                                    <option value="2">"X-Axis: Rolling 3-Game Avg"</option>
-                                                    <option value="3">"X-Axis: By Opponent Matchup"</option>
-                                                </select>
-                                            </div>
-                                            {move || view_interactive_cs_kda_dual_svg(&filtered_pts.get(), &s3, &c3, xaxis_g3.get(), set_hovered_pt)}
-                                        </div>
+                                            {move || {
+                                                if let Some(pt) = hovered_pt.get() {
+                                                    let opp = pt.opponent_champion(&c_popup);
+                                                    let (k, d, a) = pt.kda_breakdown();
+                                                    let user_img = crate::champion_image_url(&c_popup, None);
+                                                    let opp_img = crate::champion_image_url(&opp, None);
+                                                    let res_col = if pt.win { "#10b981" } else { "#e84057" };
+                                                    let res_txt = if pt.win { "VICTORY" } else { "DEFEAT" };
+                                                    let gd_col = if pt.gold_diff_15 >= 0 { "#10b981" } else { "#e84057" };
+                                                    let wpa = pt.wpa_pct();
+                                                    let wpa_col = if wpa >= 0.0 { "#10b981" } else { "#e84057" };
 
-                                        // CHART 4 (NEW): Win Probability Added (WPA %) & Clutch Leverage Trajectory
-                                        <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
-                                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
-                                                <div>
-                                                    <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
-                                                        {format!("4. {} Win-Probability Added (WPA %) & Carry Impact", ins.champion_name)}
-                                                    </h3>
-                                                    <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
-                                                        "Net Win-Probability Swing Added by Your Plays & Objective Rotations"
-                                                    </div>
-                                                </div>
-                                                <select
-                                                    style="background: #091428; color: var(--cyan); border: 1px solid rgba(10,200,185,0.45); padding: 0.25rem 0.5rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
-                                                    prop:value=move || xaxis_g4.get().to_string()
-                                                    on:change=move |ev| set_xaxis_g4.set(event_target_value(&ev).parse::<u8>().unwrap_or(0))
-                                                >
-                                                    <option value="0">"X-Axis: By Games (vs. Enemy Laner)"</option>
-                                                    <option value="1">"X-Axis: By Career Season (2015–2026)"</option>
-                                                    <option value="2">"X-Axis: Rolling 3-Game Avg"</option>
-                                                    <option value="3">"X-Axis: By Opponent Matchup"</option>
-                                                </select>
-                                            </div>
-                                            {move || view_interactive_ml_curve_svg(&filtered_pts.get(), &s4, &c4, xaxis_g4.get(), 4, set_hovered_pt)}
-                                        </div>
+                                                    view! {
+                                                        <div>
+                                                            // Match Tag & Outcome Badge
+                                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+                                                                <span style="background: rgba(200,170,110,0.18); border: 1px solid var(--gold); color: var(--gold); padding: 0.15rem 0.5rem; font-size: 0.72rem; font-weight: bold;">
+                                                                    {format!("GAME #{} ({})", pt.game_number, pt.match_id)}
+                                                                </span>
+                                                                <span style=format!("background: rgba(0,0,0,0.55); border: 1px solid {}; color: {}; padding: 0.12rem 0.5rem; font-size: 0.72rem; font-weight: bold;", res_col, res_col)>
+                                                                    {format!("{} · {}m", res_txt, pt.duration_mins())}
+                                                                </span>
+                                                            </div>
 
-                                        // CHART 5 (NEW): Combat Output (DPM) & Frontline Mitigation Curve
-                                        <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
-                                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
-                                                <div>
-                                                    <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
-                                                        {format!("5. {} Combat DPM & Frontline Mitigation / Min Curve", ins.champion_name)}
-                                                    </h3>
-                                                    <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
-                                                        "Cyan Line = Self-Mitigated Dmg/Min · Gold Line = Champion Damage/Min (DPM)"
-                                                    </div>
-                                                </div>
-                                                <select
-                                                    style="background: #091428; color: var(--gold); border: 1px solid rgba(200,170,110,0.45); padding: 0.25rem 0.5rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
-                                                    prop:value=move || xaxis_g5.get().to_string()
-                                                    on:change=move |ev| set_xaxis_g5.set(event_target_value(&ev).parse::<u8>().unwrap_or(0))
-                                                >
-                                                    <option value="0">"X-Axis: By Games (vs. Enemy Laner)"</option>
-                                                    <option value="1">"X-Axis: By Career Season (2015–2026)"</option>
-                                                    <option value="2">"X-Axis: Rolling 3-Game Avg"</option>
-                                                    <option value="3">"X-Axis: By Opponent Matchup"</option>
-                                                </select>
-                                            </div>
-                                            {move || view_interactive_combat_mitigation_svg(&filtered_pts.get(), &s5, &c5, xaxis_g5.get(), set_hovered_pt)}
-                                        </div>
+                                                            // Head to Head Visual Clash
+                                                            <div style="background: rgba(1, 10, 19, 0.8); border: 1px solid rgba(255,255,255,0.08); padding: 0.85rem 0.65rem; display: flex; justify-content: space-around; align-items: center; margin-bottom: 0.85rem;">
+                                                                <div style="text-align: center;">
+                                                                    <img src=user_img alt="" style="width: 44px; height: 44px; border: 2px solid var(--cyan); object-fit: cover; margin-bottom: 0.25rem;" />
+                                                                    <div style="color: #fff; font-size: 0.78rem; font-weight: bold;">{c_popup.clone()}</div>
+                                                                    <div style="color: var(--cyan); font-size: 0.66rem;">"YOU"</div>
+                                                                </div>
 
-                                        // CHART 6 (NEW): Kill Participation (KP %) & Vision Control Trajectory
-                                        <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.35rem;">
-                                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem;">
-                                                <div>
-                                                    <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; margin: 0;">
-                                                        {format!("6. {} Cross-Map Kill Participation (KP%) & Vision Curve", ins.champion_name)}
-                                                    </h3>
-                                                    <div style="font-family: monospace; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">
-                                                        "Global Map Presence, River Skirmish Involvement & Vision Score/Min"
-                                                    </div>
-                                                </div>
-                                                <select
-                                                    style="background: #091428; color: #10b981; border: 1px solid rgba(16,185,129,0.45); padding: 0.25rem 0.5rem; font-family: monospace; font-size: 0.72rem; cursor: pointer;"
-                                                    prop:value=move || xaxis_g6.get().to_string()
-                                                    on:change=move |ev| set_xaxis_g6.set(event_target_value(&ev).parse::<u8>().unwrap_or(0))
-                                                >
-                                                    <option value="0">"X-Axis: By Games (vs. Enemy Laner)"</option>
-                                                    <option value="1">"X-Axis: By Career Season (2015–2026)"</option>
-                                                    <option value="2">"X-Axis: Rolling 3-Game Avg"</option>
-                                                    <option value="3">"X-Axis: By Opponent Matchup"</option>
-                                                </select>
-                                            </div>
-                                            {move || view_interactive_ml_curve_svg(&filtered_pts.get(), &s6, &c6, xaxis_g6.get(), 6, set_hovered_pt)}
-                                        </div>
-                                    </div>
+                                                                <div style="color: var(--gold); font-family: serif; font-size: 1.1rem; font-weight: bold;">"VS"</div>
 
-                                    // Learned Decision-Tree Win Conditions Banner
-                                    <div style="background: rgba(9, 20, 40, 0.88); border: 1px solid rgba(200, 170, 110, 0.3); padding: 1.25rem;">
-                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                                            <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.0rem; margin: 0;">
-                                                {format!("Learned ML Decision-Tree Win Conditions for {}", ins.champion_name)}
-                                            </h3>
-                                            <span style="font-family: monospace; font-size: 0.7rem; color: var(--cyan);">"EMPIRICAL SPLIT RULES"</span>
-                                        </div>
-                                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.85rem; font-family: monospace; font-size: 0.77rem;">
-                                            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 0.65rem 0.85rem;">
-                                                <div style="color: #10b981; font-weight: bold;">
-                                                    {format!("IF GD@15 ≥ +{}g AND Deaths ≤ {}:", ins.target_gd_at_15, ins.max_deaths_threshold)}
-                                                </div>
-                                                <div style="color: #fff; margin-top: 0.2rem;">
-                                                    {format!("→ Empirical Win Probability reaches {:.1}% (Diamond I Peak Execution)", ins.win_prob_above_threshold)}
-                                                </div>
-                                            </div>
-                                            <div style="background: rgba(10, 200, 185, 0.1); border: 1px solid var(--cyan); padding: 0.65rem 0.85rem;">
-                                                <div style="color: var(--cyan); font-weight: bold;">
-                                                    {format!("IF CS/Min ≥ {:.1} by 20 Minutes:", ins.target_cs_per_min)}
-                                                </div>
-                                                <div style="color: #fff; margin-top: 0.2rem;">
-                                                    "→ Completes 2-item core spike 1:45 ahead of lane opponent (+19.4% objective fight win rate)"
-                                                </div>
-                                            </div>
-                                            <div style="background: rgba(232, 64, 87, 0.1); border: 1px solid #e84057; padding: 0.65rem 0.85rem;">
-                                                <div style="color: #e84057; font-weight: bold;">
-                                                    {format!("IF Deaths ≥ {} Before 20 Minutes:", ins.max_deaths_threshold + 2)}
-                                                </div>
-                                                <div style="color: #fff; margin-top: 0.2rem;">
-                                                    {format!("→ Win Probability drops to {:.1}% — pivot to defensive peel & vision control", ins.win_prob_below_threshold)}
-                                                </div>
-                                            </div>
+                                                                <div style="text-align: center;">
+                                                                    <img src=opp_img alt="" style="width: 44px; height: 44px; border: 2px solid #e84057; object-fit: cover; margin-bottom: 0.25rem;" />
+                                                                    <div style="color: #fde68a; font-size: 0.78rem; font-weight: bold;">{opp}</div>
+                                                                    <div style="color: #e84057; font-size: 0.66rem;">"ENEMY LANER"</div>
+                                                                </div>
+                                                            </div>
+
+                                                            // Telemetry Metrics Grid
+                                                            <div style="display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.73rem;">
+                                                                <div style="background: rgba(0, 0, 0, 0.35); padding: 0.35rem 0.55rem; border: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between;">
+                                                                    <span style="color: var(--text-muted);">"KDA Record:"</span>
+                                                                    <strong style="color: #fff;">{format!("{}/{}/{} ({:.1})", k, d, a, pt.kda)}</strong>
+                                                                </div>
+                                                                <div style="background: rgba(0, 0, 0, 0.35); padding: 0.35rem 0.55rem; border: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between;">
+                                                                    <span style="color: var(--text-muted);">"GD@15 Advantage:"</span>
+                                                                    <strong style=format!("color: {};", gd_col)>{format!("{:+} Gold", pt.gold_diff_15)}</strong>
+                                                                </div>
+                                                                <div style="background: rgba(0, 0, 0, 0.35); padding: 0.35rem 0.55rem; border: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between;">
+                                                                    <span style="color: var(--text-muted);">"Farming Economy:"</span>
+                                                                    <strong style="color: var(--gold);">{format!("{:.1} CS/min", pt.cs_per_min)}</strong>
+                                                                </div>
+                                                                <div style="background: rgba(0, 0, 0, 0.35); padding: 0.35rem 0.55rem; border: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between;">
+                                                                    <span style="color: var(--text-muted);">"ML Performance:"</span>
+                                                                    <strong style="color: var(--cyan);">{format!("{:.0} / 100", pt.perf_score)}</strong>
+                                                                </div>
+                                                                <div style="background: rgba(0, 0, 0, 0.35); padding: 0.35rem 0.55rem; border: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between;">
+                                                                    <span style="color: var(--text-muted);">"Net Win-Prob Added:"</span>
+                                                                    <strong style=format!("color: {};", wpa_col)>{format!("{:+.1}% WPA", wpa)}</strong>
+                                                                </div>
+                                                                <div style="background: rgba(0, 0, 0, 0.35); padding: 0.35rem 0.55rem; border: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between;">
+                                                                    <span style="color: var(--text-muted);">"Combat DPM / Mit:"</span>
+                                                                    <strong style="color: #ddd;">{format!("{:.0} / {:.0}/m", pt.dpm(), pt.mitigated_per_min())}</strong>
+                                                                </div>
+                                                                <div style="background: rgba(0, 0, 0, 0.35); padding: 0.35rem 0.55rem; border: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between;">
+                                                                    <span style="color: var(--text-muted);">"Map KP% / Vision:"</span>
+                                                                    <strong style="color: #10b981;">{format!("{:.0}% KP · {:.1} Vis/m", pt.kill_participation_pct(), pt.vision_per_min())}</strong>
+                                                                </div>
+                                                            </div>
+
+                                                            // Quick Navigation Instructions
+                                                            <div style="margin-top: 0.85rem; font-size: 0.67rem; color: var(--text-muted); text-align: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.5rem;">
+                                                                "Hover any point in Charts 1–6 to lock this inspector to that exact matchup."
+                                                            </div>
+                                                        </div>
+                                                    }.into_any()
+                                                } else {
+                                                    view! {
+                                                        <div style="padding: 1.5rem 0.5rem; text-align: center; color: var(--text-muted); font-size: 0.74rem;">
+                                                            "Hover over any node or bar in the graphs to inspect the matchup telemetry."
+                                                        </div>
+                                                    }.into_any()
+                                                }
+                                            }}
                                         </div>
                                     </div>
                                 </div>

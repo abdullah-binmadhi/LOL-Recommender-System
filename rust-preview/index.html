@@ -13,8 +13,8 @@
     <script src="supabase_bridge.js"></script>
     
 <script type="module">
-import init, * as bindings from '/LOL-Recommender-System/rust-preview/recommender-web-6297d0c1e91b7ee5.js';
-const wasm = await init({ module_or_path: '/LOL-Recommender-System/rust-preview/recommender-web-b1659fda5a7070_bg.wasm' });
+import init, * as bindings from '/LOL-Recommender-System/rust-preview/recommender-web-dd698661b8fb65ca.js';
+const wasm = await init({ module_or_path: '/LOL-Recommender-System/rust-preview/recommender-web-dbc4518c59e2b2a9_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -23,7 +23,7 @@ window.wasmBindings = bindings;
 dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
 
 </script>
-  <link rel="modulepreload" href="/LOL-Recommender-System/rust-preview/recommender-web-6297d0c1e91b7ee5.js" crossorigin="anonymous" integrity="sha384-v6FKG1rb6NFOG90M7yYWHLEXyJswIO7zeAwFFEMGJ2LyPaSf+krEtx5yDjcHs8Ng"><link rel="preload" href="/LOL-Recommender-System/rust-preview/recommender-web-b1659fda5a7070_bg.wasm" crossorigin="anonymous" integrity="sha384-FRtoidje1SNZtJga2VOxaKA+X88Dj34Tx+e8cltP5L+uXB9hxVA9vxvG77X9xCo9" as="fetch" type="application/wasm"></head>
+  <link rel="modulepreload" href="/LOL-Recommender-System/rust-preview/recommender-web-dd698661b8fb65ca.js" crossorigin="anonymous" integrity="sha384-Ya5Wd62lzQjH9Giehqt01JMVBp2JwVQsimrto/ugZJZIRf/7xKaTrZcuQFouTeHY"><link rel="preload" href="/LOL-Recommender-System/rust-preview/recommender-web-dbc4518c59e2b2a9_bg.wasm" crossorigin="anonymous" integrity="sha384-way5Qo5gyWzudb+SmKOyqEJu+DoU95uNb5lodFVFgrqa4BD3m0XmMCrkMjTd0lQA" as="fetch" type="application/wasm"></head>
   <body>
     <div id="app"></div>
   </body>
