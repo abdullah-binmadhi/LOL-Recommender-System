@@ -223,3 +223,47 @@ fn test_for_player_shentrick_middle_east() {
     assert!(!shen_ml.lifetime_matchup_matrix().is_empty());
     assert!(!shen_ml.lifetime_core_builds().is_empty());
 }
+
+#[test]
+fn test_role_authentic_matchups_and_builds() {
+    use recommender_core::player_analytics::canonical_role_and_archetype;
+
+    let (braum_role, braum_arch) = canonical_role_and_archetype("Braum");
+    assert_eq!(braum_role, "Support");
+    assert!(braum_arch.contains("Vanguard"));
+
+    let (ornn_role, _) = canonical_role_and_archetype("Ornn");
+    assert_eq!(ornn_role, "Top");
+
+    let report = PlayerAnalyticsReport::for_player("SHENTRICK", "SHENTRICK#SHEN", "ME", None);
+    let braum_ml = report.champion_ml_insight_for("Braum");
+    assert_eq!(braum_ml.champion_name, "Braum");
+
+    // Match point opponent for Braum must be a Support, NOT a Top laner
+    let sample_pt = &braum_ml.match_progression[0];
+    let opp = sample_pt.opponent_champion("Braum");
+    let (opp_role, _) = canonical_role_and_archetype(&opp);
+    assert_eq!(opp_role, "Support", "Expected Braum opponent to be a Support champion, got {}", opp);
+
+    // Braum lifetime matchups must be Support champions (Nautilus, Leona, Blitzcrank, etc.)
+    let braum_matchups = braum_ml.lifetime_matchup_matrix();
+    assert!(!braum_matchups.is_empty());
+    let opp_names: Vec<&str> = braum_matchups.iter().map(|m| m.opponent_champion.as_str()).collect();
+    assert!(opp_names.contains(&"Nautilus"));
+    assert!(opp_names.contains(&"Blitzcrank"));
+    assert!(!opp_names.contains(&"Fiora"), "Braum should not face Fiora in bot lane matchups");
+
+    // Braum builds must contain support tank items (Locket, Knight's Vow, etc.), never AP mage items
+    let braum_builds = braum_ml.lifetime_core_builds();
+    assert!(!braum_builds.is_empty());
+    let all_items: Vec<&str> = braum_builds.iter().flat_map(|b| b.core_items.iter().map(|s| s.as_str())).collect();
+    assert!(all_items.contains(&"Locket of the Iron Solari") || all_items.contains(&"Knight's Vow"));
+    assert!(!all_items.contains(&"Rabadon's Deathcap"));
+    assert!(!all_items.contains(&"Malignance / Luden's"));
+
+    // Ornn builds must be tank/forge items, never bruiser items like Titanic Hydra as default
+    let ornn_ml = report.champion_ml_insight_for("Ornn");
+    let ornn_builds = ornn_ml.lifetime_core_builds();
+    let ornn_items: Vec<&str> = ornn_builds.iter().flat_map(|b| b.core_items.iter().map(|s| s.as_str())).collect();
+    assert!(ornn_items.contains(&"Sunfire Aegis") || ornn_items.contains(&"Jak'Sho, The Protean"));
+}

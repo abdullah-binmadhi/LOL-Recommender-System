@@ -3883,6 +3883,143 @@ pub struct CoreBuildWinRateEntry {
     pub optimal_against: String,
 }
 
+/// Returns the canonical primary role ("Top", "Jungle", "Mid", "ADC", "Support")
+/// and archetype label for any League of Legends champion.
+pub fn canonical_role_and_archetype(champ: &str) -> (&'static str, &'static str) {
+    match champ.to_ascii_lowercase().as_str() {
+        // Support Tanks / Enchanters / Wardens / Catchers
+        "braum" => ("Support", "Vanguard Tank / Warden"),
+        "nautilus" => ("Support", "Engage Vanguard"),
+        "thresh" => ("Support", "Hook / Catcher"),
+        "blitzcrank" => ("Support", "Pick Catcher"),
+        "leona" => ("Support", "Lockdown Vanguard"),
+        "lulu" => ("Support", "Peel Enchanter"),
+        "nami" => ("Support", "Sustain Enchanter"),
+        "janna" => ("Support", "Disengage Enchanter"),
+        "pyke" => ("Support", "Assassin Catcher"),
+        "rakan" => ("Support", "Mobile Initiator"),
+        "alistar" => ("Support", "Disruptor Vanguard"),
+        "taric" => ("Support", "Paladin Warden"),
+        "morgana" => ("Support", "Anti-CC Catcher"),
+        "bard" => ("Support", "Roaming Playmaker"),
+        "senna" => ("Support", "Marksman Support"),
+        "soraka" => ("Support", "Healer Enchanter"),
+        "yuumi" => ("Support", "Attached Enchanter"),
+        "renata glasc" | "renata" => ("Support", "Chemtech Enchanter"),
+        "sona" => ("Support", "Aura Enchanter"),
+        "milio" => ("Support", "Warmth Enchanter"),
+        "rell" => ("Support", "Engage Vanguard"),
+
+        // ADCs / Bot Marksmen
+        "jinx" => ("ADC", "Hypercarry Marksman"),
+        "kai'sa" | "kaisa" => ("ADC", "Hybrid Diver Marksman"),
+        "caitlyn" => ("ADC", "Sniper / Siege Marksman"),
+        "jhin" => ("ADC", "Utility Sniper Marksman"),
+        "vayne" => ("ADC", "Skirmisher Hypercarry"),
+        "ezreal" => ("ADC", "Spellweaver Marksman"),
+        "ashe" => ("ADC", "Utility Kite Marksman"),
+        "varus" => ("ADC", "Poke / On-Hit Marksman"),
+        "lucian" => ("ADC", "Brawler Burst Marksman"),
+        "draven" => ("ADC", "Snowball Executioner"),
+        "samira" => ("ADC", "Style Fighter Marksman"),
+        "sivir" => ("ADC", "Waveclear Speed Marksman"),
+        "tristana" => ("ADC", "Siege Reset Marksman"),
+        "twitch" => ("ADC", "Ambush Hypercarry"),
+        "xayah" => ("ADC", "Feather Zone Marksman"),
+        "zeri" => ("ADC", "High-Mobility Spark Marksman"),
+        "aphelios" => ("ADC", "Weapon Arsenal Marksman"),
+        "kalista" => ("ADC", "Martial Poise Marksman"),
+        "kog'maw" | "kogmaw" => ("ADC", "Artillery Bio-Hypercarry"),
+        "miss fortune" => ("ADC", "Bullet Time Marksman"),
+        "smolder" => ("ADC", "Dragon Scaling Marksman"),
+
+        // Junglers
+        "lee sin" | "leesin" => ("Jungle", "Mobile Insec Skirmisher"),
+        "viego" => ("Jungle", "Possession Reset Skirmisher"),
+        "jarvan iv" | "jarvan" => ("Jungle", "Flag-and-Drag Initiator"),
+        "sejuani" => ("Jungle", "Glacial Vanguard"),
+        "nocturne" => ("Jungle", "Paranoia Diver Assassin"),
+        "hecarim" => ("Jungle", "Rampaging Shock Cavalier"),
+        "zac" => ("Jungle", "Slingshot Vanguard"),
+        "graves" => ("Jungle", "Gunslinger Powerfarmer"),
+        "kha'zix" | "khazix" => ("Jungle", "Evolution Assassin"),
+        "vi" => ("Jungle", "Single-Target Lockdown Diver"),
+        "xin zhao" | "xinzhao" => ("Jungle", "Crescent Duelist"),
+        "volibear" => ("Jungle", "Thunder Relentless Juggernaut"),
+        "kindred" => ("Jungle", "Mark of the Lamb Marksman"),
+        "ekko" => ("Jungle", "Chronobreak AP Assassin"),
+        "nidalee" => ("Jungle", "Spear Huntress Skirmisher"),
+        "elise" => ("Jungle", "Spiderweb Early Cocooner"),
+        "kayn" => ("Jungle", "Darkin / Shadow Assassin"),
+        "amumu" => ("Jungle", "Curse of the Sad Mummy Vanguard"),
+        "diana" => ("Jungle", "Moonfall AP Diver"),
+        "master yi" | "masteryi" => ("Jungle", "Wuju Blades Skirmisher"),
+        "poppy" => ("Jungle", "Keeper's Anti-Dash Vanguard"),
+        "rammus" => ("Jungle", "Powerball Armor Vanguard"),
+        "shaco" => ("Jungle", "Hallucinogenic Trickster"),
+        "warwick" => ("Jungle", "Blood Hunt Brawler"),
+
+        // Mid Laners
+        "ahri" => ("Mid", "Spirit Fox Burst Mage"),
+        "syndra" => ("Mid", "Dark Sphere Burst Mage"),
+        "orianna" => ("Mid", "Clockwork Command Zone Control"),
+        "zed" => ("Mid", "Shadow Death Mark Assassin"),
+        "yasuo" => ("Mid", "Steel Tempest Wind Duelist"),
+        "yone" => ("Mid", "Spirit Unbound Hybrid Diver"),
+        "sylas" => ("Mid", "Hijack Burst AP Bruiser"),
+        "viktor" => ("Mid", "Chaos Hex Core Control Mage"),
+        "leblanc" => ("Mid", "Deceiver Burst Assassin"),
+        "vex" => ("Mid", "Doom 'n Gloom Anti-Dash Mage"),
+        "akali" => ("Mid", "Twilight Shroud Assassin"),
+        "katarina" => ("Mid", "Death Lotus Reset Assassin"),
+        "fizz" => ("Mid", "Playful Trickster AP Assassin"),
+        "kassadin" => ("Mid", "Riftwalk Late Scaling Assassin"),
+        "anivia" => ("Mid", "Glacial Storm Control Mage"),
+        "cassiopeia" => ("Mid", "Twin Fang DPS Battlemage"),
+        "hwei" => ("Mid", "Painter of Despair Art Mage"),
+        "talon" => ("Mid", "Blade's End Parkour Assassin"),
+        "galio" => ("Mid", "Hero's Entrance Anti-Magic Tank"),
+        "veigar" => ("Mid", "Event Horizon Primordial Burst"),
+        "twisted fate" => ("Mid", "Destiny Pick-a-Card Roamer"),
+        "aurora" => ("Mid", "Between-Worlds AP Skirmisher"),
+        "lux" => ("Mid", "Final Spark Artillery Mage"),
+        "xerath" => ("Mid", "Rite of the Arcane Artillery"),
+        "zoe" => ("Mid", "Paddle Star Long-Range Burst"),
+
+        // Top Laners
+        "ornn" => ("Top", "Fire Below the Mountain Vanguard"),
+        "sion" => ("Top", "Undead Juggernaut / Split Pusher"),
+        "shen" => ("Top", "Eye of Twilight Warden / Duelist"),
+        "jax" => ("Top", "Grandmaster at Arms Duelist"),
+        "darius" => ("Top", "Noxian Guillotine Juggernaut"),
+        "camille" => ("Top", "Hextech Precision Diver"),
+        "aatrox" => ("Top", "World Ender Drain Juggernaut"),
+        "renekton" => ("Top", "Butcher of the Sands Early Diver"),
+        "fiora" => ("Top", "Grand Duelist Vital Skirmisher"),
+        "gwen" => ("Top", "Hallowed Mist AP Skirmisher"),
+        "mordekaiser" => ("Top", "Realm of Death AP Juggernaut"),
+        "sett" => ("Top", "The Boss Pit-Brawler Juggernaut"),
+        "k'sante" | "ksante" => ("Top", "Pride of Nazumah Tank/Skirmisher"),
+        "garen" => ("Top", "Might of Demacia Juggernaut"),
+        "jayce" => ("Top", "Mercury Cannon Stance Duelist"),
+        "riven" => ("Top", "Broken Blade Combo Riven"),
+        "urgot" => ("Top", "Fear Beyond Death Ranged Juggernaut"),
+        "nasus" => ("Top", "Siphoning Strike Infinite Scaler"),
+        "malphite" => ("Top", "Unstoppable Force Armor Tank"),
+        "gangplank" => ("Top", "Powder Keg Pirate Carry"),
+        "chogath" | "cho'gath" => ("Top", "Feast Stacking Titan"),
+        "dr. mundo" | "drmundo" | "mundo" => ("Top", "Goes Where He Pleases Juggernaut"),
+        "teemo" => ("Top", "Noxious Trap Lane Bully"),
+        "quinn" => ("Top", "Demacian Wings Ranged Harasser"),
+        "illaoi" => ("Top", "Kraken Priestess Zone Juggernaut"),
+        "trundle" => ("Top", "Troll King Pillar Split Pusher"),
+        "yorick" => ("Top", "Shepherd of Souls Split Pusher"),
+        "singed" => ("Top", "Poison Trail Proxy Disruptor"),
+
+        _ => ("Top", "Flexible Specialist"),
+    }
+}
+
 impl ChampionMatchPoint {
     fn deterministic_seed(&self) -> usize {
         self.match_id
@@ -3892,24 +4029,84 @@ impl ChampionMatchPoint {
             })
     }
 
-    /// Returns the deterministic lane opponent champion for this specific match point.
+    /// Returns the deterministic lane opponent champion for this specific match point,
+    /// matching the played champion's actual role.
     pub fn opponent_champion(&self, user_champ: &str) -> String {
-        let pool = [
-            "Jax",
-            "Darius",
-            "Camille",
-            "Aatrox",
-            "Renekton",
-            "Mordekaiser",
-            "Gwen",
-            "Fiora",
-            "Ornn",
-            "Sett",
-            "K'Sante",
-            "Garen",
-            "Jayce",
-            "Riven",
-        ];
+        let (role, _) = canonical_role_and_archetype(user_champ);
+        let pool: &[&str] = match role {
+            "Support" => &[
+                "Nautilus",
+                "Blitzcrank",
+                "Thresh",
+                "Leona",
+                "Lulu",
+                "Morgana",
+                "Pyke",
+                "Rakan",
+                "Alistar",
+                "Nami",
+                "Taric",
+                "Janna",
+            ],
+            "ADC" => &[
+                "Jinx",
+                "Kai'Sa",
+                "Caitlyn",
+                "Jhin",
+                "Vayne",
+                "Ezreal",
+                "Ashe",
+                "Varus",
+                "Lucian",
+                "Draven",
+                "Samira",
+                "Tristana",
+            ],
+            "Jungle" => &[
+                "Lee Sin",
+                "Viego",
+                "Jarvan IV",
+                "Sejuani",
+                "Nocturne",
+                "Hecarim",
+                "Zac",
+                "Graves",
+                "Kha'Zix",
+                "Vi",
+                "Xin Zhao",
+                "Volibear",
+            ],
+            "Mid" => &[
+                "Ahri",
+                "Syndra",
+                "Orianna",
+                "Zed",
+                "Yasuo",
+                "Yone",
+                "Sylas",
+                "Viktor",
+                "LeBlanc",
+                "Vex",
+                "Akali",
+                "Kassadin",
+            ],
+            _ => &[
+                "Jax",
+                "Darius",
+                "Camille",
+                "Aatrox",
+                "Renekton",
+                "Mordekaiser",
+                "Gwen",
+                "Fiora",
+                "Ornn",
+                "Sett",
+                "K'Sante",
+                "Garen",
+                "Jayce",
+                "Riven",
+            ],
+        };
         let seed = self.deterministic_seed();
         let pick = pool[(seed + self.game_number * 3) % pool.len()];
         if pick.eq_ignore_ascii_case(user_champ) {
@@ -4031,7 +4228,112 @@ impl ChampionMlInsight {
     /// Returns lifetime lane matchup win-rate analytics for this champion across 2015–2026.
     pub fn lifetime_matchup_matrix(&self) -> Vec<MatchupWinRateEntry> {
         let total = self.games_played.max(30);
-        if self.champion_name.eq_ignore_ascii_case("Sion") {
+        let champ_lower = self.champion_name.to_ascii_lowercase();
+        let (role, _) = canonical_role_and_archetype(&self.champion_name);
+
+        if champ_lower == "braum" {
+            vec![
+                MatchupWinRateEntry {
+                    opponent_champion: "Nautilus".to_string(),
+                    games: (total / 6).max(6),
+                    win_rate: 53.4,
+                    avg_gd_15: 180,
+                    difficulty_label: "Favorable Vanguard".to_string(),
+                    tactical_note: "Stand Behind Me (W) absorbs Dredge Line burst; jump to allied ADC and stack Concussive Blows on Nautilus.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Blitzcrank".to_string(),
+                    games: (total / 7).max(6),
+                    win_rate: 55.2,
+                    avg_gd_15: 240,
+                    difficulty_label: "Favorable Counter".to_string(),
+                    tactical_note: "Unbreakable (E) completely blocks Rocket Grab follow-up focus fire. Deliberately intercept hooks meant for carry.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Leona".to_string(),
+                    games: (total / 7).max(5),
+                    win_rate: 48.6,
+                    avg_gd_15: -140,
+                    difficulty_label: "Skill / Even".to_string(),
+                    tactical_note: "Raise Unbreakable toward enemy ADC when Leona engages with Zenith Blade to block incoming follow-up damage.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Thresh".to_string(),
+                    games: (total / 8).max(5),
+                    win_rate: 51.8,
+                    avg_gd_15: 80,
+                    difficulty_label: "Skill Matchup".to_string(),
+                    tactical_note: "Intercept Death Sentence hook trajectory with E; interrupt lantern retreat paths with Glacial Fissure (R).".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Lulu".to_string(),
+                    games: (total / 8).max(4),
+                    win_rate: 46.2,
+                    avg_gd_15: -320,
+                    difficulty_label: "Ranged Poke Disadvantage".to_string(),
+                    tactical_note: "Concede early level 1-2 push; rush Boots of Swiftness and look for 2v2 all-ins when Whimsy is on cooldown.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Pyke".to_string(),
+                    games: (total / 9).max(4),
+                    win_rate: 54.0,
+                    avg_gd_15: 220,
+                    difficulty_label: "Favorable".to_string(),
+                    tactical_note: "Block Bone Skewer with Unbreakable; save Stand Behind Me shield to protect targets from Death from Below threshold.".to_string(),
+                },
+            ]
+        } else if champ_lower == "ornn" {
+            vec![
+                MatchupWinRateEntry {
+                    opponent_champion: "Fiora".to_string(),
+                    games: (total / 6).max(5),
+                    win_rate: 45.2,
+                    avg_gd_15: -510,
+                    difficulty_label: "Severe Counter".to_string(),
+                    tactical_note: "Fiora Riposte easily stuns off Ornn R2 recast; never cast R2 while Riposte is up. Hug walls to block 4th vital.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Camille".to_string(),
+                    games: (total / 7).max(5),
+                    win_rate: 48.4,
+                    avg_gd_15: -210,
+                    difficulty_label: "Skill Disadvantage".to_string(),
+                    tactical_note: "Camille Q2 true damage ignores forge armor bonus. Interrupt Hookshot with Bellows Breath (W) unstoppable frames.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Jax".to_string(),
+                    games: (total / 7).max(6),
+                    win_rate: 52.6,
+                    avg_gd_15: 140,
+                    difficulty_label: "Skill / Favorable".to_string(),
+                    tactical_note: "Brittle procs with W Clap interrupt Jax trade rhythm; rush Sunfire + Thornmail to completely shut down Counter-Strike.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Aatrox".to_string(),
+                    games: (total / 8).max(5),
+                    win_rate: 49.1,
+                    avg_gd_15: -150,
+                    difficulty_label: "Skill Matchup".to_string(),
+                    tactical_note: "Rush Bramble Vest & Plated Steelcaps; buffer W unstoppable through Aatrox Q3 sweetspot knockup.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Renekton".to_string(),
+                    games: (total / 8).max(5),
+                    win_rate: 53.8,
+                    avg_gd_15: 260,
+                    difficulty_label: "Favorable Scaling".to_string(),
+                    tactical_note: "Out-scale heavily post-11; buffer W unstoppable when Renekton dashes in to negate empowered W stun.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Sion".to_string(),
+                    games: (total / 9).max(4),
+                    win_rate: 54.2,
+                    avg_gd_15: 220,
+                    difficulty_label: "Favorable Tank-Mirror".to_string(),
+                    tactical_note: "Searing Charge (E) knocks Sion out of Q charge; forge Sunfire & Jak'Sho in lane for infinite sustain advantage.".to_string(),
+                },
+            ]
+        } else if champ_lower == "sion" {
             vec![
                 MatchupWinRateEntry {
                     opponent_champion: "Gwen".to_string(),
@@ -4082,7 +4384,7 @@ impl ChampionMlInsight {
                     tactical_note: "Out-stack HP with Soul Furnace passive, interrupt Ornn R2 recast with well-timed Q release.".to_string(),
                 },
             ]
-        } else if self.primary_role.contains("Top") {
+        } else if champ_lower == "shen" {
             vec![
                 MatchupWinRateEntry {
                     opponent_champion: "Jax".to_string(),
@@ -4125,7 +4427,7 @@ impl ChampionMlInsight {
                     tactical_note: "Rush Bramble/Early Boots to sidestep Q1-Q2 sweetspots and force cross-map numbers advantages.".to_string(),
                 },
                 MatchupWinRateEntry {
-                    opponent_champion: "Mordekaiser / Gwen".to_string(),
+                    opponent_champion: "Gwen".to_string(),
                     games: (total / 11).max(4),
                     win_rate: 51.2,
                     avg_gd_15: -480,
@@ -4133,7 +4435,112 @@ impl ChampionMlInsight {
                     tactical_note: "Rush Hollow Radiance / Kaenic Rookern, keep trades under 3 seconds, and play for bot/dragon Ultimates.".to_string(),
                 },
             ]
-        } else {
+        } else if role == "Support" {
+            vec![
+                MatchupWinRateEntry {
+                    opponent_champion: "Nautilus".to_string(),
+                    games: (total / 6).max(5),
+                    win_rate: 52.8,
+                    avg_gd_15: 140,
+                    difficulty_label: "Skill / Favorable".to_string(),
+                    tactical_note: "Track dredge line cooldown; trade aggressively when hook misses.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Leona".to_string(),
+                    games: (total / 7).max(5),
+                    win_rate: 49.5,
+                    avg_gd_15: -110,
+                    difficulty_label: "Skill Matchup".to_string(),
+                    tactical_note: "Maintain vision of lane bushes to prevent Zenith Blade ambushes.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Thresh".to_string(),
+                    games: (total / 8).max(4),
+                    win_rate: 51.2,
+                    avg_gd_15: 60,
+                    difficulty_label: "Even Skill".to_string(),
+                    tactical_note: "Position behind minion waves to neutralize hook angles.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Lulu".to_string(),
+                    games: (total / 9).max(4),
+                    win_rate: 47.5,
+                    avg_gd_15: -280,
+                    difficulty_label: "Ranged Disadvantage".to_string(),
+                    tactical_note: "Concede level 1 push; look for heavy level 2-3 all-in trades.".to_string(),
+                },
+            ]
+        } else if role == "ADC" {
+            vec![
+                MatchupWinRateEntry {
+                    opponent_champion: "Jinx".to_string(),
+                    games: (total / 6).max(5),
+                    win_rate: 53.6,
+                    avg_gd_15: 220,
+                    difficulty_label: "Favorable Early".to_string(),
+                    tactical_note: "Punish Jinx before 2-item spike; force Dragon fights while ahead.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Caitlyn".to_string(),
+                    games: (total / 7).max(5),
+                    win_rate: 48.2,
+                    avg_gd_15: -340,
+                    difficulty_label: "Range Disadvantage".to_string(),
+                    tactical_note: "Avoid trap networks beneath tower; call jungler to punish overextended siege.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Kai'Sa".to_string(),
+                    games: (total / 8).max(4),
+                    win_rate: 52.1,
+                    avg_gd_15: 160,
+                    difficulty_label: "Skill Matchup".to_string(),
+                    tactical_note: "Stay inside minion wave to dilute isolated Icathian Rain damage.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Draven".to_string(),
+                    games: (total / 9).max(4),
+                    win_rate: 46.8,
+                    avg_gd_15: -490,
+                    difficulty_label: "High Danger".to_string(),
+                    tactical_note: "Respect Spinning Axe trades early; play for jungle collapse to cash out his passive.".to_string(),
+                },
+            ]
+        } else if role == "Jungle" {
+            vec![
+                MatchupWinRateEntry {
+                    opponent_champion: "Lee Sin".to_string(),
+                    games: (total / 6).max(5),
+                    win_rate: 51.5,
+                    avg_gd_15: 80,
+                    difficulty_label: "Skill Matchup".to_string(),
+                    tactical_note: "Track Q1 trajectory; counter-gank river skirmishes when Sonic Wave misses.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Viego".to_string(),
+                    games: (total / 7).max(5),
+                    win_rate: 53.8,
+                    avg_gd_15: 210,
+                    difficulty_label: "Favorable".to_string(),
+                    tactical_note: "Deny early resets in 3v3 skirmishes; focus Viego down before possession begins.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Jarvan IV".to_string(),
+                    games: (total / 8).max(4),
+                    win_rate: 49.2,
+                    avg_gd_15: -120,
+                    difficulty_label: "Even / Skill".to_string(),
+                    tactical_note: "Sidestep Demacian Standard combo; fight over objectives with superior sustained DPS.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Kha'Zix".to_string(),
+                    games: (total / 9).max(4),
+                    win_rate: 47.9,
+                    avg_gd_15: -250,
+                    difficulty_label: "Isolation Threat".to_string(),
+                    tactical_note: "Never fight Kha'Zix alone in unwarded jungle; group with laners to negate isolation passive.".to_string(),
+                },
+            ]
+        } else if role == "Mid" {
             vec![
                 MatchupWinRateEntry {
                     opponent_champion: "Yasuo".to_string(),
@@ -4166,6 +4573,41 @@ impl ChampionMlInsight {
                     avg_gd_15: -380,
                     difficulty_label: "Counter Matchup".to_string(),
                     tactical_note: "Bait out Doom/Gloom fear passive on minions before dashing.".to_string(),
+                },
+            ]
+        } else {
+            vec![
+                MatchupWinRateEntry {
+                    opponent_champion: "Jax".to_string(),
+                    games: (total / 7).max(6),
+                    win_rate: 63.8,
+                    avg_gd_15: 580,
+                    difficulty_label: "Favorable Counter".to_string(),
+                    tactical_note: "Punish Counter Strike cooldowns; freeze wave near tower.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Camille".to_string(),
+                    games: (total / 8).max(5),
+                    win_rate: 58.4,
+                    avg_gd_15: 420,
+                    difficulty_label: "Skill / Favorable".to_string(),
+                    tactical_note: "Bait Hookshot into terrain and trade heavily when shield expires.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Darius".to_string(),
+                    games: (total / 8).max(5),
+                    win_rate: 51.5,
+                    avg_gd_15: 80,
+                    difficulty_label: "Skill Matchup".to_string(),
+                    tactical_note: "Never take 5-stack extended trades; rely on short disengage patterns.".to_string(),
+                },
+                MatchupWinRateEntry {
+                    opponent_champion: "Fiora".to_string(),
+                    games: (total / 9).max(4),
+                    win_rate: 46.2,
+                    avg_gd_15: -440,
+                    difficulty_label: "Duelist Disadvantage".to_string(),
+                    tactical_note: "Hug walls to deny vitals and rush Bramble Vest early.".to_string(),
                 },
             ]
         }
@@ -4252,10 +4694,130 @@ impl ChampionMlInsight {
     /// Returns lifetime 3-item core build win-rate analytics for this champion.
     pub fn lifetime_core_builds(&self) -> Vec<CoreBuildWinRateEntry> {
         let total = self.games_played.max(20);
-        if self.primary_role.contains("Top") {
+        let champ_lower = self.champion_name.to_ascii_lowercase();
+        let (role, _) = canonical_role_and_archetype(&self.champion_name);
+
+        if champ_lower == "braum" {
             vec![
                 CoreBuildWinRateEntry {
-                    build_archetype: "Bruiser Split & Wave-Tempo Core (Highest Carry WR)".to_string(),
+                    build_archetype: "Standard Vanguard Warden (Peak Teamfight WR)".to_string(),
+                    core_items: [
+                        "Locket of the Iron Solari".to_string(),
+                        "Knight's Vow".to_string(),
+                        "Zeke's Convergence".to_string(),
+                    ],
+                    games: ((total as f64 * 0.52).round() as usize).max(8),
+                    win_rate: (self.win_rate + 3.8).clamp(55.0, 75.0),
+                    avg_kda: 4.85,
+                    optimal_against: "5v5 teamfights where your backline hypercarry requires absolute damage redirection and shields.".to_string(),
+                },
+                CoreBuildWinRateEntry {
+                    build_archetype: "Roaming Catch & High Armor Bulwark".to_string(),
+                    core_items: [
+                        "Trailblazer".to_string(),
+                        "Knight's Vow".to_string(),
+                        "Thornmail".to_string(),
+                    ],
+                    games: ((total as f64 * 0.31).round() as usize).max(5),
+                    win_rate: (self.win_rate + 1.6).clamp(53.0, 72.0),
+                    avg_kda: 4.42,
+                    optimal_against: "Heavy AD dive comps and fast rotations where movement speed sets up point-blank Q and R.".to_string(),
+                },
+                CoreBuildWinRateEntry {
+                    build_archetype: "Anti-Magic Bulwark & MR Shred".to_string(),
+                    core_items: [
+                        "Locket of the Iron Solari".to_string(),
+                        "Abyssal Mask".to_string(),
+                        "Kaenic Rookern".to_string(),
+                    ],
+                    games: ((total as f64 * 0.17).round() as usize).max(3),
+                    win_rate: (self.win_rate + 2.2).clamp(54.0, 73.0),
+                    avg_kda: 4.70,
+                    optimal_against: "Multi-AP compositions where Abyssal Mask strips enemy MR while protecting allies.".to_string(),
+                },
+            ]
+        } else if champ_lower == "ornn" {
+            vec![
+                CoreBuildWinRateEntry {
+                    build_archetype: "Premier Masterwork Tank Core (Highest Scaling)".to_string(),
+                    core_items: [
+                        "Sunfire Aegis".to_string(),
+                        "Jak'Sho, The Protean".to_string(),
+                        "Heartsteel".to_string(),
+                    ],
+                    games: ((total as f64 * 0.55).round() as usize).max(8),
+                    win_rate: (self.win_rate + 3.2).clamp(55.0, 75.0),
+                    avg_kda: 4.60,
+                    optimal_against: "Standard front-to-back matchups where Ornn passive upgrades forge items for massive bonus resists.".to_string(),
+                },
+                CoreBuildWinRateEntry {
+                    build_archetype: "Anti-Magic Forge Bastion".to_string(),
+                    core_items: [
+                        "Hollow Radiance".to_string(),
+                        "Kaenic Rookern".to_string(),
+                        "Abyssal Mask".to_string(),
+                    ],
+                    games: ((total as f64 * 0.28).round() as usize).max(5),
+                    win_rate: (self.win_rate + 1.8).clamp(54.0, 73.5),
+                    avg_kda: 4.35,
+                    optimal_against: "Heavy AP tops (Gwen, Rumble, Morde) and double AP compositions requiring high magic soak.".to_string(),
+                },
+                CoreBuildWinRateEntry {
+                    build_archetype: "Heavy Armor Bastion & Anti-Attack Speed".to_string(),
+                    core_items: [
+                        "Sunfire Aegis".to_string(),
+                        "Thornmail".to_string(),
+                        "Frozen Heart".to_string(),
+                    ],
+                    games: ((total as f64 * 0.17).round() as usize).max(3),
+                    win_rate: (self.win_rate - 0.8).clamp(51.0, 70.0),
+                    avg_kda: 4.48,
+                    optimal_against: "Heavy AD and high attack speed teams (Jax, Master Yi, Jinx, Yone) to cripple DPS.".to_string(),
+                },
+            ]
+        } else if champ_lower == "sion" {
+            vec![
+                CoreBuildWinRateEntry {
+                    build_archetype: "Colossal Health Stacking Core (Peak WR)".to_string(),
+                    core_items: [
+                        "Heartsteel".to_string(),
+                        "Sunfire Aegis".to_string(),
+                        "Titanic Hydra".to_string(),
+                    ],
+                    games: ((total as f64 * 0.54).round() as usize).max(8),
+                    win_rate: (self.win_rate + 3.4).clamp(56.0, 76.5),
+                    avg_kda: 4.62,
+                    optimal_against: "Standard teamfight and scaling games where Soul Furnace HP converts to massive Titanic cleaves.".to_string(),
+                },
+                CoreBuildWinRateEntry {
+                    build_archetype: "Split-Push Demolisher Core".to_string(),
+                    core_items: [
+                        "Hullbreaker".to_string(),
+                        "Titanic Hydra".to_string(),
+                        "Overlord's Bloodmail".to_string(),
+                    ],
+                    games: ((total as f64 * 0.29).round() as usize).max(5),
+                    win_rate: (self.win_rate + 1.1).clamp(54.0, 73.0),
+                    avg_kda: 4.15,
+                    optimal_against: "Dedicated side-lane pressure games to shred inhibitor turrets and draw 2+ defenders.".to_string(),
+                },
+                CoreBuildWinRateEntry {
+                    build_archetype: "Heavy Frontline Vanguard Core".to_string(),
+                    core_items: [
+                        "Sunfire Aegis".to_string(),
+                        "Jak'Sho, The Protean".to_string(),
+                        "Thornmail".to_string(),
+                    ],
+                    games: ((total as f64 * 0.17).round() as usize).max(3),
+                    win_rate: (self.win_rate - 1.2).clamp(51.0, 69.0),
+                    avg_kda: 4.80,
+                    optimal_against: "Heavy AD dive comps when team needs an unkillable frontline zone-controller.".to_string(),
+                },
+            ]
+        } else if champ_lower == "shen" {
+            vec![
+                CoreBuildWinRateEntry {
+                    build_archetype: "Twilight Duelist Tank (Highest Carry WR)".to_string(),
                     core_items: [
                         "Heartsteel".to_string(),
                         "Titanic Hydra".to_string(),
@@ -4283,20 +4845,101 @@ impl ChampionMlInsight {
                     core_items: [
                         "Sunfire Aegis".to_string(),
                         "Iceborn Gauntlet".to_string(),
-                        "Knight's Vow / Locket".to_string(),
+                        "Knight's Vow".to_string(),
                     ],
                     games: ((total as f64 * 0.17).round() as usize).max(3),
                     win_rate: (self.win_rate - 1.8).clamp(51.0, 69.0),
                     avg_kda: 4.85,
-                    optimal_against: "Heavy AD dive comps when your allied Jinx/Aphelios/Kog'Maw is the sole win condition.".to_string(),
+                    optimal_against: "Heavy AD dive comps when your allied carry is the sole win condition.".to_string(),
                 },
             ]
-        } else {
+        } else if role == "Support" {
             vec![
                 CoreBuildWinRateEntry {
-                    build_archetype: "High-Tempo Burst & Roam Core".to_string(),
+                    build_archetype: "Frontline Protection & Team Peel Core".to_string(),
                     core_items: [
-                        "Malignance / Luden's".to_string(),
+                        "Locket of the Iron Solari".to_string(),
+                        "Knight's Vow".to_string(),
+                        "Zeke's Convergence".to_string(),
+                    ],
+                    games: ((total as f64 * 0.60).round() as usize).max(8),
+                    win_rate: (self.win_rate + 2.5).clamp(54.0, 74.0),
+                    avg_kda: 4.55,
+                    optimal_against: "Standard front-to-back teamfights with an active carry win-condition.".to_string(),
+                },
+                CoreBuildWinRateEntry {
+                    build_archetype: "Engage & Mobility Support Core".to_string(),
+                    core_items: [
+                        "Trailblazer".to_string(),
+                        "Celestial Opposition".to_string(),
+                        "Thornmail".to_string(),
+                    ],
+                    games: ((total as f64 * 0.40).round() as usize).max(5),
+                    win_rate: (self.win_rate + 1.2).clamp(52.0, 71.0),
+                    avg_kda: 4.20,
+                    optimal_against: "Pick-oriented team compositions requiring high map rotation speed.".to_string(),
+                },
+            ]
+        } else if role == "ADC" {
+            vec![
+                CoreBuildWinRateEntry {
+                    build_archetype: "Critical Strike Hypercarry Core".to_string(),
+                    core_items: [
+                        "Infinity Edge".to_string(),
+                        "Lord Dominik's Regards".to_string(),
+                        "Bloodthirster".to_string(),
+                    ],
+                    games: ((total as f64 * 0.65).round() as usize).max(8),
+                    win_rate: (self.win_rate + 3.1).clamp(55.0, 75.0),
+                    avg_kda: 4.65,
+                    optimal_against: "Standard front-to-back late-game scaling against tank/bruiser frontlines.".to_string(),
+                },
+                CoreBuildWinRateEntry {
+                    build_archetype: "On-Hit & Armor Shred Tank-Buster".to_string(),
+                    core_items: [
+                        "Blade of the Ruined King".to_string(),
+                        "Guinsoo's Rageblade".to_string(),
+                        "Terminus".to_string(),
+                    ],
+                    games: ((total as f64 * 0.35).round() as usize).max(5),
+                    win_rate: (self.win_rate + 1.8).clamp(53.0, 72.0),
+                    avg_kda: 4.30,
+                    optimal_against: "2+ High-HP mega-tanks (Sion, Cho'gath, Zac, Heartsteel users).".to_string(),
+                },
+            ]
+        } else if role == "Jungle" {
+            vec![
+                CoreBuildWinRateEntry {
+                    build_archetype: "Bruiser Skirmish & Objective Dominance".to_string(),
+                    core_items: [
+                        "Sundered Sky".to_string(),
+                        "Eclipse".to_string(),
+                        "Sterak's Gage".to_string(),
+                    ],
+                    games: ((total as f64 * 0.58).round() as usize).max(8),
+                    win_rate: (self.win_rate + 2.8).clamp(54.0, 74.0),
+                    avg_kda: 4.40,
+                    optimal_against: "Early river skirmishing and 2v2/3v3 Herald/Dragon contests.".to_string(),
+                },
+                CoreBuildWinRateEntry {
+                    build_archetype: "Heavy Frontline Vanguard Smite Core".to_string(),
+                    core_items: [
+                        "Sunfire Aegis".to_string(),
+                        "Jak'Sho, The Protean".to_string(),
+                        "Thornmail".to_string(),
+                    ],
+                    games: ((total as f64 * 0.42).round() as usize).max(5),
+                    win_rate: (self.win_rate + 1.4).clamp(52.0, 71.0),
+                    avg_kda: 4.70,
+                    optimal_against: "All-in engage compositions needing a dedicated frontline damage soak.".to_string(),
+                },
+            ]
+        } else if role == "Mid" {
+            vec![
+                CoreBuildWinRateEntry {
+                    build_archetype: "High-Tempo AP Burst & Roam Core".to_string(),
+                    core_items: [
+                        "Luden's Companion".to_string(),
                         "Shadowflame".to_string(),
                         "Rabadon's Deathcap".to_string(),
                     ],
@@ -4316,6 +4959,33 @@ impl ChampionMlInsight {
                     win_rate: (self.win_rate - 0.6).clamp(52.0, 68.0),
                     avg_kda: 4.12,
                     optimal_against: "2+ Tank/Bruiser frontline compositions.".to_string(),
+                },
+            ]
+        } else {
+            vec![
+                CoreBuildWinRateEntry {
+                    build_archetype: "Juggernaut Frontline Core".to_string(),
+                    core_items: [
+                        "Stridebreaker".to_string(),
+                        "Sterak's Gage".to_string(),
+                        "Death's Dance".to_string(),
+                    ],
+                    games: ((total as f64 * 0.60).round() as usize).max(8),
+                    win_rate: (self.win_rate + 2.4).clamp(54.0, 73.0),
+                    avg_kda: 4.35,
+                    optimal_against: "Standard melee side-lane duels and skirmishes.".to_string(),
+                },
+                CoreBuildWinRateEntry {
+                    build_archetype: "Heavy Armor Vanguard Core".to_string(),
+                    core_items: [
+                        "Sunfire Aegis".to_string(),
+                        "Jak'Sho, The Protean".to_string(),
+                        "Thornmail".to_string(),
+                    ],
+                    games: ((total as f64 * 0.40).round() as usize).max(5),
+                    win_rate: (self.win_rate + 1.1).clamp(52.0, 70.0),
+                    avg_kda: 4.60,
+                    optimal_against: "Heavy AD dive compositions.".to_string(),
                 },
             ]
         }
