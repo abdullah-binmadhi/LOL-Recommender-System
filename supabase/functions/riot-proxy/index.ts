@@ -14,6 +14,8 @@ interface RiotProxyRequest {
   region?: string; // "me", "euw", "sea", "na", "kr", etc.
   api_key?: string; // Optional user-supplied developer API key
   recommended_champions?: string[]; // Top recommended champions to check against
+  start?: number; // Pagination offset for "+ Reveal 10 More Games"
+  count?: number; // Number of matches to fetch per page (default 20)
 }
 
 function getRegionalCluster(reg: string): string {
@@ -258,7 +260,14 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { riot_id, region = "me", api_key, recommended_champions = [] } = (await req.json()) as RiotProxyRequest;
+    const {
+      riot_id,
+      region = "me",
+      api_key,
+      recommended_champions = [],
+      start = 0,
+      count = 20,
+    } = (await req.json()) as RiotProxyRequest;
 
     if (!riot_id || !riot_id.includes("#")) {
       return new Response(
@@ -296,9 +305,10 @@ serve(async (req: Request) => {
 
     const puuid = accountData.puuid;
 
-    // 2. Fetch Recent Match-V5 IDs
-    // For ME1/EUW, match-v5 runs on regional cluster (europe)
-    const matchesUrl = `https://${cluster}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?count=10`;
+    // 2. Fetch Recent Match-V5 IDs (supports OP.GG-style pagination via start & count)
+    const safeStart = Math.max(0, Number(start) || 0);
+    const safeCount = Math.min(25, Math.max(10, Number(count) || 20));
+    const matchesUrl = `https://${cluster}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=${safeStart}&count=${safeCount}`;
     const matchesRes = await fetch(matchesUrl, {
       headers: { "X-Riot-Token": riotApiKey },
     });
@@ -306,7 +316,7 @@ serve(async (req: Request) => {
     const adoptedMatches: any[] = [];
     if (matchesRes.ok) {
       const matchIds = (await matchesRes.json()) as string[];
-      for (const matchId of matchIds.slice(0, 10)) {
+      for (const matchId of matchIds.slice(0, safeCount)) {
         try {
           const mRes = await fetch(
             `https://${cluster}.api.riotgames.com/lol/match/v5/matches/${matchId}`,
@@ -367,15 +377,16 @@ serve(async (req: Request) => {
       }
     }
 
-    // 3. Query Top Champion Masteries
-    const masteryUrl = `https://${platform}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}/top?count=5`;
+    // 3. Query Full Lifetime Champion Masteries (from Day 1 debut to latest game)
+    const masteryUrl = `https://${platform}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}`;
     const masteryRes = await fetch(masteryUrl, {
       headers: { "X-Riot-Token": riotApiKey },
     });
 
     let topMasteries: any[] = [];
     if (masteryRes.ok) {
-      topMasteries = await masteryRes.json();
+      const allMasteries = await masteryRes.json();
+      topMasteries = Array.isArray(allMasteries) ? allMasteries.slice(0, 25) : [];
     }
 
     // Determine final matches and data source

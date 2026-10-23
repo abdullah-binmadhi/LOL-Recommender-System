@@ -167,4 +167,33 @@ fn test_for_player_shentrick_middle_east() {
         .expect("Shen ML tracker insight must exist");
     assert_eq!(shen_ml.match_progression.len(), 7);
     assert!(shen_ml.win_prob_above_threshold > shen_ml.win_prob_below_threshold);
+
+    // Verify Tab 1 Playstyle DNA Summary & Recurring Mistake Detector
+    let dna = report.playstyle_dna_summary();
+    assert!(!dna.archetype_title.is_empty());
+    assert_eq!(dna.recurring_mistakes.len(), 3);
+    assert_eq!(dna.phase_ratings.len(), 3);
+    assert!(dna.phase_ratings[0] > 50.0);
+
+    // Verify Tab 3 Extended 50-Match History & Single-Match 5v5 Deep Analysis
+    let extended = report.extended_match_history(50);
+    assert_eq!(extended.len(), 50);
+    let deep = extended[0].build_deep_analysis("SHENTRICK");
+    assert_eq!(deep.allied_team.len(), 5);
+    assert_eq!(deep.enemy_team.len(), 5);
+    assert_eq!(deep.win_prob_timeline.len(), 7);
+    assert!(!deep.lane_verdict.is_empty());
+    assert!(!deep.key_turning_point.is_empty());
+
+    // Verify Tab 4 Lifetime Champion Pool (12+ champions from First-Time Debut to Latest Game)
+    let lifetime_pool = report.lifetime_champion_pool();
+    assert!(lifetime_pool.len() >= 12);
+    assert_eq!(lifetime_pool[0].champion_name, "Shen");
+    assert!(lifetime_pool[0].games_played >= 45);
+    assert!(!lifetime_pool[0].first_played_date.is_empty());
+
+    // Verify Tab 5 Dynamic Champion ML Synthesis for Lifetime Champions
+    let gwen_ml = report.champion_ml_insight_for("Gwen");
+    assert_eq!(gwen_ml.champion_name, "Gwen");
+    assert!(!gwen_ml.match_progression.is_empty());
 }

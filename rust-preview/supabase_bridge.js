@@ -245,7 +245,7 @@
       return true;
     },
 
-    fetchRiotTelemetry: async function(riotId, region, apiKey) {
+    fetchRiotTelemetry: async function(riotId, region, apiKey, startOffset, countLimit) {
       const targetRiotId = riotId || (currentUser && currentUser.riot_id) || "SHENTRICK#SHEN";
       const targetRegion = region || (currentUser && currentUser.riot_region) || "ME";
 
@@ -273,7 +273,9 @@
             riot_id: targetRiotId,
             region: targetRegion.toLowerCase(),
             api_key: apiKey || undefined,
-            recommended_champions: recommendedChamps
+            recommended_champions: recommendedChamps,
+            start: typeof startOffset === "number" ? startOffset : 0,
+            count: typeof countLimit === "number" ? countLimit : 20
           })
         });
 
@@ -283,6 +285,23 @@
         } else {
           const telemetryData = await res.json();
           try {
+            // If paginating (startOffset > 0), merge new matches into existing cached matches
+            if (typeof startOffset === "number" && startOffset > 0) {
+              const prevRaw = window.localStorage.getItem("lol_riot_telemetry");
+              if (prevRaw) {
+                const prevObj = JSON.parse(prevRaw);
+                if (Array.isArray(prevObj.matches) && Array.isArray(telemetryData.matches)) {
+                  const seen = new Set(prevObj.matches.map(m => m.match_id));
+                  for (const nm of telemetryData.matches) {
+                    if (!seen.has(nm.match_id)) {
+                      prevObj.matches.push(nm);
+                      seen.add(nm.match_id);
+                    }
+                  }
+                  telemetryData.matches = prevObj.matches;
+                }
+              }
+            }
             window.localStorage.setItem("lol_riot_telemetry", JSON.stringify(telemetryData));
           } catch (_) {}
 
