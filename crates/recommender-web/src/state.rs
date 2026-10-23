@@ -150,6 +150,16 @@ pub struct AppState {
     pub live_player_matches: Option<Vec<recommender_core::player_analytics::AdoptedMatch>>,
     pub is_syncing_riot: bool,
     pub riot_data_source: Option<String>,
+    #[allow(dead_code)]
+    pub analytics_active_tab: String,
+    #[allow(dead_code)]
+    pub analytics_selected_match_id: Option<String>,
+    #[allow(dead_code)]
+    pub analytics_curve_match_id: Option<String>,
+    #[allow(dead_code)]
+    pub analytics_tracked_champion: String,
+    #[allow(dead_code)]
+    pub analytics_visible_games: usize,
 }
 
 impl Default for AppState {
@@ -169,6 +179,11 @@ impl Default for AppState {
             live_player_matches: None,
             is_syncing_riot: false,
             riot_data_source: None,
+            analytics_active_tab: "overview".to_string(),
+            analytics_selected_match_id: None,
+            analytics_curve_match_id: None,
+            analytics_tracked_champion: String::new(),
+            analytics_visible_games: 10,
         }
     }
 }

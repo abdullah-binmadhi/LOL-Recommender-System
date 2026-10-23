@@ -70,6 +70,7 @@
       }
 
       // Listen for auth state changes
+      let lastDispatchedUserJson = currentUser ? JSON.stringify(currentUser) : "";
       client.auth.onAuthStateChange(async (event, session) => {
         if (session && session.user) {
           const userMeta = session.user.user_metadata || {};
@@ -91,14 +92,18 @@
             email: session.user.email || "",
             full_name: userMeta.full_name || userMeta.name || "Summoner",
             avatar_url: userMeta.avatar_url || userMeta.picture || "",
-            riot_id: (profile && profile.riot_id) || null,
-            riot_region: (profile && profile.riot_region) || null
+            riot_id: (profile && profile.riot_id) || savedRiotId || null,
+            riot_region: (profile && profile.riot_region) || savedRiotRegion || null
           };
-        } else if (!isMockAuth) {
+        } else if (!isMockAuth && !savedRiotId) {
           currentUser = null;
         }
 
-        window.dispatchEvent(new CustomEvent("supabase-auth-changed", { detail: currentUser }));
+        const nextUserJson = currentUser ? JSON.stringify(currentUser) : "";
+        if (nextUserJson !== lastDispatchedUserJson) {
+          lastDispatchedUserJson = nextUserJson;
+          window.dispatchEvent(new CustomEvent("supabase-auth-changed", { detail: currentUser }));
+        }
       });
     } catch (err) {
       console.error("Supabase client initialization error:", err);

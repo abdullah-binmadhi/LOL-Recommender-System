@@ -131,11 +131,17 @@ pub fn App() -> impl IntoView {
         if let Some(win) = web_sys::window() {
             if let Ok(hash) = win.location().hash() {
                 if hash == "#distribution" || hash == "#champion-distribution" {
-                    state.update(AppState::open_champion_distribution);
+                    if state.with(|c| c.screen != Screen::ChampionDistribution) {
+                        state.update(AppState::open_champion_distribution);
+                    }
                 } else if hash == "#analytics" || hash == "#player-analytics" {
-                    state.update(AppState::open_player_analytics);
+                    if state.with(|c| c.screen != Screen::PlayerAnalytics) {
+                        state.update(AppState::open_player_analytics);
+                    }
                 } else if hash.is_empty() || hash == "#" {
-                    state.update(AppState::return_to_start);
+                    if state.with(|c| c.screen != Screen::Start) {
+                        state.update(AppState::return_to_start);
+                    }
                 }
             }
         }
@@ -145,7 +151,9 @@ pub fn App() -> impl IntoView {
     let keyboard_listener =
         window_event_listener(leptos::ev::keydown, move |event: web_sys::KeyboardEvent| {
             if event.key() == "Escape" {
-                state.update(AppState::close_modal);
+                if state.with(|c| c.modal.is_some()) {
+                    state.update(AppState::close_modal);
+                }
             } else if event.ctrl_key()
                 && event.shift_key()
                 && (event.key() == "E" || event.key() == "e")
@@ -164,12 +172,13 @@ pub fn App() -> impl IntoView {
 
     let modal_catalog = Arc::clone(&catalog);
     let question_total = questions.len();
+    let active_screen = Memo::new(move |_| state.with(|current| current.screen));
 
     view! {
         <div class="app-shell">
             {view_navbar(state)}
             <main class="page">
-                {move || match state.with(|current| current.screen) {
+                {move || match active_screen.get() {
                     Screen::Start => {
                         view_start(state, Arc::clone(&analytics_summary), question_total).into_any()
                     }

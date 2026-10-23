@@ -185,15 +185,36 @@ fn test_for_player_shentrick_middle_east() {
     assert!(!deep.lane_verdict.is_empty());
     assert!(!deep.key_turning_point.is_empty());
 
-    // Verify Tab 4 Lifetime Champion Pool (12+ champions from First-Time Debut to Latest Game)
-    let lifetime_pool = report.lifetime_champion_pool();
-    assert!(lifetime_pool.len() >= 12);
-    assert_eq!(lifetime_pool[0].champion_name, "Shen");
-    assert!(lifetime_pool[0].games_played >= 45);
-    assert!(!lifetime_pool[0].first_played_date.is_empty());
+    // Verify Tab 3 Single-Game Champion Curve & Validated ML Lab (Exact Match & Champion)
+    let curve = extended[0].build_champion_curve_analysis("SHENTRICK");
+    assert_eq!(curve.match_id, extended[0].match_id);
+    assert_eq!(curve.champion_name, extended[0].champion_name);
+    assert_eq!(curve.gold_curve.len(), 7);
+    assert_eq!(curve.xp_level_curve.len(), 7);
+    assert_eq!(curve.cs_tempo_curve.len(), 7);
+    assert_eq!(curve.damage_mitigation_curve.len(), 7);
+    assert_eq!(curve.radar_axes.len(), 8);
+    assert_eq!(curve.ml_models.len(), 4);
+    assert_eq!(curve.shap_attributions.len(), 6);
+    assert_eq!(curve.item_spikes.len(), 5);
+    assert_eq!(curve.rune_telemetry.len(), 4);
+    assert_eq!(curve.timestamped_moments.len(), 4);
 
-    // Verify Tab 5 Dynamic Champion ML Synthesis for Lifetime Champions
+    // Verify Tab 4 Lifetime Champion Pool (18+ champions from Season 5 / 2015 to Season 16 / 2026)
+    let lifetime_pool = report.lifetime_champion_pool();
+    assert!(lifetime_pool.len() >= 18);
+    assert_eq!(lifetime_pool[0].champion_name, "Shen");
+    assert!(lifetime_pool[0].games_played >= 640);
+    assert!(lifetime_pool[0].first_played_date.contains("2015"));
+
+    // Verify Tab 5 Lifetime ML Suite (12 Seasons 2015–2026 + Matchup & Core Build Matrices)
     let gwen_ml = report.champion_ml_insight_for("Gwen");
     assert_eq!(gwen_ml.champion_name, "Gwen");
     assert!(!gwen_ml.match_progression.is_empty());
+    let shen_seasons = shen_ml.season_career_history();
+    assert_eq!(shen_seasons.len(), 12);
+    assert_eq!(shen_seasons.first().unwrap().year, 2015);
+    assert_eq!(shen_seasons.last().unwrap().year, 2026);
+    assert!(!shen_ml.lifetime_matchup_matrix().is_empty());
+    assert!(!shen_ml.lifetime_core_builds().is_empty());
 }
