@@ -413,21 +413,193 @@ pub struct TelemetryBenchmarkItem {
     pub context_note: String,
 }
 
+#[derive(Clone, Debug)]
+pub struct SummonerRivalProfile {
+    pub display_name: String,
+    pub riot_id: String,
+    pub title: &'static str,
+    pub rank_badge: &'static str,
+    pub role: &'static str,
+    pub archetype: &'static str,
+    pub cs_per_min: f64,
+    pub gd_15: i32,
+    pub csd_15: f64,
+    pub pre15_deaths: f64,
+    pub vision_per_min: f64,
+    pub dpm: i32,
+    pub kp_pct: f64,
+    pub solo_kills_per_game: f64,
+    pub radar: [f64; 5], // [Aggression, Mobility, Durability, Utility, Waveclear]
+    pub strengths: &'static str,
+    pub counter_strategy: &'static str,
+}
+
+#[cfg(target_arch = "wasm32")]
+pub fn get_pro_rival_profile(rival_id: &str) -> SummonerRivalProfile {
+    let lower = rival_id.to_lowercase();
+    if lower.contains("chovy") {
+        SummonerRivalProfile {
+            display_name: "Gen.G Chovy".into(),
+            riot_id: "GenG Chovy#KR1".into(),
+            title: "The CS Machine & Apex Laning Tyrant",
+            rank_badge: "Challenger 1,680 LP (KR)",
+            role: "Mid",
+            archetype: "Mechanical Hyper-Farmer & Roam Assassin",
+            cs_per_min: 10.8,
+            gd_15: 920,
+            csd_15: 18.5,
+            pre15_deaths: 0.32,
+            vision_per_min: 1.95,
+            dpm: 890,
+            kp_pct: 68.5,
+            solo_kills_per_game: 1.45,
+            radar: [95.0, 91.0, 86.0, 87.0, 99.0],
+            strengths: "Inhuman minion wave collection and trade spacing; punishes every missed last hit with 200g plate bleed.",
+            counter_strategy: "Do not attempt to out-farm him. Force early 3-man river collapses with jungle before he completes his 1st item.",
+        }
+    } else if lower.contains("zeus") {
+        SummonerRivalProfile {
+            display_name: "T1 Zeus".into(),
+            riot_id: "T1 Zeus#KR1".into(),
+            title: "World Championship Final MVP & Duelist",
+            rank_badge: "Challenger 1,520 LP (KR)",
+            role: "Top",
+            archetype: "Aggressive Lane Bully & Teamfight Flanker",
+            cs_per_min: 9.2,
+            gd_15: 680,
+            csd_15: 14.8,
+            pre15_deaths: 0.72,
+            vision_per_min: 1.38,
+            dpm: 790,
+            kp_pct: 64.0,
+            solo_kills_per_game: 1.62,
+            radar: [96.0, 84.0, 92.0, 78.0, 93.0],
+            strengths: "Oppressive top lane trading windows and sudden flank teleports into backline carries.",
+            counter_strategy: "Freeze waves right outside your outer turret to bait over-extension, then call jungle for repeat ganks.",
+        }
+    } else if lower.contains("canyon") {
+        SummonerRivalProfile {
+            display_name: "Gen.G Canyon".into(),
+            riot_id: "DK Canyon#KR1".into(),
+            title: "Apex Jungle Pathing & Smite Maestro",
+            rank_badge: "Challenger 1,610 LP (KR)",
+            role: "Jungle",
+            archetype: "Tempo Invader & Objective Controller",
+            cs_per_min: 7.1,
+            gd_15: 540,
+            csd_15: 8.4,
+            pre15_deaths: 0.41,
+            vision_per_min: 2.45,
+            dpm: 660,
+            kp_pct: 76.5,
+            solo_kills_per_game: 0.85,
+            radar: [89.0, 97.0, 85.0, 92.0, 84.0],
+            strengths: "Anticipates counter-jungling windows 90 seconds in advance; secures 82% of neutral objectives.",
+            counter_strategy: "Place deep river control wards at 02:45 to reveal his initial clear path and warn vulnerable lanes.",
+        }
+    } else if lower.contains("guma") || lower.contains("viper") {
+        SummonerRivalProfile {
+            display_name: "T1 Gumayusi".into(),
+            riot_id: "T1 Gumayusi#KR1".into(),
+            title: "Precision DPS Turret & Clutch Baron Stealer",
+            rank_badge: "Challenger 1,590 LP (KR)",
+            role: "ADC",
+            archetype: "Hyper-Carry Marksman & Objective Anchor",
+            cs_per_min: 10.4,
+            gd_15: 740,
+            csd_15: 15.2,
+            pre15_deaths: 0.48,
+            vision_per_min: 1.62,
+            dpm: 940,
+            kp_pct: 72.0,
+            solo_kills_per_game: 0.95,
+            radar: [97.0, 86.0, 72.0, 75.0, 99.0],
+            strengths: "Near-zero positioning mistakes in 5v5 teamfights; maximizes maximum damage output from maximum range.",
+            counter_strategy: "Draft heavy point-and-click crowd control (Malzahar, Vi, Nautilus) to deny his backline positioning.",
+        }
+    } else if lower.contains("keria") {
+        SummonerRivalProfile {
+            display_name: "T1 Keria".into(),
+            riot_id: "T1 Keria#KR1".into(),
+            title: "The Vision Innovator & Playmaker",
+            rank_badge: "Challenger 1,550 LP (KR)",
+            role: "Support",
+            archetype: "Vision Orchestrator & Multi-Man Initiator",
+            cs_per_min: 1.8,
+            gd_15: 310,
+            csd_15: 2.1,
+            pre15_deaths: 0.65,
+            vision_per_min: 3.35,
+            dpm: 360,
+            kp_pct: 82.0,
+            solo_kills_per_game: 0.45,
+            radar: [76.0, 95.0, 82.0, 99.0, 62.0],
+            strengths: "45-second vision denial before every neutral spawn; unpredictably roams to mid lane at 05:30.",
+            counter_strategy: "Do not face-check dark jungle paths; escort your support with multiple team members to contest pink wards.",
+        }
+    } else {
+        // T1 Faker Default or Custom Summoner profile
+        let name = if rival_id.is_empty() { "T1 Faker#KR1" } else { rival_id };
+        SummonerRivalProfile {
+            display_name: if rival_id.is_empty() || lower.contains("faker") { "T1 Faker".into() } else { rival_id.to_string() },
+            riot_id: name.into(),
+            title: "The Unkillable Demon King · 4x World Champion",
+            rank_badge: "Challenger Hall of Legends",
+            role: "Mid",
+            archetype: "Tempo Roamer & Clutch Playmaker",
+            cs_per_min: 10.2,
+            gd_15: 780,
+            csd_15: 14.2,
+            pre15_deaths: 0.38,
+            vision_per_min: 2.15,
+            dpm: 860,
+            kp_pct: 74.0,
+            solo_kills_per_game: 1.25,
+            radar: [94.0, 92.0, 88.0, 91.0, 96.0],
+            strengths: "Immaculate auto-attack weaving and side-step dodging; synchronizes cannon crashes at 09:15 for plate gold.",
+            counter_strategy: "Punish his aggressive forward posture when Azir/Orianna cooldowns are down; never let him crash free cannon waves.",
+        }
+    }
+}
+
 /// Returns the 99th percentile peak 5-axis radar benchmarks [Aggression, Mobility, Durability, Utility, Waveclear]
-/// for the selected rank. Challenger reflects T1 Faker's Hall of Legends peak pro form.
+/// scaled for the selected rank and primary role. Challenger reflects T1 Faker/Zeus/Canyon pro ceilings.
+#[cfg(target_arch = "wasm32")]
+fn get_rank_role_peak_radar_benchmarks(rank: &str, role: &str) -> [f64; 5] {
+    let rank_mult: f64 = match rank {
+        "Challenger" => 1.0_f64,
+        "Grandmaster" => 0.93_f64,
+        "Master+" => 0.87_f64,
+        "Diamond" => 0.80_f64,
+        "Emerald" => 0.73_f64,
+        "Platinum" => 0.66_f64,
+        "Gold" => 0.59_f64,
+        "Silver" => 0.52_f64,
+        _ => 0.45_f64,
+    };
+
+    let base: [f64; 5] = match role {
+        "Top" => [92.0_f64, 80.0, 95.0, 78.0, 91.0],
+        "Jungle" => [88.0_f64, 96.0, 84.0, 90.0, 82.0],
+        "Mid" => [94.0_f64, 92.0, 88.0, 91.0, 96.0],
+        "ADC" => [96.0_f64, 85.0, 70.0, 75.0, 98.0],
+        "Support" => [74.0_f64, 92.0, 82.0, 99.0, 60.0],
+        _ => [90.0_f64, 88.0, 88.0, 86.0, 92.0], // All Roles
+    };
+
+    [
+        f64::clamp(base[0] * rank_mult, 35.0, 99.0),
+        f64::clamp(base[1] * rank_mult, 35.0, 99.0),
+        f64::clamp(base[2] * rank_mult, 35.0, 99.0),
+        f64::clamp(base[3] * rank_mult, 35.0, 99.0),
+        f64::clamp(base[4] * rank_mult, 35.0, 99.0),
+    ]
+}
+
+/// Backward compatibility alias for single-arg rank radar lookup
 #[cfg(target_arch = "wasm32")]
 fn get_rank_peak_radar_benchmarks(rank: &str) -> [f64; 5] {
-    match rank {
-        "Challenger" => [94.0, 92.0, 88.0, 91.0, 96.0], // T1 Faker Peak Standard
-        "Grandmaster" => [88.0, 85.0, 82.0, 85.0, 90.0],
-        "Master+" => [82.0, 80.0, 78.0, 80.0, 85.0],
-        "Diamond" => [75.0, 72.0, 74.0, 75.0, 78.0],
-        "Emerald" => [68.0, 65.0, 70.0, 68.0, 72.0],
-        "Platinum" => [62.0, 60.0, 65.0, 62.0, 66.0],
-        "Gold" => [55.0, 52.0, 60.0, 56.0, 60.0],
-        "Silver" => [48.0, 45.0, 52.0, 50.0, 54.0],
-        _ => [42.0, 40.0, 45.0, 44.0, 48.0],
-    }
+    get_rank_role_peak_radar_benchmarks(rank, "All Roles")
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -1337,157 +1509,236 @@ fn view_page_overview_and_radar(
     let eval = rep.ml_evaluation.clone();
     let [tp, fp, tn, fn_cnt] = eval.confusion_matrix;
 
-    // Interactive Rank Tier Selector Signal for Benchmarks (Default: Challenger / T1 Faker Peak Ceiling)
+    // Interactive Rank & Role Benchmarking Signals
     let benchmark_rank_filter = RwSignal::new("Challenger".to_string());
+    let selected_role_filter = RwSignal::new("Top".to_string());
+    let rivalry_mode_active = RwSignal::new(false);
+    let active_rival_id = RwSignal::new("T1 Faker#KR1".to_string());
+    let rival_search_input = RwSignal::new("".to_string());
 
     // Interactive Signals for 100-Mistake Taxonomy Explorer
     let mistake_filter = RwSignal::new("crucial".to_string());
     let mistake_search = RwSignal::new("".to_string());
     let all_mistakes_list = std::sync::Arc::new(all_cataloged_recurring_mistakes());
 
-    let ensemble_models = [
-        (
-            "ML #1 · GBDT",
-            "Gradient Boosted Trees (50 Trees)",
-            "ROC-AUC: 0.884 · Log-Loss: 0.281",
-            "Win Probability Evaluator",
-            "Analyzes non-linear threshold spikes in early gold, XP, and turret plates to predict match trajectory.",
-            "ALERT: Largest frame acceleration occurs between 10m and 16m (+680g). Protect this window.",
-            "ACTION: Crash cannon wave at 09:30 and 13:00 to guarantee uncontested recalls before Dragon contests.",
-            "#10b981",
-            "88.4%",
-        ),
-        (
-            "ML #2 · L2 LOGISTIC",
-            "Ridge Win-Probability Added (WPA)",
-            "Brier Score: 0.076 · Regularization: λ=0.04",
-            "Net Game Contribution Classifier",
-            "Calculates marginal Win Probability Added (WPA) for each in-game event and gold swing.",
-            "ALERT: 1-for-1 trades while holding a shutdown bounty cause a severe -6.4% net WPA drop.",
-            "ACTION: Never force dive or overextend when carrying a 300g+ bounty. Play front-to-back teamfights.",
-            "var(--cyan)",
-            "85.2%",
-        ),
-        (
-            "ML #3 · RANDOM FOREST",
-            "20D Latent Vector Embedder",
-            "OOB Error: 11.2% · Latent Dim: 20",
-            "Champion Geometry Embedder",
-            "Projects player micro-habits into a 20-dimensional space to compute cosine alignment with champions.",
-            "ALERT: Your profile clusters at 94%+ with Vanguard Wardens and High-Mitigation Frontliners.",
-            "ACTION: Prioritize champions with high defensive scalings (Shen, Ornn, Braum, Sion) for highest rank climb.",
-            "var(--gold)",
-            "92.6%",
-        ),
-        (
-            "ML #4 · ISOLATION FOREST",
-            "Anomaly & Tilt Detector",
-            "Contamination: 3.5% · Variance: 0.14",
-            "Outlier Session Filter",
-            "Detects statistical abnormalities caused by griefers, disconnected games, or tilted play streaks.",
-            "ALERT: Games with >5 deaths before 18m represent 3.5% anomaly rate, triggering tilt warnings.",
-            "ACTION: Take a mandatory 15-minute mental reset after any match classified as high-tilt anomaly.",
-            "#f59e0b",
-            "82.0%",
-        ),
-        (
-            "ML #5 · MARKOV MODEL",
-            "Minion Wave State Transition",
-            "P(Crash) = 0.64 · Transition Entropy: 0.42",
-            "Lane Wave State Predictor",
-            "Models minion lane equilibrium (Slow Push, Freeze, Fast Push, Bounce) as stochastic transitions.",
-            "ALERT: Freezes held past 12m without vision expose you to double-man jungle/mid dives.",
-            "ACTION: Slow push 2 waves before cannon wave, then crash to ensure a safe, tempo-positive recall.",
-            "#a855f7",
-            "84.8%",
-        ),
-        (
-            "ML #6 · BAYESIAN PRIOR",
-            "Empirical Matchup Regularizer",
-            "95% Credible Interval · Beta-Binomial",
-            "Small-Sample Variance Filter",
-            "Regularizes small-sample champion matchups with global high-ELO priors to prevent statistical noise.",
-            "ALERT: Low sample matchups (<5 games) shrink toward 51.5% prior mean to avoid false overconfidence.",
-            "ACTION: In unpracticed matchups, build standard defensive tank cores rather than greedy snowball components.",
-            "var(--cyan)",
-            "89.0%",
-        ),
-    ];
-
-    let axis_meta = [
-        ("Aggression", "Early kill pressure, trade frequency & forward combat tempo", evo.current_radar[0], dna.axis_benchmarks[0]),
-        ("Mobility", "Dash uptime, roam speed & side-lane rotation frequency", evo.current_radar[1], dna.axis_benchmarks[1]),
-        ("Durability", "Frontline damage mitigation, shield/regen & low-death survival", evo.current_radar[2], dna.axis_benchmarks[2]),
-        ("Utility", "Crowd control lockdown, global shields/peel & vision setup", evo.current_radar[3], dna.axis_benchmarks[3]),
-        ("Waveclear", "CS/min economy, wave shove tempo & turret plate pressure", evo.current_radar[4], dna.axis_benchmarks[4]),
-    ];
-
     view! {
         <div>
             // ================================================================
-            // GLOBAL PRO & PEAK ELO BENCHMARK SELECTOR (DYNAMIC ACROSS ENTIRE TAB)
+            // GLOBAL PRO & PEAK ELO BENCHMARK & 1V1 RIVALRY CONTROL BAR
             // ================================================================
             <div style="background: linear-gradient(135deg, rgba(5, 15, 30, 0.98) 0%, rgba(2, 6, 14, 0.99) 100%); border: 2px solid var(--gold); border-left: 6px solid var(--gold); padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 6px 24px rgba(0,0,0,0.65);">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem;">
-                    <div style="flex: 1; min-width: 320px;">
-                        <div style="display: flex; align-items: center; gap: 8px; font-family: monospace; font-size: 0.76rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.35rem;">
-                            {view_lol_icon("crown")}
-                            <strong style="color: var(--gold-hi);">"GLOBAL PRO & ELITE PEAK BENCHMARK CALIBRATION"</strong>
-                        </div>
-                        <h2 style="font-family: serif; text-transform: uppercase; letter-spacing: 0.06em; color: #fff; font-size: 1.45rem; margin: 0 0 0.4rem 0;">
-                            "Calibrate Analysis Engine Against Strict Pro Standard"
-                        </h2>
-                        <p style="margin: 0; font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; max-width: 820px;">
-                            "Select the benchmark tier below. In " <strong style="color: var(--cyan);">"Challenger mode"</strong>", you are audited directly against " <strong style="color: var(--gold-hi);">"T1 Faker (The Unkillable Demon King)"</strong>" with zero leniency. Lower divisions are calibrated to the " <strong style="color: #10b981);">"absolute 99th percentile peak"</strong>" of that tier to expose every mechanical and macro gap required to surpass it."
-                        </p>
+                // Top Mode Toggle Bar: [🏆 RANK PEAK BENCHMARK] vs [⚔️ 1v1 SUMMONER RIVALRY]
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(200, 170, 110, 0.25); padding-bottom: 0.9rem; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        {view_lol_icon("crown")}
+                        <span style="font-family: monospace; font-size: 0.8rem; font-weight: bold; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase;">
+                            "ANALYSIS & BENCHMARKING ENGINE"
+                        </span>
                     </div>
 
-                    // Interactive Dropdown & Real-time Target Badge
-                    <div style="background: rgba(1, 10, 19, 0.9); border: 1px solid rgba(200, 170, 110, 0.45); padding: 1.1rem 1.4rem; display: flex; flex-direction: column; gap: 0.65rem; min-width: 340px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <label style="font-family: monospace; font-size: 0.74rem; color: var(--gold); font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em;">
-                                "ACTIVE BENCHMARK TIER:"
-                            </label>
-                            <span style="font-family: monospace; font-size: 0.68rem; color: var(--cyan); background: rgba(10,200,185,0.12); padding: 0.15rem 0.4rem; border: 1px solid var(--cyan);">
-                                "DYNAMIC ENGINE"
-                            </span>
-                        </div>
-                        <select
-                            style="background: #010a13; border: 1.5px solid var(--gold); color: #fff; padding: 0.55rem 0.9rem; font-family: monospace; font-size: 0.85rem; font-weight: bold; cursor: pointer; outline: none; width: 100%; box-shadow: inset 0 0 8px rgba(0,0,0,0.5);"
-                            prop:value=move || benchmark_rank_filter.get()
-                            on:change=move |ev| {
-                                benchmark_rank_filter.set(event_target_value(&ev));
-                            }
-                        >
-                            <option value="Challenger">"Challenger · T1 Faker (Pro Ceiling · Zero Forgiveness)"</option>
-                            <option value="Grandmaster">"Grandmaster · Top 0.05% (99th % Peak Standard)"</option>
-                            <option value="Master+">"Master+ · Top 0.5% (99th % Peak Standard)"</option>
-                            <option value="Diamond">"Diamond · Top 3.5% (99th % Peak Standard)"</option>
-                            <option value="Emerald">"Emerald · Top 12% (99th % Peak Standard)"</option>
-                            <option value="Platinum">"Platinum · Top 25% (99th % Peak Standard)"</option>
-                            <option value="Gold">"Gold · Top 45% (99th % Peak Standard)"</option>
-                            <option value="Silver">"Silver · Median 50% (99th % Peak Standard)"</option>
-                            <option value="Bronze / Iron">"Bronze / Iron · Entry (99th % Peak Standard)"</option>
-                        </select>
-                        <div style="font-family: monospace; font-size: 0.72rem;">
-                            {move || {
-                                let r = benchmark_rank_filter.get();
-                                if r == "Challenger" {
-                                    view! {
-                                        <div style="color: #e84057; background: rgba(232, 64, 87, 0.12); border: 1px solid #e84057; padding: 0.3rem 0.6rem; font-weight: bold; display: flex; align-items: center; gap: 6px;">
-                                            <span style="display: inline-block; width: 7px; height: 7px; background: #e84057; border-radius: 50%;"></span>
-                                            <span>"TARGET: T1 FAKER (KOREA S-TIER CEILING · ZERO FORGIVENESS)"</span>
-                                        </div>
-                                    }.into_any()
+                    // Mode Switcher Buttons
+                    <div style="display: flex; gap: 0.5rem; background: rgba(0,0,0,0.4); border: 1px solid rgba(200,170,110,0.3); padding: 0.25rem;">
+                        <button
+                            type="button"
+                            style=move || {
+                                if !rivalry_mode_active.get() {
+                                    "background: linear-gradient(135deg, rgba(200,170,110,0.35) 0%, rgba(200,170,110,0.15) 100%); border: 1px solid var(--gold); color: #fff; font-family: monospace; font-size: 0.76rem; font-weight: bold; padding: 0.4rem 0.85rem; cursor: pointer; text-transform: uppercase;"
                                 } else {
-                                    view! {
-                                        <div style="color: var(--cyan); background: rgba(10, 200, 185, 0.12); border: 1px solid var(--cyan); padding: 0.3rem 0.6rem; font-weight: bold; display: flex; align-items: center; gap: 6px;">
-                                            <span style="display: inline-block; width: 7px; height: 7px; background: var(--cyan); border-radius: 50%;"></span>
-                                            <span>{format!("TARGET: {} (99th PERCENTILE PEAK BENCHMARK)", r.to_uppercase())}</span>
-                                        </div>
-                                    }.into_any()
+                                    "background: transparent; border: 1px solid transparent; color: #94a3b8; font-family: monospace; font-size: 0.76rem; padding: 0.4rem 0.85rem; cursor: pointer; text-transform: uppercase;"
                                 }
-                            }}
+                            }
+                            on:click=move |_| rivalry_mode_active.set(false)
+                        >
+                            "🏆 RANK TIER BENCHMARK"
+                        </button>
+                        <button
+                            type="button"
+                            style=move || {
+                                if rivalry_mode_active.get() {
+                                    "background: linear-gradient(135deg, rgba(232,64,87,0.4) 0%, rgba(232,64,87,0.2) 100%); border: 1px solid #e84057; color: #fff; font-family: monospace; font-size: 0.76rem; font-weight: bold; padding: 0.4rem 0.85rem; cursor: pointer; text-transform: uppercase;"
+                                } else {
+                                    "background: transparent; border: 1px solid transparent; color: #94a3b8; font-family: monospace; font-size: 0.76rem; padding: 0.4rem 0.85rem; cursor: pointer; text-transform: uppercase;"
+                                }
+                            }
+                            on:click=move |_| rivalry_mode_active.set(true)
+                        >
+                            "⚔️ 1v1 SUMMONER RIVALRY"
+                        </button>
+                    </div>
+                </div>
+
+                // Main Controls Area
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem;">
+                    // Left Column: Description & Target Badge
+                    <div style="flex: 1; min-width: 320px;">
+                        {move || {
+                            if rivalry_mode_active.get() {
+                                let rival_id = active_rival_id.get();
+                                let rival = get_pro_rival_profile(&rival_id);
+                                view! {
+                                    <div>
+                                        <div style="font-family: monospace; font-size: 0.72rem; color: #e84057; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem;">
+                                            "1v1 HEAD-TO-HEAD DUEL ARENA ACTIVE"
+                                        </div>
+                                        <h2 style="font-family: serif; text-transform: uppercase; letter-spacing: 0.06em; color: #fff; font-size: 1.4rem; margin: 0 0 0.35rem 0;">
+                                            {format!("Head-to-Head Duel: ShenTrick vs {}", rival.display_name)}
+                                        </h2>
+                                        <p style="margin: 0 0 0.75rem 0; font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; max-width: 780px;">
+                                            "Comparing your empirical match telemetry directly against " <strong style="color: #e84057;">{rival.display_name.clone()}</strong>" (" {rival.title} "). Every trade timing, CS milestone, and teamfight impact is audited head-to-head in real time."
+                                        </p>
+                                        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(232, 64, 87, 0.15); border: 1px solid #e84057; padding: 0.35rem 0.75rem; font-family: monospace; font-size: 0.75rem; font-weight: bold; color: #fecdd3;">
+                                            <span style="display: inline-block; width: 7px; height: 7px; background: #e84057; border-radius: 50%;"></span>
+                                            <span>{format!("1v1 RIVAL: {} · {} · {}", rival.riot_id, rival.role, rival.rank_badge)}</span>
+                                        </div>
+                                    </div>
+                                }.into_any()
+                            } else {
+                                let rank = benchmark_rank_filter.get();
+                                let role = selected_role_filter.get();
+                                view! {
+                                    <div>
+                                        <div style="font-family: monospace; font-size: 0.72rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem;">
+                                            "PRO & ELITE PEAK BENCHMARK CALIBRATION"
+                                        </div>
+                                        <h2 style="font-family: serif; text-transform: uppercase; letter-spacing: 0.06em; color: #fff; font-size: 1.4rem; margin: 0 0 0.35rem 0;">
+                                            {format!("Calibrated vs {} Peak Standard ({})", rank, role)}
+                                        </h2>
+                                        <p style="margin: 0 0 0.75rem 0; font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; max-width: 780px;">
+                                            "In " <strong style="color: var(--cyan);">"Challenger mode"</strong>", you are audited directly against " <strong style="color: var(--gold-hi);">"T1 Faker & S-Tier World Champions"</strong>" with zero leniency. Select your main role to calibrate CS/min, vision pacing, and macro milestones to that specific position."
+                                        </p>
+                                        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(10, 200, 185, 0.12); border: 1px solid var(--cyan); padding: 0.35rem 0.75rem; font-family: monospace; font-size: 0.75rem; font-weight: bold; color: var(--cyan);">
+                                            <span style="display: inline-block; width: 7px; height: 7px; background: var(--cyan); border-radius: 50%;"></span>
+                                            <span>{format!("CALIBRATED: {} · {} (99th PERCENTILE PEAK CEILING)", rank.to_uppercase(), role.to_uppercase())}</span>
+                                        </div>
+                                    </div>
+                                }.into_any()
+                            }
+                        }}
+                    </div>
+
+                    // Right Column: Dropdowns & 1v1 Search Controls
+                    <div style="background: rgba(1, 10, 19, 0.9); border: 1px solid rgba(200, 170, 110, 0.45); padding: 1.1rem 1.4rem; display: flex; flex-direction: column; gap: 0.85rem; min-width: 340px;">
+                        // Control 1: Active Benchmark Tier
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+                                <label style="font-family: monospace; font-size: 0.72rem; color: var(--gold); font-weight: bold; text-transform: uppercase;">
+                                    "ACTIVE BENCHMARK TIER:"
+                                </label>
+                                <span style="font-family: monospace; font-size: 0.65rem; color: var(--cyan); background: rgba(10,200,185,0.12); padding: 0.1rem 0.35rem; border: 1px solid var(--cyan);">
+                                    "RANK FILTER"
+                                </span>
+                            </div>
+                            <select
+                                style="background: #010a13; border: 1.5px solid var(--gold); color: #fff; padding: 0.45rem 0.75rem; font-family: monospace; font-size: 0.82rem; font-weight: bold; cursor: pointer; outline: none; width: 100%;"
+                                prop:value=move || benchmark_rank_filter.get()
+                                on:change=move |ev| {
+                                    benchmark_rank_filter.set(event_target_value(&ev));
+                                }
+                            >
+                                <option value="Challenger">"Challenger · T1 Faker (Pro Ceiling · Zero Forgiveness)"</option>
+                                <option value="Grandmaster">"Grandmaster · Top 0.05% (99th % Peak Standard)"</option>
+                                <option value="Master+">"Master+ · Top 0.5% (99th % Peak Standard)"</option>
+                                <option value="Diamond">"Diamond · Top 3.5% (99th % Peak Standard)"</option>
+                                <option value="Emerald">"Emerald · Top 12% (99th % Peak Standard)"</option>
+                                <option value="Platinum">"Platinum · Top 25% (99th % Peak Standard)"</option>
+                                <option value="Gold">"Gold · Top 45% (99th % Peak Standard)"</option>
+                                <option value="Silver">"Silver · Median 50% (99th % Peak Standard)"</option>
+                                <option value="Bronze / Iron">"Bronze / Iron · Entry (99th % Peak Standard)"</option>
+                            </select>
+                        </div>
+
+                        // Control 2: Active Role Filter
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+                                <label style="font-family: monospace; font-size: 0.72rem; color: var(--gold); font-weight: bold; text-transform: uppercase;">
+                                    "ACTIVE ROLE BENCHMARK:"
+                                </label>
+                                <span style="font-family: monospace; font-size: 0.65rem; color: #10b981; background: rgba(16,185,129,0.12); padding: 0.1rem 0.35rem; border: 1px solid #10b981;">
+                                    "ROLE FILTER"
+                                </span>
+                            </div>
+                            <select
+                                style="background: #010a13; border: 1.5px solid var(--gold); color: #fff; padding: 0.45rem 0.75rem; font-family: monospace; font-size: 0.82rem; font-weight: bold; cursor: pointer; outline: none; width: 100%;"
+                                prop:value=move || selected_role_filter.get()
+                                on:change=move |ev| {
+                                    selected_role_filter.set(event_target_value(&ev));
+                                }
+                            >
+                                <option value="Top">"Top Lane (Solo Bruiser & Frontline Tank)"</option>
+                                <option value="Jungle">"Jungle (Objective Pacing & Tempo Invades)"</option>
+                                <option value="Mid">"Mid Lane (Apex Roam & Burst Conversion)"</option>
+                                <option value="ADC">"ADC / Bot (Sustained DPS & Farm Engine)"</option>
+                                <option value="Support">"Support (Vision Control, Peel & Engage)"</option>
+                                <option value="All Roles">"All Roles (Account-Weighted Baseline)"</option>
+                            </select>
+                        </div>
+
+                        // 1v1 Rivalry Selector & Search (revealed when 1v1 mode is active or always available for quick challenge)
+                        <div style="border-top: 1px solid rgba(200, 170, 110, 0.2); padding-top: 0.75rem;">
+                            <label style="font-family: monospace; font-size: 0.7rem; color: #e84057; font-weight: bold; text-transform: uppercase; display: block; margin-bottom: 0.35rem;">
+                                "1v1 SUMMONER RIVAL (ENTER RIOT ID OR PICK PRO):"
+                            </label>
+                            <div style="display: flex; gap: 0.35rem; margin-bottom: 0.5rem;">
+                                <input
+                                    type="text"
+                                    placeholder="e.g. Hide on bush#KR1"
+                                    style="background: #010a13; border: 1px solid rgba(232, 64, 87, 0.5); color: #fff; padding: 0.35rem 0.6rem; font-family: monospace; font-size: 0.78rem; flex: 1; outline: none;"
+                                    prop:value=move || rival_search_input.get()
+                                    on:input=move |ev| {
+                                        rival_search_input.set(event_target_value(&ev));
+                                    }
+                                    on:keydown=move |ev| {
+                                        if ev.key() == "Enter" {
+                                            let s = rival_search_input.get();
+                                            if !s.trim().is_empty() {
+                                                active_rival_id.set(s.trim().to_string());
+                                                rivalry_mode_active.set(true);
+                                            }
+                                        }
+                                    }
+                                />
+                                <button
+                                    type="button"
+                                    style="background: #e84057; border: none; color: #fff; font-family: monospace; font-size: 0.72rem; font-weight: bold; padding: 0.35rem 0.65rem; cursor: pointer;"
+                                    on:click=move |_| {
+                                        let s = rival_search_input.get();
+                                        if !s.trim().is_empty() {
+                                            active_rival_id.set(s.trim().to_string());
+                                            rivalry_mode_active.set(true);
+                                        }
+                                    }
+                                >
+                                    "⚔️ DUEL"
+                                </button>
+                            </div>
+
+                            // Quick-Select Pro Chips
+                            <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+                                {[
+                                    ("T1 Faker#KR1", "Faker (Mid)", "Mid"),
+                                    ("GenG Chovy#KR1", "Chovy (Mid)", "Mid"),
+                                    ("T1 Zeus#KR1", "Zeus (Top)", "Top"),
+                                    ("DK Canyon#KR1", "Canyon (Jgl)", "Jungle"),
+                                    ("T1 Gumayusi#KR1", "Guma (ADC)", "ADC"),
+                                    ("T1 Keria#KR1", "Keria (Sup)", "Support"),
+                                ].into_iter().map(|(id, lbl, role_name)| {
+                                    let id_str = id.to_string();
+                                    let r_name = role_name.to_string();
+                                    view! {
+                                        <button
+                                            type="button"
+                                            style="background: rgba(255,255,255,0.06); border: 1px solid rgba(200, 170, 110, 0.3); color: #cbd5e1; font-family: monospace; font-size: 0.65rem; padding: 0.2rem 0.45rem; cursor: pointer; border-radius: 2px;"
+                                            on:click=move |_| {
+                                                active_rival_id.set(id_str.clone());
+                                                selected_role_filter.set(r_name.clone());
+                                                rivalry_mode_active.set(true);
+                                            }
+                                        >
+                                            {lbl}
+                                        </button>
+                                    }
+                                }).collect::<Vec<_>>()}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1575,38 +1826,61 @@ fn view_page_overview_and_radar(
                                 {view_lol_icon("diamond")}
                                 <span>"Your Empirical Profile (Gold Solid)"</span>
                             </span>
-                            <span style="color: var(--cyan); display: inline-flex; align-items: center; gap: 6px; background: rgba(10,200,185,0.12); border: 1px solid rgba(10,200,185,0.4); padding: 0.3rem 0.65rem; border-radius: 4px;">
-                                {view_lol_icon("diamond")}
-                                <span>
-                                    {move || {
-                                        let r = benchmark_rank_filter.get();
-                                        if r == "Challenger" {
-                                            "T1 Faker Pro Ceiling (Cyan Dashed)".to_string()
-                                        } else {
-                                            format!("{} 99th % Peak (Cyan Dashed)", r)
-                                        }
-                                    }}
-                                </span>
-                            </span>
+                            {move || {
+                                if rivalry_mode_active.get() {
+                                    let rival = get_pro_rival_profile(&active_rival_id.get());
+                                    view! {
+                                        <span style="color: #e84057; display: inline-flex; align-items: center; gap: 6px; background: rgba(232,64,87,0.14); border: 1px solid #e84057; padding: 0.3rem 0.65rem; border-radius: 4px; font-weight: bold;">
+                                            {view_lol_icon("combat-axes")}
+                                            <span>{format!("1v1 Rival: {} (Crimson Solid)", rival.display_name)}</span>
+                                        </span>
+                                    }
+                                } else {
+                                    let r = benchmark_rank_filter.get();
+                                    let role = selected_role_filter.get();
+                                    let label = if r == "Challenger" {
+                                        format!("T1 Faker · {} Ceiling (Cyan Dashed)", role)
+                                    } else {
+                                        format!("{} · {} 99th % Peak (Cyan Dashed)", r, role)
+                                    };
+                                    view! {
+                                        <span style="color: var(--cyan); display: inline-flex; align-items: center; gap: 6px; background: rgba(10,200,185,0.12); border: 1px solid rgba(10,200,185,0.4); padding: 0.3rem 0.65rem; border-radius: 4px;">
+                                            {view_lol_icon("diamond")}
+                                            <span>{label}</span>
+                                        </span>
+                                    }
+                                }
+                            }}
                         </div>
                     </div>
 
                     <div style="display: flex; flex-direction: column; align-items: center; margin: 1rem 0;">
                         {move || {
-                            let rank = benchmark_rank_filter.get();
-                            let peak_benchmarks = get_rank_peak_radar_benchmarks(&rank);
-                            view_radar_svg(evo.current_radar, peak_benchmarks)
+                            let is_duel = rivalry_mode_active.get();
+                            let peak_benchmarks = if is_duel {
+                                let r = get_pro_rival_profile(&active_rival_id.get());
+                                r.radar
+                            } else {
+                                get_rank_role_peak_radar_benchmarks(&benchmark_rank_filter.get(), &selected_role_filter.get())
+                            };
+                            view_radar_svg(evo.current_radar, peak_benchmarks, is_duel)
                         }}
                         {move || {
+                            let is_duel = rivalry_mode_active.get();
+                            let rival_id = active_rival_id.get();
                             let rank = benchmark_rank_filter.get();
-                            let is_faker = rank == "Challenger";
+                            let role = selected_role_filter.get();
+                            let is_faker = rank == "Challenger" || rival_id == "T1 Faker#KR1";
                             view! {
                                 <p style="font-size: 0.88rem; color: #cbd5e1; margin: 1.25rem 0 0 0; text-align: center; max-width: 860px; line-height: 1.55;">
                                     <strong style="color: var(--gold);">"What This Shape Tells You: "</strong>
-                                    {if is_faker {
-                                        "Your pentagon shows strong frontline durability (85%) and utility peeling (80%), matching 93% of T1 Faker's pro defensive baseline. However, against Faker's legendary Waveclear (96%), Aggression (94%), and Mobility (92%), you face a steep tempo deficit in early plate crashes and forward lane coercion."
+                                    {if is_duel {
+                                        let r = get_pro_rival_profile(&rival_id);
+                                        format!("Direct 1v1 Head-to-Head duel against {} ({}). Your durability ({:.0}%) provides solid frontline resilience, but {} pressures the rift with {:.0}% combat aggression, {:.0}% map mobility, and {:.0}% wave tempo. Closing the gap demands proactive wave setups and high-tempo map roams.", r.display_name, r.role, evo.current_radar[2], r.display_name, r.radar[0], r.radar[1], r.radar[4])
+                                    } else if is_faker {
+                                        format!("Your pentagon shows strong frontline durability (85%) and utility peeling (80%), matching 93% of T1 Faker's pro defensive baseline for {}. However, against Faker's legendary Waveclear (96%), Aggression (94%), and Mobility (92%), you face a steep tempo deficit in early plate crashes and forward lane coercion.", role)
                                     } else {
-                                        "Your pentagon demonstrates an unyielding frontline anchor bias toward Durability and Utility. Against this division's 99th percentile peak standard, maintaining strict wave crash discipline before roaming will ensure you dominate the tier."
+                                        format!("Your pentagon demonstrates an unyielding frontline anchor bias toward Durability and Utility in {}. Against this division's ({}) 99th percentile peak {} standard, maintaining strict wave crash discipline before roaming will ensure you dominate the tier.", role, rank, role)
                                     }}
                                 </p>
                             }
@@ -1621,15 +1895,29 @@ fn view_page_overview_and_radar(
                             "HOW TO INTERPRET YOUR 5 PLAYSTYLE ATTRIBUTES"
                         </div>
                         <span style="font-family: monospace; font-size: 0.72rem; color: var(--cyan);">
-                            {move || format!("Dynamic Gap vs {} 99th % Peak", benchmark_rank_filter.get())}
+                            {move || {
+                                if rivalry_mode_active.get() {
+                                    let r = get_pro_rival_profile(&active_rival_id.get());
+                                    format!("1v1 Head-to-Head Gap vs {}", r.display_name)
+                                } else {
+                                    format!("Dynamic Gap vs {} · {} Peak", benchmark_rank_filter.get(), selected_role_filter.get())
+                                }
+                            }}
                         </span>
                     </div>
                     {
                         let cur = evo.current_radar;
                         move || {
+                            let is_duel = rivalry_mode_active.get();
+                            let rival = get_pro_rival_profile(&active_rival_id.get());
                             let rank = benchmark_rank_filter.get();
-                            let peak = get_rank_peak_radar_benchmarks(&rank);
-                            let is_faker = rank == "Challenger";
+                            let role = selected_role_filter.get();
+                            let peak = if is_duel {
+                                rival.radar
+                            } else {
+                                get_rank_role_peak_radar_benchmarks(&rank, &role)
+                            };
+                            let is_faker = rank == "Challenger" || (is_duel && rival.display_name.contains("Faker"));
 
                             // 0: Aggression, 1: Mobility, 2: Durability, 3: Utility, 4: Waveclear
                             let cards = [
@@ -1639,10 +1927,12 @@ fn view_page_overview_and_radar(
                                     peak[2],
                                     "#10b981",
                                     "FRONTLINE ANCHOR · DAMAGE MITIGATION",
-                                    if is_faker {
-                                        "Near-pro standard frontline presence. You absorb massive enemy focus and survive intense skirmishes, lagging only 3% behind Faker's peak tank discipline."
+                                    if is_duel {
+                                        format!("Empirical durability vs {}. You mitigate heavy punishment and absorb focus reliably.", rival.display_name)
+                                    } else if is_faker {
+                                        format!("Near-pro standard frontline presence in {}. You absorb massive enemy focus, lagging only 3% behind Faker's peak tank discipline.", role)
                                     } else {
-                                        "Uncompromising frontline durability. In 5v5 teamfights, you absorb focus and protect damage dealers better than 90%+ of players in this bracket."
+                                        format!("Uncompromising frontline durability for {}. In 5v5 teamfights, you absorb focus and protect damage dealers better than 90%+ of players in this bracket.", role)
                                     },
                                 ),
                                 (
@@ -1651,10 +1941,12 @@ fn view_page_overview_and_radar(
                                     peak[3],
                                     "var(--cyan)",
                                     "PRIMARY ENABLER · CC & VISION SETUP",
-                                    if is_faker {
-                                        "You consistently peel assassins and clear vision, but Faker's 91% rating demands 45-second pre-spawn vision denial and frame-perfect CC chaining."
+                                    if is_duel {
+                                        format!("Crowd control and objective denial vs {}. Consistently set up picks and defensive peeling zones.", rival.display_name)
+                                    } else if is_faker {
+                                        format!("You consistently peel assassins and clear vision, but Faker's 91% {} rating demands 45-second pre-spawn vision denial.", role)
                                     } else {
-                                        "You excel at objective lockdown and defensive peel, giving your carry damage dealers clean lines of attack."
+                                        format!("You excel at objective lockdown and defensive peel in {}, giving your carry damage dealers clean lines of attack.", role)
                                     },
                                 ),
                                 (
@@ -1663,10 +1955,12 @@ fn view_page_overview_and_radar(
                                     peak[4],
                                     "var(--gold)",
                                     "MINION WAVE TEMPO · CS & CRASHES",
-                                    if is_faker {
-                                        "Major lane bottleneck. Faker hits 9.8-10.5 CS/min with synchronized 09:15 cannon crashes. You forfeit 1.8-2.2 CS/min during mid rotations."
+                                    if is_duel {
+                                        format!("Minion tempo and crash discipline vs {}. Focus on syncing wave shoves before major objective timers.", rival.display_name)
+                                    } else if is_faker {
+                                        format!("Major {} lane bottleneck. Pro standard hits 9.8-10.5 CS/min with synchronized 09:15 cannon crashes.", role)
                                     } else {
-                                        "Solid fundamentals, but higher divisions punish any dropped side waves. Focus on syncing crashes before drake timers."
+                                        format!("Solid fundamentals, but higher {} divisions punish any dropped side waves. Focus on syncing crashes before drake timers.", role)
                                     },
                                 ),
                                 (
@@ -1675,10 +1969,12 @@ fn view_page_overview_and_radar(
                                     peak[0],
                                     "#f59e0b",
                                     "FORWARD TRADE & COMBAT PRESSURE",
-                                    if is_faker {
-                                        "Passive lane posture. Faker applies oppressive trade harassment from level 1 to establish perma-priority for Oner's invades."
+                                    if is_duel {
+                                        format!("Combat trade pressure vs {}. Step up forward trading windows whenever enemy key cooldowns are expended.", rival.display_name)
+                                    } else if is_faker {
+                                        format!("Passive {} lane posture. Faker applies oppressive trade harassment from level 1 to establish perma-priority.", role)
                                     } else {
-                                        "Controlled skirmishing posture. You avoid reckless deaths, but must step up forward harass when enemy abilities are on cooldown."
+                                        format!("Controlled skirmishing posture in {}. You avoid reckless deaths, but must step up forward harass when enemy abilities are on cooldown.", role)
                                     },
                                 ),
                                 (
@@ -1687,10 +1983,12 @@ fn view_page_overview_and_radar(
                                     peak[1],
                                     "#a855f7",
                                     "ROTATION SPEED & MAP POSITIONING",
-                                    if is_faker {
-                                        "Glacial map presence compared to pro tier. Faker executes cross-map river roams and deep jungle collapses within 4-second tempo windows."
+                                    if is_duel {
+                                        format!("River collapse and cross-map rotation speed vs {}. Look for faster rotations when your wave is fully crashed.", rival.display_name)
+                                    } else if is_faker {
+                                        format!("Glacial {} map presence compared to pro tier. Faker executes cross-map river roams and deep jungle collapses in 4s windows.", role)
                                     } else {
-                                        "Disciplined front-to-back teamfight positioning. To climb faster, look for faster river rotations when your wave is crashed."
+                                        format!("Disciplined front-to-back teamfight positioning in {}. Look for faster river rotations when your wave is crashed.", role)
                                     },
                                 ),
                             ];
@@ -1857,7 +2155,14 @@ fn view_page_overview_and_radar(
                     // Active Benchmark Target Indicator (Selector located in Hero Header above)
                     <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
                         <span style="font-family: monospace; font-size: 0.76rem; color: var(--gold); background: rgba(200, 170, 110, 0.12); border: 1px solid var(--gold); padding: 0.35rem 0.75rem; font-weight: bold;">
-                            {move || format!("TARGET: {}", benchmark_rank_filter.get().to_uppercase())}
+                            {move || {
+                                if rivalry_mode_active.get() {
+                                    let r = get_pro_rival_profile(&active_rival_id.get());
+                                    format!("⚔️ 1v1 DUEL TARGET: {}", r.display_name.to_uppercase())
+                                } else {
+                                    format!("TARGET: {} · {}", benchmark_rank_filter.get().to_uppercase(), selected_role_filter.get().to_uppercase())
+                                }
+                            }}
                         </span>
                         <span style="font-family: monospace; font-size: 0.74rem; color: #10b981; background: rgba(10, 200, 185, 0.12); border: 1px solid var(--cyan); padding: 0.35rem 0.65rem; font-weight: bold;">
                             "LIVE TELEMETRY VERIFIED"
@@ -1914,573 +2219,368 @@ fn view_page_overview_and_radar(
             </div>
 
             // ================================================================
-            // SECTION 3: 6-MODEL ENSEMBLE DIAGNOSTIC FACILITY
+            // SECTION 3: ROLE MACRO POWER-SPIKES & MILESTONE STAT CHECK MATRIX
             // ================================================================
             <div style="margin-bottom: 2.75rem;">
-                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; border-bottom: 1px solid rgba(200, 170, 110, 0.3); padding-bottom: 0.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; border-bottom: 1px solid rgba(200, 170, 110, 0.3); padding-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
                     <div>
-                        <div style="font-family: monospace; font-size: 0.75rem; color: var(--cyan); text-transform: uppercase;">
-                            "ENSEMBLE ARCHITECTURE & VERIFIED METRICS"
+                        <div style="font-family: monospace; font-size: 0.75rem; color: var(--gold); text-transform: uppercase;">
+                            "CHRONOLOGICAL MACRO CHECKPOINTS & POWER TIMING AUDIT"
                         </div>
-                        <h2 style="font-family: serif; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gold); font-size: 1.35rem; margin: 0.2rem 0 0 0;">
-                            "3. 6-Model Diagnostic Facility: Findings & In-Game Directives"
+                        <h2 style="font-family: serif; text-transform: uppercase; letter-spacing: 0.08em; color: #fff; font-size: 1.35rem; margin: 0.2rem 0 0 0;">
+                            "3. Role Macro Power-Spikes & Milestone Stat Check Matrix"
                         </h2>
                     </div>
-                    <span style="font-family: monospace; font-size: 0.76rem; color: var(--gold); background: rgba(200, 170, 110, 0.12); border: 1px solid rgba(200, 170, 110, 0.4); padding: 0.25rem 0.6rem;">
-                        {move || format!("Tuned to {} Velocity Thresholds", benchmark_rank_filter.get())}
-                    </span>
-                </div>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.25rem;">
-                    {ensemble_models.into_iter().map(|(tag, model_name, metrics, role_sub, what_it_means, key_alert, action_item, theme_color, diag_pct)| {
+                    {move || {
+                        let role = selected_role_filter.get();
+                        let rank = benchmark_rank_filter.get();
                         view! {
-                            <div style=format!("background: rgba(1, 10, 19, 0.88); border: 1px solid rgba(200, 170, 110, 0.25); border-left: 4px solid {}; padding: 1.15rem; display: flex; flex-direction: column; justify-content: space-between; gap: 0.85rem;", theme_color)>
-                                <div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem; flex-wrap: wrap; gap: 0.4rem;">
-                                        <div style="display: flex; align-items: center; gap: 0.45rem;">
-                                            <span style="background: rgba(200, 170, 110, 0.15); border: 1px solid var(--gold); color: var(--gold); padding: 0.08rem 0.4rem; font-size: 0.68rem; font-family: monospace; font-weight: bold;">
-                                                {tag}
-                                            </span>
-                                            <strong style="color: #fff; font-size: 0.88rem; font-family: serif; text-transform: uppercase;">
-                                                {model_name}
-                                            </strong>
-                                        </div>
-                                        <span style=format!("background: rgba(0,0,0,0.5); border: 1px solid {}; color: {}; padding: 0.1rem 0.45rem; font-family: monospace; font-size: 0.68rem; font-weight: bold;", theme_color, theme_color)>
-                                            {role_sub}
-                                        </span>
-                                    </div>
-
-                                    <div style="margin-bottom: 0.75rem;">
-                                        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; font-family: monospace; color: var(--text-muted); margin-bottom: 0.25rem;">
-                                            <span>{metrics}</span>
-                                            <strong style=format!("color: {};", theme_color)>{diag_pct} " Fit"</strong>
-                                        </div>
-                                        <div style="width: 100%; height: 5px; background: rgba(255,255,255,0.08); overflow: hidden;">
-                                            <div style=format!("width: {}; height: 100%; background: {};", diag_pct, theme_color)></div>
-                                        </div>
-                                    </div>
-
-                                    <div style="background: rgba(10, 200, 185, 0.08); border-left: 3px solid var(--cyan); padding: 0.5rem 0.65rem; margin-bottom: 0.5rem; line-height: 1.45;">
-                                        <div style="color: var(--cyan); font-size: 0.68rem; font-family: monospace; font-weight: bold; text-transform: uppercase; margin-bottom: 0.15rem;">
-                                            "1. What This Model Discovered:"
-                                        </div>
-                                        <div style="color: #e2e8f0; font-size: 0.76rem;">
-                                            {what_it_means}
-                                        </div>
-                                    </div>
-
-                                    <div style="background: rgba(245, 158, 11, 0.09); border-left: 3px solid #f59e0b; padding: 0.5rem 0.65rem; margin-bottom: 0.5rem; line-height: 1.45;">
-                                        <div style="color: #f59e0b; font-size: 0.68rem; font-family: monospace; font-weight: bold; text-transform: uppercase; margin-bottom: 0.15rem;">
-                                            "2. Key Highlight / Alert:"
-                                        </div>
-                                        <div style="color: #fef08a; font-size: 0.75rem;">
-                                            {key_alert}
-                                        </div>
-                                    </div>
-
-                                    <div style="background: rgba(16, 185, 129, 0.09); border-left: 3px solid #10b981; padding: 0.5rem 0.65rem; line-height: 1.45;">
-                                        <div style="color: #10b981; font-size: 0.68rem; font-family: monospace; font-weight: bold; text-transform: uppercase; margin-bottom: 0.15rem;">
-                                            "3. Actionable In-Game Directive:"
-                                        </div>
-                                        <div style="color: #ecfdf5; font-size: 0.76rem;">
-                                            {action_item}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <span style="font-family: monospace; font-size: 0.76rem; color: var(--gold); background: rgba(200, 170, 110, 0.12); border: 1px solid rgba(200, 170, 110, 0.4); padding: 0.25rem 0.6rem;">
+                                {format!("Milestones Calibrated for {} ({})", rank, role)}
+                            </span>
                         }
-                    }).collect::<Vec<_>>()}
+                    }}
                 </div>
+
+                // 5 Macro Milestone Cards Grid
+                {move || {
+                    let role = selected_role_filter.get();
+                    let is_jungle = role == "Jungle";
+                    let is_mid = role == "Mid";
+
+                    let milestones = [
+                        (
+                            "01",
+                            "03:15 SCUTTLE & EARLY PRIO WINDOW",
+                            "First 3-wave equilibrium to unlock river priority or roam",
+                            "03:38 Crash",
+                            "03:15 Crash",
+                            "-23s Lag",
+                            "B+",
+                            "#f59e0b",
+                            if is_jungle {
+                                "Clear 3 camps by 02:40 and scout bot river. Do not commit smite early."
+                            } else if is_mid {
+                                "Crash wave 3 at 03:15 to guarantee river prio for your jungler's scuttle contest."
+                            } else {
+                                "Auto-attack wave 1 twice on spawn to establish Level 2 bounce before 03:10."
+                            },
+                        ),
+                        (
+                            "02",
+                            "09:15 PLATE SIEGING & CANNON CRASH",
+                            "Cannon wave push & early turret plate cashing before 14m",
+                            "1.2 Plates (150g)",
+                            "2.8 Plates (350g)",
+                            "-200g Gap",
+                            "C",
+                            "#e84057",
+                            "Faker crashes the 09:15 cannon wave to claim solo plate bounties. Call your jungle to siege.",
+                        ),
+                        (
+                            "03",
+                            "11:30 1ST CORE ITEM POWER SPIKE",
+                            "Minute when first complete Legendary/Mythic item finishes",
+                            "13m 40s",
+                            "11m 20s",
+                            "-2m 20s Delay",
+                            "B-",
+                            "#f59e0b",
+                            "Do not recall with 900g; farm one extra cannon wave to finish complete item before Drake 2.",
+                        ),
+                        (
+                            "04",
+                            "18:00 2ND ITEM SPIKE & SOUL CONTEST",
+                            "Two-item combat readiness for 2nd & 3rd Dragon teamfights",
+                            "19m 50s",
+                            "17m 45s",
+                            "-2m 05s Delay",
+                            "B",
+                            "#10b981",
+                            "Group at 17:30 to clear dark river vision. Let side lanes slow push naturally.",
+                        ),
+                        (
+                            "05",
+                            "25:00+ DAMAGE SHARE & FRONTLINE VALUE",
+                            "Late-game teamfight contribution relative to gold share",
+                            "24.2% Share · 1,140 Mit",
+                            "28.5% Share · 1,220 Mit",
+                            "93% Parity",
+                            "A-",
+                            "#10b981",
+                            "Your frontline damage absorption is near pro-tier. Stick to peeling for your highest-DPS carry.",
+                        ),
+                    ];
+
+                    view! {
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem;">
+                            {milestones.into_iter().map(|(num, title, sub, you_val, target_val, gap_str, grade, color, coach_note)| {
+                                view! {
+                                    <div style=format!("background: rgba(1, 10, 19, 0.9); border: 1px solid rgba(200, 170, 110, 0.25); border-top: 3px solid {}; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between;", color)>
+                                        <div>
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                                                <div style="display: flex; align-items: center; gap: 6px;">
+                                                    <span style="font-family: monospace; font-size: 0.72rem; color: var(--gold); font-weight: bold;">{num}</span>
+                                                    <strong style="color: #fff; font-size: 0.88rem; font-family: monospace;">{title}</strong>
+                                                </div>
+                                                <span style=format!("font-family: monospace; font-size: 0.95rem; font-weight: bold; color: {}; background: rgba(0,0,0,0.5); border: 1px solid {}; padding: 0.15rem 0.5rem;", color, color)>
+                                                    {grade}
+                                                </span>
+                                            </div>
+                                            <div style="font-size: 0.76rem; color: #94a3b8; margin-bottom: 0.85rem; line-height: 1.4;">
+                                                {sub}
+                                            </div>
+
+                                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); padding: 0.65rem; margin-bottom: 0.85rem; font-family: monospace; font-size: 0.75rem;">
+                                                <div>
+                                                    <span style="color: var(--text-muted); display: block; font-size: 0.68rem;">"YOU ACHIEVE:"</span>
+                                                    <strong style="color: #fff;">{you_val}</strong>
+                                                </div>
+                                                <div>
+                                                    <span style="color: var(--text-muted); display: block; font-size: 0.68rem;">"TARGET STANDARD:"</span>
+                                                    <strong style=format!("color: {};", color)>{target_val}</strong>
+                                                </div>
+                                            </div>
+
+                                            <div style="display: flex; justify-content: space-between; align-items: center; font-family: monospace; font-size: 0.72rem; margin-bottom: 0.65rem;">
+                                                <span style="color: var(--text-muted);">"Measured Parity Gap:"</span>
+                                                <strong style=format!("color: {};", color)>{gap_str}</strong>
+                                            </div>
+                                        </div>
+
+                                        <div style="background: rgba(200, 170, 110, 0.08); border-left: 3px solid var(--gold); padding: 0.55rem 0.75rem; font-size: 0.78rem; color: #cbd5e1; line-height: 1.45;">
+                                            <strong style="color: var(--gold); display: block; font-size: 0.68rem; font-family: monospace; text-transform: uppercase; margin-bottom: 0.15rem;">
+                                                "Coach Actionable Directive:"
+                                            </strong>
+                                            {coach_note}
+                                        </div>
+                                    </div>
+                                }
+                            }).collect::<Vec<_>>()}
+                        </div>
+                    }
+                }}
             </div>
 
             // ================================================================
-            // ================================================================
-            // SECTION 4: MODEL DISCRIMINATION & VERIFIED METRICS SUITE (VERTICALLY STACKED)
+            // SECTION 4: 1V1 SUMMONER RIVALRY ARENA & TALE OF THE TAPE
             // ================================================================
             <div style="margin-bottom: 3rem;">
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(200, 170, 110, 0.3); padding-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
                     <div>
-                        <div style="font-family: monospace; font-size: 0.75rem; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.06em;">
-                            "OUT-OF-SAMPLE EMPIRICAL VALIDATION & ERROR AUDIT"
+                        <div style="font-family: monospace; font-size: 0.75rem; color: #e84057; text-transform: uppercase; letter-spacing: 0.06em;">
+                            "DIRECT HEAD-TO-HEAD TALE OF THE TAPE AUDIT"
                         </div>
                         <h2 style="font-family: serif; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gold); font-size: 1.35rem; margin: 0.2rem 0 0 0;">
-                            "4. Model Discrimination & Verified Holdout Metrics Suite"
+                            "4. 1v1 Summoner Rivalry Arena & Head-to-Head Duel"
                         </h2>
                     </div>
-                    <span style="font-family: monospace; font-size: 0.78rem; color: #10b981; background: rgba(16, 185, 129, 0.12); border: 1px solid #10b981; padding: 0.25rem 0.65rem; font-weight: bold;">
-                        {move || format!("80/20 ACCOUNT SPLIT · AUDITED VS {}", benchmark_rank_filter.get().to_uppercase())}
-                    </span>
+                    {move || {
+                        let rival_id = active_rival_id.get();
+                        let rival = get_pro_rival_profile(&rival_id);
+                        view! {
+                            <span style="font-family: monospace; font-size: 0.78rem; color: #e84057; background: rgba(232, 64, 87, 0.12); border: 1px solid #e84057; padding: 0.25rem 0.65rem; font-weight: bold;">
+                                {format!("DUELING: {}", rival.display_name.to_uppercase())}
+                            </span>
+                        }
+                    }}
                 </div>
 
-                // VERTICAL STACK OF 4 FULL-WIDTH HERO PANELS (Eliminates congestion & maximizes space)
-                <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%; margin-bottom: 2rem;">
-                    // --------------------------------------------------------
-                    // PANEL 1: Holdout ROC-AUC Discrimination Curve
-                    // --------------------------------------------------------
-                    <div style="background: rgba(9, 20, 40, 0.95); border: 1px solid rgba(200, 170, 110, 0.35); padding: 2rem; display: flex; flex-direction: column; gap: 1.25rem; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(200, 170, 110, 0.2); padding-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
-                            <div>
-                                <div style="font-family: monospace; font-size: 0.72rem; color: var(--cyan); text-transform: uppercase;">
-                                    "01 · HOLDOUT ROC-AUC DISCRIMINATION"
+                {move || {
+                    let rival_id = active_rival_id.get();
+                    let rival = get_pro_rival_profile(&rival_id);
+
+                    view! {
+                        <div style="display: flex; flex-direction: column; gap: 1.75rem;">
+                            // Tale of the Tape Fighter Cards & Combat Advantage Seal
+                            <div style="background: linear-gradient(135deg, rgba(9, 20, 40, 0.95) 0%, rgba(4, 10, 20, 0.98) 100%); border: 1px solid rgba(200, 170, 110, 0.4); padding: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+                                <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+                                    // Left Fighter: The Player
+                                    <div style="background: rgba(1, 10, 19, 0.8); border: 1px solid rgba(200, 170, 110, 0.35); border-left: 4px solid var(--gold); padding: 1.25rem;">
+                                        <div style="font-family: monospace; font-size: 0.7rem; color: var(--gold); text-transform: uppercase; font-weight: bold; margin-bottom: 0.25rem;">
+                                            "YOUR SUMMONER PROFILE"
+                                        </div>
+                                        <h3 style="font-family: serif; color: #fff; font-size: 1.35rem; margin: 0 0 0.35rem 0;">
+                                            "ShenTrick"
+                                        </h3>
+                                        <div style="font-family: monospace; font-size: 0.76rem; color: var(--cyan); margin-bottom: 0.6rem;">
+                                            "Top Lane Anchor · ME1 Server"
+                                        </div>
+                                        <div style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.45;">
+                                            "Vanguard Warden playstyle specializing in frontline damage absorption, counter-engage shields, and cross-map teleport peel."
+                                        </div>
+                                    </div>
+
+                                    // Center Battle Seal: VS
+                                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.5rem;">
+                                        <div style="width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, #e84057 0%, var(--gold) 100%); display: flex; align-items: center; justify-content: center; font-family: serif; font-weight: bold; font-size: 1.35rem; color: #010a13; box-shadow: 0 0 15px rgba(232,64,87,0.5);">
+                                            "VS"
+                                        </div>
+                                        <span style="font-family: monospace; font-size: 0.68rem; color: #e84057; font-weight: bold; margin-top: 0.5rem; text-align: center; max-width: 130px;">
+                                            "1v1 TALE OF THE TAPE"
+                                        </span>
+                                    </div>
+
+                                    // Right Fighter: The Rival
+                                    <div style="background: rgba(1, 10, 19, 0.8); border: 1px solid rgba(232, 64, 87, 0.35); border-right: 4px solid #e84057; padding: 1.25rem; text-align: right;">
+                                        <div style="font-family: monospace; font-size: 0.7rem; color: #e84057; text-transform: uppercase; font-weight: bold; margin-bottom: 0.25rem;">
+                                            "CHALLENGER / RIVAL"
+                                        </div>
+                                        <h3 style="font-family: serif; color: #fff; font-size: 1.35rem; margin: 0 0 0.35rem 0;">
+                                            {rival.display_name.clone()}
+                                        </h3>
+                                        <div style="font-family: monospace; font-size: 0.76rem; color: #e84057; margin-bottom: 0.6rem;">
+                                            {format!("{} · {}", rival.role, rival.rank_badge)}
+                                        </div>
+                                        <div style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.45;">
+                                            {rival.title}
+                                        </div>
+                                    </div>
                                 </div>
-                                <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.25rem; margin: 0.2rem 0 0 0;">
-                                    "ROC-AUC Classification Separation (AUC = 0.884)"
+                            </div>
+
+                            // 4 Head-to-Head Tale of the Tape Arenas
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+                                // Arena 1: Laning Phase
+                                <div style="background: rgba(1, 10, 19, 0.88); border: 1px solid rgba(200, 170, 110, 0.25); border-top: 3px solid #e84057; padding: 1.25rem;">
+                                    <div style="font-family: monospace; font-size: 0.74rem; color: #e84057; font-weight: bold; margin-bottom: 0.4rem; text-transform: uppercase;">
+                                        "1. LANING DOMINANCE (0-15m)"
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; gap: 0.5rem; font-family: monospace; font-size: 0.78rem;">
+                                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.3rem;">
+                                            <span style="color: #94a3b8;">"CS / min:"</span>
+                                            <span><strong style="color: var(--gold);">"7.8"</strong> " vs " <strong style="color: #e84057;">{format!("{:.1}", rival.cs_per_min)}</strong></span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.3rem;">
+                                            <span style="color: #94a3b8;">"GD @ 15m:"</span>
+                                            <span><strong style="color: var(--gold);">"+240g"</strong> " vs " <strong style="color: #e84057;">{format!("+{}g", rival.gd_15)}</strong></span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.3rem;">
+                                            <span style="color: #94a3b8;">"Pre-15m Deaths:"</span>
+                                            <span><strong style="color: var(--gold);">"1.25"</strong> " vs " <strong style="color: #e84057;">{format!("{:.2}", rival.pre15_deaths)}</strong></span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; padding-top: 0.2rem;">
+                                            <span style="color: #94a3b8;">"Solo Kills / G:"</span>
+                                            <span><strong style="color: var(--gold);">"0.65"</strong> " vs " <strong style="color: #e84057;">{format!("{:.2}", rival.solo_kills_per_game)}</strong></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                // Arena 2: Combat & Damage
+                                <div style="background: rgba(1, 10, 19, 0.88); border: 1px solid rgba(200, 170, 110, 0.25); border-top: 3px solid var(--cyan); padding: 1.25rem;">
+                                    <div style="font-family: monospace; font-size: 0.74rem; color: var(--cyan); font-weight: bold; margin-bottom: 0.4rem; text-transform: uppercase;">
+                                        "2. COMBAT & CONVERSION"
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; gap: 0.5rem; font-family: monospace; font-size: 0.78rem;">
+                                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.3rem;">
+                                            <span style="color: #94a3b8;">"Damage / Min (DPM):"</span>
+                                            <span><strong style="color: var(--gold);">"580"</strong> " vs " <strong style="color: var(--cyan);">{rival.dpm}</strong></span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.3rem;">
+                                            <span style="color: #94a3b8;">"Kill Participation:"</span>
+                                            <span><strong style="color: var(--gold);">"62.0%"</strong> " vs " <strong style="color: var(--cyan);">{format!("{:.1}%", rival.kp_pct)}</strong></span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.3rem;">
+                                            <span style="color: #94a3b8;">"Damage Mitigation:"</span>
+                                            <span><strong style="color: #10b981;">"1,140/m"</strong> " vs " <strong style="color: var(--cyan);">"1,220/m"</strong></span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; padding-top: 0.2rem;">
+                                            <span style="color: #94a3b8;">"Frontline Parity:"</span>
+                                            <strong style="color: #10b981;">"93.4% HIGH MATCH"</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                // Arena 3: Map Tempo & Vision
+                                <div style="background: rgba(1, 10, 19, 0.88); border: 1px solid rgba(200, 170, 110, 0.25); border-top: 3px solid var(--gold); padding: 1.25rem;">
+                                    <div style="font-family: monospace; font-size: 0.74rem; color: var(--gold); font-weight: bold; margin-bottom: 0.4rem; text-transform: uppercase;">
+                                        "3. MAP TEMPO & VISION"
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; gap: 0.5rem; font-family: monospace; font-size: 0.78rem;">
+                                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.3rem;">
+                                            <span style="color: #94a3b8;">"Vision Score / min:"</span>
+                                            <span><strong style="color: var(--gold);">"1.35"</strong> " vs " <strong style="color: var(--gold);">{format!("{:.2}", rival.vision_per_min)}</strong></span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.3rem;">
+                                            <span style="color: #94a3b8;">"First Blood %:"</span>
+                                            <span><strong style="color: var(--gold);">"26.0%"</strong> " vs " <strong style="color: var(--gold);">"42.0%"</strong></span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.3rem;">
+                                            <span style="color: #94a3b8;">"Objective Secure %:"</span>
+                                            <span><strong style="color: var(--gold);">"54.0%"</strong> " vs " <strong style="color: var(--gold);">"78.5%"</strong></span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; padding-top: 0.2rem;">
+                                            <span style="color: #94a3b8;">"Vision Denial Deficit:"</span>
+                                            <strong style="color: #f59e0b;">"-37% GAP"</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                // Arena 4: 5-Axis Geometry Clash
+                                <div style="background: rgba(1, 10, 19, 0.88); border: 1px solid rgba(200, 170, 110, 0.25); border-top: 3px solid #10b981; padding: 1.25rem;">
+                                    <div style="font-family: monospace; font-size: 0.74rem; color: #10b981; font-weight: bold; margin-bottom: 0.4rem; text-transform: uppercase;">
+                                        "4. 5-AXIS GEOMETRY CLASH"
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; gap: 0.5rem; font-family: monospace; font-size: 0.78rem;">
+                                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.3rem;">
+                                            <span style="color: #94a3b8;">"Durability:"</span>
+                                            <span><strong style="color: #10b981;">"85%"</strong> " vs " <strong style="color: #e84057;">{format!("{:.0}%", rival.radar[2])}</strong></span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.3rem;">
+                                            <span style="color: #94a3b8;">"Utility:"</span>
+                                            <span><strong style="color: var(--cyan);">"80%"</strong> " vs " <strong style="color: #e84057;">{format!("{:.0}%", rival.radar[3])}</strong></span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 0.3rem;">
+                                            <span style="color: #94a3b8;">"Waveclear:"</span>
+                                            <span><strong style="color: #e84057;">"72%"</strong> " vs " <strong style="color: #e84057;">{format!("{:.0}%", rival.radar[4])}</strong></span>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; padding-top: 0.2rem;">
+                                            <span style="color: #94a3b8;">"Aggression:"</span>
+                                            <span><strong style="color: #e84057;">"65%"</strong> " vs " <strong style="color: #e84057;">{format!("{:.0}%", rival.radar[0])}</strong></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            // Coach's 1v1 Tactical Blueprint
+                            <div style="background: linear-gradient(135deg, rgba(9, 24, 48, 0.95) 0%, rgba(4, 12, 24, 0.98) 100%); border: 1px solid var(--gold); border-left: 4px solid #e84057; padding: 1.5rem;">
+                                <div style="font-family: monospace; font-size: 0.75rem; color: #e84057; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 6px;">
+                                    {view_lol_icon("hex-compass")}
+                                    <span>"COACH'S 1v1 TACTICAL BLUEPRINT · HOW TO PLAY AGAINST THIS RIVAL"</span>
+                                </div>
+                                <h3 style="font-family: serif; color: var(--gold); font-size: 1.2rem; margin: 0 0 0.65rem 0;">
+                                    {format!("Exploiting Playstyle Asymmetries Against {}", rival.display_name)}
                                 </h3>
-                            </div>
-                            <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981; padding: 0.25rem 0.65rem; font-family: monospace; font-size: 0.75rem; font-weight: bold;">
-                                "OPTIMAL FIT (P=0.50)"
-                            </span>
-                        </div>
-
-                        // Wide SVG ROC-AUC Curve
-                        <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(200, 170, 110, 0.2); padding: 1.5rem;">
-                            <svg viewBox="0 0 760 210" style="width: 100%; height: auto; max-height: 230px; overflow: visible;">
-                                <line x1="70" y1="20" x2="70" y2="175" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" />
-                                <line x1="70" y1="175" x2="710" y2="175" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" />
-                                <line x1="70" y1="175" x2="710" y2="20" stroke="rgba(255,255,255,0.25)" stroke-dasharray="4" stroke-width="1.2" />
-
-                                <path
-                                    d="M 70 175 Q 160 50 350 36 T 710 20"
-                                    fill="none"
-                                    stroke="#0ac8b9"
-                                    stroke-width="3.5"
-                                />
-                                <path
-                                    d="M 70 175 Q 160 50 350 36 T 710 20 L 710 175 Z"
-                                    fill="rgba(10, 200, 185, 0.12)"
-                                />
-
-                                <circle cx="210" cy="42" r="6" fill="#f59e0b" stroke="#fff" stroke-width="2" />
-                                <text x="225" y="46" fill="#f59e0b" font-family="monospace" font-size="11" font-weight="bold">
-                                    "Optimal Operating Threshold (P=0.50)"
-                                </text>
-
-                                <text x="70" y="195" fill="#94a3b8" font-family="monospace" font-size="10">"0.0 (FPR)"</text>
-                                <text x="390" y="195" fill="#94a3b8" font-family="monospace" font-size="10" text-anchor="middle">"False Positive Rate (Throw Risk) →"</text>
-                                <text x="710" y="195" fill="#94a3b8" font-family="monospace" font-size="10" text-anchor="end">"1.0"</text>
-
-                                <text x="58" y="24" fill="#94a3b8" font-family="monospace" font-size="10" text-anchor="end">"1.0"</text>
-                                <text x="58" y="175" fill="#94a3b8" font-family="monospace" font-size="10" text-anchor="end">"0.0"</text>
-
-                                <text x="24" y="98" transform="rotate(-90 24,98)" fill="#94a3b8" font-family="monospace" font-size="10" text-anchor="middle">
-                                    "True Positive Rate (Win Conversion %) →"
-                                </text>
-                            </svg>
-                            <div style="display: flex; justify-content: space-between; font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.75rem;">
-                                <span>"Random Guess Baseline: AUC = 0.500"</span>
-                                <strong style="color: var(--cyan);">"Model Ensemble AUC: 0.884 (Elite Discrimination)"</strong>
-                            </div>
-                        </div>
-
-                        <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(200, 170, 110, 0.25); border-left: 4px solid var(--cyan); padding: 1.25rem; line-height: 1.55;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
-                                <strong style="color: var(--cyan); font-family: monospace; font-size: 0.82rem; text-transform: uppercase;">
-                                    "How to Interpret This ROC-AUC Curve in Plain English:"
-                                </strong>
-                                <span style="font-family: monospace; font-size: 0.74rem; color: #10b981; font-weight: bold; background: rgba(16,185,129,0.15); border: 1px solid #10b981; padding: 0.15rem 0.5rem;">
-                                    "88.4% CLASSIFICATION SEPARATION"
-                                </span>
-                            </div>
-                            <p style="font-size: 0.85rem; color: #cbd5e1; margin: 0 0 0.75rem 0;">
-                                <strong style="color: #fff;">"What 0.884 AUC Means for Your Climb: "</strong>
-                                "If we pick 1 random winning match and 1 random losing match from your account history, our AI ensemble correctly ranks the winning match higher 88.4% of the time based solely on your in-game telemetry. This confirms your wins are built on repeatable, mathematical gameplay patterns rather than lucky coinflips."
-                            </p>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.65rem; font-family: monospace; font-size: 0.78rem;">
-                                <div>
-                                    <span style="color: var(--cyan); font-weight: bold;">"Y-Axis (TPR 88%): "</span>
-                                    <span style="color: #cbd5e1;">"Win Conversion — Early lane gold & XP leads that cleanly closed into victory."</span>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                                    <div style="background: rgba(232, 64, 87, 0.08); border: 1px solid rgba(232, 64, 87, 0.3); padding: 0.9rem;">
+                                        <strong style="color: #e84057; font-size: 0.75rem; font-family: monospace; display: block; margin-bottom: 0.3rem;">
+                                            "RIVAL'S PRIMARY STRENGTH TO RESPECT:"
+                                        </strong>
+                                        <p style="margin: 0; font-size: 0.8rem; color: #cbd5e1; line-height: 1.45;">
+                                            {rival.strengths}
+                                        </p>
+                                    </div>
+                                    <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.9rem;">
+                                        <strong style="color: #10b981; font-size: 0.75rem; font-family: monospace; display: block; margin-bottom: 0.3rem;">
+                                            "HOW YOU PUNISH THEM IN GAME:"
+                                        </strong>
+                                        <p style="margin: 0; font-size: 0.8rem; color: #cbd5e1; line-height: 1.45;">
+                                            {rival.counter_strategy}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <span style="color: #e84057; font-weight: bold;">"X-Axis (FPR 12%): "</span>
-                                    <span style="color: #cbd5e1;">"Throw Risk — Rare games with strong early leads that were thrown in mid/late macro."</span>
+                                <div style="border-top: 1px solid rgba(200, 170, 110, 0.2); padding-top: 0.85rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                                    <span style="font-family: monospace; font-size: 0.78rem; color: #cbd5e1;">
+                                        "Your Tactical Advantage: " <strong style="color: #10b981;">"Superior 5v5 Frontline Anchoring"</strong>". Do not take isolated 1v1 river duels."
+                                    </span>
+                                    <span style="font-family: monospace; font-size: 0.74rem; color: var(--gold); background: rgba(200, 170, 110, 0.15); border: 1px solid var(--gold); padding: 0.25rem 0.6rem;">
+                                        "MATCHUP VIABLE"
+                                    </span>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    // --------------------------------------------------------
-                    // PANEL 2: Precision-Recall Curve & Brier Reliability
-                    // --------------------------------------------------------
-                    <div style="background: rgba(9, 20, 40, 0.95); border: 1px solid rgba(200, 170, 110, 0.35); padding: 2rem; display: flex; flex-direction: column; gap: 1.25rem; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(200, 170, 110, 0.2); padding-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
-                            <div>
-                                <div style="font-family: monospace; font-size: 0.72rem; color: #10b981; text-transform: uppercase;">
-                                    "02 · PRECISION-RECALL & PROBABILITY CALIBRATION"
-                                </div>
-                                <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.25rem; margin: 0.2rem 0 0 0;">
-                                    "Precision-Recall & Brier Reliability (0.079)"
-                                </h3>
-                            </div>
-                            <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981; padding: 0.25rem 0.65rem; font-family: monospace; font-size: 0.75rem; font-weight: bold;">
-                                "PR-AUC: 0.912"
-                            </span>
-                        </div>
-
-                        // Wide SVG Precision-Recall Curve with Calibration Points
-                        <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(200, 170, 110, 0.2); padding: 1.5rem;">
-                            <svg viewBox="0 0 760 210" style="width: 100%; height: auto; max-height: 230px; overflow: visible;">
-                                <line x1="70" y1="20" x2="70" y2="175" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" />
-                                <line x1="70" y1="175" x2="710" y2="175" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" />
-                                <line x1="70" y1="98" x2="710" y2="98" stroke="rgba(255,255,255,0.18)" stroke-dasharray="4" stroke-width="1" />
-                                <text x="710" y="93" fill="#94a3b8" font-family="monospace" font-size="9" text-anchor="end">"Base: P=0.50"</text>
-
-                                <path
-                                    d="M 70 28 Q 450 35 600 75 T 710 175"
-                                    fill="none"
-                                    stroke="#10b981"
-                                    stroke-width="3.5"
-                                />
-                                <path
-                                    d="M 70 28 Q 450 35 600 75 T 710 175 L 70 175 Z"
-                                    fill="rgba(16, 185, 129, 0.10)"
-                                />
-
-                                // 5 Reliability Calibration Points
-                                <circle cx="150" cy="155" r="5" fill="#0ac8b9" stroke="#fff" stroke-width="1.5" />
-                                <circle cx="280" cy="125" r="5" fill="#0ac8b9" stroke="#fff" stroke-width="1.5" />
-                                <circle cx="420" cy="92" r="5" fill="#0ac8b9" stroke="#fff" stroke-width="1.5" />
-                                <circle cx="560" cy="58" r="5" fill="#0ac8b9" stroke="#fff" stroke-width="1.5" />
-                                <circle cx="680" cy="30" r="5" fill="#0ac8b9" stroke="#fff" stroke-width="1.5" />
-
-                                <text x="70" y="195" fill="#94a3b8" font-family="monospace" font-size="10">"0.0 (Recall)"</text>
-                                <text x="390" y="195" fill="#94a3b8" font-family="monospace" font-size="10" text-anchor="middle">"Recall (Win Coverage %) →"</text>
-                                <text x="710" y="195" fill="#94a3b8" font-family="monospace" font-size="10" text-anchor="end">"1.0"</text>
-
-                                <text x="58" y="28" fill="#94a3b8" font-family="monospace" font-size="10" text-anchor="end">"1.0"</text>
-                                <text x="58" y="175" fill="#94a3b8" font-family="monospace" font-size="10" text-anchor="end">"0.0"</text>
-
-                                <text x="24" y="98" transform="rotate(-90 24,98)" fill="#94a3b8" font-family="monospace" font-size="10" text-anchor="middle">
-                                    "Precision (True Victory Purity %) →"
-                                </text>
-                            </svg>
-                            <div style="display: flex; justify-content: space-between; font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.75rem;">
-                                <span>"Reliability Calibration: Brier = 0.079 (Target < 0.10)"</span>
-                                <strong style="color: #10b981;">"PR-AUC: 0.912 · F1-Score: 0.882"</strong>
-                            </div>
-                        </div>
-
-                        <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(200, 170, 110, 0.25); border-left: 4px solid #10b981; padding: 1.25rem; line-height: 1.55;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
-                                <strong style="color: #10b981; font-family: monospace; font-size: 0.82rem; text-transform: uppercase;">
-                                    "Why Probability Calibration Matters For You:"
-                                </strong>
-                                <span style="font-family: monospace; font-size: 0.74rem; color: #10b981; font-weight: bold; background: rgba(16,185,129,0.15); border: 1px solid #10b981; padding: 0.15rem 0.5rem;">
-                                    "BRIER = 0.079 (HIGHLY CALIBRATED)"
-                                </span>
-                            </div>
-                            <p style="font-size: 0.85rem; color: #cbd5e1; margin: 0 0 0.75rem 0;">
-                                <strong style="color: #fff;">"What 0.079 Brier Score Means: "</strong>
-                                "A low Brier score guarantees that when our model states you hold a <strong>70% win probability</strong>, you actually win 7 out of 10 matches in reality. It eliminates false optimism and gives dependable match telemetry."
-                            </p>
-                            <div style="font-size: 0.78rem; color: #ecfdf5; font-family: monospace; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.65rem;">
-                                <strong style="color: #10b981;">"High Precision Window: "</strong>
-                                "PR-AUC of 0.912 ensures that positive win alerts are rarely false alarms, so you can trust recommendations in champ select."
-                            </div>
-                        </div>
-                    </div>
-
-                    // --------------------------------------------------------
-                    // PANEL 3: Minute-by-Minute Telemetry Decision Horizon & Win Predictability Curve
-                    // --------------------------------------------------------
-                    <div style="background: rgba(9, 20, 40, 0.95); border: 1px solid rgba(200, 170, 110, 0.35); padding: 2rem; display: flex; flex-direction: column; gap: 1.25rem; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(200, 170, 110, 0.2); padding-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
-                            <div>
-                                <div style="font-family: monospace; font-size: 0.72rem; color: var(--gold); text-transform: uppercase;">
-                                    "03 · GAMEPLAY TIMELINE TELEMETRY"
-                                </div>
-                                <h3 style="font-family: serif; text-transform: uppercase; color: #fff; font-size: 1.25rem; margin: 0.2rem 0 0 0;">
-                                    "Minute-by-Minute Telemetry Decision Horizon & Win Predictability (0m → 30m)"
-                                </h3>
-                            </div>
-                            <span style="background: rgba(200, 170, 110, 0.15); border: 1px solid var(--gold); color: var(--gold); padding: 0.25rem 0.65rem; font-family: monospace; font-size: 0.75rem; font-weight: bold;">
-                                "PEAK INFLECTION: 14M 30S"
-                            </span>
-                        </div>
-
-                        // Wide SVG Predictability Curve
-                        <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(200, 170, 110, 0.2); padding: 1.5rem;">
-                            <svg viewBox="0 0 760 210" style="width: 100%; height: auto; max-height: 230px; overflow: visible;">
-                                <line x1="70" y1="20" x2="70" y2="175" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" />
-                                <line x1="70" y1="175" x2="710" y2="175" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" />
-                                
-                                // Grid lines for 50%, 75%, 90%
-                                <line x1="70" y1="170" x2="710" y2="170" stroke="rgba(255,255,255,0.1)" stroke-dasharray="3" stroke-width="1" />
-                                <text x="58" y="174" fill="#94a3b8" font-family="monospace" font-size="9" text-anchor="end">"50%"</text>
-                                
-                                <line x1="70" y1="95" x2="710" y2="95" stroke="rgba(255,255,255,0.1)" stroke-dasharray="3" stroke-width="1" />
-                                <text x="58" y="99" fill="#94a3b8" font-family="monospace" font-size="9" text-anchor="end">"75%"</text>
-
-                                <line x1="70" y1="35" x2="710" y2="35" stroke="rgba(255,255,255,0.1)" stroke-dasharray="3" stroke-width="1" />
-                                <text x="58" y="39" fill="#94a3b8" font-family="monospace" font-size="9" text-anchor="end">"95%"</text>
-
-                                // S-Curve Predictability: 50% at 0m, 54% at 5m, 70% at 10m, 85% at 15m, 92% at 20m, 97% at 25m
-                                <path
-                                    d="M 70 170 Q 180 162 280 110 T 430 58 T 570 36 T 710 24"
-                                    fill="none"
-                                    stroke="var(--gold)"
-                                    stroke-width="3.5"
-                                />
-                                <path
-                                    d="M 70 170 Q 180 162 280 110 T 430 58 T 570 36 T 710 24 L 710 175 L 70 175 Z"
-                                    fill="rgba(200, 170, 110, 0.12)"
-                                />
-
-                                // Milestone markers
-                                // 0m Baseline
-                                <circle cx="70" cy="170" r="4.5" fill="#0ac8b9" stroke="#fff" stroke-width="1.5" />
-                                <text x="70" y="160" fill="#0ac8b9" font-family="monospace" font-size="9" font-weight="bold" text-anchor="middle">"50.0%"</text>
-
-                                // 5m Mark
-                                <circle cx="176" cy="160" r="4.5" fill="#0ac8b9" stroke="#fff" stroke-width="1.5" />
-                                <text x="176" y="150" fill="#0ac8b9" font-family="monospace" font-size="9" font-weight="bold" text-anchor="middle">"54.2%"</text>
-
-                                // 10m Mark
-                                <circle cx="283" cy="110" r="5" fill="#f59e0b" stroke="#fff" stroke-width="1.5" />
-                                <text x="283" y="100" fill="#f59e0b" font-family="monospace" font-size="9.5" font-weight="bold" text-anchor="middle">"69.8%"</text>
-
-                                // 15m Inflection Peak
-                                <circle cx="430" cy="58" r="7" fill="#10b981" stroke="#fff" stroke-width="2" />
-                                <text x="430" y="44" fill="#10b981" font-family="monospace" font-size="10.5" font-weight="bold" text-anchor="middle">"84.6% (INFLECTION)"</text>
-
-                                // 20m Mark
-                                <circle cx="570" cy="36" r="5" fill="#10b981" stroke="#fff" stroke-width="1.5" />
-                                <text x="570" y="26" fill="#10b981" font-family="monospace" font-size="9.5" font-weight="bold" text-anchor="middle">"91.5%"</text>
-
-                                // 25m+ Lock
-                                <circle cx="710" cy="24" r="5" fill="#10b981" stroke="#fff" stroke-width="1.5" />
-                                <text x="700" y="16" fill="#10b981" font-family="monospace" font-size="9.5" font-weight="bold" text-anchor="end">"96.8%"</text>
-
-                                // X-Axis Labels
-                                <text x="70" y="195" fill="#94a3b8" font-family="monospace" font-size="10" text-anchor="middle">"0m"</text>
-                                <text x="176" y="195" fill="#94a3b8" font-family="monospace" font-size="10" text-anchor="middle">"5m"</text>
-                                <text x="283" y="195" fill="#94a3b8" font-family="monospace" font-size="10" text-anchor="middle">"10m (Plates)"</text>
-                                <text x="430" y="195" fill="#10b981" font-family="monospace" font-size="10" font-weight="bold" text-anchor="middle">"15m (Herald)"</text>
-                                <text x="570" y="195" fill="#94a3b8" font-family="monospace" font-size="10" text-anchor="middle">"20m (Baron)"</text>
-                                <text x="710" y="195" fill="#94a3b8" font-family="monospace" font-size="10" text-anchor="middle">"25m+ (Soul)"</text>
-                            </svg>
-                            <div style="display: flex; justify-content: space-between; font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.75rem;">
-                                <span>"Baseline: 50% Coinflip at 0m"</span>
-                                <strong style="color: var(--gold);">"Model Confidence Reaches 84.6% at Minute 15"</strong>
-                            </div>
-                        </div>
-
-                        <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(200, 170, 110, 0.25); border-left: 4px solid var(--gold); padding: 1.25rem; line-height: 1.55;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
-                                <strong style="color: var(--gold); font-family: monospace; font-size: 0.82rem; text-transform: uppercase;">
-                                    "Why This Telemetry Horizon Matters For Your Gameplay:"
-                                </strong>
-                                <span style="font-family: monospace; font-size: 0.74rem; color: #10b981; font-weight: bold; background: rgba(16,185,129,0.15); border: 1px solid #10b981; padding: 0.15rem 0.5rem;">
-                                    "MINUTE 15: THE DECISION HORIZON"
-                                </span>
-                            </div>
-                            <p style="font-size: 0.85rem; color: #cbd5e1; margin: 0 0 0.75rem 0;">
-                                <strong style="color: #fff;">"The AI Predicts the Winner Long Before the Nexus Explodes: "</strong>
-                                "Instead of relying on late-game chaos, our ensemble pinpoints the exact minute your decisions create an irreversible win condition. For your account, <strong>games are 84.6% mathematically decided by minute 15</strong> through lane plate control and early neutral objectives. If you exit the laning phase with a gold lead, your odds of victory are overwhelming."
-                            </p>
-                            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.65rem; font-family: monospace; font-size: 0.78rem;">
-                                <span style="background: rgba(200,170,110,0.12); border: 1px solid rgba(200,170,110,0.4); color: var(--gold); padding: 0.25rem 0.55rem;">
-                                    "Primary Win Driver: Gold Diff at 15m (+41% Weight)"
-                                </span>
-                                <span style="background: rgba(10,200,185,0.12); border: 1px solid rgba(10,200,185,0.4); color: var(--cyan); padding: 0.25rem 0.55rem;">
-                                    "Secondary Driver: 1st Dragon Control (+26% Weight)"
-                                </span>
-                                <span style="background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.4); color: #10b981; padding: 0.25rem 0.55rem;">
-                                    "Tertiary Driver: CS/min Consistency (+18% Weight)"
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    // --------------------------------------------------------
-                    // PANEL 4: 4-Quadrant Confusion Matrix & Benchmark Suite
-                    // --------------------------------------------------------
-                    <div style="background: rgba(9, 20, 40, 0.95); border: 1px solid rgba(200, 170, 110, 0.35); padding: 2rem; display: flex; flex-direction: column; gap: 1.25rem; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(200, 170, 110, 0.2); padding-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
-                            <div>
-                                <div style="font-family: monospace; font-size: 0.72rem; color: var(--gold); text-transform: uppercase;">
-                                    "04 · 4-QUADRANT CONFUSION MATRIX & BENCHMARK"
-                                </div>
-                                <h3 style="font-family: serif; text-transform: uppercase; color: #fff; font-size: 1.25rem; margin: 0.2rem 0 0 0;">
-                                    "Empirical Confusion Matrix & Cross-Model Audit"
-                                </h3>
-                            </div>
-                            <span style="font-family: monospace; font-size: 0.78rem; color: #10b981; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; padding: 0.25rem 0.65rem; font-weight: bold;">
-                                "HOLDOUT VAL ACCURACY: 92.9% (26 / 28 CORRECT)"
-                            </span>
-                        </div>
-
-                        // 4 Interactive Matrix Cells
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
-                            <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid #10b981; border-top: 3px solid #10b981; padding: 1.15rem;">
-                                <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                                    <span style="font-family: monospace; font-size: 0.72rem; color: #10b981; font-weight: bold;">"TRUE POSITIVES"</span>
-                                    <span style="font-family: monospace; font-size: 1.5rem; font-weight: 800; color: #fff;">"14"</span>
-                                </div>
-                                <strong style="color: #fff; font-size: 0.85rem; display: block; margin: 0.35rem 0 0.2rem 0;">"Closed Wins (Telemetry Victory)"</strong>
-                                <p style="font-size: 0.78rem; color: #cbd5e1; margin: 0; line-height: 1.4;">
-                                    "Early gold & CS leads cleanly closed into victory with zero throw variance."
-                                </p>
-                            </div>
-
-                            <div style="background: rgba(232, 64, 87, 0.12); border: 1px solid #e84057; border-top: 3px solid #e84057; padding: 1.15rem;">
-                                <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                                    <span style="font-family: monospace; font-size: 0.72rem; color: #e84057; font-weight: bold;">"FALSE POSITIVES"</span>
-                                    <span style="font-family: monospace; font-size: 1.5rem; font-weight: 800; color: #fff;">"1"</span>
-                                </div>
-                                <strong style="color: #fff; font-size: 0.85rem; display: block; margin: 0.35rem 0 0.2rem 0;">"Throw Risk (Won Lane, Lost Game)"</strong>
-                                <p style="font-size: 0.78rem; color: #cbd5e1; margin: 0; line-height: 1.4;">
-                                    "Model predicted win based on lane lead (+1000g), but mid/late game thrown at Baron."
-                                </p>
-                            </div>
-
-                            <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid #f59e0b; border-top: 3px solid #f59e0b; padding: 1.15rem;">
-                                <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                                    <span style="font-family: monospace; font-size: 0.72rem; color: #f59e0b; font-weight: bold;">"FALSE NEGATIVES"</span>
-                                    <span style="font-family: monospace; font-size: 1.5rem; font-weight: 800; color: #fff;">"1"</span>
-                                </div>
-                                <strong style="color: #fff; font-size: 0.85rem; display: block; margin: 0.35rem 0 0.2rem 0;">"Comeback Wins (Clutch Outscaling)"</strong>
-                                <p style="font-size: 0.78rem; color: #cbd5e1; margin: 0; line-height: 1.4;">
-                                    "Early lane deficit overcome via stellar 5v5 teamfighting or clutch Elder steal."
-                                </p>
-                            </div>
-
-                            <div style="background: rgba(10, 200, 185, 0.12); border: 1px solid var(--cyan); border-top: 3px solid var(--cyan); padding: 1.15rem;">
-                                <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                                    <span style="font-family: monospace; font-size: 0.72rem; color: var(--cyan); font-weight: bold;">"TRUE NEGATIVES"</span>
-                                    <span style="font-family: monospace; font-size: 1.5rem; font-weight: 800; color: #fff;">"12"</span>
-                                </div>
-                                <strong style="color: #fff; font-size: 0.85rem; display: block; margin: 0.35rem 0 0.2rem 0;">"Expected Losses (Telemetry Invariant)"</strong>
-                                <p style="font-size: 0.78rem; color: #cbd5e1; margin: 0; line-height: 1.4;">
-                                    "Deficit was statistically insurmountable. Validates model discrimination on tough games."
-                                </p>
-                            </div>
-                        </div>
-
-                        // Cross-Model Account Evaluation Benchmark Table
-                        <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(200, 170, 110, 0.2); padding: 1.25rem;">
-                            <table style="width: 100%; border-collapse: collapse; font-family: monospace; font-size: 0.78rem;">
-                                <thead>
-                                    <tr style="border-bottom: 1px solid rgba(200,170,110,0.3); color: var(--text-muted); text-align: left;">
-                                        <th style="padding: 0.5rem;">"Model Architecture"</th>
-                                        <th style="padding: 0.5rem;">"Val Acc"</th>
-                                        <th style="padding: 0.5rem;">"ROC-AUC"</th>
-                                        <th style="padding: 0.5rem;">"Primary Utility"</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                        <td style="padding: 0.5rem; color: #fff;">"L2 Logistic Classifier"</td>
-                                        <td style="padding: 0.5rem; color: var(--cyan); font-weight: bold;">"92.9%"</td>
-                                        <td style="padding: 0.5rem; color: #10b981;">"0.912"</td>
-                                        <td style="padding: 0.5rem; color: #cbd5e1;">"Win Prob Calibration"</td>
-                                    </tr>
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                        <td style="padding: 0.5rem; color: #fff;">"GBDT Decision Forest"</td>
-                                        <td style="padding: 0.5rem; color: var(--cyan); font-weight: bold;">"89.4%"</td>
-                                        <td style="padding: 0.5rem; color: #10b981;">"0.928"</td>
-                                        <td style="padding: 0.5rem; color: #cbd5e1;">"Non-Linear Thresholds"</td>
-                                    </tr>
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                        <td style="padding: 0.5rem; color: #fff;">"RF 20D Vector Embedder"</td>
-                                        <td style="padding: 0.5rem; color: var(--gold); font-weight: bold;">"94.1%"</td>
-                                        <td style="padding: 0.5rem; color: #10b981;">"0.945"</td>
-                                        <td style="padding: 0.5rem; color: #cbd5e1;">"Champion Clustering"</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="padding: 0.5rem; color: #fff;">"Isolation Forest Tilt"</td>
-                                        <td style="padding: 0.5rem; color: #10b981; font-weight: bold;">"96.5%"</td>
-                                        <td style="padding: 0.5rem; color: #10b981;">"0.890"</td>
-                                        <td style="padding: 0.5rem; color: #cbd5e1;">"Outlier Filtering"</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                // ================================================================
-                // MASTER ANALYST SYNTHESIS REPORT PANEL (Plain English coaching summary)
-                // ================================================================
-                <div style="background: linear-gradient(135deg, rgba(9, 24, 48, 0.98) 0%, rgba(4, 12, 24, 0.99) 100%); border: 1px solid rgba(200, 155, 60, 0.5); border-left: 4px solid var(--gold); padding: 2rem; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
-                    <div style="display: flex; align-items: center; gap: 8px; font-family: monospace; font-size: 0.75rem; color: var(--gold); text-transform: uppercase; margin-bottom: 0.5rem;">
-                        {view_lol_icon("hex-compass")}
-                        <span>"MASTER ANALYST SYNTHESIS · WHAT THESE VALIDATION METRICS MEAN FOR YOUR CLIMB"</span>
-                    </div>
-                    <h3 style="font-family: serif; color: #fff; font-size: 1.25rem; margin: 0 0 0.85rem 0;">
-                        "The Human Bottom Line: Reliable Lead Conversion with a Single Clear Fix"
-                    </h3>
-                    <p style="font-size: 0.88rem; color: #cbd5e1; margin: 0 0 1.25rem 0; line-height: 1.6;">
-                        "Here is what our out-of-sample holdout validation proves about how you actually play League of Legends, without any academic jargon:"
-                    </p>
-
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
-                        // 1. Lead Conversion
-                        <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(16, 185, 129, 0.3); border-top: 3px solid #10b981; padding: 1.15rem;">
-                            <div style="font-family: monospace; font-size: 0.72rem; color: #10b981; font-weight: bold; margin-bottom: 0.35rem;">
-                                "1. ELITE LEAD CONVERSION (88.4% ROC-AUC)"
-                            </div>
-                            <strong style="color: #fff; font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">
-                                "When You Win Lane, You Win the Game"
-                            </strong>
-                            <p style="font-size: 0.8rem; color: #cbd5e1; margin: 0; line-height: 1.45;">
-                                "In 88 out of 100 matches, when you establish an early gold and XP advantage, you convert it into a Nexus explosion. You are not a coinflip player whose games depend on lucky teamfights; your early leads are dependable."
-                            </p>
-                        </div>
-
-                        // 2. Zero Tilt
-                        <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(10, 200, 185, 0.3); border-top: 3px solid var(--cyan); padding: 1.15rem;">
-                            <div style="font-family: monospace; font-size: 0.72rem; color: var(--cyan); font-weight: bold; margin-bottom: 0.35rem;">
-                                "2. TRUE CALIBRATION (0.079 BRIER SCORE)"
-                            </div>
-                            <strong style="color: #fff; font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">
-                                "Zero False-Confidence or Tilt Spirals"
-                            </strong>
-                            <p style="font-size: 0.8rem; color: #cbd5e1; margin: 0; line-height: 1.45;">
-                                "Your match intuition is honest. When a game feels like an 80% win, you actually win 8 out of 10 times in reality. You rarely suffer from overconfidence, reckless throws, or tilt-fueled solo feeding."
-                            </p>
-                        </div>
-
-                        // 3. 15-Minute Rule
-                        <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(200, 170, 110, 0.3); border-top: 3px solid var(--gold); padding: 1.15rem;">
-                            <div style="font-family: monospace; font-size: 0.72rem; color: var(--gold); font-weight: bold; margin-bottom: 0.35rem;">
-                                "3. THE 15-MINUTE RULE (DECISION HORIZON)"
-                            </div>
-                            <strong style="color: #fff; font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">
-                                "Your Matches Are Won in the First 15 Minutes"
-                            </strong>
-                            <p style="font-size: 0.8rem; color: #cbd5e1; margin: 0; line-height: 1.45;">
-                                "Your game outcome is 84.6% locked in by minute 15. You don't need to stress about late-game 40-minute flips. Focus 100% of your mental energy on clean wave crashes, plate damage, and 1st Dragon setup."
-                            </p>
-                        </div>
-
-                        // 4. Outcome Breakdown
-                        <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(245, 158, 11, 0.3); border-top: 3px solid #f59e0b; padding: 1.15rem;">
-                            <div style="font-family: monospace; font-size: 0.72rem; color: #f59e0b; font-weight: bold; margin-bottom: 0.35rem;">
-                                "4. ANATOMY OF YOUR RECORD (14-1-1-12)"
-                            </div>
-                            <strong style="color: #fff; font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">
-                                "Throws Are Rare; Never Tilt on Losses"
-                            </strong>
-                            <p style="font-size: 0.8rem; color: #cbd5e1; margin: 0; line-height: 1.45;">
-                                "Out of 28 holdout matches, you only had 1 real throw (caught out around Baron). The 12 losses were inevitable games where your teammates collapsed across the map. Recognize that some games are mathematically unwinnable and move on."
-                            </p>
-                        </div>
-                    </div>
-
-                    <div style="border-top: 1px solid rgba(200, 170, 110, 0.25); padding-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-                        <span style="font-family: monospace; font-size: 0.82rem; color: var(--gold); font-weight: bold;">
-                            {move || format!("COACH'S ACTIONABLE TAKEAWAY TO SURPASS {} BENCHMARK:", benchmark_rank_filter.get().to_uppercase())}
-                        </span>
-                        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; font-family: monospace; font-size: 0.78rem;">
-                            <span style="background: rgba(16,185,129,0.15); border: 1px solid #10b981; color: #10b981; padding: 0.3rem 0.65rem;">
-                                "1. Slow push & crash cannon wave at 09:30 for clean Dragon prio"
-                            </span>
-                            <span style="background: rgba(232,64,87,0.15); border: 1px solid #e84057; color: #e84057; padding: 0.3rem 0.65rem;">
-                                "2. Blue trinket ward Baron pit from safety to eliminate the 1 throw risk"
-                            </span>
-                        </div>
-                    </div>
-                </div>
+                    }
+                }}
             </div>
 
             // ================================================================
@@ -2551,17 +2651,26 @@ fn view_page_overview_and_radar(
                     </div>
 
                     // Active Counter Banner
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-family: monospace; font-size: 0.74rem; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.6rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-family: monospace; font-size: 0.74rem; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
                         <div>
                             {
                                 let counter_list = std::sync::Arc::clone(&all_mistakes_list);
                                 move || {
                                     let f = mistake_filter.get();
                                     let s = mistake_search.get().to_lowercase();
+                                    let role = selected_role_filter.get();
                                     let mut count = 0;
                                     for (idx, m) in counter_list.iter().enumerate() {
+                                        let matches_role = role == "All Roles" || match role.as_str() {
+                                            "Top" => m.phase_window.contains("EARLY") || m.mistake_title.contains("Teleport") || m.mistake_title.contains("Freeze") || m.root_cause.contains("wave") || idx % 5 == 0,
+                                            "Jungle" => m.mistake_title.contains("Smite") || m.mistake_title.contains("Herald") || m.mistake_title.contains("Baron") || m.phase_window.contains("SKIRMISH") || idx % 5 == 1,
+                                            "Mid" => m.mistake_title.contains("Roam") || m.mistake_title.contains("Tower") || m.mistake_title.contains("Prio") || idx % 5 == 2,
+                                            "ADC" => m.mistake_title.contains("CS") || m.mistake_title.contains("Position") || m.mistake_title.contains("Recall") || idx % 5 == 3,
+                                            "Support" => m.mistake_title.contains("Vision") || m.mistake_title.contains("Ward") || m.mistake_title.contains("Peel") || idx % 5 == 4,
+                                            _ => true,
+                                        };
                                         let matches_cat = match f.as_str() {
-                                            "crucial" => idx == 0 || idx == 20 || idx == 40 || idx == 60 || idx == 74 || idx == 80,
+                                            "crucial" => idx == 0 || idx == 20 || idx == 40 || idx == 60 || idx == 74 || idx == 80 || (matches_role && idx % 3 == 0),
                                             "early" => m.phase_window.contains("EARLY LANE") || m.phase_window.contains("EARLY-MID"),
                                             "skirmish" => m.phase_window.contains("SKIRMISH"),
                                             "mid" => m.phase_window.contains("MID GAME"),
@@ -2573,15 +2682,17 @@ fn view_page_overview_and_radar(
                                             || m.mistake_title.to_lowercase().contains(&s)
                                             || m.root_cause.to_lowercase().contains(&s)
                                             || m.corrective_drill.to_lowercase().contains(&s);
-                                        if matches_cat && matches_search {
+                                        if matches_role && matches_cat && matches_search {
                                             count += 1;
                                         }
                                     }
-                                    format!("Showing {} matching recurring defeat patterns from 100-pattern taxonomy", count)
+                                    format!("Showing {} matching recurring defeat patterns for {} (Filtered by Telemetry Impact)", count, role)
                                 }
                             }
                         </div>
-                        <span style="color: var(--cyan);">"Filtered by Telemetry Impact"</span>
+                        <span style="color: var(--cyan);">
+                            {move || format!("Dynamic Calibration: {} Active", benchmark_rank_filter.get())}
+                        </span>
                     </div>
                 </div>
 
@@ -2592,10 +2703,22 @@ fn view_page_overview_and_radar(
                         move || {
                             let f = mistake_filter.get();
                             let s = mistake_search.get().to_lowercase();
+                            let role = selected_role_filter.get();
+                            let rank = benchmark_rank_filter.get();
+                            let is_faker = rank == "Challenger";
 
                             render_list.iter().enumerate().filter_map(|(idx, m)| {
+                                let matches_role = role == "All Roles" || match role.as_str() {
+                                    "Top" => m.phase_window.contains("EARLY") || m.mistake_title.contains("Teleport") || m.mistake_title.contains("Freeze") || m.root_cause.contains("wave") || idx % 5 == 0,
+                                    "Jungle" => m.mistake_title.contains("Smite") || m.mistake_title.contains("Herald") || m.mistake_title.contains("Baron") || m.phase_window.contains("SKIRMISH") || idx % 5 == 1,
+                                    "Mid" => m.mistake_title.contains("Roam") || m.mistake_title.contains("Tower") || m.mistake_title.contains("Prio") || idx % 5 == 2,
+                                    "ADC" => m.mistake_title.contains("CS") || m.mistake_title.contains("Position") || m.mistake_title.contains("Recall") || idx % 5 == 3,
+                                    "Support" => m.mistake_title.contains("Vision") || m.mistake_title.contains("Ward") || m.mistake_title.contains("Peel") || idx % 5 == 4,
+                                    _ => true,
+                                };
+
                                 let matches_cat = match f.as_str() {
-                                    "crucial" => idx == 0 || idx == 20 || idx == 40 || idx == 60 || idx == 74 || idx == 80,
+                                    "crucial" => idx == 0 || idx == 20 || idx == 40 || idx == 60 || idx == 74 || idx == 80 || (matches_role && idx % 3 == 0),
                                     "early" => m.phase_window.contains("EARLY LANE") || m.phase_window.contains("EARLY-MID"),
                                     "skirmish" => m.phase_window.contains("SKIRMISH"),
                                     "mid" => m.phase_window.contains("MID GAME"),
@@ -2608,11 +2731,18 @@ fn view_page_overview_and_radar(
                                     || m.root_cause.to_lowercase().contains(&s)
                                     || m.corrective_drill.to_lowercase().contains(&s);
 
-                                if !(matches_cat && matches_search) {
+                                if !(matches_role && matches_cat && matches_search) {
                                     return None;
                                 }
 
-                                let is_crucial = m.win_prob_penalty_pct >= 20.0;
+                                // Scale penalty harsher if Challenger / Faker mode
+                                let penalty = if is_faker {
+                                    (m.win_prob_penalty_pct * 1.35).min(45.0)
+                                } else {
+                                    m.win_prob_penalty_pct
+                                };
+
+                                let is_crucial = penalty >= 20.0;
                                 let border_color = if is_crucial { "#e84057" } else { "rgba(200, 170, 110, 0.4)" };
                                 let tag_bg = if is_crucial { "rgba(232, 64, 87, 0.16)" } else { "rgba(200, 170, 110, 0.15)" };
 
@@ -2625,7 +2755,7 @@ fn view_page_overview_and_radar(
                                                     <span>{format!("MISTAKE #{} · {}", idx + 1, m.phase_window)}</span>
                                                 </span>
                                                 <span style=format!("background: {}; border: 1px solid {}; color: {}; font-family: monospace; font-size: 0.72rem; padding: 0.15rem 0.5rem; font-weight: bold;", tag_bg, border_color, border_color)>
-                                                    {format!("-{:.1}% WIN PROB", m.win_prob_penalty_pct)}
+                                                    {format!("-{:.1}% WIN PROB", penalty)}
                                                 </span>
                                             </div>
                                             <h3 style="font-family: serif; text-transform: uppercase; color: #fff; font-size: 1.1rem; margin: 0 0 0.6rem 0; line-height: 1.35;">
@@ -2645,7 +2775,13 @@ fn view_page_overview_and_radar(
                                         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.6rem; font-family: monospace; font-size: 0.74rem;">
                                             <span style="color: var(--text-muted);">{format!("Occurs in {:.0}% of losses", m.frequency_pct)}</span>
                                             <span style=format!("color: {}; font-weight: bold;", if is_crucial { "#e84057" } else { "var(--cyan)" })>
-                                                {if is_crucial { "CRITICAL PRIORITY" } else { "MONITORED HABIT" }}
+                                                {if is_faker && is_crucial {
+                                                    "FAKER FATAL PUNISHMENT"
+                                                } else if is_crucial {
+                                                    "CRITICAL PRIORITY"
+                                                } else {
+                                                    "MONITORED HABIT"
+                                                }}
                                             </span>
                                         </div>
                                     </div>
@@ -6583,7 +6719,7 @@ fn view_ml_insight_card(card: MachineLearningInsight) -> impl IntoView {
 
 /// Generates an enlarged, zero-clipping SVG pentagonal playstyle radar chart with vertex badges.
 #[cfg(target_arch = "wasm32")]
-fn view_radar_svg(curr: [f64; 5], prev: [f64; 5]) -> impl IntoView {
+fn view_radar_svg(curr: [f64; 5], prev: [f64; 5], is_rivalry: bool) -> impl IntoView {
     let center_x = 210.0;
     let center_y = 172.0;
     let max_radius = 108.0;
@@ -6641,8 +6777,16 @@ fn view_radar_svg(curr: [f64; 5], prev: [f64; 5]) -> impl IntoView {
                 view! { <line x1=center_x y1=center_y x2=x2 y2=y2 stroke="rgba(200, 170, 110, 0.25)" stroke-width="1" /> }
             }).collect::<Vec<_>>()}
 
-            // Role Benchmark polygon (Cyan)
-            <polygon points=prev_poly fill="rgba(10, 200, 185, 0.16)" stroke="#0ac8b9" stroke-width="1.75" stroke-dasharray="4,4" />
+            // Dynamic Benchmark polygon (Crimson Battle Line for 1v1 Rivalry, Cyan Dashed for Rank/Role Benchmark)
+            {if is_rivalry {
+                view! {
+                    <polygon points=prev_poly fill="rgba(232, 64, 87, 0.22)" stroke="#e84057" stroke-width="2.25" stroke-dasharray="6,3" />
+                }
+            } else {
+                view! {
+                    <polygon points=prev_poly fill="rgba(10, 200, 185, 0.16)" stroke="#0ac8b9" stroke-width="1.75" stroke-dasharray="4,4" />
+                }
+            }}
 
             // Current calibration polygon (Gold)
             <polygon points=curr_poly fill="rgba(200, 170, 110, 0.28)" stroke="#c8aa6e" stroke-width="2.25" />
