@@ -253,6 +253,7 @@
     fetchRiotTelemetry: async function(riotId, region, apiKey, startOffset, countLimit) {
       const targetRiotId = riotId || (currentUser && currentUser.riot_id) || "SHENTRICK#SHEN";
       const targetRegion = region || (currentUser && currentUser.riot_region) || "ME";
+      const targetApiKey = apiKey || window.localStorage.getItem("lol_riot_api_key") || undefined;
 
       // Extract recommended champions from cached recommendation runs to calculate actual calibration accuracy
       let recommendedChamps = [];
@@ -277,7 +278,7 @@
           body: JSON.stringify({
             riot_id: targetRiotId,
             region: targetRegion.toLowerCase(),
-            api_key: apiKey || undefined,
+            api_key: targetApiKey || undefined,
             recommended_champions: recommendedChamps,
             start: typeof startOffset === "number" ? startOffset : 0,
             count: typeof countLimit === "number" ? countLimit : 20

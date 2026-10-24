@@ -48,7 +48,9 @@ fn test_custom_player_analytics_calculation() {
             gold_diff_15: 1200,
             is_calibrated: true,
             calibrated_rank: Some(1),
-        },
+        
+            ..Default::default()
+},
         AdoptedMatch {
             match_id: "NA-2".into(),
             champion_name: "Kaisa".into(),
@@ -61,7 +63,9 @@ fn test_custom_player_analytics_calculation() {
             gold_diff_15: -800,
             is_calibrated: false,
             calibrated_rank: None,
-        },
+        
+            ..Default::default()
+},
     ];
 
     let calibrations = vec![CalibrationRecord {
@@ -128,6 +132,15 @@ fn test_for_player_shentrick_middle_east() {
     assert_eq!(report.efficacy.calibrated_games, 13);
     assert_eq!(report.efficacy.calibrated_wins, 12);
 
+    // Verify latest match is accurately Ornn vs Vel'Koz Top
+    let latest_match = &report.recent_matches[0];
+    assert_eq!(latest_match.champion_name, "Ornn");
+    assert_eq!(latest_match.role, "Top");
+    assert_eq!(latest_match.lane_opponent_champion.as_deref(), Some("Vel'Koz"));
+    let deep = latest_match.build_deep_analysis(&report.summoner_name);
+    assert_eq!(deep.lane_opponent_champion, "Vel'Koz");
+    assert!(deep.personal_mistake_diagnosis.contains("Vel'Koz"));
+
     // Champion performance records with Bayesian shrinkage
     assert!(!report.champion_performances.is_empty());
     let shen_perf = report
@@ -135,8 +148,8 @@ fn test_for_player_shentrick_middle_east() {
         .iter()
         .find(|c| c.champion_name == "Shen")
         .expect("Shen performance must be present");
-    assert_eq!(shen_perf.games_played, 7);
-    assert_eq!(shen_perf.wins, 7);
+    assert_eq!(shen_perf.games_played, 6);
+    assert_eq!(shen_perf.wins, 6);
     assert_eq!(shen_perf.win_rate, 100.0);
     assert!(shen_perf.performance_index > 60.0);
     assert_eq!(shen_perf.confidence_rating, "Moderate Sample (5-9 Games)");
@@ -165,7 +178,7 @@ fn test_for_player_shentrick_middle_east() {
         .iter()
         .find(|i| i.champion_name == "Shen")
         .expect("Shen ML tracker insight must exist");
-    assert_eq!(shen_ml.match_progression.len(), 7);
+    assert_eq!(shen_ml.match_progression.len(), 6);
     assert!(shen_ml.win_prob_above_threshold > shen_ml.win_prob_below_threshold);
 
     // Verify Tab 1 Playstyle DNA Summary & Recurring Mistake Detector
@@ -178,7 +191,10 @@ fn test_for_player_shentrick_middle_east() {
     // Verify Tab 3 Extended 50-Match History & Single-Match 5v5 Deep Analysis
     let extended = report.extended_match_history(50);
     assert_eq!(extended.len(), 50);
+    assert_eq!(extended[0].champion_name, "Ornn");
+    assert_eq!(extended[0].lane_opponent_champion.as_deref(), Some("Vel'Koz"));
     let deep = extended[0].build_deep_analysis("SHENTRICK");
+    assert_eq!(deep.lane_opponent_champion, "Vel'Koz");
     assert_eq!(deep.allied_team.len(), 5);
     assert_eq!(deep.enemy_team.len(), 5);
     assert_eq!(deep.win_prob_timeline.len(), 7);

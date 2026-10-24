@@ -10,6 +10,36 @@ pub fn get_storage() -> Option<web_sys::Storage> {
 }
 
 #[cfg(target_arch = "wasm32")]
+pub fn get_local_storage_item(key: &str) -> Option<String> {
+    get_storage().and_then(|s| s.get_item(key).ok().flatten())
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn get_local_storage_item(_key: &str) -> Option<String> {
+    None
+}
+
+#[cfg(target_arch = "wasm32")]
+pub fn set_local_storage_item(key: &str, value: &str) {
+    if let Some(s) = get_storage() {
+        let _ = s.set_item(key, value);
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn set_local_storage_item(_key: &str, _value: &str) {}
+
+#[cfg(target_arch = "wasm32")]
+pub fn remove_local_storage_item(key: &str) {
+    if let Some(s) = get_storage() {
+        let _ = s.remove_item(key);
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn remove_local_storage_item(_key: &str) {}
+
+#[cfg(target_arch = "wasm32")]
 pub fn load_users_raw() -> Vec<Value> {
     if let Some(storage) = get_storage() {
         if let Ok(Some(json_str)) = storage.get_item(USERS_KEY) {

@@ -75,16 +75,35 @@ function getFallbackTelemetry(gameName: string, tagLine: string, region: string)
     ? [
         {
           match_id: `${prefix}104928`,
-          champion_name: "Shen",
+          champion_name: "Ornn",
           role: "Top",
           win: true,
-          kills: 6,
+          kills: 5,
           deaths: 1,
           assists: 14,
-          cs_per_min: 7.4,
-          gold_diff_15: 1420,
+          cs_per_min: 7.8,
+          gold_diff_15: 840,
           is_calibrated: true,
           calibrated_rank: 1,
+          lane_opponent_champion: "Vel'Koz",
+          duration_mins: 31,
+          user_damage_dealt: 21850,
+          user_vision_score: 42,
+          items: [3068, 6665, 3075, 3111, 2055, 3340],
+          allied_team: [
+            { champion_name: "Ornn", role: "Top", kills: 5, deaths: 1, assists: 14, damage_dealt: 21850, cs: 242, is_player: true },
+            { champion_name: "Sejuani", role: "Jungle", kills: 4, deaths: 2, assists: 16, damage_dealt: 14200, cs: 178, is_player: false },
+            { champion_name: "Ahri", role: "Mid", kills: 10, deaths: 3, assists: 8, damage_dealt: 26400, cs: 255, is_player: false },
+            { champion_name: "Jinx", role: "ADC", kills: 9, deaths: 2, assists: 11, damage_dealt: 31200, cs: 284, is_player: false },
+            { champion_name: "Thresh", role: "Support", kills: 1, deaths: 3, assists: 22, damage_dealt: 6800, cs: 38, is_player: false },
+          ],
+          enemy_team: [
+            { champion_name: "Vel'Koz", role: "Top", kills: 3, deaths: 6, assists: 4, damage_dealt: 23500, cs: 215, is_player: false },
+            { champion_name: "Jarvan IV", role: "Jungle", kills: 3, deaths: 6, assists: 7, damage_dealt: 12100, cs: 162, is_player: false },
+            { champion_name: "Syndra", role: "Mid", kills: 4, deaths: 5, assists: 5, damage_dealt: 22100, cs: 240, is_player: false },
+            { champion_name: "Kai'Sa", role: "ADC", kills: 1, deaths: 7, assists: 3, damage_dealt: 17400, cs: 230, is_player: false },
+            { champion_name: "Nautilus", role: "Support", kills: 0, deaths: 5, assists: 6, damage_dealt: 5100, cs: 42, is_player: false },
+          ],
         },
         {
           match_id: `${prefix}104855`,
@@ -358,6 +377,43 @@ serve(async (req: Request) => {
             ? Math.round(participant.challenges.goldDiffAtMin15)
             : 0;
 
+          // Extract authentic lane opponent
+          const enemyOpponent = (matchData.info.participants || []).find(
+            (p: any) => p.teamId !== participant.teamId && p.teamPosition === participant.teamPosition
+          );
+          const laneOpponentChampion = enemyOpponent ? (enemyOpponent.championName || null) : null;
+          const durationMins = Math.round((matchData.info.gameDuration || 1800) / 60);
+          const items = [
+            participant.item0, participant.item1, participant.item2,
+            participant.item3, participant.item4, participant.item5, participant.item6
+          ].filter((id: number) => id && id > 0);
+
+          const alliedTeam = (matchData.info.participants || [])
+            .filter((p: any) => p.teamId === participant.teamId)
+            .map((p: any) => ({
+              champion_name: p.championName || "Unknown",
+              role: p.teamPosition || "Unknown",
+              kills: p.kills || 0,
+              deaths: p.deaths || 0,
+              assists: p.assists || 0,
+              damage_dealt: p.totalDamageDealtToChampions || 0,
+              cs: (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0),
+              is_player: p.puuid === puuid,
+            }));
+
+          const enemyTeam = (matchData.info.participants || [])
+            .filter((p: any) => p.teamId !== participant.teamId)
+            .map((p: any) => ({
+              champion_name: p.championName || "Unknown",
+              role: p.teamPosition || "Unknown",
+              kills: p.kills || 0,
+              deaths: p.deaths || 0,
+              assists: p.assists || 0,
+              damage_dealt: p.totalDamageDealtToChampions || 0,
+              cs: (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0),
+              is_player: false,
+            }));
+
           adoptedMatches.push({
             match_id: matchId,
             champion_name: champName,
@@ -370,6 +426,13 @@ serve(async (req: Request) => {
             gold_diff_15: goldDiff15,
             is_calibrated: isCalibrated,
             calibrated_rank: calibratedRank,
+            lane_opponent_champion: laneOpponentChampion,
+            duration_mins: durationMins,
+            user_damage_dealt: participant.totalDamageDealtToChampions || 0,
+            user_vision_score: participant.visionScore || 0,
+            items,
+            allied_team: alliedTeam,
+            enemy_team: enemyTeam,
           });
         } catch (e) {
           console.warn("Failed to parse match", matchId, e);

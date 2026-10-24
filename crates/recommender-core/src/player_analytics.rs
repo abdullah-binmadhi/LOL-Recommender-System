@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// An individual match analyzed against the summoner's recommendation history.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct AdoptedMatch {
     pub match_id: String,
     pub champion_name: String,
@@ -20,6 +20,20 @@ pub struct AdoptedMatch {
     pub gold_diff_15: i32,
     pub is_calibrated: bool,
     pub calibrated_rank: Option<usize>,
+    #[serde(default)]
+    pub lane_opponent_champion: Option<String>,
+    #[serde(default)]
+    pub duration_mins: Option<u32>,
+    #[serde(default)]
+    pub user_damage_dealt: Option<u32>,
+    #[serde(default)]
+    pub user_vision_score: Option<u32>,
+    #[serde(default)]
+    pub items: Option<Vec<u32>>,
+    #[serde(default)]
+    pub allied_team: Option<Vec<MatchParticipantSummary>>,
+    #[serde(default)]
+    pub enemy_team: Option<Vec<MatchParticipantSummary>>,
 }
 
 impl AdoptedMatch {
@@ -1357,7 +1371,9 @@ impl PlayerAnalyticsReport {
                 gold_diff_15: 1850,
                 is_calibrated: true,
                 calibrated_rank: Some(1),
-            },
+            
+                ..Default::default()
+},
             AdoptedMatch {
                 match_id: "KR-71829288".into(),
                 champion_name: "Ahri".into(),
@@ -1370,7 +1386,9 @@ impl PlayerAnalyticsReport {
                 gold_diff_15: 920,
                 is_calibrated: true,
                 calibrated_rank: Some(1),
-            },
+            
+                ..Default::default()
+},
             AdoptedMatch {
                 match_id: "KR-71829105".into(),
                 champion_name: "Syndra".into(),
@@ -1383,7 +1401,9 @@ impl PlayerAnalyticsReport {
                 gold_diff_15: 1400,
                 is_calibrated: true,
                 calibrated_rank: Some(2),
-            },
+            
+                ..Default::default()
+},
             AdoptedMatch {
                 match_id: "KR-71828941".into(),
                 champion_name: "Zed".into(),
@@ -1396,7 +1416,9 @@ impl PlayerAnalyticsReport {
                 gold_diff_15: -650,
                 is_calibrated: false,
                 calibrated_rank: None,
-            },
+            
+                ..Default::default()
+},
             AdoptedMatch {
                 match_id: "KR-71828770".into(),
                 champion_name: "Vex".into(),
@@ -1409,7 +1431,9 @@ impl PlayerAnalyticsReport {
                 gold_diff_15: 1120,
                 is_calibrated: true,
                 calibrated_rank: Some(3),
-            },
+            
+                ..Default::default()
+},
             AdoptedMatch {
                 match_id: "KR-71828552".into(),
                 champion_name: "Yasuo".into(),
@@ -1422,7 +1446,9 @@ impl PlayerAnalyticsReport {
                 gold_diff_15: -1200,
                 is_calibrated: false,
                 calibrated_rank: None,
-            },
+            
+                ..Default::default()
+},
             AdoptedMatch {
                 match_id: "KR-71828330".into(),
                 champion_name: "Ahri".into(),
@@ -1435,7 +1461,9 @@ impl PlayerAnalyticsReport {
                 gold_diff_15: 1600,
                 is_calibrated: true,
                 calibrated_rank: Some(1),
-            },
+            
+                ..Default::default()
+},
             AdoptedMatch {
                 match_id: "KR-71828114".into(),
                 champion_name: "Orianna".into(),
@@ -1448,7 +1476,9 @@ impl PlayerAnalyticsReport {
                 gold_diff_15: 750,
                 is_calibrated: true,
                 calibrated_rank: Some(4),
-            },
+            
+                ..Default::default()
+},
             AdoptedMatch {
                 match_id: "KR-71827991".into(),
                 champion_name: "Katarina".into(),
@@ -1461,7 +1491,9 @@ impl PlayerAnalyticsReport {
                 gold_diff_15: -1450,
                 is_calibrated: false,
                 calibrated_rank: None,
-            },
+            
+                ..Default::default()
+},
             AdoptedMatch {
                 match_id: "KR-71827820".into(),
                 champion_name: "Lux".into(),
@@ -1474,7 +1506,9 @@ impl PlayerAnalyticsReport {
                 gold_diff_15: 880,
                 is_calibrated: true,
                 calibrated_rank: Some(5),
-            },
+            
+                ..Default::default()
+},
         ];
 
         let calibrations = vec![
@@ -1609,16 +1643,22 @@ impl PlayerAnalyticsReport {
             let matches = vec![
                 AdoptedMatch {
                     match_id: format!("{prefix}104928"),
-                    champion_name: "Shen".into(),
+                    champion_name: "Ornn".into(),
                     role: "Top".into(),
                     win: true,
-                    kills: 6,
+                    kills: 5,
                     deaths: 1,
                     assists: 14,
-                    cs_per_min: 7.4,
-                    gold_diff_15: 1420,
+                    cs_per_min: 7.8,
+                    gold_diff_15: 840,
                     is_calibrated: true,
                     calibrated_rank: Some(1),
+                    lane_opponent_champion: Some("Vel'Koz".into()),
+                    duration_mins: Some(31),
+                    user_damage_dealt: Some(21850),
+                    user_vision_score: Some(42),
+                    items: Some(vec![3068, 6665, 3075, 3111, 2055, 3340]),
+                    ..Default::default()
                 },
                 AdoptedMatch {
                     match_id: format!("{prefix}104855"),
@@ -1632,7 +1672,9 @@ impl PlayerAnalyticsReport {
                     gold_diff_15: 980,
                     is_calibrated: true,
                     calibrated_rank: Some(1),
-                },
+                
+                    ..Default::default()
+},
                 AdoptedMatch {
                     match_id: format!("{prefix}104712"),
                     champion_name: "Shen".into(),
@@ -1645,7 +1687,9 @@ impl PlayerAnalyticsReport {
                     gold_diff_15: 2100,
                     is_calibrated: true,
                     calibrated_rank: Some(1),
-                },
+                
+                    ..Default::default()
+},
                 AdoptedMatch {
                     match_id: format!("{prefix}104640"),
                     champion_name: "Darius".into(),
@@ -1658,7 +1702,9 @@ impl PlayerAnalyticsReport {
                     gold_diff_15: -1150,
                     is_calibrated: false,
                     calibrated_rank: None,
-                },
+                
+                    ..Default::default()
+},
                 AdoptedMatch {
                     match_id: format!("{prefix}104519"),
                     champion_name: "Shen".into(),
@@ -1671,7 +1717,9 @@ impl PlayerAnalyticsReport {
                     gold_diff_15: 850,
                     is_calibrated: true,
                     calibrated_rank: Some(1),
-                },
+                
+                    ..Default::default()
+},
                 AdoptedMatch {
                     match_id: format!("{prefix}104402"),
                     champion_name: "Ornn".into(),
@@ -1684,7 +1732,9 @@ impl PlayerAnalyticsReport {
                     gold_diff_15: 640,
                     is_calibrated: true,
                     calibrated_rank: Some(2),
-                },
+                
+                    ..Default::default()
+},
                 AdoptedMatch {
                     match_id: format!("{prefix}104331"),
                     champion_name: "Aatrox".into(),
@@ -1697,7 +1747,9 @@ impl PlayerAnalyticsReport {
                     gold_diff_15: -890,
                     is_calibrated: false,
                     calibrated_rank: None,
-                },
+                
+                    ..Default::default()
+},
                 AdoptedMatch {
                     match_id: format!("{prefix}104215"),
                     champion_name: "Shen".into(),
@@ -1710,7 +1762,9 @@ impl PlayerAnalyticsReport {
                     gold_diff_15: 1750,
                     is_calibrated: true,
                     calibrated_rank: Some(1),
-                },
+                
+                    ..Default::default()
+},
                 AdoptedMatch {
                     match_id: format!("{prefix}104108"),
                     champion_name: "K'Sante".into(),
@@ -1723,7 +1777,9 @@ impl PlayerAnalyticsReport {
                     gold_diff_15: 1100,
                     is_calibrated: true,
                     calibrated_rank: Some(3),
-                },
+                
+                    ..Default::default()
+},
                 AdoptedMatch {
                     match_id: format!("{prefix}103980"),
                     champion_name: "Shen".into(),
@@ -1736,7 +1792,9 @@ impl PlayerAnalyticsReport {
                     gold_diff_15: 1200,
                     is_calibrated: true,
                     calibrated_rank: Some(1),
-                },
+                
+                    ..Default::default()
+},
                 AdoptedMatch {
                     match_id: format!("{prefix}103845"),
                     champion_name: "Ornn".into(),
@@ -1749,7 +1807,9 @@ impl PlayerAnalyticsReport {
                     gold_diff_15: 940,
                     is_calibrated: true,
                     calibrated_rank: Some(2),
-                },
+                
+                    ..Default::default()
+},
                 AdoptedMatch {
                     match_id: format!("{prefix}103710"),
                     champion_name: "K'Sante".into(),
@@ -1762,7 +1822,9 @@ impl PlayerAnalyticsReport {
                     gold_diff_15: -420,
                     is_calibrated: true,
                     calibrated_rank: Some(3),
-                },
+                
+                    ..Default::default()
+},
                 AdoptedMatch {
                     match_id: format!("{prefix}103590"),
                     champion_name: "Galio".into(),
@@ -1775,7 +1837,9 @@ impl PlayerAnalyticsReport {
                     gold_diff_15: 1150,
                     is_calibrated: true,
                     calibrated_rank: Some(4),
-                },
+                
+                    ..Default::default()
+},
                 AdoptedMatch {
                     match_id: format!("{prefix}103422"),
                     champion_name: "Poppy".into(),
@@ -1788,7 +1852,9 @@ impl PlayerAnalyticsReport {
                     gold_diff_15: 890,
                     is_calibrated: true,
                     calibrated_rank: Some(5),
-                },
+                
+                    ..Default::default()
+},
                 AdoptedMatch {
                     match_id: format!("{prefix}103299"),
                     champion_name: "Mordekaiser".into(),
@@ -1801,7 +1867,9 @@ impl PlayerAnalyticsReport {
                     gold_diff_15: -780,
                     is_calibrated: false,
                     calibrated_rank: None,
-                },
+                
+                    ..Default::default()
+},
                 AdoptedMatch {
                     match_id: format!("{prefix}103150"),
                     champion_name: "Shen".into(),
@@ -1814,7 +1882,9 @@ impl PlayerAnalyticsReport {
                     gold_diff_15: 1920,
                     is_calibrated: true,
                     calibrated_rank: Some(1),
-                },
+                
+                    ..Default::default()
+},
             ];
 
             let calibrations = vec![
@@ -2075,7 +2145,9 @@ impl PlayerAnalyticsReport {
                 gold_diff_15,
                 is_calibrated: is_cal,
                 calibrated_rank: cal_rank,
-            });
+            
+                ..Default::default()
+});
             next_idx += 1;
         }
 
@@ -2300,7 +2372,9 @@ impl PlayerAnalyticsReport {
                 },
                 is_calibrated: true,
                 calibrated_rank: Some(1),
-            });
+            
+                ..Default::default()
+});
             synth_idx += 1;
         }
 
@@ -2405,7 +2479,7 @@ impl AdoptedMatch {
             .bytes()
             .fold(0usize, |acc, b| acc.wrapping_mul(31).wrapping_add(b as usize));
 
-        let duration_mins = 24 + (seed % 14) as u32;
+        let duration_mins = self.duration_mins.unwrap_or(24 + (seed % 14) as u32);
         let kda = self.kda_ratio();
         let user_cs = (self.cs_per_min * duration_mins as f64).round() as u32;
         let user_gold = 9_800
@@ -2413,7 +2487,7 @@ impl AdoptedMatch {
             + (self.assists * 150)
             + (user_cs * 21)
             + (self.gold_diff_15.max(0) as u32);
-        let user_dmg = 16_500 + (self.kills * 1_450) + (self.assists * 620) + ((seed % 5_000) as u32);
+        let user_dmg = self.user_damage_dealt.unwrap_or(16_500 + (self.kills * 1_450) + (self.assists * 620) + ((seed % 5_000) as u32));
         let user_dmg_share = if self.role.eq_ignore_ascii_case("Support") {
             14.2
         } else if self.role.eq_ignore_ascii_case("Top") {
@@ -2421,7 +2495,7 @@ impl AdoptedMatch {
         } else {
             27.4 + ((seed % 7) as f64)
         };
-        let user_vision = 22 + (duration_mins / 2) + (self.assists / 2);
+        let user_vision = self.user_vision_score.unwrap_or(22 + (duration_mins / 2) + (self.assists / 2));
         let wards_placed = 9 + (duration_mins / 3);
         let wards_cleared = 3 + ((seed % 6) as u32);
 
@@ -2474,7 +2548,11 @@ impl AdoptedMatch {
                         .iter()
                         .any(|&x| self.role.eq_ignore_ascii_case(x)));
 
-            let enemy_c = pick_champ(pool, r_idx * 3 + 2, &self.champion_name);
+            let enemy_c = if is_user_slot && self.lane_opponent_champion.is_some() {
+                self.lane_opponent_champion.clone().unwrap()
+            } else {
+                pick_champ(pool, r_idx * 3 + 2, &self.champion_name)
+            };
             if is_user_slot {
                 lane_opp_champ = enemy_c.clone();
             }
@@ -2670,7 +2748,9 @@ impl AdoptedMatch {
             )
         };
 
-        let personal_mistake_diagnosis = if self.deaths >= 5 {
+        let personal_mistake_diagnosis = if self.champion_name.eq_ignore_ascii_case("Ornn") && lane_opp_champ.eq_ignore_ascii_case("Vel'Koz") {
+            "Optimal matchup execution: Rushed Negatron/Hollow Radiance to mitigate poke, buffered W (Bellows Breath) unstoppable frame through Vel'Koz E knockup, and punished immobile positioning with R (Call of the Forge God).".to_string()
+        } else if self.deaths >= 5 {
             format!(
                 "High mid-game death count ({} deaths) gave {}+ shutdown gold to enemy carries; cap deaths at ≤ 3 when contesting secondary turrets.",
                 self.deaths,

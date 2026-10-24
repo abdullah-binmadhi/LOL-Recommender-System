@@ -2748,9 +2748,11 @@ fn view_link_riot_modal(state: RwSignal<AppState>) -> impl IntoView {
             .and_then(|u| u.riot_region.clone())
             .unwrap_or_else(|| "NA".into())
     });
+    let initial_api_key = storage::get_local_storage_item("lol_riot_api_key").unwrap_or_default();
 
     let riot_id = RwSignal::new(current_riot_id);
     let region = RwSignal::new(current_region);
+    let api_key = RwSignal::new(initial_api_key);
 
     view! {
         <Dialog
@@ -2804,6 +2806,19 @@ fn view_link_riot_modal(state: RwSignal<AppState>) -> impl IntoView {
                         <option value="PBE">"Public Beta Environment (PBE1)"</option>
                     </select>
                 </div>
+                <div class="field">
+                    <label for="riotApiKeyInput">"Personal Riot Developer API Key (Optional)"</label>
+                    <input
+                        id="riotApiKeyInput"
+                        type="password"
+                        placeholder="RGAPI-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                        prop:value=move || api_key.get()
+                        on:input=move |ev| api_key.set(event_target_value(&ev))
+                    />
+                    <small style="color: var(--text-muted); font-size: 0.72rem; margin-top: 4px; display: block;">
+                        "Optional: Provide your personal key from developer.riotgames.com to bypass shared proxy rate limits and pull live 2026 Match-V5 telemetry directly."
+                    </small>
+                </div>
                 <p class="notice">
                     "Note: Riot Games requires exact capitalization for Riot IDs with tags (e.g. Name#TAG)."
                 </p>
@@ -2817,6 +2832,12 @@ fn view_link_riot_modal(state: RwSignal<AppState>) -> impl IntoView {
                     on:click=move |_| {
                         let id = riot_id.get().trim().to_string();
                         let reg = region.get();
+                        let key = api_key.get().trim().to_string();
+                        if !key.is_empty() {
+                            storage::set_local_storage_item("lol_riot_api_key", &key);
+                        } else {
+                            storage::remove_local_storage_item("lol_riot_api_key");
+                        }
                         storage::supabase_update_riot_profile(&id, &reg);
                         storage::supabase_fetch_riot_telemetry(&id, &reg);
                         state.update(|c| {
