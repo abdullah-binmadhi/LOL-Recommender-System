@@ -305,3 +305,34 @@ fn test_no_quiz_multi_role_and_class_recommendations() {
         assert!(!r.combat_focus.is_empty());
     }
 }
+
+#[test]
+fn test_all_100_cataloged_recurring_mistakes() {
+    let mistakes = recommender_core::player_analytics::all_cataloged_recurring_mistakes();
+    assert_eq!(mistakes.len(), 100, "Must contain exactly 100 cataloged mistakes");
+
+    let mut seen_titles = std::collections::HashSet::new();
+    for m in &mistakes {
+        assert!(!m.mistake_title.is_empty(), "Mistake title must not be empty");
+        assert!(!m.phase_window.is_empty(), "Phase window must not be empty");
+        assert!(!m.root_cause.is_empty(), "Root cause must not be empty");
+        assert!(!m.corrective_drill.is_empty(), "Corrective drill must not be empty");
+        assert!(m.frequency_pct > 0.0 && m.frequency_pct <= 100.0, "Frequency must be in 0..100%");
+        assert!(m.win_prob_penalty_pct > 0.0 && m.win_prob_penalty_pct <= 100.0, "Penalty must be positive");
+        assert!(seen_titles.insert(m.mistake_title.clone()), "Duplicate mistake title: {}", m.mistake_title);
+    }
+
+    // Verify all 5 categories are well-represented
+    let early_lane = mistakes.iter().filter(|m| m.phase_window.contains("EARLY LANE") || m.phase_window.contains("EARLY-MID")).count();
+    let skirmish = mistakes.iter().filter(|m| m.phase_window.contains("SKIRMISH")).count();
+    let mid_macro = mistakes.iter().filter(|m| m.phase_window.contains("MID GAME")).count();
+    let late_fight = mistakes.iter().filter(|m| m.phase_window.contains("LATE TEAMFIGHT")).count();
+    let economy = mistakes.iter().filter(|m| m.phase_window.contains("ECONOMY") || m.phase_window.contains("ITEMIZATION")).count();
+
+    assert!(early_lane >= 15, "Early lane category under-represented: {}", early_lane);
+    assert!(skirmish >= 15, "Skirmish category under-represented: {}", skirmish);
+    assert!(mid_macro >= 15, "Mid macro category under-represented: {}", mid_macro);
+    assert!(late_fight >= 15, "Late fight category under-represented: {}", late_fight);
+    assert!(economy >= 15, "Economy category under-represented: {}", economy);
+}
+
