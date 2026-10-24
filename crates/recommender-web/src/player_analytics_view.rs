@@ -750,6 +750,79 @@ where
         ((1.0 / (1.0 + (-logit).exp())) * 100.0).clamp(4.0, 97.5)
     };
 
+    // Recommendation filter signals
+    let rec_role_filter = RwSignal::new("all".to_string());
+    let rec_class_filter = RwSignal::new("all".to_string());
+    let rec_sort_filter = RwSignal::new("fit".to_string());
+
+    let all_recs = eval.no_quiz_recommendations.clone();
+    let filtered_recs = move || {
+        let r_filter = rec_role_filter.get();
+        let c_filter = rec_class_filter.get();
+        let s_filter = rec_sort_filter.get();
+
+        let mut matches: Vec<_> = all_recs
+            .iter()
+            .filter(|r| {
+                let role_ok = match r_filter.as_str() {
+                    "all" => true,
+                    "Top" => r.role.contains("Top"),
+                    "Jungle" => r.role.contains("Jungle"),
+                    "Mid" => r.role.contains("Mid"),
+                    "ADC" => r.role.contains("ADC") || r.role.contains("Bot"),
+                    "Support" => r.role.contains("Support"),
+                    _ => true,
+                };
+                let class_ok = match c_filter.as_str() {
+                    "all" => true,
+                    "Tank" => r.class.contains("Tank"),
+                    "Warden" => r.class.contains("Warden"),
+                    "Mage" => r.class.contains("Mage"),
+                    "Marksman" => r.class.contains("Marksman"),
+                    "Fighter" => r.class.contains("Fighter") || r.class.contains("Bruiser"),
+                    "Assassin" => r.class.contains("Assassin") || r.class.contains("Skirmisher"),
+                    "Enchanter" => r.class.contains("Enchanter") || r.class.contains("Utility"),
+                    _ => true,
+                };
+                role_ok && class_ok
+            })
+            .cloned()
+            .collect();
+
+        match s_filter.as_str() {
+            "wr" => matches.sort_by(|a, b| {
+                b.predicted_win_rate
+                    .partial_cmp(&a.predicted_win_rate)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            }),
+            "durability" => matches.sort_by(|a, b| {
+                let a_dur = if a.class.contains("Tank") || a.class.contains("Warden") { 1 } else { 0 };
+                let b_dur = if b.class.contains("Tank") || b.class.contains("Warden") { 1 } else { 0 };
+                b_dur.cmp(&a_dur).then_with(|| {
+                    b.archetype_fit_pct
+                        .partial_cmp(&a.archetype_fit_pct)
+                        .unwrap_or(std::cmp::Ordering::Equal)
+                })
+            }),
+            "tempo" => matches.sort_by(|a, b| {
+                let a_tempo = if a.status_tag.contains("DOMINANCE") || a.status_tag.contains("TEMPO") { 1 } else { 0 };
+                let b_tempo = if b.status_tag.contains("DOMINANCE") || b.status_tag.contains("TEMPO") { 1 } else { 0 };
+                b_tempo.cmp(&a_tempo).then_with(|| {
+                    b.archetype_fit_pct
+                        .partial_cmp(&a.archetype_fit_pct)
+                        .unwrap_or(std::cmp::Ordering::Equal)
+                })
+            }),
+            _ => matches.sort_by(|a, b| {
+                b.archetype_fit_pct
+                    .partial_cmp(&a.archetype_fit_pct)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            }),
+        }
+
+        matches.into_iter().take(6).collect::<Vec<_>>()
+    };
+
     // 18 Telemetry Features extracted from live account match history
     let telemetry_categories = [
         (
@@ -1084,18 +1157,18 @@ where
                         </div>
 
                         // SVG ROC-AUC Curve
-                        <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(200, 170, 110, 0.2); padding: 1rem; margin-bottom: 1rem;">
+                        <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(200, 170, 110, 0.2); padding: 1rem; margin-bottom: 0.85rem;">
                             <svg viewBox="0 0 320 200" style="width: 100%; height: 180px; overflow: visible;">
                                 // Axes
-                                <line x1="40" y1="20" x2="40" y2="160" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" />
-                                <line x1="40" y1="160" x2="300" y2="160" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" />
+                                <line x1="45" y1="20" x2="45" y2="160" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" />
+                                <line x1="45" y1="160" x2="300" y2="160" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" />
 
                                 // Random Guess Baseline (Diagonal)
-                                <line x1="40" y1="160" x2="300" y2="20" stroke="rgba(255,255,255,0.25)" stroke-dasharray="4" stroke-width="1.2" />
+                                <line x1="45" y1="160" x2="300" y2="20" stroke="rgba(255,255,255,0.25)" stroke-dasharray="4" stroke-width="1.2" />
 
                                 // ROC Curve Path (AUC = 0.884)
                                 <path
-                                    d="M 40 160 Q 55 50 120 38 T 300 20"
+                                    d="M 45 160 Q 60 50 125 38 T 300 20"
                                     fill="none"
                                     stroke="#0ac8b9"
                                     stroke-width="3"
@@ -1103,43 +1176,83 @@ where
 
                                 // Shaded Area Under Curve
                                 <path
-                                    d="M 40 160 Q 55 50 120 38 T 300 20 L 300 160 Z"
+                                    d="M 45 160 Q 60 50 125 38 T 300 20 L 300 160 Z"
                                     fill="rgba(10, 200, 185, 0.12)"
                                 />
 
                                 // Optimal Operating Threshold Marker (at FPR=0.12, TPR=0.88)
-                                <circle cx="82" cy="42" r="5" fill="#f59e0b" stroke="#fff" stroke-width="2" />
-                                <text x="94" y="44" fill="#f59e0b" font-family="monospace" font-size="10" font-weight="bold">
+                                <circle cx="87" cy="42" r="5" fill="#f59e0b" stroke="#fff" stroke-width="2" />
+                                <text x="98" y="44" fill="#f59e0b" font-family="monospace" font-size="9.5" font-weight="bold">
                                     "Optimal Threshold (P=0.50)"
                                 </text>
 
                                 // Labels
-                                <text x="40" y="180" fill="#94a3b8" font-family="monospace" font-size="9">"0.0 (FPR)"</text>
-                                <text x="170" y="180" fill="#94a3b8" font-family="monospace" font-size="9">"False Positive Rate"</text>
-                                <text x="280" y="180" fill="#94a3b8" font-family="monospace" font-size="9">"1.0"</text>
+                                <text x="45" y="180" fill="#94a3b8" font-family="monospace" font-size="8.5">"0.0 (FPR)"</text>
+                                <text x="170" y="180" fill="#94a3b8" font-family="monospace" font-size="8.5">"False Positive Rate (Throw Risk)"</text>
+                                <text x="280" y="180" fill="#94a3b8" font-family="monospace" font-size="8.5">"1.0"</text>
 
-                                <text x="8" y="24" fill="#94a3b8" font-family="monospace" font-size="9">"1.0"</text>
-                                <text x="8" y="160" fill="#94a3b8" font-family="monospace" font-size="9">"0.0"</text>
+                                <text x="26" y="24" fill="#94a3b8" font-family="monospace" font-size="8.5">"1.0"</text>
+                                <text x="26" y="160" fill="#94a3b8" font-family="monospace" font-size="8.5">"0.0"</text>
+
+                                // Y-axis title rotated
+                                <text x="16" y="90" transform="rotate(-90 16,90)" fill="#94a3b8" font-family="monospace" font-size="8.5" text-anchor="middle">
+                                    "True Positive Rate (Win Conversion %)"
+                                </text>
                             </svg>
-                            <div style="display: flex; justify-content: space-between; font-family: monospace; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.35rem;">
-                                <span>"Random Chance Baseline: AUC = 0.500"</span>
+                            <div style="display: flex; justify-content: space-between; font-family: monospace; font-size: 0.72rem; color: var(--text-muted); margin-top: 0.45rem;">
+                                <span>"Random Guess Baseline: AUC = 0.500"</span>
                                 <strong style="color: var(--cyan);">"Model Ensemble AUC: 0.884"</strong>
                             </div>
                         </div>
 
+                        // Plain-English Interpretation Callout Box (Explains AUC & Eliminates Dead Space)
+                        <div style="background: rgba(1, 10, 19, 0.85); border: 1px solid rgba(200, 170, 110, 0.25); border-left: 3px solid var(--cyan); padding: 0.85rem 1rem; margin-bottom: 1rem; line-height: 1.45;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; flex-wrap: wrap; gap: 0.3rem;">
+                                <strong style="color: var(--cyan); font-family: monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                    "How to Interpret This ROC-AUC Curve:"
+                                </strong>
+                                <span style="font-family: monospace; font-size: 0.68rem; color: #10b981; font-weight: bold; background: rgba(16,185,129,0.15); border: 1px solid #10b981; padding: 0.08rem 0.4rem;">
+                                    "88.4% CLASSIFICATION SEPARATION"
+                                </span>
+                            </div>
+                            <div style="font-size: 0.74rem; color: #cbd5e1; margin-bottom: 0.45rem;">
+                                <strong style="color: #fff;">"What 0.884 AUC Means: "</strong>
+                                "If we pick 1 random winning match and 1 random losing match from your account history, the 6-model ensemble will correctly rank the winning game higher 88.4% of the time based solely on your 18 telemetry features (vs. 50.0% for a random coin flip)."
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.45rem; font-family: monospace; font-size: 0.71rem;">
+                                <div>
+                                    <span style="color: var(--cyan); font-weight: bold;">"Y-Axis (TPR 88%): "</span>
+                                    <span style="color: #94a3b8;">"Win Conversion — Early lane gold & XP leads that cleanly closed into victory."</span>
+                                </div>
+                                <div>
+                                    <span style="color: #e84057; font-weight: bold;">"X-Axis (FPR 12%): "</span>
+                                    <span style="color: #94a3b8;">"Throw Rate — Games with strong early leads that were thrown in mid/late macro."</span>
+                                </div>
+                            </div>
+                            <div style="font-size: 0.71rem; color: #fde68a; margin-top: 0.45rem; font-family: monospace; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.35rem;">
+                                <strong style="color: #f59e0b;">"Optimal Threshold Dot (P=0.50): "</strong>
+                                "The statistical sweet spot where the model captures 88% of real wins while keeping false throw alerts down to just 12%."
+                            </div>
+                        </div>
+
                         // 8-Epoch Gradient Descent Loss Convergence
-                        <div>
-                            <div style="font-family: monospace; font-size: 0.73rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.45rem;">
-                                "8-Epoch Gradient Descent Loss Convergence:"
+                        <div style="margin-top: 0.5rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
+                                <div style="font-family: monospace; font-size: 0.73rem; color: var(--text-muted); text-transform: uppercase;">
+                                    "8-Epoch Gradient Descent Loss Convergence:"
+                                </div>
+                                <span style="font-family: monospace; font-size: 0.68rem; color: var(--cyan);">
+                                    "Log-Loss: 0.69 → " {format!("{:.2}", eval.log_loss)}
+                                </span>
                             </div>
                             <div style="display: flex; align-items: flex-end; gap: 0.45rem; height: 60px; padding: 0.5rem; background: rgba(1, 10, 19, 0.7); border: 1px solid rgba(200, 170, 110, 0.2);">
                                 {eval.epoch_loss_curve.into_iter().enumerate().map(|(ep, loss)| {
                                     let bar_h = ((loss / 0.75) * 100.0).clamp(18.0, 100.0);
                                     view! {
                                         <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;">
-                                            <span style="font-family: monospace; font-size: 0.6rem; color: var(--cyan);">{format!("{:.2}", loss)}</span>
+                                            <span style="font-family: monospace; font-size: 0.6rem; color: var(--cyan); margin-bottom: 2px;">{format!("{:.2}", loss)}</span>
                                             <div style=format!("width: 100%; height: {:.0}px; background: linear-gradient(180deg, var(--cyan), rgba(200,170,110,0.4));", bar_h * 0.38)></div>
-                                            <span style="font-family: monospace; font-size: 0.58rem; color: var(--text-muted);">{format!("E{}", ep + 1)}</span>
+                                            <span style="font-family: monospace; font-size: 0.58rem; color: var(--text-muted); margin-top: 2px;">{format!("E{}", ep + 1)}</span>
                                         </div>
                                     }
                                 }).collect::<Vec<_>>()}
@@ -1358,7 +1471,7 @@ where
             </div>
 
             // ================================================================
-            // 6. ACCOUNT-TRAINED CHAMPION RECOMMENDATIONS (NO QUIZ REQUIRED)
+            // 6. ACCOUNT-TRAINED CHAMPION RECOMMENDATIONS (DYNAMIC 6-PICK FILTERING)
             // ================================================================
             <div>
                 <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; border-bottom: 1px solid rgba(200, 170, 110, 0.3); padding-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -1375,66 +1488,170 @@ where
                     </span>
                 </div>
 
+                // Interactive 3-Dropdown Filtering & Personalization Toolbar
+                <div style="background: rgba(1, 10, 19, 0.9); border: 1px solid rgba(200, 170, 110, 0.3); padding: 0.85rem 1.15rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; font-family: monospace; font-size: 0.76rem;">
+                    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                        // Role Filter Dropdown
+                        <div style="display: flex; align-items: center; gap: 0.45rem;">
+                            <span style="color: var(--cyan); font-weight: bold;">"ROLE:"</span>
+                            <select
+                                style="background: rgba(9, 20, 40, 0.95); border: 1px solid var(--gold); color: #fff; padding: 0.35rem 0.65rem; font-family: monospace; font-size: 0.76rem; cursor: pointer; outline: none;"
+                                prop:value=move || rec_role_filter.get()
+                                on:change=move |ev| {
+                                    rec_role_filter.set(event_target_value(&ev));
+                                }
+                            >
+                                <option value="all">"All Roles (Overall Best Fit)"</option>
+                                <option value="Top">"Top Lane"</option>
+                                <option value="Jungle">"Jungle"</option>
+                                <option value="Mid">"Mid Lane"</option>
+                                <option value="ADC">"ADC / Marksman"</option>
+                                <option value="Support">"Support"</option>
+                            </select>
+                        </div>
+
+                        // Class Filter Dropdown
+                        <div style="display: flex; align-items: center; gap: 0.45rem;">
+                            <span style="color: var(--gold); font-weight: bold;">"CLASS:"</span>
+                            <select
+                                style="background: rgba(9, 20, 40, 0.95); border: 1px solid var(--cyan); color: #fff; padding: 0.35rem 0.65rem; font-family: monospace; font-size: 0.76rem; cursor: pointer; outline: none;"
+                                prop:value=move || rec_class_filter.get()
+                                on:change=move |ev| {
+                                    rec_class_filter.set(event_target_value(&ev));
+                                }
+                            >
+                                <option value="all">"All Classes"</option>
+                                <option value="Tank">"Tank & Vanguard"</option>
+                                <option value="Warden">"Warden & Protector"</option>
+                                <option value="Mage">"Mage (Burst / Control)"</option>
+                                <option value="Marksman">"Marksman / Carry"</option>
+                                <option value="Fighter">"Fighter & Bruiser"</option>
+                                <option value="Assassin">"Assassin & Skirmisher"</option>
+                                <option value="Enchanter">"Enchanter & Utility"</option>
+                            </select>
+                        </div>
+
+                        // Sort / Strategic Priority Dropdown
+                        <div style="display: flex; align-items: center; gap: 0.45rem;">
+                            <span style="color: #10b981; font-weight: bold;">"SORT:"</span>
+                            <select
+                                style="background: rgba(9, 20, 40, 0.95); border: 1px solid #10b981; color: #fff; padding: 0.35rem 0.65rem; font-family: monospace; font-size: 0.76rem; cursor: pointer; outline: none;"
+                                prop:value=move || rec_sort_filter.get()
+                                on:change=move |ev| {
+                                    rec_sort_filter.set(event_target_value(&ev));
+                                }
+                            >
+                                <option value="fit">"Highest 20D Vector Fit"</option>
+                                <option value="wr">"Highest Projected Win Rate"</option>
+                                <option value="durability">"Highest Durability & Peel"</option>
+                                <option value="tempo">"Highest Early Lane Tempo"</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    // Reset Filters Button
+                    <button
+                        type="button"
+                        style="background: rgba(200, 170, 110, 0.15); border: 1px solid var(--gold); color: var(--gold); padding: 0.35rem 0.75rem; font-family: monospace; font-size: 0.74rem; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;"
+                        on:click=move |_| {
+                            rec_role_filter.set("all".into());
+                            rec_class_filter.set("all".into());
+                            rec_sort_filter.set("fit".into());
+                        }
+                    >
+                        <span>"↺ Reset Filters"</span>
+                    </button>
+                </div>
+
+                // Render Filtered 6-Champion Cards Grid
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.25rem;">
-                    {eval.no_quiz_recommendations.into_iter().map(|rec| {
-                        let c_name = rec.champion_name.clone();
-                        let c_pin = rec.champion_name.clone();
-                        let img_url = crate::champion_image_url(&rec.champion_name, None);
-                        view! {
-                            <div style="background: rgba(9, 20, 40, 0.92); border: 1px solid rgba(200, 170, 110, 0.35); border-top: 3px solid var(--cyan); padding: 1.35rem; display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.4);">
-                                <div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                                        <span style="font-family: monospace; font-size: 0.72rem; color: var(--cyan); background: rgba(10, 200, 185, 0.14); border: 1px solid var(--cyan); padding: 0.15rem 0.5rem; font-weight: bold;">
-                                            {rec.status_tag}
-                                        </span>
-                                        <span style="font-family: monospace; font-size: 0.85rem; color: var(--gold); font-weight: bold;">
-                                            {format!("{:.1}% 20D Vector Fit", rec.archetype_fit_pct)}
-                                        </span>
-                                    </div>
-
-                                    <div style="display: flex; align-items: center; gap: 0.95rem;">
-                                        <img src=img_url alt="" style="width: 52px; height: 52px; border: 2px solid var(--gold); object-fit: cover;" />
-                                        <div>
-                                            <h3 style="font-family: serif; text-transform: uppercase; color: #fff; font-size: 1.35rem; margin: 0; letter-spacing: 0.05em;">
-                                                {rec.champion_name}
-                                            </h3>
-                                            <span style="font-family: monospace; font-size: 0.78rem; color: var(--text-muted);">
-                                                "Role: " <strong style="color: var(--gold);">{rec.role}</strong>
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div style="margin: 0.75rem 0 0.5rem 0;">
-                                        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); overflow: hidden;">
-                                            <div style=format!("width: {}%; height: 100%; background: linear-gradient(90deg, var(--gold), var(--cyan));", rec.archetype_fit_pct.clamp(60.0, 100.0))></div>
-                                        </div>
-                                    </div>
-
-                                    <p style="font-size: 0.82rem; color: #cbd5e1; margin: 0; line-height: 1.5;">
-                                        {rec.rationale}
-                                    </p>
-                                </div>
-
-                                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
-                                    <span style="font-family: monospace; font-size: 0.82rem; color: #10b981; font-weight: bold;">
-                                        {format!("Projected WR: {:.1}%", rec.predicted_win_rate)}
-                                    </span>
+                    {move || {
+                        let recs = filtered_recs();
+                        if recs.is_empty() {
+                            view! {
+                                <div style="grid-column: 1 / -1; background: rgba(9, 20, 40, 0.85); border: 1px dashed var(--gold); padding: 2.5rem 1.5rem; text-align: center; font-family: monospace;">
+                                    <div style="color: var(--gold); font-size: 1.1rem; margin-bottom: 0.5rem;">"No champions matched the selected Role & Class combination."</div>
+                                    <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 1rem;">"Try setting Class to 'All Classes' or selecting a different Role."</div>
                                     <button
                                         type="button"
-                                        style="background: rgba(200, 170, 110, 0.16); border: 1px solid var(--gold); color: var(--gold); padding: 0.4rem 0.8rem; font-family: monospace; font-size: 0.75rem; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;"
+                                        style="background: rgba(10, 200, 185, 0.16); border: 1px solid var(--cyan); color: var(--cyan); padding: 0.4rem 0.9rem; font-family: monospace; font-size: 0.78rem; text-transform: uppercase; cursor: pointer;"
                                         on:click=move |_| {
-                                            toggle_pin_champion(c_pin.clone());
-                                            selected_tracked_champion.set(c_name.clone());
-                                            active_tab.set("pinned_tracker".into());
+                                            rec_role_filter.set("all".into());
+                                            rec_class_filter.set("all".into());
+                                            rec_sort_filter.set("fit".into());
                                         }
                                     >
-                                        {view_lol_icon("warden-sigil")}
-                                        <span>"Pin & Track Progress →"</span>
+                                        "Reset All Filters →"
                                     </button>
                                 </div>
-                            </div>
+                            }.into_view().into_any()
+                        } else {
+                            recs.into_iter().map(|rec| {
+                                let c_name = rec.champion_name.clone();
+                                let c_pin = rec.champion_name.clone();
+                                let img_url = crate::champion_image_url(&rec.champion_name, None);
+                                view! {
+                                    <div style="background: rgba(9, 20, 40, 0.92); border: 1px solid rgba(200, 170, 110, 0.35); border-top: 3px solid var(--cyan); padding: 1.35rem; display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.4);">
+                                        <div>
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.4rem;">
+                                                <span style="font-family: monospace; font-size: 0.68rem; color: var(--cyan); background: rgba(10, 200, 185, 0.14); border: 1px solid var(--cyan); padding: 0.15rem 0.5rem; font-weight: bold; white-space: nowrap;">
+                                                    {rec.status_tag}
+                                                </span>
+                                                <span style="font-family: monospace; font-size: 0.8rem; color: var(--gold); font-weight: bold; background: rgba(200, 170, 110, 0.12); border: 1px solid rgba(200, 170, 110, 0.25); padding: 0.15rem 0.5rem; white-space: nowrap;">
+                                                    {format!("{:.1}% 20D Fit", rec.archetype_fit_pct)}
+                                                </span>
+                                            </div>
+
+                                            <div style="display: flex; align-items: center; gap: 0.95rem;">
+                                                <img src=img_url alt="" style="width: 52px; height: 52px; border: 2px solid var(--gold); object-fit: cover;" />
+                                                <div>
+                                                    <h3 style="font-family: serif; text-transform: uppercase; color: #fff; font-size: 1.35rem; margin: 0; letter-spacing: 0.05em;">
+                                                        {rec.champion_name}
+                                                    </h3>
+                                                    <span style="font-family: monospace; font-size: 0.74rem; color: var(--text-muted); display: block; margin-top: 0.15rem;">
+                                                        "Role: " <strong style="color: var(--gold);">{rec.role}</strong>
+                                                        <span style="color: rgba(255,255,255,0.3); margin: 0 0.35rem;">"·"</span>
+                                                        <span style="color: var(--cyan);">{rec.class}</span>
+                                                    </span>
+                                                    <div style="font-family: monospace; font-size: 0.68rem; color: #10b981; margin-top: 0.2rem;">
+                                                        "Focus: " <span style="color: #cbd5e1;">{rec.combat_focus}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div style="margin: 0.75rem 0 0.5rem 0;">
+                                                <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); overflow: hidden;">
+                                                    <div style=format!("width: {}%; height: 100%; background: linear-gradient(90deg, var(--gold), var(--cyan));", rec.archetype_fit_pct.clamp(60.0, 100.0))></div>
+                                                </div>
+                                            </div>
+
+                                            <p style="font-size: 0.82rem; color: #cbd5e1; margin: 0; line-height: 1.5;">
+                                                {rec.rationale}
+                                            </p>
+                                        </div>
+
+                                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
+                                            <span style="font-family: monospace; font-size: 0.82rem; color: #10b981; font-weight: bold;">
+                                                {format!("Projected WR: {:.1}%", rec.predicted_win_rate)}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                style="background: rgba(200, 170, 110, 0.16); border: 1px solid var(--gold); color: var(--gold); padding: 0.4rem 0.8rem; font-family: monospace; font-size: 0.75rem; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;"
+                                                on:click=move |_| {
+                                                    toggle_pin_champion(c_pin.clone());
+                                                    selected_tracked_champion.set(c_name.clone());
+                                                    active_tab.set("pinned_tracker".into());
+                                                }
+                                            >
+                                                {view_lol_icon("warden-sigil")}
+                                                <span>"Pin & Track Progress →"</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            }).collect::<Vec<_>>().into_view().into_any()
                         }
-                    }).collect::<Vec<_>>()}
+                    }}
                 </div>
             </div>
         </div>
@@ -2420,74 +2637,61 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                 </div>
             </div>
 
-            // 5A. Full-Width 3-Column Item Power Spikes, Skill Order & Keystone / Rune Value Strip (Zero Dead Space)
+            // 5A. Full-Width 2-Column Item Purchase Spikes & Keystone Rune Efficiency Strip (Zero Dead Space)
             <div style="background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.3); padding: 1.25rem; margin-bottom: 1.5rem; font-family: monospace; font-size: 0.76rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid rgba(200, 170, 110, 0.2); padding-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
                     <h4 style="margin: 0; font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.02rem; display: flex; align-items: center; gap: 6px;">
                         {view_lol_icon("nexus-pulse")}
-                        <span>"Item Build Spikes, Skill Priority Order & Keystone / Rune Telemetry"</span>
+                        <span>"Item Purchase Spikes & Keystone Rune Efficiency"</span>
                     </h4>
-                    <span style="font-family: monospace; font-size: 0.7rem; color: var(--cyan);">"MATCH INVENTORY & RUNIC EFFICIENCY"</span>
+                    <span style="font-family: monospace; font-size: 0.7rem; color: var(--cyan);">"MATCH INVENTORY & RUNIC VALUE EXTRACTED"</span>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 1.25rem; align-items: stretch;">
-                    // Column 1: Skill Priority Order
-                    <div style="background: rgba(1, 10, 19, 0.75); border: 1px solid rgba(10, 200, 185, 0.35); padding: 1rem; display: flex; flex-direction: column; justify-content: space-between;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.25rem; align-items: stretch;">
+                    // Column 1: Chronological Item Purchase Spikes Timeline (Expanded Full Width)
+                    <div style="background: rgba(1, 10, 19, 0.75); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1.15rem; display: flex; flex-direction: column; justify-content: space-between;">
                         <div>
-                            <div style="color: var(--cyan); font-weight: bold; text-transform: uppercase; font-size: 0.72rem; margin-bottom: 0.5rem;">
-                                "Skill Priority & Ability Level Progression"
+                            <div style="color: var(--gold); font-weight: bold; text-transform: uppercase; font-size: 0.74rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+                                <span>"Chronological Item Spike Timeline:"</span>
+                                <span style="color: var(--text-muted); font-size: 0.68rem;">"Gold Power Thresholds"</span>
                             </div>
-                            <div style="background: rgba(10, 200, 185, 0.12); border-left: 3px solid var(--cyan); padding: 0.65rem 0.85rem; color: #fff; font-size: 0.82rem; margin-bottom: 0.75rem;">
-                                <strong style="color: var(--cyan);">"Skill Order: "</strong>
-                                <span>{c.skill_order.clone()}</span>
+                            <div style="display: flex; flex-direction: column; gap: 0.55rem;">
+                                {c.item_spikes.iter().map(|sp| {
+                                    view! {
+                                        <div style="background: rgba(0, 0, 0, 0.45); border-left: 3px solid var(--gold); padding: 0.55rem 0.75rem; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                                            <div>
+                                                <span style="color: var(--cyan); font-weight: bold;">{format!("[{}m] ", sp.minute)}</span>
+                                                <strong style="color: #fff; font-size: 0.8rem;">{sp.item_name.clone()}</strong>
+                                                <span style="color: var(--gold);">{format!(" ({}g)", sp.gold_cost)}</span>
+                                                <div style="color: var(--text-muted); font-size: 0.72rem; margin-top: 0.18rem; line-height: 1.35;">{sp.spike_impact.clone()}</div>
+                                            </div>
+                                        </div>
+                                    }
+                                }).collect::<Vec<_>>()}
                             </div>
-                            <p style="color: var(--text-muted); font-size: 0.71rem; line-height: 1.4; margin: 0;">
-                                "Optimal ability sequence for trading, wave manipulation, and maximum cooldown efficiency in this matchup."
-                            </p>
-                        </div>
-                        <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.55rem; font-size: 0.7rem; color: var(--gold);">
-                            "Max Path: R → Q → E → W"
                         </div>
                     </div>
 
-                    // Column 2: Chronological Item Purchase Spikes Timeline
-                    <div style="background: rgba(1, 10, 19, 0.75); border: 1px solid rgba(200, 170, 110, 0.35); padding: 1rem;">
-                        <div style="color: var(--gold); font-weight: bold; text-transform: uppercase; font-size: 0.72rem; margin-bottom: 0.6rem;">
-                            "Chronological Item Spike Timeline:"
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 0.45rem;">
-                            {c.item_spikes.iter().map(|sp| {
-                                view! {
-                                    <div style="background: rgba(0, 0, 0, 0.4); border-left: 3px solid var(--gold); padding: 0.45rem 0.65rem; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                                        <div>
-                                            <span style="color: var(--cyan); font-weight: bold;">{format!("[{}m] ", sp.minute)}</span>
-                                            <strong style="color: #fff;">{sp.item_name.clone()}</strong>
-                                            <span style="color: var(--gold);">{format!(" ({}g)", sp.gold_cost)}</span>
-                                            <div style="color: var(--text-muted); font-size: 0.71rem; margin-top: 0.15rem;">{sp.spike_impact.clone()}</div>
+                    // Column 2: Keystone & Rune Value Extracted (Expanded Full Width)
+                    <div style="background: rgba(1, 10, 19, 0.75); border: 1px solid rgba(16, 185, 129, 0.35); padding: 1.15rem; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="color: #10b981; font-weight: bold; text-transform: uppercase; font-size: 0.74rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+                                <span>"Keystone & Rune Value Extracted:"</span>
+                                <span style="color: var(--gold); font-size: 0.68rem;">"Empirical Combat Efficiency"</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.65rem;">
+                                {c.rune_telemetry.iter().map(|rn| {
+                                    view! {
+                                        <div style="background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.6rem 0.75rem; display: flex; flex-direction: column; justify-content: space-between;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <strong style="color: #10b981; font-size: 0.76rem;">{rn.rune_name.clone()}</strong>
+                                                <span style="color: var(--gold); font-size: 0.68rem; font-weight: bold; background: rgba(200,170,110,0.15); padding: 0.05rem 0.35rem; border: 1px solid rgba(200,170,110,0.3);">{rn.efficiency_grade.clone()}</span>
+                                            </div>
+                                            <div style="color: #cbd5e1; font-size: 0.72rem; margin-top: 0.3rem; line-height: 1.35;">{rn.stat_summary.clone()}</div>
                                         </div>
-                                    </div>
-                                }
-                            }).collect::<Vec<_>>()}
-                        </div>
-                    </div>
-
-                    // Column 3: Keystone & Rune Value Extracted
-                    <div style="background: rgba(1, 10, 19, 0.75); border: 1px solid rgba(16, 185, 129, 0.35); padding: 1rem;">
-                        <div style="color: #10b981; font-weight: bold; text-transform: uppercase; font-size: 0.72rem; margin-bottom: 0.6rem;">
-                            "Keystone & Rune Value Extracted:"
-                        </div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem;">
-                            {c.rune_telemetry.iter().map(|rn| {
-                                view! {
-                                    <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.5rem 0.65rem;">
-                                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                                            <strong style="color: #10b981; font-size: 0.73rem;">{rn.rune_name.clone()}</strong>
-                                            <span style="color: var(--gold); font-size: 0.66rem; font-weight: bold;">{rn.efficiency_grade.clone()}</span>
-                                        </div>
-                                        <div style="color: #ccc; font-size: 0.7rem; margin-top: 0.2rem;">{rn.stat_summary.clone()}</div>
-                                    </div>
-                                }
-                            }).collect::<Vec<_>>()}
+                                    }
+                                }).collect::<Vec<_>>()}
+                            </div>
                         </div>
                     </div>
                 </div>

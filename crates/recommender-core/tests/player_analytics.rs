@@ -153,7 +153,7 @@ fn test_for_player_shentrick_middle_east() {
     );
     assert!(report.ml_evaluation.train_accuracy >= 80.0);
     assert!(report.ml_evaluation.val_accuracy >= 60.0);
-    assert_eq!(report.ml_evaluation.no_quiz_recommendations.len(), 6);
+    assert!(report.ml_evaluation.no_quiz_recommendations.len() >= 6);
     assert_eq!(
         report.ml_evaluation.no_quiz_recommendations[0].champion_name,
         "Shen"
@@ -266,4 +266,42 @@ fn test_role_authentic_matchups_and_builds() {
     let ornn_builds = ornn_ml.lifetime_core_builds();
     let ornn_items: Vec<&str> = ornn_builds.iter().flat_map(|b| b.core_items.iter().map(|s| s.as_str())).collect();
     assert!(ornn_items.contains(&"Sunfire Aegis") || ornn_items.contains(&"Jak'Sho, The Protean"));
+}
+
+#[test]
+fn test_no_quiz_multi_role_and_class_recommendations() {
+    let report = PlayerAnalyticsReport::for_player("SHENTRICK", "SHENTRICK#SHEN", "ME", None);
+    let recs = &report.ml_evaluation.no_quiz_recommendations;
+
+    // Must have rich pool across multiple roles
+    assert!(recs.len() >= 30, "Expected at least 30 recommendations across roles, got {}", recs.len());
+
+    // Verify candidates exist in each of the 5 roles
+    let has_top = recs.iter().any(|r| r.role == "Top");
+    let has_jungle = recs.iter().any(|r| r.role == "Jungle");
+    let has_mid = recs.iter().any(|r| r.role == "Mid");
+    let has_adc = recs.iter().any(|r| r.role == "ADC");
+    let has_support = recs.iter().any(|r| r.role == "Support");
+    assert!(has_top, "Missing Top recommendations");
+    assert!(has_jungle, "Missing Jungle recommendations");
+    assert!(has_mid, "Missing Mid recommendations");
+    assert!(has_adc, "Missing ADC recommendations");
+    assert!(has_support, "Missing Support recommendations");
+
+    // Verify candidates exist across major classes
+    let has_mage = recs.iter().any(|r| r.class.contains("Mage"));
+    let has_marksman = recs.iter().any(|r| r.class.contains("Marksman"));
+    let has_tank = recs.iter().any(|r| r.class.contains("Tank"));
+    let has_warden = recs.iter().any(|r| r.class.contains("Warden"));
+    assert!(has_mage, "Missing Mage recommendations");
+    assert!(has_marksman, "Missing Marksman recommendations");
+    assert!(has_tank, "Missing Tank recommendations");
+    assert!(has_warden, "Missing Warden recommendations");
+
+    // Check that each recommendation has valid fit % and non-empty rationale
+    for r in recs {
+        assert!(r.archetype_fit_pct >= 50.0 && r.archetype_fit_pct <= 100.0);
+        assert!(!r.rationale.is_empty());
+        assert!(!r.combat_focus.is_empty());
+    }
 }
