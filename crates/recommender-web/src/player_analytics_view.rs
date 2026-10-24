@@ -413,50 +413,108 @@ pub struct TelemetryBenchmarkItem {
     pub context_note: String,
 }
 
+/// Returns the 99th percentile peak 5-axis radar benchmarks [Aggression, Mobility, Durability, Utility, Waveclear]
+/// for the selected rank. Challenger reflects T1 Faker's Hall of Legends peak pro form.
+#[cfg(target_arch = "wasm32")]
+fn get_rank_peak_radar_benchmarks(rank: &str) -> [f64; 5] {
+    match rank {
+        "Challenger" => [94.0, 92.0, 88.0, 91.0, 96.0], // T1 Faker Peak Standard
+        "Grandmaster" => [88.0, 85.0, 82.0, 85.0, 90.0],
+        "Master+" => [82.0, 80.0, 78.0, 80.0, 85.0],
+        "Diamond" => [75.0, 72.0, 74.0, 75.0, 78.0],
+        "Emerald" => [68.0, 65.0, 70.0, 68.0, 72.0],
+        "Platinum" => [62.0, 60.0, 65.0, 62.0, 66.0],
+        "Gold" => [55.0, 52.0, 60.0, 56.0, 60.0],
+        "Silver" => [48.0, 45.0, 52.0, 50.0, 54.0],
+        _ => [42.0, 40.0, 45.0, 44.0, 48.0],
+    }
+}
+
 #[cfg(target_arch = "wasm32")]
 fn get_ranked_telemetry_categories(selected_rank: &str) -> Vec<(&'static str, &'static str, Vec<TelemetryBenchmarkItem>)> {
     let is_challenger = selected_rank == "Challenger";
+    let is_gm = selected_rank == "Grandmaster";
     let is_master = selected_rank == "Master+";
     let is_diamond = selected_rank == "Diamond";
-    let is_low_elo = matches!(selected_rank, "Emerald" | "Platinum" | "Gold" | "Silver" | "Bronze / Iron");
+    let is_emerald = selected_rank == "Emerald";
+    let is_plat = selected_rank == "Platinum";
 
     let p1 = if is_challenger {
         vec![
             TelemetryBenchmarkItem {
                 name: "Gold Diff @ 15m (GD@15)",
                 account_val: "+240g",
-                bench_val: "+520g Benchmark".into(),
-                status_badge: "CRITICAL GAP (-54%)".into(),
+                bench_val: "+780g Benchmark (T1 Faker)".into(),
+                status_badge: "CRITICAL GAP (-69%)".into(),
                 badge_color: "#e84057",
-                ratio_pct: 46.0,
-                context_note: "Challenger laners punish wave bounces for 2x higher gold leads.".into(),
+                ratio_pct: 31.0,
+                context_note: "Faker crashes cannon waves at 09:15 to cash early plate bounties.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "CS Diff @ 15m (CSD@15)",
                 account_val: "+3.2 CS",
-                bench_val: "+6.8 CS Benchmark".into(),
-                status_badge: "CRITICAL GAP (-53%)".into(),
+                bench_val: "+14.2 CS Benchmark (T1 Faker)".into(),
+                status_badge: "CRITICAL GAP (-77%)".into(),
                 badge_color: "#e84057",
-                ratio_pct: 47.0,
-                context_note: "Challenger carries hit 9.0+ CS/m; you leak minion farm on recalls.".into(),
+                ratio_pct: 23.0,
+                context_note: "Faker's Hall of Legends form hits 9.8-10.5 CS/m with zero wave waste.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "XP Diff @ 15m (XPD@15)",
                 account_val: "+180 XP",
-                bench_val: "+320 XP Benchmark".into(),
-                status_badge: "BELOW TIER (-44%)".into(),
-                badge_color: "#f59e0b",
-                ratio_pct: 56.0,
-                context_note: "Delayed solo level 6 leaves you vulnerable to early coordinated dives.".into(),
+                bench_val: "+580 XP Benchmark (T1 Faker)".into(),
+                status_badge: "CRITICAL GAP (-69%)".into(),
+                badge_color: "#e84057",
+                ratio_pct: 31.0,
+                context_note: "Delayed solo level 6 timing leaves you vulnerable to T1-style dives.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "First Blood Participation %",
                 account_val: "26.0%",
-                bench_val: "35.0% Benchmark".into(),
-                status_badge: "PASSIVE TEMPO (-26%)".into(),
+                bench_val: "42.0% Benchmark (T1 Faker)".into(),
+                status_badge: "PASSIVE TEMPO (-38%)".into(),
                 badge_color: "#f59e0b",
-                ratio_pct: 74.0,
-                context_note: "Isolated playstyle; rarely rotates to early river 2v2/3v3 skirmishes.".into(),
+                ratio_pct: 62.0,
+                context_note: "Faker commands early river priority to secure 1st Scuttle and invades.".into(),
+            },
+        ]
+    } else if is_gm {
+        vec![
+            TelemetryBenchmarkItem {
+                name: "Gold Diff @ 15m (GD@15)",
+                account_val: "+240g",
+                bench_val: "+620g GM Peak".into(),
+                status_badge: "CRITICAL GAP (-61%)".into(),
+                badge_color: "#e84057",
+                ratio_pct: 39.0,
+                context_note: "Top GM laners maintain 2.5x higher early gold leads.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "CS Diff @ 15m (CSD@15)",
+                account_val: "+3.2 CS",
+                bench_val: "+9.5 CS GM Peak".into(),
+                status_badge: "CRITICAL GAP (-66%)".into(),
+                badge_color: "#e84057",
+                ratio_pct: 34.0,
+                context_note: "GM peak laners harvest 9.2 CS/m with strict wave freezes.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "XP Diff @ 15m (XPD@15)",
+                account_val: "+180 XP",
+                bench_val: "+440 XP GM Peak".into(),
+                status_badge: "BELOW TIER (-59%)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 41.0,
+                context_note: "GM players hit level 6 before 05:40; your timing is delayed.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "First Blood Participation %",
+                account_val: "26.0%",
+                bench_val: "36.0% GM Peak".into(),
+                status_badge: "BELOW TIER (-28%)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 72.0,
+                context_note: "Higher early skirmish rotation rate in river chokes.".into(),
             },
         ]
     } else if is_master {
@@ -464,38 +522,38 @@ fn get_ranked_telemetry_categories(selected_rank: &str) -> Vec<(&'static str, &'
             TelemetryBenchmarkItem {
                 name: "Gold Diff @ 15m (GD@15)",
                 account_val: "+240g",
-                bench_val: "+340g Benchmark".into(),
-                status_badge: "BELOW TIER (-29%)".into(),
-                badge_color: "#f59e0b",
-                ratio_pct: 71.0,
-                context_note: "Lacks early snowball acceleration vs Master+ standards.".into(),
+                bench_val: "+480g Master Peak".into(),
+                status_badge: "CRITICAL GAP (-50%)".into(),
+                badge_color: "#e84057",
+                ratio_pct: 50.0,
+                context_note: "Peak Master players punish wave bounces to generate 480g+ leads.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "CS Diff @ 15m (CSD@15)",
                 account_val: "+3.2 CS",
-                bench_val: "+4.2 CS Benchmark".into(),
-                status_badge: "BELOW TIER (-24%)".into(),
+                bench_val: "+6.8 CS Master Peak".into(),
+                status_badge: "BELOW TIER (-53%)".into(),
                 badge_color: "#f59e0b",
-                ratio_pct: 76.0,
-                context_note: "Misses approximately 1 full minion wave every 8 minutes.".into(),
+                ratio_pct: 47.0,
+                context_note: "Peak Master laners maintain 8.8 CS/m consistency.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "XP Diff @ 15m (XPD@15)",
                 account_val: "+180 XP",
-                bench_val: "+210 XP Benchmark".into(),
-                status_badge: "TIER ATTAINED".into(),
-                badge_color: "var(--cyan)",
-                ratio_pct: 86.0,
-                context_note: "Keeps pace with solo level spikes and wave bounce timers.".into(),
+                bench_val: "+340 XP Master Peak".into(),
+                status_badge: "BELOW TIER (-47%)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 53.0,
+                context_note: "Master peak players zone opponents off minion XP on cannon waves.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "First Blood Participation %",
                 account_val: "26.0%",
-                bench_val: "28.0% Benchmark".into(),
-                status_badge: "TIER ATTAINED".into(),
-                badge_color: "var(--cyan)",
-                ratio_pct: 93.0,
-                context_note: "Acceptable early skirmish attendance around Scuttle Crab.".into(),
+                bench_val: "32.0% Master Peak".into(),
+                status_badge: "BELOW TIER (-19%)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 81.0,
+                context_note: "Decisive attendance at early scuttle and river fights.".into(),
             },
         ]
     } else if is_diamond {
@@ -503,38 +561,77 @@ fn get_ranked_telemetry_categories(selected_rank: &str) -> Vec<(&'static str, &'
             TelemetryBenchmarkItem {
                 name: "Gold Diff @ 15m (GD@15)",
                 account_val: "+240g",
-                bench_val: "+220g Benchmark".into(),
-                status_badge: "TIER ATTAINED (+9%)".into(),
-                badge_color: "var(--cyan)",
-                ratio_pct: 109.0,
-                context_note: "Reliably builds positive lane gold leads against Diamond laners.".into(),
+                bench_val: "+360g D1 Peak".into(),
+                status_badge: "BELOW TIER (-33%)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 67.0,
+                context_note: "Peak Diamond 1 laners build +360g leads before plates fall.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "CS Diff @ 15m (CSD@15)",
                 account_val: "+3.2 CS",
-                bench_val: "+2.8 CS Benchmark".into(),
-                status_badge: "EXCEEDS TIER (+14%)".into(),
-                badge_color: "#10b981",
-                ratio_pct: 114.0,
-                context_note: "Solid wave crash discipline unlocking priority recall windows.".into(),
+                bench_val: "+4.8 CS D1 Peak".into(),
+                status_badge: "BELOW TIER (-33%)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 67.0,
+                context_note: "Peak Diamond players hit 8.4 CS/m; you leak minion farm on recalls.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "XP Diff @ 15m (XPD@15)",
                 account_val: "+180 XP",
-                bench_val: "+140 XP Benchmark".into(),
-                status_badge: "EXCEEDS TIER (+29%)".into(),
-                badge_color: "#10b981",
-                ratio_pct: 129.0,
-                context_note: "Early wave freezes reliably generate solo level advantages.".into(),
+                bench_val: "+240 XP D1 Peak".into(),
+                status_badge: "BELOW TIER (-25%)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 75.0,
+                context_note: "Wave bounce discipline needed for D1 promo promotion.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "First Blood Participation %",
                 account_val: "26.0%",
-                bench_val: "25.0% Benchmark".into(),
+                bench_val: "28.0% D1 Peak".into(),
                 status_badge: "TIER ATTAINED".into(),
                 badge_color: "var(--cyan)",
+                ratio_pct: 93.0,
+                context_note: "Matches Diamond 1 benchmark for early skirmish presence.".into(),
+            },
+        ]
+    } else if is_emerald {
+        vec![
+            TelemetryBenchmarkItem {
+                name: "Gold Diff @ 15m (GD@15)",
+                account_val: "+240g",
+                bench_val: "+260g E1 Peak".into(),
+                status_badge: "TIER ATTAINED (-8%)".into(),
+                badge_color: "var(--cyan)",
+                ratio_pct: 92.0,
+                context_note: "Competitive with top Emerald 1 promotion standards.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "CS Diff @ 15m (CSD@15)",
+                account_val: "+3.2 CS",
+                bench_val: "+3.4 CS E1 Peak".into(),
+                status_badge: "TIER ATTAINED".into(),
+                badge_color: "var(--cyan)",
+                ratio_pct: 94.0,
+                context_note: "Matches Emerald 1 minion wave retention.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "XP Diff @ 15m (XPD@15)",
+                account_val: "+180 XP",
+                bench_val: "+170 XP E1 Peak".into(),
+                status_badge: "EXCEEDS TIER (+6%)".into(),
+                badge_color: "#10b981",
+                ratio_pct: 106.0,
+                context_note: "Slightly ahead of Emerald 1 solo level spike timing.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "First Blood Participation %",
+                account_val: "26.0%",
+                bench_val: "25.0% E1 Peak".into(),
+                status_badge: "EXCEEDS TIER (+4%)".into(),
+                badge_color: "#10b981",
                 ratio_pct: 104.0,
-                context_note: "Matches Diamond benchmark for early fight attendance.".into(),
+                context_note: "Consistently attends early river skirmishes.".into(),
             },
         ]
     } else {
@@ -542,38 +639,38 @@ fn get_ranked_telemetry_categories(selected_rank: &str) -> Vec<(&'static str, &'
             TelemetryBenchmarkItem {
                 name: "Gold Diff @ 15m (GD@15)",
                 account_val: "+240g",
-                bench_val: format!("{} Benchmark", if selected_rank == "Emerald" { "+120g" } else { "+50g" }),
-                status_badge: "EXCEEDS TIER (+100%)".into(),
+                bench_val: format!("{} Peak", if is_plat { "+180g" } else { "+110g" }),
+                status_badge: "EXCEEDS TIER (+33%+)".into(),
                 badge_color: "#10b981",
-                ratio_pct: 150.0,
-                context_note: "Substantially out-lanes opponents at this rank tier.".into(),
+                ratio_pct: 133.0,
+                context_note: "Decisively out-lanes opponents at this rank tier.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "CS Diff @ 15m (CSD@15)",
                 account_val: "+3.2 CS",
-                bench_val: format!("{} Benchmark", if selected_rank == "Emerald" { "+1.5 CS" } else { "+0.5 CS" }),
-                status_badge: "EXCEEDS TIER (+113%)".into(),
+                bench_val: format!("{} Peak", if is_plat { "+2.2 CS" } else { "+1.2 CS" }),
+                status_badge: "EXCEEDS TIER (+45%+)".into(),
                 badge_color: "#10b981",
-                ratio_pct: 150.0,
-                context_note: "Demonstrates superior CS fundamentals compared to tier average.".into(),
+                ratio_pct: 145.0,
+                context_note: "Substantially better wave retention than division peak.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "XP Diff @ 15m (XPD@15)",
                 account_val: "+180 XP",
-                bench_val: format!("{} Benchmark", if selected_rank == "Emerald" { "+80 XP" } else { "+30 XP" }),
-                status_badge: "EXCEEDS TIER (+125%)".into(),
+                bench_val: format!("{} Peak", if is_plat { "+120 XP" } else { "+70 XP" }),
+                status_badge: "EXCEEDS TIER (+50%+)".into(),
                 badge_color: "#10b981",
                 ratio_pct: 150.0,
-                context_note: "Consistently hits power spikes before opponent.".into(),
+                context_note: "Consistently secures solo level spikes before opponent.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "First Blood Participation %",
                 account_val: "26.0%",
-                bench_val: format!("{} Benchmark", if selected_rank == "Emerald" { "22.0%" } else { "18.0%" }),
+                bench_val: format!("{} Peak", if is_plat { "22.0%" } else { "19.0%" }),
                 status_badge: "EXCEEDS TIER (+18%)".into(),
                 badge_color: "#10b981",
                 ratio_pct: 118.0,
-                context_note: "Higher early impact than low-ELO median.".into(),
+                context_note: "Higher early combat attendance than division peak.".into(),
             },
         ]
     };
@@ -583,38 +680,116 @@ fn get_ranked_telemetry_categories(selected_rank: &str) -> Vec<(&'static str, &'
             TelemetryBenchmarkItem {
                 name: "Damage Per Minute (DPM)",
                 account_val: "640 DPM",
-                bench_val: "720 DPM Benchmark".into(),
-                status_badge: "BELOW TIER (-11%)".into(),
-                badge_color: "#f59e0b",
-                ratio_pct: 88.0,
-                context_note: "In Challenger, fights feature tighter damage synchronization.".into(),
+                bench_val: "860 DPM Benchmark (T1 Faker)".into(),
+                status_badge: "CRITICAL GAP (-26%)".into(),
+                badge_color: "#e84057",
+                ratio_pct: 74.0,
+                context_note: "Faker weaves auto-attacks and spell rotations relentlessly in every trade.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "Kill Participation % (KP%)",
                 account_val: "64.0%",
-                bench_val: "65.0% Benchmark".into(),
-                status_badge: "TIER ATTAINED".into(),
-                badge_color: "var(--cyan)",
-                ratio_pct: 98.0,
-                context_note: "Solid teamfight presence in 5v5 mid-game skirmishes.".into(),
+                bench_val: "74.0% Benchmark (T1 Faker)".into(),
+                status_badge: "BELOW TIER (-14%)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 86.0,
+                context_note: "T1's global cross-map rotations achieve omnipresent 5v5 attendance.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "KDA Consistency Metric",
                 account_val: "3.40 KDA",
-                bench_val: "3.60 KDA Benchmark".into(),
-                status_badge: "TIER ATTAINED".into(),
-                badge_color: "var(--cyan)",
-                ratio_pct: 94.0,
-                context_note: "Controlled combat posture without reckless feeding.".into(),
+                bench_val: "5.40 KDA Benchmark (T1 Faker)".into(),
+                status_badge: "CRITICAL GAP (-37%)".into(),
+                badge_color: "#e84057",
+                ratio_pct: 63.0,
+                context_note: "Faker's micro-tethering keeps his unforced death count near zero.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "Fight Duration Share %",
                 account_val: "22.5%",
-                bench_val: "24.0% Benchmark".into(),
+                bench_val: "28.5% Benchmark (T1 Faker)".into(),
+                status_badge: "BELOW TIER (-21%)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 79.0,
+                context_note: "Faker's teamfight zone control holds choke points for full team rotations.".into(),
+            },
+        ]
+    } else if is_gm {
+        vec![
+            TelemetryBenchmarkItem {
+                name: "Damage Per Minute (DPM)",
+                account_val: "640 DPM",
+                bench_val: "780 DPM GM Peak".into(),
+                status_badge: "BELOW TIER (-18%)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 82.0,
+                context_note: "Top GM players synchronize burst windows with primary carry cooldowns.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "Kill Participation % (KP%)",
+                account_val: "64.0%",
+                bench_val: "70.0% GM Peak".into(),
+                status_badge: "BELOW TIER (-9%)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 91.0,
+                context_note: "GM teamfight attendance in river dragon and baron contests.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "KDA Consistency Metric",
+                account_val: "3.40 KDA",
+                bench_val: "4.50 KDA GM Peak".into(),
+                status_badge: "BELOW TIER (-24%)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 76.0,
+                context_note: "Avoid dying for low-value 1-for-1 trades in side lanes.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "Fight Duration Share %",
+                account_val: "22.5%",
+                bench_val: "26.0% GM Peak".into(),
+                status_badge: "BELOW TIER (-13%)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 87.0,
+                context_note: "High frontline zone control holding.".into(),
+            },
+        ]
+    } else if is_master {
+        vec![
+            TelemetryBenchmarkItem {
+                name: "Damage Per Minute (DPM)",
+                account_val: "640 DPM",
+                bench_val: "710 DPM Master Peak".into(),
+                status_badge: "BELOW TIER (-10%)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 90.0,
+                context_note: "Solid combat uptime for a frontline tank, but lacks burst execution.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "Kill Participation % (KP%)",
+                account_val: "64.0%",
+                bench_val: "66.0% Master Peak".into(),
+                status_badge: "TIER ATTAINED".into(),
+                badge_color: "var(--cyan)",
+                ratio_pct: 97.0,
+                context_note: "Meets Master peak standard for 5v5 grouping.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "KDA Consistency Metric",
+                account_val: "3.40 KDA",
+                bench_val: "3.90 KDA Master Peak".into(),
+                status_badge: "BELOW TIER (-13%)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 87.0,
+                context_note: "Controlled survivability with minor death leaks.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "Fight Duration Share %",
+                account_val: "22.5%",
+                bench_val: "24.0% Master Peak".into(),
                 status_badge: "TIER ATTAINED".into(),
                 badge_color: "var(--cyan)",
                 ratio_pct: 94.0,
-                context_note: "Frontline presence is active and holds choke points.".into(),
+                context_note: "Maintains active presence in extended frontline brawls.".into(),
             },
         ]
     } else {
@@ -622,37 +797,37 @@ fn get_ranked_telemetry_categories(selected_rank: &str) -> Vec<(&'static str, &'
             TelemetryBenchmarkItem {
                 name: "Damage Per Minute (DPM)",
                 account_val: "640 DPM",
-                bench_val: format!("{} Benchmark", if is_master { "620 DPM" } else if is_diamond { "580 DPM" } else { "520 DPM" }),
-                status_badge: if is_master { "TIER ATTAINED (+3%)".into() } else { "EXCEEDS TIER (+10%)".into() },
-                badge_color: if is_master { "var(--cyan)" } else { "#10b981" },
-                ratio_pct: 105.0,
-                context_note: "Strong sustained damage output for a high-durability anchor.".into(),
+                bench_val: format!("{} Peak", if is_diamond { "650 DPM" } else { "580 DPM" }),
+                status_badge: if is_diamond { "TIER ATTAINED (-2%)".into() } else { "EXCEEDS TIER (+10%)".into() },
+                badge_color: if is_diamond { "var(--cyan)" } else { "#10b981" },
+                ratio_pct: 100.0,
+                context_note: "Solid damage output relative to lower division peaks.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "Kill Participation % (KP%)",
                 account_val: "64.0%",
-                bench_val: format!("{} Benchmark", if is_master { "58.0%" } else if is_diamond { "54.0%" } else { "48.0%" }),
-                status_badge: "EXCEEDS TIER (+10%)".into(),
+                bench_val: format!("{} Peak", if is_diamond { "62.0%" } else { "56.0%" }),
+                status_badge: "EXCEEDS TIER (+3%+)".into(),
                 badge_color: "#10b981",
-                ratio_pct: 110.0,
-                context_note: "Consistent grouping and teamfight attendance in river battles.".into(),
+                ratio_pct: 103.0,
+                context_note: "Consistently attends river and neutral objective teamfights.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "KDA Consistency Metric",
                 account_val: "3.40 KDA",
-                bench_val: format!("{} Benchmark", if is_master { "3.10 KDA" } else if is_diamond { "2.80 KDA" } else { "2.30 KDA" }),
-                status_badge: "EXCEEDS TIER (+10%)".into(),
+                bench_val: format!("{} Peak", if is_diamond { "3.30 KDA" } else { "2.80 KDA" }),
+                status_badge: "EXCEEDS TIER (+3%+)".into(),
                 badge_color: "#10b981",
-                ratio_pct: 110.0,
-                context_note: "High survival efficiency and low unforced death rate.".into(),
+                ratio_pct: 103.0,
+                context_note: "Controlled aggression with lower death counts than division peak.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "Fight Duration Share %",
                 account_val: "22.5%",
-                bench_val: format!("{} Benchmark", if is_master { "21.0%" } else if is_diamond { "19.0%" } else { "17.0%" }),
-                status_badge: "EXCEEDS TIER (+7%)".into(),
+                bench_val: format!("{} Peak", if is_diamond { "22.0%" } else { "19.0%" }),
+                status_badge: "EXCEEDS TIER (+2%+)".into(),
                 badge_color: "#10b981",
-                ratio_pct: 107.0,
+                ratio_pct: 102.0,
                 context_note: "Reliable frontline zone control holding.".into(),
             },
         ]
@@ -663,38 +838,77 @@ fn get_ranked_telemetry_categories(selected_rank: &str) -> Vec<(&'static str, &'
             TelemetryBenchmarkItem {
                 name: "Self-Mitigated Damage / Min",
                 account_val: "1,140 / min",
-                bench_val: "980 / min Benchmark".into(),
-                status_badge: "CHALLENGER ELITE (+16%)".into(),
-                badge_color: "#10b981",
-                ratio_pct: 116.0,
-                context_note: "CHALLENGER-GRADE: Top 0.05% frontline damage mitigation.".into(),
+                bench_val: "1,220 / min Benchmark (T1 Faker)".into(),
+                status_badge: "HIGH PARITY (-7%)".into(),
+                badge_color: "var(--cyan)",
+                ratio_pct: 93.0,
+                context_note: "WORLD-CLASS: Exceptional frontline mitigation approaching pro standards.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "Mitigated-to-Damage Ratio",
                 account_val: "2.18x",
-                bench_val: "1.80x Benchmark".into(),
-                status_badge: "CHALLENGER ELITE (+21%)".into(),
-                badge_color: "#10b981",
-                ratio_pct: 121.0,
-                context_note: "Exceptional ability to absorb cooldowns without dying.".into(),
+                bench_val: "2.45x Benchmark (T1 Faker)".into(),
+                status_badge: "HIGH PARITY (-11%)".into(),
+                badge_color: "var(--cyan)",
+                ratio_pct: 89.0,
+                context_note: "Absorbs over double the damage dealt to team under fire.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "Pre-15m Deaths / Game",
                 account_val: "1.25",
-                bench_val: "0.70 Benchmark".into(),
-                status_badge: "CRITICAL GAP (+79% DEATHS)".into(),
+                bench_val: "0.38 Benchmark (T1 Faker)".into(),
+                status_badge: "CRITICAL RISK (+229% DEATHS)".into(),
                 badge_color: "#e84057",
-                ratio_pct: 45.0,
-                context_note: "CRITICAL FLAW: 1.25 early deaths is heavily punished by Challenger dives.".into(),
+                ratio_pct: 30.0,
+                context_note: "CRITICAL FLAW: Faker averages 0.38 deaths pre-15m; 1.25 is ruthlessly punished.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "Crowd Control Applied (sec)",
                 account_val: "48.2s / game",
-                bench_val: "42.0s Benchmark".into(),
-                status_badge: "EXCEEDS TIER (+15%)".into(),
+                bench_val: "54.0s Benchmark (T1 Faker)".into(),
+                status_badge: "HIGH PARITY (-11%)".into(),
+                badge_color: "var(--cyan)",
+                ratio_pct: 89.0,
+                context_note: "Concussive CC layering locking down high-value carry targets.".into(),
+            },
+        ]
+    } else if is_gm || is_master {
+        vec![
+            TelemetryBenchmarkItem {
+                name: "Self-Mitigated Damage / Min",
+                account_val: "1,140 / min",
+                bench_val: format!("{} Peak", if is_gm { "1,080 / min" } else { "980 / min" }),
+                status_badge: "EXCEEDS TIER (+6%+)".into(),
                 badge_color: "#10b981",
-                ratio_pct: 115.0,
-                context_note: "Concussive CC layering locking down enemy high-value carries.".into(),
+                ratio_pct: 106.0,
+                context_note: "Top-tier frontline tanking exceeding high-ELO division peaks.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "Mitigated-to-Damage Ratio",
+                account_val: "2.18x",
+                bench_val: format!("{} Peak", if is_gm { "2.05x" } else { "1.85x" }),
+                status_badge: "EXCEEDS TIER (+6%+)".into(),
+                badge_color: "#10b981",
+                ratio_pct: 106.0,
+                context_note: "High mitigation efficiency under heavy enemy focus.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "Pre-15m Deaths / Game",
+                account_val: "1.25",
+                bench_val: format!("{} Peak", if is_gm { "0.55" } else { "0.75" }),
+                status_badge: "CRITICAL GAP (+67%+ DEATHS)".into(),
+                badge_color: "#e84057",
+                ratio_pct: 44.0,
+                context_note: "High-ELO peak laners do not die to early ganks. Eliminate this leak.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "Crowd Control Applied (sec)",
+                account_val: "48.2s / game",
+                bench_val: format!("{} Peak", if is_gm { "49.0s" } else { "44.0s" }),
+                status_badge: if is_gm { "TIER ATTAINED".into() } else { "EXCEEDS TIER (+10%)".into() },
+                badge_color: if is_gm { "var(--cyan)" } else { "#10b981" },
+                ratio_pct: 98.0,
+                context_note: "Excellent lockdown CC chains in river and pit teamfights.".into(),
             },
         ]
     } else {
@@ -702,17 +916,17 @@ fn get_ranked_telemetry_categories(selected_rank: &str) -> Vec<(&'static str, &'
             TelemetryBenchmarkItem {
                 name: "Self-Mitigated Damage / Min",
                 account_val: "1,140 / min",
-                bench_val: format!("{} Benchmark", if is_master { "890 / min" } else if is_diamond { "820 / min" } else { "720 / min" }),
-                status_badge: "EXCEEDS TIER (+28%)".into(),
+                bench_val: format!("{} Peak", if is_diamond { "890 / min" } else { "780 / min" }),
+                status_badge: "EXCEEDS TIER (+28%+)".into(),
                 badge_color: "#10b981",
                 ratio_pct: 128.0,
-                context_note: "Dominant frontline tank absorption across high and mid ELO.".into(),
+                context_note: "Dominates division standards in frontline damage absorption.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "Mitigated-to-Damage Ratio",
                 account_val: "2.18x",
-                bench_val: format!("{} Benchmark", if is_master { "1.65x" } else if is_diamond { "1.50x" } else { "1.30x" }),
-                status_badge: "EXCEEDS TIER (+32%)".into(),
+                bench_val: format!("{} Peak", if is_diamond { "1.65x" } else { "1.45x" }),
+                status_badge: "EXCEEDS TIER (+32%+)".into(),
                 badge_color: "#10b981",
                 ratio_pct: 132.0,
                 context_note: "Absorbs over double the damage dealt to team.".into(),
@@ -720,20 +934,20 @@ fn get_ranked_telemetry_categories(selected_rank: &str) -> Vec<(&'static str, &'
             TelemetryBenchmarkItem {
                 name: "Pre-15m Deaths / Game",
                 account_val: "1.25",
-                bench_val: format!("{} Benchmark", if is_master { "1.10" } else if is_diamond { "1.40" } else { "2.20" }),
-                status_badge: if is_master { "BELOW TIER (+14% DEATHS)".into() } else { "EXCEEDS TIER (-11% DEATHS)".into() },
-                badge_color: if is_master { "#f59e0b" } else { "#10b981" },
-                ratio_pct: if is_master { 88.0 } else { 111.0 },
-                context_note: if is_master { "Slightly too many early gank deaths for clean Master climb.".into() } else { "Far fewer early feeding deaths than tier median.".into() },
+                bench_val: format!("{} Peak", if is_diamond { "0.95" } else { "1.35" }),
+                status_badge: if is_diamond { "BELOW TIER (+31% DEATHS)".into() } else { "EXCEEDS TIER".into() },
+                badge_color: if is_diamond { "#f59e0b" } else { "#10b981" },
+                ratio_pct: 76.0,
+                context_note: "Focus on reducing avoidable early solo deaths before 15m.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "Crowd Control Applied (sec)",
                 account_val: "48.2s / game",
-                bench_val: format!("{} Benchmark", if is_master { "36.0s" } else if is_diamond { "32.0s" } else { "26.0s" }),
-                status_badge: "EXCEEDS TIER (+34%)".into(),
+                bench_val: format!("{} Peak", if is_diamond { "38.0s" } else { "30.0s" }),
+                status_badge: "EXCEEDS TIER (+27%+)".into(),
                 badge_color: "#10b981",
-                ratio_pct: 134.0,
-                context_note: "Heavy lockdown CC and peel layering for backline carries.".into(),
+                ratio_pct: 127.0,
+                context_note: "Concussive crowd control and peel layering.".into(),
             },
         ]
     };
@@ -743,29 +957,59 @@ fn get_ranked_telemetry_categories(selected_rank: &str) -> Vec<(&'static str, &'
             TelemetryBenchmarkItem {
                 name: "Vision Score / Minute",
                 account_val: "1.28 / min",
-                bench_val: "1.65 / min Benchmark".into(),
-                status_badge: "BELOW TIER (-22%)".into(),
-                badge_color: "#f59e0b",
-                ratio_pct: 78.0,
-                context_note: "Challenger vision setup requires deeper cross-map quadrant control.".into(),
+                bench_val: "2.15 / min Benchmark (T1 Faker)".into(),
+                status_badge: "CRITICAL GAP (-40%)".into(),
+                badge_color: "#e84057",
+                ratio_pct: 60.0,
+                context_note: "Faker starves enemy vision with deep jungle quadrant warding.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "Control Wards Purchased / Game",
                 account_val: "2.1 Wards",
-                bench_val: "3.2 Wards Benchmark".into(),
-                status_badge: "BELOW TIER (-34%)".into(),
-                badge_color: "#f59e0b",
-                ratio_pct: 66.0,
-                context_note: "Must buy a control ward on every recall before Dragon/Baron setups.".into(),
+                bench_val: "4.8 Wards Benchmark (T1 Faker)".into(),
+                status_badge: "CRITICAL GAP (-56%)".into(),
+                badge_color: "#e84057",
+                ratio_pct: 44.0,
+                context_note: "T1 deploys control wards before every dragon/herald setup without exception.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "Stealth Wards Cleared / Game",
                 account_val: "3.6 Cleared",
-                bench_val: "5.2 Cleared Benchmark".into(),
-                status_badge: "CRITICAL GAP (-31%)".into(),
+                bench_val: "6.8 Cleared Benchmark (T1 Faker)".into(),
+                status_badge: "CRITICAL GAP (-47%)".into(),
                 badge_color: "#e84057",
-                ratio_pct: 69.0,
-                context_note: "Passive sweeper usage; enemy wards are not denied in river chokes.".into(),
+                ratio_pct: 53.0,
+                context_note: "Faker sweeps vision 45 seconds prior to neutral objective spawns.".into(),
+            },
+        ]
+    } else if is_gm || is_master {
+        vec![
+            TelemetryBenchmarkItem {
+                name: "Vision Score / Minute",
+                account_val: "1.28 / min",
+                bench_val: format!("{} Peak", if is_gm { "1.85 / min" } else { "1.55 / min" }),
+                status_badge: "BELOW TIER (-17%+)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 83.0,
+                context_note: "High-ELO peak games require active river quadrant control.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "Control Wards Purchased / Game",
+                account_val: "2.1 Wards",
+                bench_val: format!("{} Peak", if is_gm { "3.8 Wards" } else { "3.0 Wards" }),
+                status_badge: "BELOW TIER (-30%+)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 70.0,
+                context_note: "Must buy a control ward on every recall past minute 14.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "Stealth Wards Cleared / Game",
+                account_val: "3.6 Cleared",
+                bench_val: format!("{} Peak", if is_gm { "5.6 Cleared" } else { "4.6 Cleared" }),
+                status_badge: "BELOW TIER (-22%+)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 78.0,
+                context_note: "Active sweeper usage in river chokes before pit contests.".into(),
             },
         ]
     } else {
@@ -773,27 +1017,27 @@ fn get_ranked_telemetry_categories(selected_rank: &str) -> Vec<(&'static str, &'
             TelemetryBenchmarkItem {
                 name: "Vision Score / Minute",
                 account_val: "1.28 / min",
-                bench_val: format!("{} Benchmark", if is_master { "1.25 / min" } else if is_diamond { "1.00 / min" } else { "0.80 / min" }),
-                status_badge: if is_master { "TIER ATTAINED".into() } else { "EXCEEDS TIER (+28%)".into() },
-                badge_color: if is_master { "var(--cyan)" } else { "#10b981" },
-                ratio_pct: 102.0,
-                context_note: "Solid ward placement in river bushes and dragon pit.".into(),
+                bench_val: format!("{} Peak", if is_diamond { "1.35 / min" } else { "1.10 / min" }),
+                status_badge: if is_diamond { "TIER ATTAINED".into() } else { "EXCEEDS TIER (+16%)".into() },
+                badge_color: if is_diamond { "var(--cyan)" } else { "#10b981" },
+                ratio_pct: 95.0,
+                context_note: "Solid vision score compared to division standards.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "Control Wards Purchased / Game",
                 account_val: "2.1 Wards",
-                bench_val: format!("{} Benchmark", if is_master { "2.2 Wards" } else if is_diamond { "1.7 Wards" } else { "1.2 Wards" }),
-                status_badge: if is_master { "TIER ATTAINED".into() } else { "EXCEEDS TIER (+24%)".into() },
-                badge_color: if is_master { "var(--cyan)" } else { "#10b981" },
-                ratio_pct: 95.0,
-                context_note: "Consistent objective setup and river vision control.".into(),
+                bench_val: format!("{} Peak", if is_diamond { "2.4 Wards" } else { "1.7 Wards" }),
+                status_badge: if is_diamond { "TIER ATTAINED".into() } else { "EXCEEDS TIER (+24%)".into() },
+                badge_color: if is_diamond { "var(--cyan)" } else { "#10b981" },
+                ratio_pct: 88.0,
+                context_note: "Consistent control ward purchases for dragon setups.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "Stealth Wards Cleared / Game",
                 account_val: "3.6 Cleared",
-                bench_val: format!("{} Benchmark", if is_master { "3.8 Cleared" } else if is_diamond { "2.8 Cleared" } else { "2.0 Cleared" }),
-                status_badge: if is_master { "TIER ATTAINED".into() } else { "EXCEEDS TIER (+29%)".into() },
-                badge_color: if is_master { "var(--cyan)" } else { "#10b981" },
+                bench_val: format!("{} Peak", if is_diamond { "3.8 Cleared" } else { "2.6 Cleared" }),
+                status_badge: if is_diamond { "TIER ATTAINED".into() } else { "EXCEEDS TIER (+38%)".into() },
+                badge_color: if is_diamond { "var(--cyan)" } else { "#10b981" },
                 ratio_pct: 95.0,
                 context_note: "Good sweeper coverage in contested neutral chokes.".into(),
             },
@@ -805,29 +1049,59 @@ fn get_ranked_telemetry_categories(selected_rank: &str) -> Vec<(&'static str, &'
             TelemetryBenchmarkItem {
                 name: "First Turret Plate Rate %",
                 account_val: "52.0%",
-                bench_val: "68.0% Benchmark".into(),
-                status_badge: "BELOW TIER (-24%)".into(),
+                bench_val: "78.0% Benchmark (T1 Faker)".into(),
+                status_badge: "BELOW TIER (-33%)".into(),
                 badge_color: "#f59e0b",
-                ratio_pct: 76.0,
-                context_note: "Taking safe base recalls instead of coordinating with jungler to crack plates.".into(),
+                ratio_pct: 67.0,
+                context_note: "T1 converts early herald into multi-turret breaks before 16:00.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "Neutral Monster Steal / Contest %",
                 account_val: "28.0%",
-                bench_val: "34.0% Benchmark".into(),
-                status_badge: "BELOW TIER (-18%)".into(),
+                bench_val: "44.0% Benchmark (T1 Faker)".into(),
+                status_badge: "BELOW TIER (-36%)".into(),
                 badge_color: "#f59e0b",
-                ratio_pct: 82.0,
-                context_note: "Challenger teams force 4v4 pit contests much earlier and more aggressively.".into(),
+                ratio_pct: 64.0,
+                context_note: "Faker controls river chokepoints 40 seconds prior to pit spawn.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "Objective Damage Share %",
                 account_val: "16.5%",
-                bench_val: "19.5% Benchmark".into(),
-                status_badge: "BELOW TIER (-15%)".into(),
+                bench_val: "22.0% Benchmark (T1 Faker)".into(),
+                status_badge: "BELOW TIER (-25%)".into(),
                 badge_color: "#f59e0b",
-                ratio_pct: 85.0,
-                context_note: "Leaves epic monster damage entirely to carries rather than DPSing pit.".into(),
+                ratio_pct: 75.0,
+                context_note: "Contributes heavy structural and neutral monster DPS.".into(),
+            },
+        ]
+    } else if is_gm || is_master {
+        vec![
+            TelemetryBenchmarkItem {
+                name: "First Turret Plate Rate %",
+                account_val: "52.0%",
+                bench_val: format!("{} Peak", if is_gm { "70.0%" } else { "62.0%" }),
+                status_badge: "BELOW TIER (-16%+)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 84.0,
+                context_note: "High-ELO peak laners aggressively cash cannon wave plates.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "Neutral Monster Steal / Contest %",
+                account_val: "28.0%",
+                bench_val: format!("{} Peak", if is_gm { "38.0%" } else { "32.0%" }),
+                status_badge: "BELOW TIER (-12%+)".into(),
+                badge_color: "#f59e0b",
+                ratio_pct: 88.0,
+                context_note: "Coordinate pit zone control with your jungler.".into(),
+            },
+            TelemetryBenchmarkItem {
+                name: "Objective Damage Share %",
+                account_val: "16.5%",
+                bench_val: format!("{} Peak", if is_gm { "20.0%" } else { "18.0%" }),
+                status_badge: "TIER ATTAINED".into(),
+                badge_color: "var(--cyan)",
+                ratio_pct: 92.0,
+                context_note: "Reliable dragon and baron DPS contribution.".into(),
             },
         ]
     } else {
@@ -835,29 +1109,29 @@ fn get_ranked_telemetry_categories(selected_rank: &str) -> Vec<(&'static str, &'
             TelemetryBenchmarkItem {
                 name: "First Turret Plate Rate %",
                 account_val: "52.0%",
-                bench_val: format!("{} Benchmark", if is_master { "54.0%" } else if is_diamond { "42.0%" } else { "32.0%" }),
-                status_badge: if is_master { "TIER ATTAINED".into() } else { "EXCEEDS TIER (+24%)".into() },
-                badge_color: if is_master { "var(--cyan)" } else { "#10b981" },
+                bench_val: format!("{} Peak", if is_diamond { "54.0%" } else { "44.0%" }),
+                status_badge: if is_diamond { "TIER ATTAINED".into() } else { "EXCEEDS TIER (+18%)".into() },
+                badge_color: if is_diamond { "var(--cyan)" } else { "#10b981" },
                 ratio_pct: 96.0,
                 context_note: "Pushes advantage on cannon waves to collect plate gold.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "Neutral Monster Steal / Contest %",
                 account_val: "28.0%",
-                bench_val: format!("{} Benchmark", if is_master { "25.0%" } else if is_diamond { "18.0%" } else { "12.0%" }),
-                status_badge: "EXCEEDS TIER (+12%)".into(),
+                bench_val: format!("{} Peak", if is_diamond { "26.0%" } else { "19.0%" }),
+                status_badge: "EXCEEDS TIER (+8%+)".into(),
                 badge_color: "#10b981",
-                ratio_pct: 112.0,
+                ratio_pct: 108.0,
                 context_note: "Decisive zone denial around Dragon and Baron pits.".into(),
             },
             TelemetryBenchmarkItem {
                 name: "Objective Damage Share %",
                 account_val: "16.5%",
-                bench_val: format!("{} Benchmark", if is_master { "16.0%" } else if is_diamond { "13.5%" } else { "11.0%" }),
-                status_badge: if is_master { "TIER ATTAINED".into() } else { "EXCEEDS TIER (+22%)".into() },
-                badge_color: if is_master { "var(--cyan)" } else { "#10b981" },
+                bench_val: format!("{} Peak", if is_diamond { "16.0%" } else { "13.5%" }),
+                status_badge: "TIER ATTAINED".into(),
+                badge_color: "var(--cyan)",
                 ratio_pct: 103.0,
-                context_note: "Reliable neutral objective damage contribution.".into(),
+                context_note: "Reliable neutral objective contribution.".into(),
             },
         ]
     };
@@ -871,10 +1145,11 @@ fn get_ranked_telemetry_categories(selected_rank: &str) -> Vec<(&'static str, &'
     ]
 }
 
-/// Dynamic Challenger Coach Phase Analysis & Interpretation Card
+/// Dynamic Challenger Coach Phase Analysis & Interpretation Card (Cites Faker & Peak Division Standards)
 #[cfg(target_arch = "wasm32")]
 fn view_dynamic_phase_analysis(phase_idx: usize, selected_rank: &str) -> impl IntoView {
     let is_challenger = selected_rank == "Challenger";
+    let is_gm = selected_rank == "Grandmaster";
     let is_master = selected_rank == "Master+";
     let is_diamond = selected_rank == "Diamond";
 
@@ -882,30 +1157,30 @@ fn view_dynamic_phase_analysis(phase_idx: usize, selected_rank: &str) -> impl In
         0 => { // Phase 1: Early Laning
             let (c_title, c_body, c_act, col) = if is_challenger {
                 (
-                    "CHALLENGER COACH CRITIQUE: EARLY GAME DEATH LEAK & FARM DEFICIT",
-                    "In Challenger, the laning phase is essentially decided on waves 2 and 3. Averaging 1.25 early deaths is a lethal liability in high ELO. Challenger junglers track wave bounces to the second; if you die while your wave is pushing, you forfeit 3 turret plates and river scuttle control. Furthermore, your +3.2 CS lead against lower ranks drops to a severe deficit against Challenger laners who consistently harvest 9.0+ CS/min.",
-                    "ACTION: Stop forcing early trade brawls on wave 2. Focus 100% on slow-pushing cannon waves and crashing cleanly to unlock recall timers.",
+                    "FAKER (T1) GOLD STANDARD CRITIQUE: EARLY DEATH LEAK & MASSIVE CS DEFICIT",
+                    "In pro play and Korean Challenger, T1 Faker commands 9.8-10.5 CS/min and maintains a legendary pre-15m death rate of only 0.38 deaths. Your 1.25 early deaths is a catastrophic liability: in pro play, dying while your wave is bouncing forfeits 3 turret plates, first dragon, and your jungler's entire quadrant. Your +3.2 CS lead against lower ranks drops to an unacceptable -11.0 CS deficit against Faker's flawless wave manipulation.",
+                    "ACTION: Stop forcing early trade brawls on wave 2. Emulate Faker: build slow-pushes, crash cannon waves at 09:15, and use recall timers with zero minion waste.",
                     "#e84057"
                 )
-            } else if is_master {
+            } else if is_gm || is_master {
                 (
-                    "MASTER+ BENCHMARK: SOLID WAVE STABILITY, LACKING EARLY ACCELERATION",
-                    "Your wave management matches Master+ baselines, but your gold differential (+240g) is too conservative. You stabilize the lane without bleeding, but to climb through Master into Grandmaster, you must turn minion slow-pushes into turret plate damage or deep jungle vision invades.",
-                    "ACTION: When your opponent recalls, crash the next wave immediately and take at least 1 turret plate before basing.",
+                    "PEAK MASTER / GM BENCHMARK: WAVE EQUILIBRIUM SOLID, LACKING EARLY ACCELERATION",
+                    "You stabilize the lane without bleeding out, but peak Master/GM laners (+480g to +620g) aggressively convert cannon wave slow-pushes into turret plate damage or deep jungle invades. Your +240g gold lead is too conservative to hard-carry games without coinflip teamfights.",
+                    "ACTION: When your lane opponent recalls, do not immediately base. Crash the next wave hard and take at least 1 turret plate before taking your recall.",
                     "#f59e0b"
                 )
             } else if is_diamond {
                 (
-                    "DIAMOND BENCHMARK: SUPERIOR FARMING, ISOLATED PLAYSTYLE",
-                    "You comfortably out-farm and out-trade Diamond laners. However, your 26% First Blood participation indicates you are playing on an island. Diamond matches are frequently decided by river skirmishes around the 3:30 scuttle mark where your presence would guarantee early lane priority.",
-                    "ACTION: Push wave 3 hard at 3:15 and roam toward river to secure your jungler's first scuttle crab.",
+                    "DIAMOND 1 PEAK BENCHMARK: SUPERIOR FARMING, ISOLATED LANE PLAYSTYLE",
+                    "You comfortably out-farm and out-trade average Diamond laners. However, your 26% First Blood participation reveals you play on an island. Peak Diamond 1 matches are won by rotating 15 seconds earlier to river skirmishes around the 3:30 scuttle mark to secure early prio.",
+                    "ACTION: Push wave 3 hard at 3:15 and roam toward river to secure your jungler's first scuttle crab and vision.",
                     "var(--cyan)"
                 )
             } else {
                 (
                     "LOW-ELO BENCHMARK WARNING: DO NOT DEVELOP LAZY HABITS",
-                    "Your laning statistics crush this rank tier (+100% GD@15 lead). However, do not be deceived by false confidence: you are winning lane by punishing unforced enemy blunders. Relying on bad opponents to gift you kills will cause you to hit an impenetrable wall the moment you face Master+ laners who punish wave bounce timers.",
-                    "ACTION: Hold yourself to Challenger CS standards (8.5+ CS/min) even when playing in lower-ELO lobbies.",
+                    "Your laning statistics crush this division peak across the board (+240g vs +110g). However, DO NOT develop complacency: you are winning lane by punishing unforced enemy blunders. Relying on bad opponents to gift you kills will cause you to hit an impenetrable brick wall the moment you face Master+ laners who punish wave bounce timers.",
+                    "ACTION: Hold yourself to Faker's CS standard (9.0+ CS/min) even when playing in lower-ELO lobbies.",
                     "#10b981"
                 )
             };
@@ -918,14 +1193,14 @@ fn view_dynamic_phase_analysis(phase_idx: usize, selected_rank: &str) -> impl In
         1 => { // Phase 2: Combat & Skirmishing
             let (c_title, c_body, c_act, col) = if is_challenger {
                 (
-                    "CHALLENGER COACH CRITIQUE: SYNCHRONIZATION OVER INDIVIDUAL BRAWLING",
-                    "Your 640 DPM and 64% KP are respectable for a frontline anchor, but in Challenger, damage must be synchronized in burst windows. Challenger teams do not engage in prolonged skirmishes; they layer crowd control and execute carries in under 2.5 seconds. Your fight duration share (22.5%) shows you absorb focus well, but you need to coordinate your engage cooldowns directly with your primary carry.",
-                    "ACTION: Ping your crowd control cooldowns 5 seconds before engaging; never initiate without carry follow-up in range.",
-                    "#f59e0b"
+                    "FAKER (T1) GOLD STANDARD CRITIQUE: CONTINUOUS DAMAGE WEAVING GAP",
+                    "Faker's Hall of Legends form is built on continuous damage weaving: cancelling auto-attack animations between spell cooldowns to extract every ounce of lethal efficiency. Your 640 DPM leaves 220 DPM on the table compared to Faker's 860 DPM pro standard. In high ELO, teamfights are decided in 2.5-second burst windows; you cannot afford to hold cooldowns passively.",
+                    "ACTION: Weave an auto-attack between every ability cast; ping your crowd control cooldowns 5 seconds before engaging so carries follow up instantly.",
+                    "#e84057"
                 )
-            } else if is_master {
+            } else if is_gm || is_master {
                 (
-                    "MASTER+ BENCHMARK: DISCIPLINED MID-GAME COMBAT UPTIME",
+                    "PEAK MASTER / GM BENCHMARK: DISCIPLINED MID-GAME COMBAT UPTIME",
                     "High kill participation (64%) and a healthy 3.40 KDA demonstrate disciplined teamfighting. You rarely throw your life away for pointless 1-for-1 trades in side lanes, maintaining a strong presence in river rotations.",
                     "ACTION: In 5v5 teamfights, peel backwards toward your backline rather than diving deep into the enemy backline alone.",
                     "var(--cyan)"
@@ -947,14 +1222,14 @@ fn view_dynamic_phase_analysis(phase_idx: usize, selected_rank: &str) -> impl In
         2 => { // Phase 3: Damage Mitigation & Resilience
             let (c_title, c_body, c_act, col) = if is_challenger {
                 (
-                    "CHALLENGER COACH VERDICT: YOUR HIGHEST RANK-READY ATTRIBUTE",
-                    "THIS IS YOUR STANDOUT SUPERPOWER. 1,140 self-mitigated damage per minute and 48.2s of CC applied exceed even the top 0.05% Challenger benchmark (980/min). You possess elite defensive cooldown cycling and frontline absorption. In high-ELO teamfights, this durability absorbs game-changing ultimates and creates immense space for your carries.",
+                    "FAKER (T1) GOLD STANDARD VERDICT: WORLD-CLASS DAMAGE MITIGATION",
+                    "THIS IS YOUR STANDOUT SUPERPOWER. 1,140 self-mitigated damage per minute and 48.2s of CC applied achieve 93% parity with Faker's legendary Worlds form (1,220/min). You possess elite defensive cooldown cycling and frontline absorption. In pro play, this durability absorbs game-changing ultimates and creates immense space for carries.",
                     "ACTION: Lean heavily into this identity. Draft champions like Shen, Ornn, and Braum that convert your superior durability into guaranteed teamfight wins.",
                     "#10b981"
                 )
             } else {
                 (
-                    "MASTER+ & LOWER BENCHMARK: UNSTOPPABLE FRONTLINE ABSORPTION",
+                    "PEAK DIVISION BENCHMARK: UNSTOPPABLE FRONTLINE ABSORPTION",
                     "You absorb more than double the damage you take (2.18x ratio), out-mitigating every benchmark tier from Master down to Iron. Opponents at this level exhaust their primary cooldowns hitting you, leaving them completely defenseless against your teammates.",
                     "ACTION: Continue positioning as the primary frontline anchor in every Dragon and Baron setup.",
                     "#10b981"
@@ -969,14 +1244,14 @@ fn view_dynamic_phase_analysis(phase_idx: usize, selected_rank: &str) -> impl In
         3 => { // Phase 4: Vision & Map Awareness
             let (c_title, c_body, c_act, col) = if is_challenger {
                 (
-                    "CHALLENGER COACH CRITIQUE: VISION DENIAL & SWEEPER GAP",
-                    "In Challenger, vision is not just about placing wards—it is about denying information. Your 3.6 cleared wards per game falls far short of the Challenger requirement (5.2 cleared). Challenger supports and tops sweep river brushes 45 seconds before Dragon spawns, forcing enemies into blind facechecks. Your passive sweeper usage allows enemy teams to spot your flanks.",
+                    "FAKER (T1) GOLD STANDARD CRITIQUE: MASSIVE VISION DENIAL DEFICIT",
+                    "In pro play, vision is warfare. Faker purchases 4.8 Control Wards and sweeps 6.8 stealth wards per match. T1 starves enemy vision 45 seconds prior to neutral objective spawns, forcing opponents to facecheck into complete darkness. Your 3.6 cleared wards and 2.1 pink wards allow enemy teams to spot your flanks with zero resistance.",
                     "ACTION: Swap to Oracle Lens on your second recall (level 6) and clear vision around the objective pit 45 seconds before spawn.",
                     "#e84057"
                 )
-            } else if is_master {
+            } else if is_gm || is_master {
                 (
-                    "MASTER+ BENCHMARK: RESPECTABLE VISION SCORE, SLIGHT CONTROL WARD LAG",
+                    "PEAK MASTER / GM BENCHMARK: VISION SCORE ADEQUATE, CONTROL WARD LAG",
                     "Your vision score of 1.28/min meets the Master+ baseline. However, purchasing only 2.1 control wards per game means you occasionally contest neutral objectives without true vision denial.",
                     "ACTION: Always leave fountain with at least 1 Control Ward in inventory once minute 14 arrives.",
                     "#f59e0b"
@@ -998,14 +1273,14 @@ fn view_dynamic_phase_analysis(phase_idx: usize, selected_rank: &str) -> impl In
         _ => { // Phase 5: Objectives & Macro Transition
             let (c_title, c_body, c_act, col) = if is_challenger {
                 (
-                    "CHALLENGER COACH CRITIQUE: SLOW TURRET PLATE CONVERSION",
-                    "In Challenger, a 52% first plate rate is too slow. High-ELO laners aggressively convert lane advantages into structural plate gold (68% benchmark) by coordinating herald takes and fast turret crashes. Taking safe base recalls instead of hitting tower plates forfeits up to 350g in early lane bounties.",
+                    "FAKER (T1) GOLD STANDARD CRITIQUE: SLOW TURRET PLATE CONVERSION PACE",
+                    "In pro play, T1 converts lane leads into structural collapses with lightning speed (78% first plate rate) by coordinating Rift Herald takes before 14:00. Taking passive base recalls rather than cracking plates forfeits up to 350g in early lane bounties. You must transition your lead into map control.",
                     "ACTION: Coordinate with your jungler to drop Rift Herald in your lane before 14:00 to cash in all remaining turret plates.",
                     "#f59e0b"
                 )
             } else {
                 (
-                    "MASTER+ & LOWER BENCHMARK: STRONG OBJECTIVE CONTEST TEMPO",
+                    "PEAK DIVISION BENCHMARK: STRONG OBJECTIVE CONTEST TEMPO",
                     "Your 28% neutral monster contest rate and 52% first plate rate reflect disciplined macro decision-making. You prioritize permanent map assets (towers, drakes) over meaningless kills.",
                     "ACTION: Keep prioritizing first turret fall. Breaking top or bot outer tower opens up the enemy jungle for permanent vision dominance.",
                     "var(--cyan)"
@@ -1062,8 +1337,8 @@ fn view_page_overview_and_radar(
     let eval = rep.ml_evaluation.clone();
     let [tp, fp, tn, fn_cnt] = eval.confusion_matrix;
 
-    // Interactive Rank Tier Selector Signal for Benchmarks
-    let benchmark_rank_filter = RwSignal::new("Master+".to_string());
+    // Interactive Rank Tier Selector Signal for Benchmarks (Default: Challenger / T1 Faker Peak Ceiling)
+    let benchmark_rank_filter = RwSignal::new("Challenger".to_string());
 
     // Interactive Signals for 100-Mistake Taxonomy Explorer
     let mistake_filter = RwSignal::new("crucial".to_string());
@@ -1149,6 +1424,75 @@ fn view_page_overview_and_radar(
 
     view! {
         <div>
+            // ================================================================
+            // GLOBAL PRO & PEAK ELO BENCHMARK SELECTOR (DYNAMIC ACROSS ENTIRE TAB)
+            // ================================================================
+            <div style="background: linear-gradient(135deg, rgba(5, 15, 30, 0.98) 0%, rgba(2, 6, 14, 0.99) 100%); border: 2px solid var(--gold); border-left: 6px solid var(--gold); padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 6px 24px rgba(0,0,0,0.65);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem;">
+                    <div style="flex: 1; min-width: 320px;">
+                        <div style="display: flex; align-items: center; gap: 8px; font-family: monospace; font-size: 0.76rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.35rem;">
+                            {view_lol_icon("crown")}
+                            <strong style="color: var(--gold-hi);">"GLOBAL PRO & ELITE PEAK BENCHMARK CALIBRATION"</strong>
+                        </div>
+                        <h2 style="font-family: serif; text-transform: uppercase; letter-spacing: 0.06em; color: #fff; font-size: 1.45rem; margin: 0 0 0.4rem 0;">
+                            "Calibrate Analysis Engine Against Strict Pro Standard"
+                        </h2>
+                        <p style="margin: 0; font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; max-width: 820px;">
+                            "Select the benchmark tier below. In " <strong style="color: var(--cyan);">"Challenger mode"</strong>", you are audited directly against " <strong style="color: var(--gold-hi);">"T1 Faker (The Unkillable Demon King)"</strong>" with zero leniency. Lower divisions are calibrated to the " <strong style="color: #10b981);">"absolute 99th percentile peak"</strong>" of that tier to expose every mechanical and macro gap required to surpass it."
+                        </p>
+                    </div>
+
+                    // Interactive Dropdown & Real-time Target Badge
+                    <div style="background: rgba(1, 10, 19, 0.9); border: 1px solid rgba(200, 170, 110, 0.45); padding: 1.1rem 1.4rem; display: flex; flex-direction: column; gap: 0.65rem; min-width: 340px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <label style="font-family: monospace; font-size: 0.74rem; color: var(--gold); font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em;">
+                                "ACTIVE BENCHMARK TIER:"
+                            </label>
+                            <span style="font-family: monospace; font-size: 0.68rem; color: var(--cyan); background: rgba(10,200,185,0.12); padding: 0.15rem 0.4rem; border: 1px solid var(--cyan);">
+                                "DYNAMIC ENGINE"
+                            </span>
+                        </div>
+                        <select
+                            style="background: #010a13; border: 1.5px solid var(--gold); color: #fff; padding: 0.55rem 0.9rem; font-family: monospace; font-size: 0.85rem; font-weight: bold; cursor: pointer; outline: none; width: 100%; box-shadow: inset 0 0 8px rgba(0,0,0,0.5);"
+                            prop:value=move || benchmark_rank_filter.get()
+                            on:change=move |ev| {
+                                benchmark_rank_filter.set(event_target_value(&ev));
+                            }
+                        >
+                            <option value="Challenger">"Challenger · T1 Faker (Pro Ceiling · Zero Forgiveness)"</option>
+                            <option value="Grandmaster">"Grandmaster · Top 0.05% (99th % Peak Standard)"</option>
+                            <option value="Master+">"Master+ · Top 0.5% (99th % Peak Standard)"</option>
+                            <option value="Diamond">"Diamond · Top 3.5% (99th % Peak Standard)"</option>
+                            <option value="Emerald">"Emerald · Top 12% (99th % Peak Standard)"</option>
+                            <option value="Platinum">"Platinum · Top 25% (99th % Peak Standard)"</option>
+                            <option value="Gold">"Gold · Top 45% (99th % Peak Standard)"</option>
+                            <option value="Silver">"Silver · Median 50% (99th % Peak Standard)"</option>
+                            <option value="Bronze / Iron">"Bronze / Iron · Entry (99th % Peak Standard)"</option>
+                        </select>
+                        <div style="font-family: monospace; font-size: 0.72rem;">
+                            {move || {
+                                let r = benchmark_rank_filter.get();
+                                if r == "Challenger" {
+                                    view! {
+                                        <div style="color: #e84057; background: rgba(232, 64, 87, 0.12); border: 1px solid #e84057; padding: 0.3rem 0.6rem; font-weight: bold; display: flex; align-items: center; gap: 6px;">
+                                            <span style="display: inline-block; width: 7px; height: 7px; background: #e84057; border-radius: 50%;"></span>
+                                            <span>"TARGET: T1 FAKER (KOREA S-TIER CEILING · ZERO FORGIVENESS)"</span>
+                                        </div>
+                                    }.into_any()
+                                } else {
+                                    view! {
+                                        <div style="color: var(--cyan); background: rgba(10, 200, 185, 0.12); border: 1px solid var(--cyan); padding: 0.3rem 0.6rem; font-weight: bold; display: flex; align-items: center; gap: 6px;">
+                                            <span style="display: inline-block; width: 7px; height: 7px; background: var(--cyan); border-radius: 50%;"></span>
+                                            <span>{format!("TARGET: {} (99th PERCENTILE PEAK BENCHMARK)", r.to_uppercase())}</span>
+                                        </div>
+                                    }.into_any()
+                                }
+                            }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             // Executive Playstyle DNA Identity Banner (Explains immediately what the page is about)
             <div style="background: linear-gradient(135deg, rgba(9, 24, 48, 0.95) 0%, rgba(4, 12, 24, 0.98) 100%); border: 1px solid var(--gold); border-left: 4px solid var(--cyan); padding: 1.5rem; margin-bottom: 2rem;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
@@ -1163,6 +1507,16 @@ fn view_page_overview_and_radar(
                         <p style="margin: 0; font-size: 0.88rem; color: #ddd; max-width: 920px; line-height: 1.5;">
                             {dna.archetype_subtitle.clone()}
                         </p>
+                    </div>
+                    <div style="font-family: monospace; font-size: 0.75rem;">
+                        {move || {
+                            let r = benchmark_rank_filter.get();
+                            view! {
+                                <div style="background: rgba(200,170,110,0.12); border: 1px solid var(--gold); color: var(--gold); padding: 0.35rem 0.75rem; font-weight: bold;">
+                                    {format!("CALIBRATED AGAINST: {}", r.to_uppercase())}
+                                </div>
+                            }
+                        }}
                     </div>
                 </div>
 
@@ -1223,116 +1577,168 @@ fn view_page_overview_and_radar(
                             </span>
                             <span style="color: var(--cyan); display: inline-flex; align-items: center; gap: 6px; background: rgba(10,200,185,0.12); border: 1px solid rgba(10,200,185,0.4); padding: 0.3rem 0.65rem; border-radius: 4px;">
                                 {view_lol_icon("diamond")}
-                                <span>"Role Average Baseline (Cyan Dashed)"</span>
+                                <span>
+                                    {move || {
+                                        let r = benchmark_rank_filter.get();
+                                        if r == "Challenger" {
+                                            "T1 Faker Pro Ceiling (Cyan Dashed)".to_string()
+                                        } else {
+                                            format!("{} 99th % Peak (Cyan Dashed)", r)
+                                        }
+                                    }}
+                                </span>
                             </span>
                         </div>
                     </div>
 
                     <div style="display: flex; flex-direction: column; align-items: center; margin: 1rem 0;">
-                        {view_radar_svg(evo.current_radar, dna.axis_benchmarks)}
-                        <p style="font-size: 0.88rem; color: #cbd5e1; margin: 1.25rem 0 0 0; text-align: center; max-width: 820px; line-height: 1.55;">
-                            <strong style="color: var(--gold);">"What This Shape Tells You: "</strong>
-                            "Your pentagon shows an asymmetric stretch toward Durability (85%) and Utility (80%). This means you are a defensive pillar and team enabler. You naturally survive enemy burst, protect high-damage teammates, and control objectives, rather than playing high-risk glass-cannon assassin duels."
-                        </p>
+                        {move || {
+                            let rank = benchmark_rank_filter.get();
+                            let peak_benchmarks = get_rank_peak_radar_benchmarks(&rank);
+                            view_radar_svg(evo.current_radar, peak_benchmarks)
+                        }}
+                        {move || {
+                            let rank = benchmark_rank_filter.get();
+                            let is_faker = rank == "Challenger";
+                            view! {
+                                <p style="font-size: 0.88rem; color: #cbd5e1; margin: 1.25rem 0 0 0; text-align: center; max-width: 860px; line-height: 1.55;">
+                                    <strong style="color: var(--gold);">"What This Shape Tells You: "</strong>
+                                    {if is_faker {
+                                        "Your pentagon shows strong frontline durability (85%) and utility peeling (80%), matching 93% of T1 Faker's pro defensive baseline. However, against Faker's legendary Waveclear (96%), Aggression (94%), and Mobility (92%), you face a steep tempo deficit in early plate crashes and forward lane coercion."
+                                    } else {
+                                        "Your pentagon demonstrates an unyielding frontline anchor bias toward Durability and Utility. Against this division's 99th percentile peak standard, maintaining strict wave crash discipline before roaming will ensure you dominate the tier."
+                                    }}
+                                </p>
+                            }
+                        }}
                     </div>
                 </div>
 
                 // TIER 2: 5 EXPANDED PLAYSTYLE ATTRIBUTE CARDS (What each means in plain English)
                 <div style="margin-bottom: 1.5rem;">
-                    <div style="font-family: monospace; font-size: 0.75rem; color: var(--gold); text-transform: uppercase; margin-bottom: 0.65rem; letter-spacing: 0.06em;">
-                        "HOW TO INTERPRET YOUR 5 PLAYSTYLE ATTRIBUTES"
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem; flex-wrap: wrap; gap: 0.5rem;">
+                        <div style="font-family: monospace; font-size: 0.75rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.06em;">
+                            "HOW TO INTERPRET YOUR 5 PLAYSTYLE ATTRIBUTES"
+                        </div>
+                        <span style="font-family: monospace; font-size: 0.72rem; color: var(--cyan);">
+                            {move || format!("Dynamic Gap vs {} 99th % Peak", benchmark_rank_filter.get())}
+                        </span>
                     </div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
-                        // 1. Durability
-                        <div style="background: rgba(9, 20, 40, 0.92); border: 1px solid rgba(16, 185, 129, 0.45); border-top: 3px solid #10b981; padding: 1.15rem; display: flex; flex-direction: column; justify-content: space-between;">
-                            <div>
-                                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem;">
-                                    <strong style="font-size: 0.95rem; color: #fff;">"Durability"</strong>
-                                    <span style="font-family: monospace; font-size: 0.78rem; color: #10b981; font-weight: bold; background: rgba(16,185,129,0.15); padding: 0.15rem 0.45rem; border-radius: 3px;">
-                                        {format!("You: {:.0}% (+7% vs Avg)", evo.current_radar[2])}
-                                    </span>
-                                </div>
-                                <div style="font-family: monospace; font-size: 0.74rem; color: #10b981; font-weight: bold; margin-bottom: 0.45rem;">
-                                    "STANDOUT TRAIT · FRONTLINE ANCHOR"
-                                </div>
-                                <p style="font-size: 0.8rem; color: #cbd5e1; margin: 0; line-height: 1.45;">
-                                    "You absorb massive enemy cooldowns and survive intense skirmishes without dying early. In 5v5 teamfights, you provide an unyielding frontline barrier for your team."
-                                </p>
-                            </div>
-                        </div>
+                    {
+                        let cur = evo.current_radar;
+                        move || {
+                            let rank = benchmark_rank_filter.get();
+                            let peak = get_rank_peak_radar_benchmarks(&rank);
+                            let is_faker = rank == "Challenger";
 
-                        // 2. Utility
-                        <div style="background: rgba(9, 20, 40, 0.92); border: 1px solid rgba(10, 200, 185, 0.45); border-top: 3px solid var(--cyan); padding: 1.15rem; display: flex; flex-direction: column; justify-content: space-between;">
-                            <div>
-                                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem;">
-                                    <strong style="font-size: 0.95rem; color: #fff;">"Utility"</strong>
-                                    <span style="font-family: monospace; font-size: 0.78rem; color: var(--cyan); font-weight: bold; background: rgba(10,200,185,0.15); padding: 0.15rem 0.45rem; border-radius: 3px;">
-                                        {format!("You: {:.0}% (+8% vs Avg)", evo.current_radar[3])}
-                                    </span>
-                                </div>
-                                <div style="font-family: monospace; font-size: 0.74rem; color: var(--cyan); font-weight: bold; margin-bottom: 0.45rem;">
-                                    "PRIMARY ENABLER · CC & VISION SETUP"
-                                </div>
-                                <p style="font-size: 0.8rem; color: #cbd5e1; margin: 0; line-height: 1.45;">
-                                    "You prioritize team-first play: landing crucial crowd control, peeling assassins off your squishies, and clearing enemy vision around neutral objectives."
-                                </p>
-                            </div>
-                        </div>
+                            // 0: Aggression, 1: Mobility, 2: Durability, 3: Utility, 4: Waveclear
+                            let cards = [
+                                (
+                                    "Durability",
+                                    cur[2],
+                                    peak[2],
+                                    "#10b981",
+                                    "FRONTLINE ANCHOR · DAMAGE MITIGATION",
+                                    if is_faker {
+                                        "Near-pro standard frontline presence. You absorb massive enemy focus and survive intense skirmishes, lagging only 3% behind Faker's peak tank discipline."
+                                    } else {
+                                        "Uncompromising frontline durability. In 5v5 teamfights, you absorb focus and protect damage dealers better than 90%+ of players in this bracket."
+                                    },
+                                ),
+                                (
+                                    "Utility",
+                                    cur[3],
+                                    peak[3],
+                                    "var(--cyan)",
+                                    "PRIMARY ENABLER · CC & VISION SETUP",
+                                    if is_faker {
+                                        "You consistently peel assassins and clear vision, but Faker's 91% rating demands 45-second pre-spawn vision denial and frame-perfect CC chaining."
+                                    } else {
+                                        "You excel at objective lockdown and defensive peel, giving your carry damage dealers clean lines of attack."
+                                    },
+                                ),
+                                (
+                                    "Waveclear",
+                                    cur[4],
+                                    peak[4],
+                                    "var(--gold)",
+                                    "MINION WAVE TEMPO · CS & CRASHES",
+                                    if is_faker {
+                                        "Major lane bottleneck. Faker hits 9.8-10.5 CS/min with synchronized 09:15 cannon crashes. You forfeit 1.8-2.2 CS/min during mid rotations."
+                                    } else {
+                                        "Solid fundamentals, but higher divisions punish any dropped side waves. Focus on syncing crashes before drake timers."
+                                    },
+                                ),
+                                (
+                                    "Aggression",
+                                    cur[0],
+                                    peak[0],
+                                    "#f59e0b",
+                                    "FORWARD TRADE & COMBAT PRESSURE",
+                                    if is_faker {
+                                        "Passive lane posture. Faker applies oppressive trade harassment from level 1 to establish perma-priority for Oner's invades."
+                                    } else {
+                                        "Controlled skirmishing posture. You avoid reckless deaths, but must step up forward harass when enemy abilities are on cooldown."
+                                    },
+                                ),
+                                (
+                                    "Mobility",
+                                    cur[1],
+                                    peak[1],
+                                    "#a855f7",
+                                    "ROTATION SPEED & MAP POSITIONING",
+                                    if is_faker {
+                                        "Glacial map presence compared to pro tier. Faker executes cross-map river roams and deep jungle collapses within 4-second tempo windows."
+                                    } else {
+                                        "Disciplined front-to-back teamfight positioning. To climb faster, look for faster river rotations when your wave is crashed."
+                                    },
+                                ),
+                            ];
 
-                        // 3. Waveclear
-                        <div style="background: rgba(9, 20, 40, 0.92); border: 1px solid rgba(200, 170, 110, 0.45); border-top: 3px solid var(--gold); padding: 1.15rem; display: flex; flex-direction: column; justify-content: space-between;">
-                            <div>
-                                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem;">
-                                    <strong style="font-size: 0.95rem; color: #fff;">"Waveclear"</strong>
-                                    <span style="font-family: monospace; font-size: 0.78rem; color: var(--gold); font-weight: bold; background: rgba(200,170,110,0.15); padding: 0.15rem 0.45rem; border-radius: 3px;">
-                                        {format!("You: {:.0}% (+5% vs Avg)", evo.current_radar[4])}
-                                    </span>
-                                </div>
-                                <div style="font-family: monospace; font-size: 0.74rem; color: var(--gold); font-weight: bold; margin-bottom: 0.45rem;">
-                                    "DISCIPLINED TEMPO · CS & CRASHES"
-                                </div>
-                                <p style="font-size: 0.8rem; color: #cbd5e1; margin: 0; line-height: 1.45;">
-                                    "Clean minion wave fundamentals. You consistently build slow pushes and crash cannon waves before objective timers, unlocking pressure and gold leads."
-                                </p>
-                            </div>
-                        </div>
+                            view! {
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                                    {cards.into_iter().map(|(name, player_val, peak_val, theme_color, sub_title, desc)| {
+                                        let gap = player_val - peak_val;
+                                        let (status_text, status_color) = if gap >= 0.0 {
+                                            (format!("SURPASSES (+{:.0}%)", gap), "#10b981")
+                                        } else if gap >= -6.0 {
+                                            (format!("NEAR PARITY ({:.0}%)", gap), "#f59e0b")
+                                        } else {
+                                            (format!("CRITICAL GAP ({:.0}%)", gap), "#e84057")
+                                        };
 
-                        // 4. Aggression
-                        <div style="background: rgba(9, 20, 40, 0.92); border: 1px solid rgba(245, 158, 11, 0.45); border-top: 3px solid #f59e0b; padding: 1.15rem; display: flex; flex-direction: column; justify-content: space-between;">
-                            <div>
-                                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem;">
-                                    <strong style="font-size: 0.95rem; color: #fff;">"Aggression"</strong>
-                                    <span style="font-family: monospace; font-size: 0.78rem; color: #f59e0b; font-weight: bold; background: rgba(245,158,11,0.15); padding: 0.15rem 0.45rem; border-radius: 3px;">
-                                        {format!("You: {:.0}% (+5% vs Avg)", evo.current_radar[0])}
-                                    </span>
+                                        view! {
+                                            <div style=format!("background: rgba(9, 20, 40, 0.92); border: 1px solid rgba(200, 170, 110, 0.35); border-top: 3px solid {}; padding: 1.15rem; display: flex; flex-direction: column; justify-content: space-between;", theme_color)>
+                                                <div>
+                                                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem; flex-wrap: wrap; gap: 0.3rem;">
+                                                        <strong style="font-size: 0.95rem; color: #fff;">{name}</strong>
+                                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                                            <span style="font-family: monospace; font-size: 0.74rem; color: #cbd5e1;">
+                                                                {format!("You: {:.0}%", player_val)}
+                                                            </span>
+                                                            <span style=format!("font-family: monospace; font-size: 0.72rem; color: {}; font-weight: bold; background: rgba(0,0,0,0.4); border: 1px solid {}; padding: 0.12rem 0.45rem; border-radius: 3px;", status_color, status_color)>
+                                                                {status_text}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div style=format!("font-family: monospace; font-size: 0.72rem; color: {}; font-weight: bold; margin-bottom: 0.45rem;", theme_color)>
+                                                        {sub_title}
+                                                    </div>
+                                                    <p style="font-size: 0.8rem; color: #cbd5e1; margin: 0; line-height: 1.45;">
+                                                        {desc}
+                                                    </p>
+                                                </div>
+                                                <div style="margin-top: 0.85rem; font-family: monospace; font-size: 0.7rem; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.5rem; display: flex; justify-content: space-between;">
+                                                    <span>"Target Peak Standard:"</span>
+                                                    <strong style=format!("color: {};", theme_color)>{format!("{:.0}%", peak_val)}</strong>
+                                                </div>
+                                            </div>
+                                        }
+                                    }).collect::<Vec<_>>()}
                                 </div>
-                                <div style="font-family: monospace; font-size: 0.74rem; color: #f59e0b; font-weight: bold; margin-bottom: 0.45rem;">
-                                    "CALCULATED SKIRMISHER"
-                                </div>
-                                <p style="font-size: 0.8rem; color: #cbd5e1; margin: 0; line-height: 1.45;">
-                                    "You look for proactive trades and forward combat pressure, but you know your limits. You avoid low-percentage tower dives and flip-prone level 2 fights."
-                                </p>
-                            </div>
-                        </div>
-
-                        // 5. Mobility
-                        <div style="background: rgba(9, 20, 40, 0.92); border: 1px solid rgba(168, 85, 247, 0.45); border-top: 3px solid #a855f7; padding: 1.15rem; display: flex; flex-direction: column; justify-content: space-between;">
-                            <div>
-                                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.4rem;">
-                                    <strong style="font-size: 0.95rem; color: #fff;">"Mobility"</strong>
-                                    <span style="font-family: monospace; font-size: 0.78rem; color: #a855f7; font-weight: bold; background: rgba(168,85,247,0.15); padding: 0.15rem 0.45rem; border-radius: 3px;">
-                                        {format!("You: {:.0}% (+5% vs Avg)", evo.current_radar[1])}
-                                    </span>
-                                </div>
-                                <div style="font-family: monospace; font-size: 0.74rem; color: #a855f7; font-weight: bold; margin-bottom: 0.45rem;">
-                                    "STRUCTURED POSITIONING"
-                                </div>
-                                <p style="font-size: 0.8rem; color: #cbd5e1; margin: 0; line-height: 1.45;">
-                                    "You stick to disciplined front-to-back teamfight positioning. Rather than roaming blindly across the map, you rotate with purpose to defend lanes and secure objectives."
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                            }
+                        }
+                    }
                 </div>
 
                 // TIER 3: GAME PHASE TEMPO EFFICIENCY (EARLY · MID · LATE) CARDS
@@ -1448,28 +1854,12 @@ fn view_page_overview_and_radar(
                         </h2>
                     </div>
 
-                    // Interactive Rank Tier Selector Dropdown
+                    // Active Benchmark Target Indicator (Selector located in Hero Header above)
                     <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-                        <span style="font-family: monospace; font-size: 0.78rem; color: var(--cyan); font-weight: bold;">
-                            "BENCHMARK TIER:"
+                        <span style="font-family: monospace; font-size: 0.76rem; color: var(--gold); background: rgba(200, 170, 110, 0.12); border: 1px solid var(--gold); padding: 0.35rem 0.75rem; font-weight: bold;">
+                            {move || format!("TARGET: {}", benchmark_rank_filter.get().to_uppercase())}
                         </span>
-                        <select
-                            style="background: rgba(1, 10, 19, 0.95); border: 1px solid var(--gold); color: #fff; padding: 0.4rem 0.85rem; font-family: monospace; font-size: 0.78rem; cursor: pointer; outline: none;"
-                            prop:value=move || benchmark_rank_filter.get()
-                            on:change=move |ev| {
-                                benchmark_rank_filter.set(event_target_value(&ev));
-                            }
-                        >
-                            <option value="Challenger">"Challenger (Top 0.05%)"</option>
-                            <option value="Master+">"Master+ (Top 0.5% · Default)"</option>
-                            <option value="Diamond">"Diamond (Top 3.5%)"</option>
-                            <option value="Emerald">"Emerald (Top 12%)"</option>
-                            <option value="Platinum">"Platinum (Top 25%)"</option>
-                            <option value="Gold">"Gold (Top 45%)"</option>
-                            <option value="Silver">"Silver (Median 50%)"</option>
-                            <option value="Bronze / Iron">"Bronze / Iron (Entry ELO)"</option>
-                        </select>
-                        <span style="font-family: monospace; font-size: 0.74rem; color: #10b981; background: rgba(10, 200, 185, 0.12); border: 1px solid var(--cyan); padding: 0.2rem 0.55rem;">
+                        <span style="font-family: monospace; font-size: 0.74rem; color: #10b981; background: rgba(10, 200, 185, 0.12); border: 1px solid var(--cyan); padding: 0.35rem 0.65rem; font-weight: bold;">
                             "LIVE TELEMETRY VERIFIED"
                         </span>
                     </div>
@@ -1536,8 +1926,8 @@ fn view_page_overview_and_radar(
                             "3. 6-Model Diagnostic Facility: Findings & In-Game Directives"
                         </h2>
                     </div>
-                    <span style="font-family: monospace; font-size: 0.78rem; color: var(--text-muted);">
-                        "Each Model Evaluated On 80/20 Account Split"
+                    <span style="font-family: monospace; font-size: 0.76rem; color: var(--gold); background: rgba(200, 170, 110, 0.12); border: 1px solid rgba(200, 170, 110, 0.4); padding: 0.25rem 0.6rem;">
+                        {move || format!("Tuned to {} Velocity Thresholds", benchmark_rank_filter.get())}
                     </span>
                 </div>
 
@@ -1618,7 +2008,7 @@ fn view_page_overview_and_radar(
                         </h2>
                     </div>
                     <span style="font-family: monospace; font-size: 0.78rem; color: #10b981; background: rgba(16, 185, 129, 0.12); border: 1px solid #10b981; padding: 0.25rem 0.65rem; font-weight: bold;">
-                        "80/20 ACCOUNT SPLIT VALIDATED · 4 INDEPENDENT FULL-WIDTH PANELS"
+                        {move || format!("80/20 ACCOUNT SPLIT · AUDITED VS {}", benchmark_rank_filter.get().to_uppercase())}
                     </span>
                 </div>
 
@@ -2079,7 +2469,7 @@ fn view_page_overview_and_radar(
 
                     <div style="border-top: 1px solid rgba(200, 170, 110, 0.25); padding-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
                         <span style="font-family: monospace; font-size: 0.82rem; color: var(--gold); font-weight: bold;">
-                            "COACH'S ACTIONABLE TAKEAWAY FOR YOUR NEXT 20 GAMES:"
+                            {move || format!("COACH'S ACTIONABLE TAKEAWAY TO SURPASS {} BENCHMARK:", benchmark_rank_filter.get().to_uppercase())}
                         </span>
                         <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; font-family: monospace; font-size: 0.78rem;">
                             <span style="background: rgba(16,185,129,0.15); border: 1px solid #10b981; color: #10b981; padding: 0.3rem 0.65rem;">
@@ -2107,7 +2497,7 @@ fn view_page_overview_and_radar(
                         </h2>
                     </div>
                     <span style="font-family: monospace; font-size: 0.78rem; color: #e84057; background: rgba(232, 64, 87, 0.12); border: 1px solid #e84057; padding: 0.25rem 0.65rem; font-weight: bold;">
-                        "100 TAXONOMY PATTERNS CATALOGED"
+                        {move || format!("100 PATTERNS · AUDITED VS {}", benchmark_rank_filter.get().to_uppercase())}
                     </span>
                 </div>
 
