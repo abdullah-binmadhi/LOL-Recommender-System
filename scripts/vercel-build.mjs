@@ -14,4 +14,10 @@ for (const item of copyList) {
   }
 }
 
+// Ensure the root index.html serves the full WASM application directly without redirect latency
+const rustIndex = path.join(dist, 'rust-preview', 'index.html');
+if (fs.existsSync(rustIndex)) {
+  fs.copyFileSync(rustIndex, path.join(dist, 'index.html'));
+}
+
 console.log('Vercel static distribution successfully prepared in dist/');
