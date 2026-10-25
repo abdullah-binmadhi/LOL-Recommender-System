@@ -89,7 +89,7 @@ pub fn view_analytics(state: RwSignal<AppState>, summary: Arc<AnalyticsSummary>)
                 <button
                     type="button"
                     class="back-button"
-                    style="border-color: var(--cyan); color: var(--cyan);"
+                    style="border-color: var(--cyan); color: var(--cyan); display: inline-flex; align-items: center; gap: 6px;"
                     on:click=move |_| {
                         if let Some(win) = web_sys::window() {
                             let _ = win.location().set_hash("#analytics");
@@ -97,7 +97,8 @@ pub fn view_analytics(state: RwSignal<AppState>, summary: Arc<AnalyticsSummary>)
                         state.update(AppState::open_player_analytics);
                     }
                 >
-                    "✦ Summoner Intelligence (Player Analytics) →"
+                    {crate::player_analytics_view::view_lol_icon("hex-compass")}
+                    <span>"Summoner Intelligence (Player Analytics) →"</span>
                 </button>
             </div>
 
@@ -134,7 +135,7 @@ pub fn view_analytics(state: RwSignal<AppState>, summary: Arc<AnalyticsSummary>)
             // Interactive Filter Ribbon & Roster Matcher
             <div class="matrix-filter-ribbon">
                 <div class="matrix-filter-header">
-                    <span class="matrix-sparkle">"✦"</span>
+                    <span class="matrix-sparkle">{crate::player_analytics_view::view_lol_icon("hex-sparkle")}</span>
                     <span class="matrix-title">"Interactive Roster Matrix"</span>
                     {move || {
                         let count = filtered_champions.with(|c| c.len());
@@ -159,9 +160,11 @@ pub fn view_analytics(state: RwSignal<AppState>, summary: Arc<AnalyticsSummary>)
                                 <button
                                     type="button"
                                     class="matrix-reset-btn"
+                                    style="display: inline-flex; align-items: center; gap: 5px;"
                                     on:click=move |_| state.update(|s| s.clear_roster_filter())
                                 >
-                                    "↺ Reset All Filters"
+                                    {crate::player_analytics_view::view_lol_icon("nexus-pulse")}
+                                    <span>"Reset All Filters"</span>
                                 </button>
                             }.into_any()
                         } else {
@@ -255,7 +258,7 @@ pub fn view_analytics(state: RwSignal<AppState>, summary: Arc<AnalyticsSummary>)
                     let avatar = champion_avatar(&champ.name);
                     view! {
                         <div class="champion-reveal-heroic">
-                            <div class="reveal-badge">"✦ CHAMPION REVEALED! ✦"</div>
+                            <div class="reveal-badge">"CHAMPION REVEALED"</div>
                             <div class="reveal-content">
                                 <img class="reveal-avatar" src=avatar alt=champ.name.clone() />
                                 <div class="reveal-info">
@@ -275,9 +278,11 @@ pub fn view_analytics(state: RwSignal<AppState>, summary: Arc<AnalyticsSummary>)
                                         <button
                                             type="button"
                                             class="btn btn-secondary btn-md"
+                                            style="display: inline-flex; align-items: center; gap: 6px;"
                                             on:click=move |_| state.update(|s| s.open_modal(crate::state::Modal::Champion(champ_name_btn.clone())))
                                         >
-                                            "✦ Inspect Details & Counters"
+                                            {crate::player_analytics_view::view_lol_icon("hex-compass")}
+                                            <span>"Inspect Details & Counters"</span>
                                         </button>
                                         <button
                                             type="button"
@@ -315,7 +320,10 @@ pub fn view_analytics(state: RwSignal<AppState>, summary: Arc<AnalyticsSummary>)
                     view! {
                         <div class="matched-roster-section">
                             <div class="roster-section-header">
-                                <h3>"✦ Matched Champions (" {count} ")"</h3>
+                                <h3 style="display: inline-flex; align-items: center; gap: 6px;">
+                                    {crate::player_analytics_view::view_lol_icon("arcane-matrix")}
+                                    <span>{format!("Matched Champions ({})", count)}</span>
+                                </h3>
                                 <span class="roster-section-subtitle">"Click any champion card below to inspect full stats, matchups, and counters."</span>
                             </div>
                             <div class="matched-roster-grid">
@@ -336,9 +344,11 @@ pub fn view_analytics(state: RwSignal<AppState>, summary: Arc<AnalyticsSummary>)
                             <button
                                 type="button"
                                 class="btn btn-secondary btn-sm"
+                                style="display: inline-flex; align-items: center; gap: 5px;"
                                 on:click=move |_| state.update(|s| s.clear_roster_filter())
                             >
-                                "↺ Reset All Filters"
+                                {crate::player_analytics_view::view_lol_icon("nexus-pulse")}
+                                <span>"Reset All Filters"</span>
                             </button>
                         </div>
                     }.into_any()

@@ -220,6 +220,30 @@ pub fn view_lol_icon(kind: &'static str) -> impl IntoView {
             </svg>
         }
         .into_any(),
+        "hex-overdrive" => view! {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <polygon points="12,2 21,9 18,22 6,22 3,9" stroke="#0ac8b9" stroke-width="1.6" fill="rgba(10,200,185,0.18)" />
+                <polygon points="12,5 17,10 15,19 9,19 7,10" stroke="#c8aa6e" stroke-width="1.3" fill="rgba(200,170,110,0.24)" />
+                <line x1="12" y1="2" x2="12" y2="22" stroke="#0ac8b9" stroke-width="1.5" />
+                <line x1="3" y1="9" x2="21" y2="9" stroke="#c8aa6e" stroke-width="1" />
+                <circle cx="12" cy="12" r="2" fill="#0ac8b9" />
+            </svg>
+        }
+        .into_any(),
+        "hex-sparkle" => view! {
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" stroke="#c8aa6e" stroke-width="1.5" fill="rgba(200,170,110,0.2)" />
+                <circle cx="12" cy="12" r="2" fill="#0ac8b9" />
+            </svg>
+        }
+        .into_any(),
+        "google-crest" => view! {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <circle cx="12" cy="12" r="10" stroke="#c8aa6e" stroke-width="1.4" fill="rgba(200,170,110,0.12)" />
+                <path d="M16.5 12H12V14.5H14.8C14.3 16 13.2 16.8 12 16.8C10.2 16.8 8.7 15.3 8.7 13.5C8.7 11.7 10.2 10.2 12 10.2C12.8 10.2 13.5 10.5 14.1 11.1L15.9 9.3C14.8 8.3 13.5 7.7 12 7.7C8.8 7.7 6.2 10.3 6.2 13.5C6.2 16.7 8.8 19.3 12 19.3C15.2 19.3 17.3 17 17.3 13.8C17.3 13.1 17.2 12.5 17 12H16.5Z" fill="#0ac8b9" />
+            </svg>
+        }
+        .into_any(),
         _ => view! {
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="flex-shrink: 0; vertical-align: middle;">
                 <polygon points="8,1 15,8 8,15 1,8" fill="#c8aa6e" stroke="#0ac8b9" stroke-width="1" />
@@ -317,8 +341,15 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
 
     let show_quick_key_drawer = RwSignal::new(false);
     let quick_key_input = RwSignal::new(crate::storage::get_local_storage_item("lol_riot_api_key").unwrap_or_default());
+    let last_sync_click = StoredValue::new(0.0);
 
     let trigger_riot_sync = move |champ_opt: Option<String>| {
+        let now = js_sys::Date::now();
+        if now - last_sync_click.get_value() < 4000.0 {
+            return;
+        }
+        last_sync_click.set_value(now);
+
         if let Some(ref c) = champ_opt {
             refreshing_champion.set(Some(c.clone()));
         }
@@ -332,14 +363,13 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
         crate::storage::supabase_fetch_riot_telemetry(&r_id, &reg);
     };
 
-    // Auto-trigger sync on mount if matches are not yet loaded in state
-    Effect::new(move |_| {
-        let has_matches = state.with(|c| c.live_player_matches.as_ref().map(|m| !m.is_empty()).unwrap_or(false));
-        let is_syncing = state.with(|c| c.is_syncing_riot);
-        if !has_matches && !is_syncing {
-            trigger_riot_sync(None);
+    // Safely load cached matches on mount without triggering an infinite reactive network loop
+    if state.with_untracked(|c| c.live_player_matches.is_none()) {
+        if let Some(cached) = crate::storage::load_cached_riot_matches() {
+            let src = crate::storage::load_cached_riot_data_source();
+            state.update(|c| c.set_live_matches(Some(cached), src));
         }
-    });
+    }
 
     view! {
         <section id="player-analytics-dashboard" class="analytics-dashboard active" style="max-width: 1260px; margin: 0 auto; padding: 2rem 1rem;">
@@ -432,12 +462,12 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                                     disabled=move || state.with(|c| c.is_syncing_riot)
                                     on:click=move |_| trigger_riot_sync(None)
                                 >
-                                    {view_lol_icon("nexus-pulse")}
+                                    {view_lol_icon("hex-overdrive")}
                                     <span>
                                         {move || if state.with(|c| c.is_syncing_riot) {
                                             "Ingesting from Riot API..."
                                         } else {
-                                            "⚡ Update Database"
+                                            "Update Database"
                                         }}
                                     </span>
                                 </button>
@@ -447,8 +477,8 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                                     style="background: rgba(9, 20, 40, 0.7); border: 1px solid rgba(200, 170, 110, 0.4); color: var(--gold); padding: 0.55rem 0.85rem; cursor: pointer; font-size: 0.76rem; text-transform: uppercase; font-family: monospace; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;"
                                     on:click=move |_| show_quick_key_drawer.update(|v| *v = !*v)
                                 >
-                                    {view_lol_icon("hex-compass")}
-                                    <span>{move || if show_quick_key_drawer.get() { "Hide API Key Drawer" } else { "✦ Quick Riot API Key" }}</span>
+                                    {view_lol_icon("hex-core")}
+                                    <span>{move || if show_quick_key_drawer.get() { "Hide API Key Drawer" } else { "Quick Riot API Key" }}</span>
                                 </button>
 
                                 {move || {
@@ -481,7 +511,7 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                                     <div style="background: rgba(1, 10, 19, 0.95); border: 1px solid var(--cyan); padding: 1rem 1.25rem; margin-top: 1rem; display: flex; flex-direction: column; gap: 0.65rem; box-shadow: inset 0 0 16px rgba(10, 200, 185, 0.15);">
                                         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                                             <div style="display: flex; align-items: center; gap: 0.45rem;">
-                                                <span style="color: var(--cyan); font-weight: bold; font-family: monospace; font-size: 0.85rem;">"✦ Personal 24-Hour Riot Developer Key"</span>
+                                                <span style="color: var(--cyan); font-weight: bold; font-family: monospace; font-size: 0.85rem;">"Personal 24-Hour Riot Developer Key"</span>
                                                 <span style="color: var(--text-muted); font-size: 0.74rem;">"(Bypasses rate limits & ingests today's fresh matches)"</span>
                                             </div>
                                             <a
@@ -3470,7 +3500,8 @@ where
                                     "Master Coach & Analyst Synthesis"
                                 </span>
                                 <span style="color: #10b981; font-family: monospace; font-size: 0.72rem; font-weight: bold;">
-                                    "● High Diagnostic Confidence (R² = 0.942)"
+                                    {view_lol_icon("hex-check")}
+                                    <span>"High Diagnostic Confidence (R² = 0.942)"</span>
                                 </span>
                             </div>
                             <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold-hi); font-size: 1.35rem; margin: 0; letter-spacing: 0.05em;">
@@ -3802,7 +3833,8 @@ where
                             rec_sort_filter.set("fit".into());
                         }
                     >
-                        <span>"↺ Reset Filters"</span>
+                        {view_lol_icon("nexus-pulse")}
+                        <span>"Reset Filters"</span>
                     </button>
                 </div>
 

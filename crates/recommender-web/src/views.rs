@@ -120,10 +120,10 @@ pub fn App() -> impl IntoView {
                     .ok().and_then(|v| v.as_f64()).unwrap_or(0.0) as usize;
 
                 if status.as_deref() == Some("api_key_expired") {
-                    feedback_msg = Some("⚠ Riot Developer API Key expired (24h limit). Please enter a fresh RGAPI key below to ingest today's matches.".to_string());
+                    feedback_msg = Some("Riot Developer API Key expired (24h limit). Please enter a fresh RGAPI key below to ingest today's matches.".to_string());
                     status_ok = false;
                 } else if status.as_deref() == Some("error") {
-                    feedback_msg = err.or_else(|| Some("⚠ Could not reach sync proxy. Check your connection or try again.".to_string()));
+                    feedback_msg = err.or_else(|| Some("Could not reach sync proxy. Check your connection or try again.".to_string()));
                     status_ok = false;
                 } else if new_count > 0 {
                     feedback_msg = Some(format!("✓ Successfully ingested {} new matches from today into Supabase!", new_count));
@@ -390,9 +390,11 @@ fn view_navbar(state: RwSignal<AppState>) -> impl IntoView {
                             <button
                                 type="button"
                                 class="btn btn-secondary btn-md"
+                                style="display: inline-flex; align-items: center; gap: 6px;"
                                 on:click=move |_| storage::supabase_sign_in_google()
                             >
-                                "✦ Google Sign-In"
+                                {crate::player_analytics_view::view_lol_icon("google-crest")}
+                                <span>"Sign in with Google"</span>
                             </button>
                         }.into_any(),
                     }}
@@ -460,7 +462,8 @@ fn view_start(
                             (!is_authed).then(|| view! {
                                 <Button variant=ButtonVariant::Secondary size=ButtonSize::Lg
                                     on:click=move |_| storage::supabase_sign_in_google()>
-                                    "✦ Sign in with Google"
+                                    {crate::player_analytics_view::view_lol_icon("google-crest")}
+                                    <span>"Sign in with Google"</span>
                                 </Button>
                             })
                         }}
@@ -1363,7 +1366,10 @@ fn view_analysis_content(
                 <img src=top_image alt=top_name.clone() />
             </div>
             <div class="spotlight-main">
-                <span class="eyebrow">"★ Your #1 champion match"</span>
+                <span class="eyebrow" style="display: inline-flex; align-items: center; gap: 6px;">
+                    {crate::player_analytics_view::view_lol_icon("mastery-crest")}
+                    <span>"Your #1 Champion Match"</span>
+                </span>
                 <h2 class="spot-name">{top_name.clone()}</h2>
                 <p class="spot-sub">
                     {format!("{top_role} • Difficulty {top_difficulty:.0}/10 • {top_tier} tier • {top_win_rate:.1}% win rate")}
@@ -1513,7 +1519,7 @@ fn view_analysis_content(
 
         <section class="block" aria-labelledby="top10-title">
             <div class="block-head hex-block-head">
-                <span class="hex-rune-tag">"✦ HEXTECH MATCHMAKING ENGINE ✦"</span>
+                <span class="hex-rune-tag">"HEXTECH MATCHMAKING ENGINE"</span>
                 <h2 id="top10-title" class="section-title">
                     <span style="display:inline-flex;width:20px;height:20px;margin-right:8px;vertical-align:middle;">
                         {crate::player_analytics_view::view_lol_icon("mastery-crest")}
@@ -1711,7 +1717,7 @@ fn view_model_quality_panel(
     view! {
         <section class="block model-quality-panel" aria-labelledby="quality-metrics-title">
             <div class="block-head hex-block-head">
-                <span class="hex-rune-tag">"✦ ADVANCED STATISTICAL AUDIT & VALIDATION ✦"</span>
+                <span class="hex-rune-tag">"ADVANCED STATISTICAL AUDIT & VALIDATION"</span>
                 <h2 id="quality-metrics-title" class="section-title">
                     <span style="display:inline-flex;width:22px;height:22px;margin-right:10px;vertical-align:middle;">
                         {crate::player_analytics_view::view_lol_icon("arcane-matrix")}
@@ -3195,7 +3201,7 @@ fn view_link_riot_modal(state: RwSignal<AppState>) -> impl IntoView {
             class="inspector"
         >
             <header class="modal-head">
-                <span class="eyebrow">"✦ Riot Account Integration ✦"</span>
+                <span class="eyebrow">"RIOT ACCOUNT INTEGRATION"</span>
                 <h2>"Link Your Riot ID"</h2>
                 <p class="muted">
                     "Connect your in-game identity to link rank, mastery stats, and future live telemetry."
@@ -3299,7 +3305,7 @@ fn view_cloud_history_modal(state: RwSignal<AppState>) -> impl IntoView {
             class="inspector"
         >
             <header class="modal-head">
-                <span class="eyebrow">"✦ Cloud Sync Active ✦"</span>
+                <span class="eyebrow">"CLOUD SYNC ACTIVE"</span>
                 <h2>"Supabase Telemetry & History"</h2>
                 <p class="muted">
                     "Your calibration runs and champion compatibility scores are securely synced to Supabase."
@@ -3799,7 +3805,7 @@ fn view_tie_breaker_modal(
     view! {
         <Dialog on_close=close_modal_callback(state) label="Adaptive Tie-Breaker & Scenario Alignment" class="inspector">
             <header class="modal-head">
-                <span class="eyebrow">"✦ CONSENSUS STEERING ENGINE ✦"</span>
+                <span class="eyebrow">"CONSENSUS STEERING ENGINE"</span>
                 <h2>"Resolve Divergent Recommendations"</h2>
                 <p class="muted">
                     "When machine learning models disagree on champion priorities, 5 tactical scenarios clarify your intrinsic playstyle preference."
@@ -3840,8 +3846,9 @@ fn view_tie_breaker_modal(
                 // Consensus Dial & Alignment Recommendation Box
                 <div style="background: rgba(10, 200, 185, 0.08); border: 1px solid var(--cyan); border-radius: 6px; padding: 1rem 1.25rem; margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                     <div>
-                        <span style="font-family: monospace; font-size: 0.72rem; color: var(--cyan); letter-spacing: 0.08em; text-transform: uppercase;">
-                            "● CONSENSUS ALIGNMENT VERDICT"
+                        <span style="font-family: monospace; font-size: 0.72rem; color: var(--cyan); letter-spacing: 0.08em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 5px;">
+                            {crate::player_analytics_view::view_lol_icon("warden-sigil")}
+                            <span>"CONSENSUS ALIGNMENT VERDICT"</span>
                         </span>
                         <div style="font-size: 0.95rem; color: #f0e6d2; margin-top: 0.2rem;">
                             <span>"Steering Consensus to "</span>
@@ -3865,7 +3872,7 @@ fn view_tie_breaker_modal(
                         <span style="display:inline-flex;width:14px;height:14px;margin-right:6px;vertical-align:middle;">
                             {crate::player_analytics_view::view_lol_icon("hex-gears")}
                         </span>
-                        "Accept Alignment & Calibrate Sliders (Step 3) ➔"
+                        "Accept Alignment & Calibrate Sliders (Step 3) →"
                     </Button>
                 </div>
             </div>

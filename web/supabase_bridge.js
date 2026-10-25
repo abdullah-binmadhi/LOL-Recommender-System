@@ -393,11 +393,11 @@
       }
       const now = Date.now();
       const last = (window.SupabaseBridge || window.supabaseAuth).getLastSyncTime();
-      const minInterval = force ? 10000 : 45000; // 45s cooldown unless force (10s)
+      const minInterval = force ? 15000 : 180000; // 3 min cooldown unless forced (15s)
       if (now - last < minInterval) {
         return;
       }
-      console.log("[Auto-Sync] Tab active or periodic tick — checking for newly completed games...");
+      console.log("[Auto-Sync] Periodic tick — checking for newly completed games...");
       return (window.SupabaseBridge || window.supabaseAuth).fetchRiotTelemetry(null, null, null, 0, 5);
     }
   };
@@ -408,19 +408,9 @@
   // OP.GG-style auto-update listeners:
   // Detects when the player finishes their 30-min match and tabs back into the recommender
   if (typeof document !== "undefined" && typeof window !== "undefined") {
-    document.addEventListener("visibilitychange", function() {
-      if (document.visibilityState === "visible") {
-        window.SupabaseBridge.triggerAutoSync(false);
-      }
-    });
-
-    window.addEventListener("focus", function() {
-      window.SupabaseBridge.triggerAutoSync(false);
-    });
-
-    // Periodic auto-sync every 90 seconds while tab remains open
+    // Periodic auto-sync every 3 minutes while tab remains open
     setInterval(function() {
       window.SupabaseBridge.triggerAutoSync(false);
-    }, 90000);
+    }, 180000);
   }
 })();

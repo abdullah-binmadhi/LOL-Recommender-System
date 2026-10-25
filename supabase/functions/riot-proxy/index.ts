@@ -201,21 +201,28 @@ serve(async (req: Request) => {
       );
     }
 
-    // 1. Resolve Summoner PUUID
-    const accountData = await resolveAccountPuuid(gameName, tagLine, cluster, riotApiKey);
-    let puuid = accountData?.puuid;
+    // 1. Resolve Summoner PUUID (Check Supabase first to save Riot API quota & eliminate latency)
+    let puuid: string | undefined = undefined;
+    let resolvedGameName = gameName;
+    let resolvedTagLine = tagLine;
 
-    // Fallback: If account resolution failed (e.g. key expired), try finding PUUID in existing Postgres matches
-    if (!puuid) {
-      const { data: existingPlayer } = await supabase
-        .from("player_matches")
-        .select("puuid")
-        .ilike("riot_id", `${gameName}%`)
-        .limit(1)
-        .maybeSingle();
-      if (existingPlayer && existingPlayer.puuid) {
-        puuid = existingPlayer.puuid;
-      }
+    const { data: existingPlayer } = await supabase
+      .from("player_matches")
+      .select("puuid, riot_id")
+      .ilike("riot_id", `${gameName}%`)
+      .limit(1)
+      .maybeSingle();
+
+    if (existingPlayer && existingPlayer.puuid) {
+      puuid = existingPlayer.puuid;
+      const parts = (existingPlayer.riot_id || "").split("#");
+      if (parts[0]) resolvedGameName = parts[0];
+      if (parts[1]) resolvedTagLine = parts[1];
+    } else {
+      const accountData = await resolveAccountPuuid(gameName, tagLine, cluster, riotApiKey);
+      puuid = accountData?.puuid;
+      if (accountData?.gameName) resolvedGameName = accountData.gameName;
+      if (accountData?.tagLine) resolvedTagLine = accountData.tagLine;
     }
 
     if (!puuid) {
@@ -230,10 +237,13 @@ serve(async (req: Request) => {
     }
 
     const safeStart = Math.max(0, Number(start) || 0);
-    const safeCount = Math.min(30, Math.max(1, Number(count) || 20));
+    // Use an agile default batch size of 10 for lightning-fast sync without triggering 429 rate limits
+    const safeCount = Math.min(20, Math.max(1, Number(count) || 10));
 
     // 2. Fetch match IDs from Riot Match-V5
     let apiKeyExpired = false;
+    let rateLimited = false;
+    let retryAfterSeconds = 0;
     let newMatchesCount = 0;
     const parsedNewMatches: any[] = [];
 
@@ -243,10 +253,14 @@ serve(async (req: Request) => {
     try {
       const matchesRes = await fetchWithTimeout(matchesUrl, {
         headers: { "X-Riot-Token": riotApiKey },
-      }, 5000);
+      }, 4000);
 
       if (matchesRes.status === 401 || matchesRes.status === 403) {
         apiKeyExpired = true;
+      } else if (matchesRes.status === 429) {
+        rateLimited = true;
+        const retryHeader = matchesRes.headers.get("retry-after");
+        retryAfterSeconds = retryHeader ? Math.max(1, parseInt(retryHeader, 10)) : 30;
       } else if (matchesRes.ok) {
         matchIds = ((await matchesRes.json()) as string[]) || [];
       }
@@ -507,10 +521,19 @@ serve(async (req: Request) => {
       // Non-fatal
     }
 
-    const responseStatus = apiKeyExpired ? "api_key_expired" : "success";
-    const statusMsg = apiKeyExpired
-      ? "Riot Developer API Key expired (24h limit) or invalid. Enter a fresh RGAPI key to ingest latest games."
-      : null;
+    let responseStatus = "success";
+    let statusMsg: string | null = null;
+    let riotApiStatus = "connected";
+
+    if (apiKeyExpired) {
+      responseStatus = "api_key_expired";
+      statusMsg = "Riot Developer API Key expired (24h limit) or invalid. Enter a fresh RGAPI key to ingest latest games.";
+      riotApiStatus = "key_expired";
+    } else if (rateLimited) {
+      responseStatus = "rate_limited";
+      statusMsg = `Riot API rate limit reached (100 req/2min). Cooldown in progress (ready in ${retryAfterSeconds}s).`;
+      riotApiStatus = "rate_limited";
+    }
 
     return new Response(
       JSON.stringify({
@@ -518,12 +541,13 @@ serve(async (req: Request) => {
         data_source: "live_postgres",
         new_matches_synced: newMatchesCount,
         total_matches_in_db: totalCount || rawMatches.length,
-        riot_api_status: apiKeyExpired ? "key_expired" : "connected",
+        riot_api_status: riotApiStatus,
+        retry_after: retryAfterSeconds,
         error: statusMsg,
         summoner: {
           puuid,
-          gameName: accountData?.gameName || gameName,
-          tagLine: accountData?.tagLine || tagLine,
+          gameName: resolvedGameName,
+          tagLine: resolvedTagLine,
           region,
           top_masteries: topMasteries.map((m: any) => ({
             championId: m.championId,
