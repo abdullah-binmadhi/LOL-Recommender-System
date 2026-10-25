@@ -134,6 +134,13 @@ impl RosterFilter {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum OverdriveMode {
+    #[default]
+    ArchetypeResonance,
+    ParetoHarmonizer,
+}
+
 #[derive(Debug, Clone)]
 pub struct AppState {
     pub screen: Screen,
@@ -168,6 +175,8 @@ pub struct AppState {
     pub tie_breaker_answers: Vec<bool>,
     pub model_trust_lab_open: bool,
     pub overdrive_active: bool,
+    pub overdrive_mode: OverdriveMode,
+    pub show_tradeoff_audit: bool,
     pub original_recommendation: Option<RecommendationResult>,
 }
 
@@ -197,6 +206,8 @@ impl Default for AppState {
             tie_breaker_answers: vec![true, true, true, true, true],
             model_trust_lab_open: true,
             overdrive_active: false,
+            overdrive_mode: OverdriveMode::ArchetypeResonance,
+            show_tradeoff_audit: false,
             original_recommendation: None,
         }
     }
@@ -555,6 +566,19 @@ impl AppState {
         };
     }
 
+    /// Sets the active Overdrive mode (Archetype Resonance vs. Pareto Harmonizer) and re-evaluates the pool
+    pub fn set_overdrive_mode(&mut self, mode: OverdriveMode) {
+        self.overdrive_mode = mode;
+        if self.overdrive_active {
+            self.recompute_overdrive();
+        }
+    }
+
+    /// Toggles the interactive trade-off audit drawer in Pareto Harmonizer mode
+    pub fn toggle_tradeoff_audit(&mut self) {
+        self.show_tradeoff_audit = !self.show_tradeoff_audit;
+    }
+
     /// Toggles Apex Overdrive mode, elevating the top 10 candidates of the primary selected role
     /// into unanimous 95%–100% consensus across all 6 ML models.
     pub fn toggle_apex_overdrive(&mut self) {
@@ -563,6 +587,7 @@ impl AppState {
                 self.recommendation = Some(orig);
             }
             self.overdrive_active = false;
+            self.show_tradeoff_audit = false;
             return;
         }
 
@@ -571,8 +596,22 @@ impl AppState {
         };
 
         if self.original_recommendation.is_none() {
-            self.original_recommendation = Some(current_rec.clone());
+            self.original_recommendation = Some(current_rec);
         }
+
+        self.overdrive_active = true;
+        self.recompute_overdrive();
+    }
+
+    /// Recomputes the Overdrive pool according to the current mode (Archetype vs. Pareto)
+    pub fn recompute_overdrive(&mut self) {
+        let base_rec = self
+            .original_recommendation
+            .clone()
+            .or_else(|| self.recommendation.clone());
+        let Some(current_rec) = base_rec else {
+            return;
+        };
 
         // Determine primary selected role
         let primary_role = self
@@ -620,21 +659,51 @@ impl AppState {
             }
         }
 
-        // Sort by baseline score descending
-        candidate_pool.sort_by(|a, b| b.average.total_cmp(&a.average));
+        // Sort candidates depending on the selected Overdrive mode:
+        // Mode A (Archetype Resonance) evaluates pure role archetype weight (RF + GBDT + Cosine)
+        // Mode B (Pareto Harmonizer) evaluates multi-objective trait balance (KNN + DecisionTree + NaiveBayes)
+        match self.overdrive_mode {
+            OverdriveMode::ArchetypeResonance => {
+                candidate_pool.sort_by(|a, b| {
+                    let score_a = a.random_forest * 0.35
+                        + a.gbdt.unwrap_or(a.average) * 0.35
+                        + a.cosine_similarity.unwrap_or(a.average) * 0.30;
+                    let score_b = b.random_forest * 0.35
+                        + b.gbdt.unwrap_or(b.average) * 0.35
+                        + b.cosine_similarity.unwrap_or(b.average) * 0.30;
+                    score_b.total_cmp(&score_a)
+                });
+            }
+            OverdriveMode::ParetoHarmonizer => {
+                candidate_pool.sort_by(|a, b| {
+                    let score_a = a.knn * 0.40
+                        + a.decision_tree * 0.35
+                        + a.naive_bayes.unwrap_or(a.average) * 0.25;
+                    let score_b = b.knn * 0.40
+                        + b.decision_tree * 0.35
+                        + b.naive_bayes.unwrap_or(b.average) * 0.25;
+                    score_b.total_cmp(&score_a)
+                });
+            }
+        }
+
         candidate_pool.truncate(10);
 
-        // Monotonically map the top 10 candidates into [95.0, 100.0]
+        // Monotonically map the top 10 candidates into [95.0, 100.0] and all 6 models into [90.0, 100.0]
         let mut apex_top10 = Vec::new();
+        let is_archetype = self.overdrive_mode == OverdriveMode::ArchetypeResonance;
+        let base_ceiling = if is_archetype { 99.8 } else { 99.5 };
+        let model_floor = if is_archetype { 90.5 } else { 90.0 };
+
         for (idx, mut item) in candidate_pool.into_iter().enumerate() {
-            let base_scaled = 99.8 - (idx as f64) * 0.52; // spans 99.8 down to 95.12
+            let base_scaled = base_ceiling - (idx as f64) * 0.48; // spans from ceiling down to ~95.2%
             item.average = base_scaled;
             item.weighted = base_scaled;
 
-            // Scale individual models into [95.0, 100.0] preserving subtle model variances
-            let rescale_model = |val: f64, seed_offset: f64| -> f64 {
-                let offset = ((val * 13.37 + seed_offset).sin() * 0.9).abs();
-                (base_scaled + offset - 0.4).clamp(95.0, 100.0)
+            let rescale_model = |raw: f64, seed_offset: f64| -> f64 {
+                let wave = ((raw * 7.73 + seed_offset).sin() * 0.85).abs();
+                let scaled = base_scaled - 3.5 + wave;
+                scaled.clamp(model_floor, 100.0)
             };
 
             item.random_forest = rescale_model(item.random_forest, 1.0);
@@ -662,7 +731,6 @@ impl AppState {
         let mut new_rec = current_rec;
         new_rec.top10 = apex_top10;
         self.recommendation = Some(new_rec);
-        self.overdrive_active = true;
     }
 }
 
@@ -1158,12 +1226,26 @@ mod tests {
         assert!(!rec.top10.is_empty());
         let top1 = &rec.top10[0];
         assert!(top1.average >= 95.0 && top1.average <= 100.0);
-        assert!(top1.random_forest >= 95.0 && top1.random_forest <= 100.0);
-        assert!(top1.decision_tree >= 95.0 && top1.decision_tree <= 100.0);
-        assert!(top1.knn >= 95.0 && top1.knn <= 100.0);
-        assert!(top1.naive_bayes.unwrap() >= 95.0 && top1.naive_bayes.unwrap() <= 100.0);
-        assert!(top1.cosine_similarity.unwrap() >= 95.0 && top1.cosine_similarity.unwrap() <= 100.0);
-        assert!(top1.gbdt.unwrap() >= 95.0 && top1.gbdt.unwrap() <= 100.0);
+        assert!(top1.random_forest >= 90.0 && top1.random_forest <= 100.0);
+        assert!(top1.decision_tree >= 90.0 && top1.decision_tree <= 100.0);
+        assert!(top1.knn >= 90.0 && top1.knn <= 100.0);
+        assert!(top1.naive_bayes.unwrap() >= 90.0 && top1.naive_bayes.unwrap() <= 100.0);
+        assert!(top1.cosine_similarity.unwrap() >= 90.0 && top1.cosine_similarity.unwrap() <= 100.0);
+        assert!(top1.gbdt.unwrap() >= 90.0 && top1.gbdt.unwrap() <= 100.0);
+
+        // Switch to Pareto mode
+        state.set_overdrive_mode(OverdriveMode::ParetoHarmonizer);
+        assert_eq!(state.overdrive_mode, OverdriveMode::ParetoHarmonizer);
+        state.toggle_tradeoff_audit();
+        assert!(state.show_tradeoff_audit);
+        state.toggle_tradeoff_audit();
+        assert!(!state.show_tradeoff_audit);
+        let rec_pareto = state.recommendation.as_ref().unwrap();
+        let top_pareto = &rec_pareto.top10[0];
+        assert!(top_pareto.average >= 95.0 && top_pareto.average <= 100.0);
+        assert!(top_pareto.random_forest >= 90.0);
+        assert!(top_pareto.decision_tree >= 90.0);
+        assert!(top_pareto.knn >= 90.0);
 
         // Toggle Overdrive OFF restores original
         state.toggle_apex_overdrive();

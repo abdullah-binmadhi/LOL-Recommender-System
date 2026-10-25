@@ -130,12 +130,12 @@ button {
   white-space: nowrap;
 }
 
-.brand-mark {
-  width: 28px;
-  height: 28px;
-  background: linear-gradient(135deg, var(--gold-hi), var(--gold) 55%, var(--cyan));
-  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
-  filter: drop-shadow(0 0 10px rgba(200, 170, 110, 0.6));
+.brand svg {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
+}
+.brand:hover svg {
+  transform: scale(1.08) rotate(3deg);
+  filter: drop-shadow(0 0 12px rgba(10, 200, 185, 0.85)) !important;
 }
 
 .brand-text {

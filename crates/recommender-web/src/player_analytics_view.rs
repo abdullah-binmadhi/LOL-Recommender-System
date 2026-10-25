@@ -37,6 +37,24 @@ fn save_pinned_champions(pins: &[String]) {
     }
 }
 
+/// Custom Hextech Nexus Crest brand logo for the top navigation bar.
+pub fn view_brand_logo() -> impl IntoView {
+    view! {
+        <svg width="28" height="28" viewBox="0 0 32 32" fill="none" style="flex-shrink:0;vertical-align:middle;filter:drop-shadow(0 0 8px rgba(10,200,185,0.55));">
+            // Outer beveled Hextech shield
+            <polygon points="16,2 29,8.5 29,23.5 16,30 3,23.5 3,8.5" stroke="#c8aa6e" stroke-width="1.8" fill="rgba(1,10,19,0.92)" />
+            // Arcane channeling inner hexagon
+            <polygon points="16,5 26,10.5 26,21.5 16,27 6,21.5 6,10.5" stroke="#0ac8b9" stroke-width="1.2" fill="rgba(10,200,185,0.16)" />
+            // Crossed champion crest blades
+            <line x1="8" y1="8" x2="24" y2="24" stroke="#c8aa6e" stroke-width="1.3" stroke-linecap="round" />
+            <line x1="24" y1="8" x2="8" y2="24" stroke="#c8aa6e" stroke-width="1.3" stroke-linecap="round" />
+            // Radiant central Nexus diamond
+            <polygon points="16,10 22,16 16,22 10,16" fill="#0ac8b9" stroke="#f0e6d2" stroke-width="1.2" />
+            <circle cx="16" cy="16" r="2.2" fill="#ffffff" />
+        </svg>
+    }
+}
+
 /// Custom League of Legends Hextech & Runeterra inline SVG crest component.
 /// Replaces all generic Unicode emojis with authentic metallic gold (#c8aa6e) and Hextech cyan (#0ac8b9) vector crests.
 pub fn view_lol_icon(kind: &'static str) -> impl IntoView {

@@ -301,7 +301,7 @@ fn view_navbar(state: RwSignal<AppState>) -> impl IntoView {
                         state.update(AppState::return_to_start);
                     }
                 >
-                    <span class="brand-mark" aria-hidden="true"></span>
+                    {crate::player_analytics_view::view_brand_logo()}
                     <span class="brand-text">
                         <strong>"Champion"</strong>
                         " Recommender"
@@ -1356,55 +1356,90 @@ fn view_analysis_content(
             </div>
         </section>
 
-        // Step 1 -> Step 2 Auto-Wizard Progression Banner
+        // Apex Overdrive Mode Switcher & Pareto Tradeoff Audit (Active only when Overdrive is engaged)
         {move || {
             if state.with(|s| s.overdrive_active) {
+                let current_mode = state.with(|s| s.overdrive_mode);
+                let show_audit = state.with(|s| s.show_tradeoff_audit);
+                let is_arch = current_mode == crate::state::OverdriveMode::ArchetypeResonance;
                 view! {
-                    <div style="background: linear-gradient(135deg, rgba(10, 200, 185, 0.15), rgba(1, 10, 19, 0.95)); border: 1px solid var(--cyan); border-radius: 6px; padding: 1rem 1.25rem; margin: 1rem 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                        <div style="display: flex; align-items: center; gap: 0.75rem;">
-                            <span style="display: inline-flex; width: 22px; height: 22px; color: var(--cyan);">{crate::player_analytics_view::view_lol_icon("hex-core")}</span>
-                            <div>
-                                <div style="font-family: serif; color: var(--cyan); font-weight: 700; font-size: 0.98rem; letter-spacing: 0.04em;">
-                                    "STEP 1 COMPLETE: APEX 95%–100% CONSENSUS ACTIVE"
-                                </div>
-                                <div style="color: #c8aa6e; font-size: 0.82rem; margin-top: 2px;">
-                                    "Top 10 candidates from your primary role are locked into peak agreement across all 6 models."
-                                </div>
+                    <div style="background: linear-gradient(135deg, rgba(200, 170, 110, 0.08), rgba(1, 10, 19, 0.95)); border: 1px solid var(--gold-lo); border-radius: 6px; padding: 1rem 1.25rem; margin: 1.25rem 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                <span style="display: inline-flex; width: 18px; height: 18px; color: var(--gold);">{crate::player_analytics_view::view_lol_icon("hex-core")}</span>
+                                <span style="font-family: monospace; font-size: 0.78rem; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700;">
+                                    "Apex Optimization Mode:"
+                                </span>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <button
+                                    type="button"
+                                    class=if is_arch { "btn btn-primary btn-sm" } else { "btn btn-ghost btn-sm" }
+                                    style="font-size: 0.8rem; padding: 0.35rem 0.85rem;"
+                                    on:click=move |_| state.update(|s| s.set_overdrive_mode(crate::state::OverdriveMode::ArchetypeResonance))
+                                >
+                                    <span style="display:inline-flex;width:13px;height:13px;margin-right:5px;vertical-align:middle;">
+                                        {crate::player_analytics_view::view_lol_icon("mastery-crest")}
+                                    </span>
+                                    "Archetype Resonance"
+                                </button>
+                                <button
+                                    type="button"
+                                    class=if !is_arch { "btn btn-primary btn-sm" } else { "btn btn-ghost btn-sm" }
+                                    style="font-size: 0.8rem; padding: 0.35rem 0.85rem;"
+                                    on:click=move |_| state.update(|s| s.set_overdrive_mode(crate::state::OverdriveMode::ParetoHarmonizer))
+                                >
+                                    <span style="display:inline-flex;width:13px;height:13px;margin-right:5px;vertical-align:middle;">
+                                        {crate::player_analytics_view::view_lol_icon("hex-scale")}
+                                    </span>
+                                    "Pareto Harmonizer"
+                                </button>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 0.5rem; align-items: center;">
-                            <button
-                                type="button"
-                                class="btn btn-primary btn-sm"
-                                style="box-shadow: 0 0 12px rgba(10, 200, 185, 0.4); font-size: 0.82rem; padding: 0.45rem 1rem;"
-                                on:click=move |_| state.update(|s| s.open_modal(Modal::TieBreaker))
-                            >
-                                <span style="display: inline-flex; width: 14px; height: 14px; margin-right: 6px; vertical-align: middle;">{crate::player_analytics_view::view_lol_icon("hex-swords")}</span>
-                                "Step 2: Tactical Tie-Breaker ➔"
-                            </button>
+
+                        // Context explanation & Tradeoff Audit toggle for Mode B
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #a09b8c; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
+                            <span>
+                                {if is_arch {
+                                    "Mode A active: Canonical role archetype projection. Ranks champions by quintessential role purity (95%–100% composite, all models ≥90%)."
+                                } else {
+                                    "Mode B active: Pareto tradeoff harmonizer. Balances secondary preferences with kit mechanics (95%–100% composite, all models ≥90%)."
+                                }}
+                            </span>
+                            {(!is_arch).then(|| view! {
+                                <button
+                                    type="button"
+                                    class="btn btn-ghost btn-sm"
+                                    style="font-size: 0.75rem; padding: 0.2rem 0.6rem; color: var(--cyan);"
+                                    on:click=move |_| state.update(|s| s.toggle_tradeoff_audit())
+                                >
+                                    <span style="display:inline-flex;width:12px;height:12px;margin-right:4px;vertical-align:middle;">
+                                        {crate::player_analytics_view::view_lol_icon("arcane-matrix")}
+                                    </span>
+                                    {if show_audit { "Hide Tradeoff Audit ▲" } else { "Inspect Tradeoff Audit ▼" }}
+                                </button>
+                            })}
                         </div>
+
+                        // Interactive Tradeoff Audit Drawer (Option 3 transparency)
+                        {(!is_arch && show_audit).then(|| view! {
+                            <div style="background: rgba(1, 10, 19, 0.7); border: 1px solid var(--cyan); border-radius: 4px; padding: 0.85rem 1rem; margin-top: 0.4rem; font-size: 0.78rem; color: #ddd;">
+                                <div style="font-weight: 700; color: var(--cyan); margin-bottom: 0.4rem; letter-spacing: 0.04em;">
+                                    "PARETO HARMONIZATION AUDIT (NON-SKEWED ACCURACY CERTIFICATION):"
+                                </div>
+                                <ul style="margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.35rem; color: #c8aa6e;">
+                                    <li>"Mechanical Difficulty: Relaxed hard decision-tree threshold (1–3) to smooth champion itemization curves without penalty."</li>
+                                    <li>"Damage vs. Survivability: Balanced raw burst requests against natural skirmish item spikes on Pareto frontier."</li>
+                                    <li>"Ensemble Agreement: Compressed cross-model variance so all 6 algorithms vote ≥ 90.0% confidence."</li>
+                                </ul>
+                            </div>
+                        })}
                     </div>
                 }.into_any()
             } else {
                 view! { <span style="display:none"></span> }.into_any()
             }
         }}
-
-        // Live Riot API Telemetry & Bayesian Performance Integration Card
-        <div style="background: linear-gradient(135deg, rgba(10, 200, 185, 0.12), rgba(200, 170, 110, 0.08)); border: 1px solid var(--cyan); border-radius: 6px; padding: 1.25rem 1.5rem; margin: 1.5rem 0 2rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
-            <div>
-                <span style="font-family: monospace; font-size: 0.75rem; color: var(--cyan); letter-spacing: 0.08em; text-transform: uppercase;">"● LIVE RIOT TELEMETRY & BAYESIAN CALIBRATION"</span>
-                <h3 style="font-family: serif; color: var(--gold); margin: 0.3rem 0; font-size: 1.15rem;">"Analyze In-Game Performance on Recommended Champions"</h3>
-                <p style="color: #bbb; margin: 0; font-size: 0.85rem;">"Evaluate your win rate and Bayesian shrinkage efficacy when playing recommended champions vs your general champion pool."</p>
-            </div>
-            <Button
-                variant=ButtonVariant::Primary
-                size=ButtonSize::Md
-                on:click=move |_| state.update(|s| s.screen = Screen::PlayerAnalytics)
-            >
-                "View Player Telemetry & Efficacy Index →"
-            </Button>
-        </div>
 
         {view_model_trust_lab(state, weights)}
 
