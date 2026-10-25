@@ -194,6 +194,14 @@ pub fn view_lol_icon(kind: &'static str) -> impl IntoView {
             </svg>
         }
         .into_any(),
+        "hex-scale" => view! {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <path d="M12 3V21M6 21H18M12 5L4 10M12 5L20 10" stroke="#c8aa6e" stroke-width="1.6" stroke-linecap="round" />
+                <path d="M2 13C2 15.2 3.8 17 6 17C8.2 17 10 15.2 10 13H2ZM14 13C14 15.2 15.8 17 18 17C20.2 17 22 15.2 22 13H14Z" stroke="#0ac8b9" stroke-width="1.4" fill="rgba(10,200,185,0.2)" />
+                <circle cx="12" cy="5" r="2" fill="#c8aa6e" />
+            </svg>
+        }
+        .into_any(),
         _ => view! {
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="flex-shrink: 0; vertical-align: middle;">
                 <polygon points="8,1 15,8 8,15 1,8" fill="#c8aa6e" stroke="#0ac8b9" stroke-width="1" />

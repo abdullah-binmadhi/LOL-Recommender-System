@@ -1371,7 +1371,12 @@ fn view_analysis_content(
         <section class="block" aria-labelledby="top10-title">
             <div class="block-head hex-block-head">
                 <span class="hex-rune-tag">"✦ HEXTECH MATCHMAKING ENGINE ✦"</span>
-                <h2 id="top10-title" class="section-title">"🥇 Primal Synergy Podium"</h2>
+                <h2 id="top10-title" class="section-title">
+                    <span style="display:inline-flex;width:20px;height:20px;margin-right:8px;vertical-align:middle;">
+                        {crate::player_analytics_view::view_lol_icon("mastery-crest")}
+                    </span>
+                    "Primal Synergy Podium"
+                </h2>
                 <p class="muted">"Your top 3 highest-compatibility champions across our 6-model machine learning ensemble."</p>
             </div>
             <div class="podium-grid">
@@ -1379,7 +1384,12 @@ fn view_analysis_content(
             </div>
 
             <div class="block-head hex-block-head" style="margin-top: 36px;">
-                <h2 class="section-title">"⚔️ Active Roster Candidates"</h2>
+                <h2 class="section-title">
+                    <span style="display:inline-flex;width:20px;height:20px;margin-right:8px;vertical-align:middle;">
+                        {crate::player_analytics_view::view_lol_icon("hex-blades")}
+                    </span>
+                    "Active Roster Candidates"
+                </h2>
                 <p class="muted">"Alternative high-synergy recommendations ranked for your playstyle."</p>
             </div>
             <div class="roster-list">
@@ -1492,7 +1502,7 @@ fn view_tips_panel(tips: &[(&'static str, &'static str)], audience: &str) -> imp
         .map(|(icon, tip)| {
             view! {
                 <li class="tip-item">
-                    <span class="tip-icon" aria-hidden="true">{*icon}</span>
+                    <span class="tip-icon" aria-hidden="true">{crate::player_analytics_view::view_lol_icon(icon)}</span>
                     <span class="tip-text">{*tip}</span>
                 </li>
             }
@@ -2316,32 +2326,62 @@ fn view_math_matrices_inspector(
                                 <h4>"6-Model Ensemble Weight Distribution"</h4>
                                 <div class="weights-table">
                                     <div class="weight-row">
-                                        <span class="weight-model">"🌲 Random Forest (10-Tree Bagging)"</span>
+                                        <span class="weight-model">
+                                            <span style="display:inline-flex;width:14px;height:14px;margin-right:6px;vertical-align:middle;">
+                                                {crate::player_analytics_view::view_lol_icon("hex-core")}
+                                            </span>
+                                            "Random Forest (10-Tree Bagging)"
+                                        </span>
                                         <span class="weight-pct">"22%"</span>
                                         <span class="weight-score">{format!("{rf_val:.1}%")}</span>
                                     </div>
                                     <div class="weight-row">
-                                        <span class="weight-model">"🌳 Decision Tree (Hierarchical Rules)"</span>
+                                        <span class="weight-model">
+                                            <span style="display:inline-flex;width:14px;height:14px;margin-right:6px;vertical-align:middle;">
+                                                {crate::player_analytics_view::view_lol_icon("arcane-matrix")}
+                                            </span>
+                                            "Decision Tree (Hierarchical Rules)"
+                                        </span>
                                         <span class="weight-pct">"18%"</span>
                                         <span class="weight-score">{format!("{dt_val:.1}%")}</span>
                                     </div>
                                     <div class="weight-row">
-                                        <span class="weight-model">"📍 K-Nearest Neighbors (Euclidean Distance)"</span>
+                                        <span class="weight-model">
+                                            <span style="display:inline-flex;width:14px;height:14px;margin-right:6px;vertical-align:middle;">
+                                                {crate::player_analytics_view::view_lol_icon("hex-compass")}
+                                            </span>
+                                            "K-Nearest Neighbors (Euclidean Distance)"
+                                        </span>
                                         <span class="weight-pct">"18%"</span>
                                         <span class="weight-score">{format!("{knn_val:.1}%")}</span>
                                     </div>
                                     <div class="weight-row">
-                                        <span class="weight-model">"🎲 Multi-Class Naive Bayes (Gaussian Prior)"</span>
+                                        <span class="weight-model">
+                                            <span style="display:inline-flex;width:14px;height:14px;margin-right:6px;vertical-align:middle;">
+                                                {crate::player_analytics_view::view_lol_icon("nexus-pulse")}
+                                            </span>
+                                            "Multi-Class Naive Bayes (Gaussian Prior)"
+                                        </span>
                                         <span class="weight-pct">"14%"</span>
                                         <span class="weight-score">{format!("{nb_val:.1}%")}</span>
                                     </div>
                                     <div class="weight-row">
-                                        <span class="weight-model">"📐 Cosine Similarity (Angular Vector Space)"</span>
+                                        <span class="weight-model">
+                                            <span style="display:inline-flex;width:14px;height:14px;margin-right:6px;vertical-align:middle;">
+                                                {crate::player_analytics_view::view_lol_icon("hex-crosshair")}
+                                            </span>
+                                            "Cosine Similarity (Angular Vector Space)"
+                                        </span>
                                         <span class="weight-pct">"14%"</span>
                                         <span class="weight-score">{format!("{cos_val:.1}%")}</span>
                                     </div>
                                     <div class="weight-row">
-                                        <span class="weight-model">"⚡ GBDT (Boosted Residual Stumps)"</span>
+                                        <span class="weight-model">
+                                            <span style="display:inline-flex;width:14px;height:14px;margin-right:6px;vertical-align:middle;">
+                                                {crate::player_analytics_view::view_lol_icon("hex-curves")}
+                                            </span>
+                                            "GBDT (Boosted Residual Stumps)"
+                                        </span>
                                         <span class="weight-pct">"14%"</span>
                                         <span class="weight-score">{format!("{gbdt_val:.1}%")}</span>
                                     </div>
@@ -3076,19 +3116,21 @@ fn view_model_trust_lab(
     state: RwSignal<AppState>,
     weights: recommender_core::aggregation::ModelWeights,
 ) -> impl IntoView {
-    let norm = weights.normalized();
-    let rf_pct = (norm.random_forest * 100.0).round() as i64;
-    let dt_pct = (norm.decision_tree * 100.0).round() as i64;
-    let knn_pct = (norm.knn * 100.0).round() as i64;
-    let nb_pct = (norm.naive_bayes * 100.0).round() as i64;
-    let cos_pct = (norm.cosine_similarity * 100.0).round() as i64;
-    let gbdt_pct = (norm.gbdt * 100.0).round() as i64;
+    let draft_weights = RwSignal::new(weights);
 
-    let is_open = RwSignal::new(false);
+    let norm = Signal::derive(move || draft_weights.get().normalized());
+    let rf_pct = Signal::derive(move || (norm.get().random_forest * 100.0).round() as i64);
+    let dt_pct = Signal::derive(move || (norm.get().decision_tree * 100.0).round() as i64);
+    let knn_pct = Signal::derive(move || (norm.get().knn * 100.0).round() as i64);
+    let nb_pct = Signal::derive(move || (norm.get().naive_bayes * 100.0).round() as i64);
+    let cos_pct = Signal::derive(move || (norm.get().cosine_similarity * 100.0).round() as i64);
+    let gbdt_pct = Signal::derive(move || (norm.get().gbdt * 100.0).round() as i64);
+
+    let is_open = Signal::derive(move || state.with(|s| s.model_trust_lab_open));
 
     view! {
         <div class="model-trust-lab" style="background: linear-gradient(135deg, rgba(200, 170, 110, 0.06), rgba(1, 10, 19, 0.85)); border: 1px solid var(--gold-lo); border-radius: 6px; padding: 1.25rem 1.5rem; margin: 1.5rem 0;">
-            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" on:click=move |_| is_open.update(|o| *o = !*o)>
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" on:click=move |_| state.update(|s| s.model_trust_lab_open = !s.model_trust_lab_open)>
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <span style="display: inline-flex; width: 20px; height: 20px; color: var(--gold);">{crate::player_analytics_view::view_lol_icon("hex-gears")}</span>
                     <div>
@@ -3127,34 +3169,38 @@ fn view_model_trust_lab(
                             <button
                                 type="button"
                                 class="btn btn-ghost btn-sm"
-                                style="font-size: 0.75rem; padding: 0.25rem 0.6rem;"
-                                on:click=move |_| state.update(|s| s.model_weights = recommender_core::aggregation::ModelWeights::balanced())
+                                style="font-size: 0.75rem; padding: 0.25rem 0.6rem; display: inline-flex; align-items: center; gap: 5px;"
+                                on:click=move |_| draft_weights.set(recommender_core::aggregation::ModelWeights::balanced())
                             >
-                                "⚖️ Balanced Ensemble (Equal)"
+                                <span style="display: inline-flex; width: 14px; height: 14px; color: var(--gold);">{crate::player_analytics_view::view_lol_icon("hex-scale")}</span>
+                                "Balanced Ensemble (Equal)"
                             </button>
                             <button
                                 type="button"
                                 class="btn btn-ghost btn-sm"
-                                style="font-size: 0.75rem; padding: 0.25rem 0.6rem;"
-                                on:click=move |_| state.update(|s| s.model_weights = recommender_core::aggregation::ModelWeights::mechanics_and_kit())
+                                style="font-size: 0.75rem; padding: 0.25rem 0.6rem; display: inline-flex; align-items: center; gap: 5px;"
+                                on:click=move |_| draft_weights.set(recommender_core::aggregation::ModelWeights::mechanics_and_kit())
                             >
-                                "🎯 Kit & Synergy (KNN/Cosine)"
+                                <span style="display: inline-flex; width: 14px; height: 14px; color: var(--cyan);">{crate::player_analytics_view::view_lol_icon("hex-crosshair")}</span>
+                                "Kit & Synergy (KNN/Cosine)"
                             </button>
                             <button
                                 type="button"
                                 class="btn btn-ghost btn-sm"
-                                style="font-size: 0.75rem; padding: 0.25rem 0.6rem;"
-                                on:click=move |_| state.update(|s| s.model_weights = recommender_core::aggregation::ModelWeights::pro_meta())
+                                style="font-size: 0.75rem; padding: 0.25rem 0.6rem; display: inline-flex; align-items: center; gap: 5px;"
+                                on:click=move |_| draft_weights.set(recommender_core::aggregation::ModelWeights::pro_meta())
                             >
-                                "🏆 Pro Meta (RF/GBDT)"
+                                <span style="display: inline-flex; width: 14px; height: 14px; color: var(--gold);">{crate::player_analytics_view::view_lol_icon("hex-trophy")}</span>
+                                "Pro Meta (RF/GBDT)"
                             </button>
                             <button
                                 type="button"
                                 class="btn btn-ghost btn-sm"
-                                style="font-size: 0.75rem; padding: 0.25rem 0.6rem;"
-                                on:click=move |_| state.update(|s| s.model_weights = recommender_core::aggregation::ModelWeights::rule_clarity())
+                                style="font-size: 0.75rem; padding: 0.25rem 0.6rem; display: inline-flex; align-items: center; gap: 5px;"
+                                on:click=move |_| draft_weights.set(recommender_core::aggregation::ModelWeights::rule_clarity())
                             >
-                                "📐 Rule Logic (DT/NB)"
+                                <span style="display: inline-flex; width: 14px; height: 14px; color: var(--cyan);">{crate::player_analytics_view::view_lol_icon("arcane-matrix")}</span>
+                                "Rule Logic (DT/NB)"
                             </button>
                         </div>
 
@@ -3164,19 +3210,18 @@ fn view_model_trust_lab(
                             <div class="slider-group" style="background: rgba(1, 10, 19, 0.4); border: 1px solid var(--line); border-radius: 4px; padding: 0.75rem;">
                                 <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.35rem;">
                                     <strong style="color: var(--gold);">"Random Forest"</strong>
-                                    <span style="color: #f0e6d2; font-family: monospace;">{format!("{}%", rf_pct)}</span>
+                                    <span style="color: #f0e6d2; font-family: monospace;">{move || format!("{}%", rf_pct.get())}</span>
                                 </div>
                                 <input
                                     type="range"
                                     min="1"
                                     max="100"
-                                    value=rf_pct.to_string()
+                                    value=move || (draft_weights.get().random_forest * 100.0).round().to_string()
                                     style="width: 100%; accent-color: var(--gold);"
                                     on:input=move |e| {
                                         let val = event_target_value(&e).parse::<f64>().unwrap_or(25.0);
-                                        state.update(|s| {
-                                            s.model_weights.random_forest = val;
-                                            s.model_weights = s.model_weights.normalized();
+                                        draft_weights.update(|w| {
+                                            w.random_forest = val;
                                         });
                                     }
                                 />
@@ -3187,19 +3232,18 @@ fn view_model_trust_lab(
                             <div class="slider-group" style="background: rgba(1, 10, 19, 0.4); border: 1px solid var(--line); border-radius: 4px; padding: 0.75rem;">
                                 <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.35rem;">
                                     <strong style="color: var(--gold);">"Decision Tree"</strong>
-                                    <span style="color: #f0e6d2; font-family: monospace;">{format!("{}%", dt_pct)}</span>
+                                    <span style="color: #f0e6d2; font-family: monospace;">{move || format!("{}%", dt_pct.get())}</span>
                                 </div>
                                 <input
                                     type="range"
                                     min="1"
                                     max="100"
-                                    value=dt_pct.to_string()
+                                    value=move || (draft_weights.get().decision_tree * 100.0).round().to_string()
                                     style="width: 100%; accent-color: var(--gold);"
                                     on:input=move |e| {
                                         let val = event_target_value(&e).parse::<f64>().unwrap_or(15.0);
-                                        state.update(|s| {
-                                            s.model_weights.decision_tree = val;
-                                            s.model_weights = s.model_weights.normalized();
+                                        draft_weights.update(|w| {
+                                            w.decision_tree = val;
                                         });
                                     }
                                 />
@@ -3210,19 +3254,18 @@ fn view_model_trust_lab(
                             <div class="slider-group" style="background: rgba(1, 10, 19, 0.4); border: 1px solid var(--line); border-radius: 4px; padding: 0.75rem;">
                                 <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.35rem;">
                                     <strong style="color: var(--cyan);">"K-Nearest Neighbors"</strong>
-                                    <span style="color: #f0e6d2; font-family: monospace;">{format!("{}%", knn_pct)}</span>
+                                    <span style="color: #f0e6d2; font-family: monospace;">{move || format!("{}%", knn_pct.get())}</span>
                                 </div>
                                 <input
                                     type="range"
                                     min="1"
                                     max="100"
-                                    value=knn_pct.to_string()
+                                    value=move || (draft_weights.get().knn * 100.0).round().to_string()
                                     style="width: 100%; accent-color: var(--cyan);"
                                     on:input=move |e| {
                                         let val = event_target_value(&e).parse::<f64>().unwrap_or(15.0);
-                                        state.update(|s| {
-                                            s.model_weights.knn = val;
-                                            s.model_weights = s.model_weights.normalized();
+                                        draft_weights.update(|w| {
+                                            w.knn = val;
                                         });
                                     }
                                 />
@@ -3233,19 +3276,18 @@ fn view_model_trust_lab(
                             <div class="slider-group" style="background: rgba(1, 10, 19, 0.4); border: 1px solid var(--line); border-radius: 4px; padding: 0.75rem;">
                                 <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.35rem;">
                                     <strong style="color: var(--cyan);">"Naive Bayes"</strong>
-                                    <span style="color: #f0e6d2; font-family: monospace;">{format!("{}%", nb_pct)}</span>
+                                    <span style="color: #f0e6d2; font-family: monospace;">{move || format!("{}%", nb_pct.get())}</span>
                                 </div>
                                 <input
                                     type="range"
                                     min="1"
                                     max="100"
-                                    value=nb_pct.to_string()
+                                    value=move || (draft_weights.get().naive_bayes * 100.0).round().to_string()
                                     style="width: 100%; accent-color: var(--cyan);"
                                     on:input=move |e| {
                                         let val = event_target_value(&e).parse::<f64>().unwrap_or(15.0);
-                                        state.update(|s| {
-                                            s.model_weights.naive_bayes = val;
-                                            s.model_weights = s.model_weights.normalized();
+                                        draft_weights.update(|w| {
+                                            w.naive_bayes = val;
                                         });
                                     }
                                 />
@@ -3256,19 +3298,18 @@ fn view_model_trust_lab(
                             <div class="slider-group" style="background: rgba(1, 10, 19, 0.4); border: 1px solid var(--line); border-radius: 4px; padding: 0.75rem;">
                                 <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.35rem;">
                                     <strong style="color: #8ac0ff;">"Cosine Similarity"</strong>
-                                    <span style="color: #f0e6d2; font-family: monospace;">{format!("{}%", cos_pct)}</span>
+                                    <span style="color: #f0e6d2; font-family: monospace;">{move || format!("{}%", cos_pct.get())}</span>
                                 </div>
                                 <input
                                     type="range"
                                     min="1"
                                     max="100"
-                                    value=cos_pct.to_string()
+                                    value=move || (draft_weights.get().cosine_similarity * 100.0).round().to_string()
                                     style="width: 100%; accent-color: #8ac0ff;"
                                     on:input=move |e| {
                                         let val = event_target_value(&e).parse::<f64>().unwrap_or(15.0);
-                                        state.update(|s| {
-                                            s.model_weights.cosine_similarity = val;
-                                            s.model_weights = s.model_weights.normalized();
+                                        draft_weights.update(|w| {
+                                            w.cosine_similarity = val;
                                         });
                                     }
                                 />
@@ -3279,24 +3320,56 @@ fn view_model_trust_lab(
                             <div class="slider-group" style="background: rgba(1, 10, 19, 0.4); border: 1px solid var(--line); border-radius: 4px; padding: 0.75rem;">
                                 <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.35rem;">
                                     <strong style="color: #e09aff;">"Gradient Boosted Trees"</strong>
-                                    <span style="color: #f0e6d2; font-family: monospace;">{format!("{}%", gbdt_pct)}</span>
+                                    <span style="color: #f0e6d2; font-family: monospace;">{move || format!("{}%", gbdt_pct.get())}</span>
                                 </div>
                                 <input
                                     type="range"
                                     min="1"
                                     max="100"
-                                    value=gbdt_pct.to_string()
+                                    value=move || (draft_weights.get().gbdt * 100.0).round().to_string()
                                     style="width: 100%; accent-color: #e09aff;"
                                     on:input=move |e| {
                                         let val = event_target_value(&e).parse::<f64>().unwrap_or(15.0);
-                                        state.update(|s| {
-                                            s.model_weights.gbdt = val;
-                                            s.model_weights = s.model_weights.normalized();
+                                        draft_weights.update(|w| {
+                                            w.gbdt = val;
                                         });
                                     }
                                 />
                                 <div style="font-size: 0.72rem; color: #888; margin-top: 0.25rem;">"Sequential pseudo-residual minimization for high-stakes accuracy."</div>
                             </div>
+                        </div>
+
+                        // Action Bar: Reset & Apply Calibration
+                        <div style="margin-top: 1.25rem; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); padding-top: 1rem; flex-wrap: wrap; gap: 0.75rem;">
+                            <button
+                                type="button"
+                                class="btn btn-ghost btn-sm"
+                                on:click=move |_| {
+                                    let def = recommender_core::aggregation::ModelWeights::default();
+                                    draft_weights.set(def);
+                                    state.update(|s| s.model_weights = def);
+                                }
+                            >
+                                <span style="display:inline-flex;width:14px;height:14px;margin-right:6px;vertical-align:middle;">
+                                    {crate::player_analytics_view::view_lol_icon("nexus-pulse")}
+                                </span>
+                                "Reset Defaults"
+                            </button>
+
+                            <button
+                                type="button"
+                                class="btn btn-primary btn-md"
+                                style="box-shadow: 0 0 16px rgba(200, 170, 110, 0.4); padding: 0.5rem 1.25rem; font-weight: 700;"
+                                on:click=move |_| {
+                                    let final_w = draft_weights.get().normalized();
+                                    state.update(|s| s.model_weights = final_w);
+                                }
+                            >
+                                <span style="display:inline-flex;width:15px;height:15px;margin-right:8px;vertical-align:middle;">
+                                    {crate::player_analytics_view::view_lol_icon("hex-check")}
+                                </span>
+                                "Apply Calibration & Re-Rank"
+                            </button>
                         </div>
                     </div>
                 }
@@ -3363,7 +3436,7 @@ fn view_tie_breaker_modal(
                         <span style="font-family: monospace; font-size: 0.72rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em;">
                             {d.phase}
                         </span>
-                        <span style="font-size: 0.75rem; color: #a09b8c;">{format!("Dilemma #{}", d.id)}</span>
+                        <span style="font-size: 0.75rem; color: #a09b8c;">{format!("Dilemma {} of 5", d.id)}</span>
                     </div>
                     <p style="font-size: 0.88rem; color: #f0e6d2; margin-bottom: 0.85rem; line-height: 1.4;">{d.scenario}</p>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
@@ -3411,7 +3484,7 @@ fn view_tie_breaker_modal(
                 <span class="eyebrow">"✦ CONSENSUS STEERING ENGINE ✦"</span>
                 <h2>"Resolve Divergent Recommendations"</h2>
                 <p class="muted">
-                    "When machine learning models disagree on champion priorities, tactical scenarios clarify your intrinsic playstyle preference."
+                    "When machine learning models disagree on champion priorities, 5 tactical scenarios clarify your intrinsic playstyle preference."
                 </p>
             </header>
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding-right: 0.5rem; margin-top: 14px;">

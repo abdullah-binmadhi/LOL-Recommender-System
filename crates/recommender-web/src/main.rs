@@ -122,141 +122,141 @@ fn role_tips(role: &str) -> &'static [(&'static str, &'static str)] {
     match role {
         "Tank" => &[
             (
-                "🛡️",
+                "warden-sigil",
                 "Engage when your team is ready and enemies are grouped together",
             ),
             (
-                "🎯",
+                "hex-shield",
                 "Focus on peeling for your carries rather than diving their backline",
             ),
             (
-                "👥",
+                "hex-blades",
                 "Use your crowd control abilities to set up kills for your team",
             ),
             (
-                "⚡",
+                "hex-core",
                 "Build according to enemy team composition - armor vs AD, MR vs AP",
             ),
             (
-                "🛡️",
+                "warden-sigil",
                 "Use your tankiness to soak up damage and protect your carries",
             ),
             (
-                "👥",
+                "hex-compass",
                 "Look for opportunities to initiate fights and create space for your team",
             ),
         ],
         "Fighter" => &[
             (
-                "⚔️",
+                "hex-blades",
                 "Look for extended trades where you can use your full combo",
             ),
             (
-                "🏃",
+                "hex-compass",
                 "Use teleport to join teamfights or split push when ahead",
             ),
             (
-                "💪",
+                "hex-core",
                 "Build a mix of damage and survivability to stay relevant",
             ),
             (
-                "🎯",
+                "hex-crosshair",
                 "Target the enemy backline but don't dive too deep alone",
             ),
         ],
         "Assassin" => &[
             (
-                "💀",
+                "hex-stopwatch",
                 "Wait for enemy cooldowns before going in for the kill",
             ),
             (
-                "👤",
+                "hex-compass",
                 "Use fog of war and flanking to catch enemies off guard",
             ),
             (
-                "⚡",
+                "nexus-pulse",
                 "Burst down high-priority targets quickly then get out",
             ),
             (
-                "🌙",
+                "hex-compass",
                 "Roam frequently to get kills and help other lanes snowball",
             ),
             (
-                "👤",
+                "hex-curves",
                 "Use your mobility to dodge key enemy abilities and reposition",
             ),
             (
-                "💀",
+                "nexus-pulse",
                 "Look for enemies low on health to use your ultimate effectively",
             ),
         ],
         "Marksman" => &[
             (
-                "🏹",
+                "hex-crosshair",
                 "Position safely behind your team and focus nearest target",
             ),
-            ("💰", "Farm consistently and avoid risky trades early game"),
+            ("hex-stopwatch", "Farm consistently and avoid risky trades early game"),
             (
-                "🎯",
+                "hex-blades",
                 "Use attack-move to maintain DPS while kiting backwards",
             ),
-            ("⚡", "Build lifesteal to sustain through teamfights"),
+            ("hex-core", "Build lifesteal to sustain through teamfights"),
             (
-                "🎯",
+                "hex-crosshair",
                 "Use your long range to control minion waves and deny farm to enemy ADC",
             ),
             (
-                "🏹",
+                "nexus-pulse",
                 "Position for teamfights where you can maximize your damage output",
             ),
         ],
         "Mage" => &[
             (
-                "🔮",
+                "arcane-matrix",
                 "Manage your mana carefully and look for ability combos",
             ),
-            ("📏", "Use your range advantage to poke before teamfights"),
+            ("hex-crosshair", "Use your range advantage to poke before teamfights"),
             (
-                "🛡️",
+                "hex-shield",
                 "Position safely and use crowd control to protect yourself",
             ),
-            ("💥", "Save your ultimate for maximum impact in teamfights"),
+            ("nexus-pulse", "Save your ultimate for maximum impact in teamfights"),
             (
-                "🔮",
+                "arcane-matrix",
                 "Use your abilities to zone enemies from minion waves and control CS",
             ),
             (
-                "📏",
+                "hex-compass",
                 "Position for teamfights where you can land abilities on multiple enemies",
             ),
         ],
         "Support" => &[
             (
-                "👁️",
+                "warden-sigil",
                 "Ward key areas and deny enemy vision with control wards",
             ),
-            ("🤝", "Roam to help other lanes when your ADC is safe"),
-            ("🛡️", "Protect your carries and peel for them in teamfights"),
+            ("hex-compass", "Roam to help other lanes when your ADC is safe"),
+            ("hex-shield", "Protect your carries and peel for them in teamfights"),
             (
-                "💡",
+                "hex-core",
                 "Build according to team needs - tank items or enchanter items",
             ),
             (
-                "👁️",
+                "warden-sigil",
                 "Use your vision control to set up ganks and avoid enemy ganks",
             ),
             (
-                "🤝",
+                "hex-blades",
                 "Look for opportunities to create picks with your crowd control",
             ),
         ],
         _ => &[
             (
-                "⚔️",
+                "hex-blades",
                 "Adapt your playstyle based on the enemy team composition",
             ),
             (
-                "🛡️",
+                "hex-shield",
                 "Focus on farming safely and scaling into the late game",
             ),
         ],

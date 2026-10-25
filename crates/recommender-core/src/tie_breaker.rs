@@ -128,23 +128,37 @@ impl TieBreakerSession {
 
         let phases = [
             (
-                "Early Laning (0-10m)",
+                "Phase 1: Early Laning Trades & Wave Control (0–8m)",
                 format!(
-                    "Level 3 Wave Crash: The enemy laner has frozen the minion wave near their tower. Between {} and {}, how do you resolve this pressure point?",
+                    "Level 3 Wave Crash: The enemy laner has frozen the minion wave right outside their tower range. Between {} and {}, how do you resolve this pressure point?",
                     a.champion_name, b.champion_name
                 ),
             ),
             (
-                "Mid-Game Objective (15-25m)",
+                "Phase 2: Voidgrubs & First Turret Rotation (8–14m)",
                 format!(
-                    "Contested Dragon Fight: Enemy team has vision control in river. As {} and {} offer different playstyles, where is your focus?",
+                    "Voidgrubs Skirmish: A 3v3 river skirmish breaks out around the pit while turret plates are still active. Between {} and {}, where do you direct your momentum?",
                     a.champion_name, b.champion_name
                 ),
             ),
             (
-                "Late-Game Deciding Standoff (30m+)",
+                "Phase 3: Elemental Dragon Soul Standoff in Fog (15–22m)",
                 format!(
-                    "Baron & Inhibitor Standoff: Both teams are at 4 items. The game rests on a single tactical execution. Which win condition fits your style: {}'s approach or {}'s approach?",
+                    "Contested 3rd Elemental Dragon: Enemy team sweeps river vision and baits dragon in the fog of war. Between {} and {}, what is your primary tactical role?",
+                    a.champion_name, b.champion_name
+                ),
+            ),
+            (
+                "Phase 4: Side-Lane 1-3-1 Split vs 5v5 Mid Siege (22–30m)",
+                format!(
+                    "Tier 2 Turret Siege: The game has stalled with enemy deathball grouping in mid. As {} and {} approach macro differently, which win condition do you trust?",
+                    a.champion_name, b.champion_name
+                ),
+            ),
+            (
+                "Phase 5: Deciding Elder Dragon & Baron Nashor (30m+)",
+                format!(
+                    "35-Minute Elder Dragon / Baron Standoff: Death timers are 55 seconds. A single misstep decides the match. Which execution style fits you best: {}'s or {}'s?",
                     a.champion_name, b.champion_name
                 ),
             ),
@@ -156,20 +170,82 @@ impl TieBreakerSession {
             let attr_key = delta.0;
             let a_higher = delta.4;
 
-            let (label_a, desc_a, label_b, desc_b) = if a_higher {
-                (
-                    format!("{}: Aggressive Focus", a.champion_name),
-                    format!("Leverage superior {} to dominate the interaction with high offensive pressure.", attr_key),
-                    format!("{}: Calculated Focus", b.champion_name),
-                    format!("Play with tactical composure, punishing enemy over-extensions with defensive consistency and controlled {}.", attr_key),
-                )
-            } else {
-                (
-                    format!("{}: Tactical Structure", a.champion_name),
-                    format!("Maintain structure and capitalize on steady wave mechanics, zoning, and superior {}.", attr_key),
-                    format!("{}: Explosive Outplay", b.champion_name),
-                    format!("Exploit superior {} for high-velocity outplay and rapid picks.", attr_key),
-                )
+            let (label_a, desc_a, label_b, desc_b) = match i {
+                0 => if a_higher {
+                    (
+                        format!("{}: Offensive Dive & Trade", a.champion_name),
+                        format!("Step past minion line with high {} to bait enemy spells and force a flash or kill under pressure.", attr_key),
+                        format!("{}: Wave Freeze & Safety", b.champion_name),
+                        "Hold position, thin the wave safely, and rely on disciplined CS control until your jungler rotates.".to_string(),
+                    )
+                } else {
+                    (
+                        format!("{}: Methodical Wave Reset", a.champion_name),
+                        format!("Crash the wave patiently using superior {} and recall for an optimal item component spike.", attr_key),
+                        format!("{}: Aggressive All-In Burst", b.champion_name),
+                        "Force a high-lethal trading combo to break the freeze and assert dominant kill pressure.".to_string(),
+                    )
+                },
+                1 => if a_higher {
+                    (
+                        format!("{}: River Collapse & Pick", a.champion_name),
+                        format!("Rotate immediately through river, leveraging {} to catch their jungler off-guard at Voidgrubs.", attr_key),
+                        format!("{}: Lane Lock & Plate Punish", b.champion_name),
+                        "Stay in lane to punish enemy rotation, securing guaranteed solo gold from turret plates.".to_string(),
+                    )
+                } else {
+                    (
+                        format!("{}: Objective Zone Anchor", a.champion_name),
+                        format!("Anchor the choke point with {} to secure neutral objectives cleanly for your team.", attr_key),
+                        format!("{}: Rapid Flank & Skirmish", b.champion_name),
+                        "Flank through tri-bush to assassinate isolated enemies before the pit fight begins.".to_string(),
+                    )
+                },
+                2 => if a_higher {
+                    (
+                        format!("{}: Flank Carry Assassination", a.champion_name),
+                        format!("Bypass frontline tanks using {} to eliminate the primary enemy carry from the blind fog of war.", attr_key),
+                        format!("{}: Frontline Peel & Anchor", b.champion_name),
+                        "Stand directly with your allied carries, absorbing enemy burst and peeling dive threats.".to_string(),
+                    )
+                } else {
+                    (
+                        format!("{}: Defensive Counter-Engage", a.champion_name),
+                        format!("Position defensively and unleash {} to turn the fight the moment the enemy overextends.", attr_key),
+                        format!("{}: Explosive Backline Dive", b.champion_name),
+                        "Dash across river choke points to burst squishy targets before their frontline can react.".to_string(),
+                    )
+                },
+                3 => if a_higher {
+                    (
+                        format!("{}: Relentless Sidelane Split", a.champion_name),
+                        format!("Pressure tier 2/inhibitor turrets with {}, forcing at least 2 enemy champions to answer your duels.", attr_key),
+                        format!("{}: 5v5 Mid Deathball Force", b.champion_name),
+                        "Group with all 5 teammates to break the mid siege through superior teamfight cohesion.".to_string(),
+                    )
+                } else {
+                    (
+                        format!("{}: Grouped Waveclear Siege", a.champion_name),
+                        format!("Anchor mid lane with {}, stalling enemy siege until an allied pick enables a Baron take.", attr_key),
+                        format!("{}: Isolated Duelist Pressure", b.champion_name),
+                        "Command side-lane priority, hunting isolated defenders who attempt to clear your pushed waves.".to_string(),
+                    )
+                },
+                _ => if a_higher {
+                    (
+                        format!("{}: High-Velocity Clutch Outplay", a.champion_name),
+                        format!("Risk a decisive micro-outplay using {}, finding an instant kill window to close the match immediately.", attr_key),
+                        format!("{}: Disciplined Objective Control", b.champion_name),
+                        "Play strictly by the book: burn Elder Dragon, zone enemies systematically, and avoid coinflip trades.".to_string(),
+                    )
+                } else {
+                    (
+                        format!("{}: Methodical Final Anchor", a.champion_name),
+                        format!("Lock down the pit with {}, allowing zero enemy carries to approach without being punished.", attr_key),
+                        format!("{}: Game-Ending Backdoor / Flank", b.champion_name),
+                        "Execute an unexpected flank to wipe enemy carries during the chaotic 50/50 smite fight.".to_string(),
+                    )
+                },
             };
 
             dilemmas.push(ScenarioDilemma {
@@ -289,12 +365,12 @@ mod tests {
         ];
 
         let session = TieBreakerSession::generate(&[a, b], &catalog).expect("session generated");
-        assert_eq!(session.dilemmas.len(), 3);
+        assert_eq!(session.dilemmas.len(), 5);
         assert!(session.models_preferring_a.contains(&"Random Forest".to_string()));
         assert!(session.models_preferring_b.contains(&"Decision Tree".to_string()));
 
-        // Resolve choosing option A for all 3 dilemmas
-        let resolution = session.resolve(&[true, true, true], &ModelWeights::default());
+        // Resolve choosing option A for all 5 dilemmas
+        let resolution = session.resolve(&[true, true, true, true, true], &ModelWeights::default());
         assert_eq!(resolution.winning_champion, "Yasuo");
         assert_eq!(resolution.consensus_confidence, 100.0);
         // Yasuo favored Random Forest, so RF weight should be boosted

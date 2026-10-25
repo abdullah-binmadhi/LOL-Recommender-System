@@ -166,6 +166,7 @@ pub struct AppState {
     pub model_weights: recommender_core::aggregation::ModelWeights,
     #[allow(dead_code)]
     pub tie_breaker_answers: Vec<bool>,
+    pub model_trust_lab_open: bool,
 }
 
 impl Default for AppState {
@@ -191,7 +192,8 @@ impl Default for AppState {
             analytics_tracked_champion: String::new(),
             analytics_visible_games: 10,
             model_weights: recommender_core::aggregation::ModelWeights::default(),
-            tie_breaker_answers: vec![true, true, true],
+            tie_breaker_answers: vec![true, true, true, true, true],
+            model_trust_lab_open: true,
         }
     }
 }
@@ -887,5 +889,15 @@ mod tests {
         assert_eq!(state.screen, Screen::ChampionDistribution);
         state.return_to_start();
         assert_eq!(state.screen, Screen::Start);
+    }
+
+    #[test]
+    fn test_model_trust_lab_and_tie_breaker_defaults() {
+        let mut state = AppState::default();
+        assert!(state.model_trust_lab_open);
+        assert_eq!(state.tie_breaker_answers.len(), 5);
+
+        state.model_trust_lab_open = false;
+        assert!(!state.model_trust_lab_open);
     }
 }
