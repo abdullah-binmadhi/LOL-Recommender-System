@@ -279,6 +279,23 @@ pub struct EvaluationResult {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct EnsembleQualityAudit {
+    pub kendall_w: f64,
+    pub ndcg_10: f64,
+    pub ece: f64,
+    pub ensemble_divergence: f64,
+    pub precision_at1: f64,
+    pub precision_at3: f64,
+    pub precision_at10: f64,
+    pub mean_average_precision: f64,
+    pub model_agreements: Vec<(String, f64)>,
+    pub concordance_status: String,
+    pub calibration_status: String,
+    pub ranking_fidelity_status: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct RecommendationResult {
     pub features: UserFeatures,
     pub scores: AlgorithmScores,
@@ -286,6 +303,8 @@ pub struct RecommendationResult {
     pub top10: Vec<AggregatedChampionScore>,
     #[serde(default)]
     pub evaluation: Option<EvaluationResult>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quality_audit: Option<EnsembleQualityAudit>,
 }
 
 /// Local records have changed shape over time. Known registration/result fields are typed,

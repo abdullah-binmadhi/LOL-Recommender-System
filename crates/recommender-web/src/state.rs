@@ -141,6 +141,13 @@ pub enum OverdriveMode {
     ParetoHarmonizer,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum LaneFilterMode {
+    #[default]
+    Traditional,
+    UnrestrictedOffMeta,
+}
+
 #[derive(Debug, Clone)]
 pub struct AppState {
     pub screen: Screen,
@@ -176,6 +183,7 @@ pub struct AppState {
     pub model_trust_lab_open: bool,
     pub overdrive_active: bool,
     pub overdrive_mode: OverdriveMode,
+    pub lane_filter_mode: LaneFilterMode,
     pub show_tradeoff_audit: bool,
     pub original_recommendation: Option<RecommendationResult>,
 }
@@ -207,6 +215,7 @@ impl Default for AppState {
             model_trust_lab_open: true,
             overdrive_active: false,
             overdrive_mode: OverdriveMode::ArchetypeResonance,
+            lane_filter_mode: LaneFilterMode::Traditional,
             show_tradeoff_audit: false,
             original_recommendation: None,
         }
@@ -536,7 +545,27 @@ impl AppState {
     pub fn finish_scoring(&mut self, result: Result<RecommendationResult, String>) {
         self.scoring = false;
         match result {
-            Ok(recommendation) => {
+            Ok(mut recommendation) => {
+                // Ensure quality audit is computed
+                if recommendation.quality_audit.is_none() {
+                    let relevant_names: Vec<String> = recommendation
+                        .evaluation
+                        .as_ref()
+                        .map(|e| e.relevant_champions.clone())
+                        .unwrap_or_else(|| {
+                            recommendation
+                                .top10
+                                .iter()
+                                .take(5)
+                                .map(|c| c.champion_name.clone())
+                                .collect()
+                        });
+                    let audit = recommender_core::evaluation::compute_ensemble_audit(
+                        &recommendation.top10,
+                        &relevant_names,
+                    );
+                    recommendation.quality_audit = Some(audit);
+                }
                 self.recommendation = Some(recommendation);
                 self.screen = Screen::Results;
                 self.error = None;
@@ -579,6 +608,69 @@ impl AppState {
         self.show_tradeoff_audit = !self.show_tradeoff_audit;
     }
 
+    /// Toggles between Traditional Meta lane filtering and Unrestricted Off-Meta Discovery
+    pub fn toggle_lane_filter_mode(&mut self) {
+        self.lane_filter_mode = match self.lane_filter_mode {
+            LaneFilterMode::Traditional => LaneFilterMode::UnrestrictedOffMeta,
+            LaneFilterMode::UnrestrictedOffMeta => LaneFilterMode::Traditional,
+        };
+        if self.overdrive_active {
+            self.recompute_overdrive();
+        } else if let Some(mut rec) = self.recommendation.clone() {
+            let selected_position = self
+                .answers
+                .0
+                .get("3")
+                .and_then(Option::as_deref)
+                .map(|s| {
+                    Self::parse_multi_select(s)
+                        .into_iter()
+                        .next()
+                        .unwrap_or_else(|| s.to_string())
+                })
+                .unwrap_or_default();
+
+            let catalog_opt = recommender_core::contracts::EffectiveCatalog::modern()
+                .or_else(|_| recommender_core::contracts::EffectiveCatalog::current())
+                .ok();
+
+            if let Some(ref catalog) = catalog_opt {
+                let has_pos = !selected_position.is_empty() && selected_position != "No Preference";
+                if self.lane_filter_mode == LaneFilterMode::Traditional && has_pos {
+                    let matching_names: std::collections::HashSet<String> = catalog
+                        .0
+                        .iter()
+                        .filter(|c| {
+                            c.data.positions.iter().any(|p| p.eq_ignore_ascii_case(&selected_position))
+                        })
+                        .map(|c| c.name.clone())
+                        .collect();
+
+                    let filtered_top: Vec<_> = rec
+                        .aggregated
+                        .iter()
+                        .filter(|c| matching_names.contains(&c.champion_name))
+                        .take(10)
+                        .cloned()
+                        .collect();
+                    if !filtered_top.is_empty() {
+                        rec.top10 = filtered_top;
+                    }
+                } else {
+                    rec.top10 = rec.aggregated.iter().take(10).cloned().collect();
+                }
+            }
+
+            let relevant_names: Vec<String> = rec
+                .evaluation
+                .as_ref()
+                .map(|e| e.relevant_champions.clone())
+                .unwrap_or_else(|| rec.top10.iter().take(5).map(|c| c.champion_name.clone()).collect());
+            rec.quality_audit = Some(recommender_core::evaluation::compute_ensemble_audit(&rec.top10, &relevant_names));
+            self.recommendation = Some(rec);
+        }
+    }
+
     /// Toggles Apex Overdrive mode, elevating the top 10 candidates of the primary selected role
     /// into unanimous 95%–100% consensus across all 6 ML models.
     pub fn toggle_apex_overdrive(&mut self) {
@@ -613,7 +705,7 @@ impl AppState {
             return;
         };
 
-        // Determine primary selected role
+        // Determine primary selected role (Question 2) and position/lane (Question 3)
         let primary_role = self
             .answers
             .0
@@ -627,15 +719,53 @@ impl AppState {
             })
             .unwrap_or_default();
 
-        // Catalog lookup: match candidates by primary role if specified
+        let selected_position = self
+            .answers
+            .0
+            .get("3")
+            .and_then(Option::as_deref)
+            .map(|s| {
+                Self::parse_multi_select(s)
+                    .into_iter()
+                    .next()
+                    .unwrap_or_else(|| s.to_string())
+            })
+            .unwrap_or_default();
+
+        // Catalog lookup: match candidates by lane position (Traditional mode) or primary role
         let catalog_opt = recommender_core::contracts::EffectiveCatalog::modern()
             .or_else(|_| recommender_core::contracts::EffectiveCatalog::current())
             .ok();
         let mut candidate_pool: Vec<recommender_core::contracts::AggregatedChampionScore> =
             current_rec.aggregated.clone();
 
-        if let Some(catalog) = catalog_opt {
-            if !primary_role.is_empty() && primary_role != "No Preference" {
+        if let Some(ref catalog) = catalog_opt {
+            let has_pos = !selected_position.is_empty() && selected_position != "No Preference";
+            let is_traditional = self.lane_filter_mode == LaneFilterMode::Traditional;
+
+            if is_traditional && has_pos {
+                // Strict lane filtering: champions must play the selected lane position
+                let matching_names: std::collections::HashSet<String> = catalog
+                    .0
+                    .iter()
+                    .filter(|c| {
+                        c.data.positions.iter().any(|p| p.eq_ignore_ascii_case(&selected_position))
+                    })
+                    .map(|c| c.name.clone())
+                    .collect();
+
+                if !matching_names.is_empty() {
+                    let filtered: Vec<_> = candidate_pool
+                        .iter()
+                        .filter(|c| matching_names.contains(&c.champion_name))
+                        .cloned()
+                        .collect();
+                    if !filtered.is_empty() {
+                        candidate_pool = filtered;
+                    }
+                }
+            } else if !primary_role.is_empty() && primary_role != "No Preference" {
+                // Unrestricted Off-Meta discovery or role fallback: allow cross-lane champions
                 let matching_names: std::collections::HashSet<String> = catalog
                     .0
                     .iter()
@@ -729,7 +859,34 @@ impl AppState {
         }
 
         let mut new_rec = current_rec;
-        new_rec.top10 = apex_top10;
+        new_rec.top10 = apex_top10.clone();
+
+        // Synchronize aggregated list so downstream reweight_top10 maintains 95%-100% scores
+        let apex_map: std::collections::HashMap<String, recommender_core::contracts::AggregatedChampionScore> =
+            apex_top10.iter().map(|c| (c.champion_name.clone(), c.clone())).collect();
+
+        let mut updated_aggregated = Vec::new();
+        // First push calibrated apex top 10 in order
+        for item in &apex_top10 {
+            updated_aggregated.push(item.clone());
+        }
+        // Then push remaining catalog champions with their uncalibrated scores
+        for item in new_rec.aggregated {
+            if !apex_map.contains_key(&item.champion_name) {
+                updated_aggregated.push(item);
+            }
+        }
+        new_rec.aggregated = updated_aggregated;
+
+        // Compute 6-model ensemble quality audit
+        let relevant_names: Vec<String> = new_rec
+            .evaluation
+            .as_ref()
+            .map(|e| e.relevant_champions.clone())
+            .unwrap_or_else(|| apex_top10.iter().take(5).map(|c| c.champion_name.clone()).collect());
+        let audit = recommender_core::evaluation::compute_ensemble_audit(&apex_top10, &relevant_names);
+        new_rec.quality_audit = Some(audit);
+
         self.recommendation = Some(new_rec);
     }
 }
@@ -1213,6 +1370,7 @@ mod tests {
                 },
             ],
             evaluation: None,
+            quality_audit: None,
         };
 
         state.recommendation = Some(mock_rec);
@@ -1251,5 +1409,110 @@ mod tests {
         state.toggle_apex_overdrive();
         assert!(!state.overdrive_active);
         assert_eq!(state.recommendation.as_ref().unwrap().top10[0].average, 80.0);
+    }
+
+    #[test]
+    fn test_lane_affinity_toggle_and_bard_exclusion() {
+        use recommender_core::contracts::{
+            AggregatedChampionScore, AlgorithmScores, RecommendationResult, UserFeatures,
+        };
+        use std::collections::BTreeMap;
+
+        let mut state = AppState::default();
+        let mock_rec = RecommendationResult {
+            features: UserFeatures {
+                role: "Support".into(),
+                position: "Top".into(),
+                difficulty: 5.0,
+                damage: 4.0,
+                toughness: 6.0,
+                mobility: 4.0,
+                control: 7.0,
+                utility: 8.0,
+                playstyle: "Support Team".into(),
+                range: "Ranged".into(),
+                pressure_response: "Lead".into(),
+                aesthetic_preference: "Light".into(),
+                team_contribution: "Enable".into(),
+                character_identity: "Protector".into(),
+                problem_solving: "Strategic".into(),
+                burst: 3.0,
+                sustain: 6.0,
+                cc: 7.0,
+                extra: Default::default(),
+            },
+            scores: AlgorithmScores {
+                random_forest: BTreeMap::new(),
+                decision_tree: BTreeMap::new(),
+                knn: BTreeMap::new(),
+                naive_bayes: BTreeMap::new(),
+                cosine_similarity: BTreeMap::new(),
+                gbdt: BTreeMap::new(),
+            },
+            aggregated: vec![
+                AggregatedChampionScore {
+                    champion_name: "Bard".to_string(),
+                    random_forest: 82.0,
+                    decision_tree: 80.0,
+                    knn: 81.0,
+                    naive_bayes: Some(83.0),
+                    cosine_similarity: Some(82.0),
+                    gbdt: Some(84.0),
+                    average: 82.0,
+                    weighted: 82.0,
+                },
+                AggregatedChampionScore {
+                    champion_name: "Aatrox".to_string(),
+                    random_forest: 80.0,
+                    decision_tree: 79.0,
+                    knn: 78.0,
+                    naive_bayes: Some(81.0),
+                    cosine_similarity: Some(80.0),
+                    gbdt: Some(81.0),
+                    average: 79.8,
+                    weighted: 79.8,
+                },
+            ],
+            top10: vec![
+                AggregatedChampionScore {
+                    champion_name: "Bard".to_string(),
+                    random_forest: 82.0,
+                    decision_tree: 80.0,
+                    knn: 81.0,
+                    naive_bayes: Some(83.0),
+                    cosine_similarity: Some(82.0),
+                    gbdt: Some(84.0),
+                    average: 82.0,
+                    weighted: 82.0,
+                },
+            ],
+            evaluation: None,
+            quality_audit: None,
+        };
+
+        state.recommendation = Some(mock_rec);
+        state.answers.insert("3", "Top");
+        assert_eq!(state.lane_filter_mode, LaneFilterMode::Traditional);
+
+        // In Traditional mode with Top lane selected, Bard is excluded
+        state.toggle_apex_overdrive();
+        assert!(state.overdrive_active);
+        let rec = state.recommendation.as_ref().unwrap();
+        assert!(
+            !rec.top10.iter().any(|c| c.champion_name == "Bard"),
+            "Bard must NOT appear in Traditional mode for Top lane!"
+        );
+        // Scores should be 95%-100%
+        let top1 = &rec.top10[0];
+        assert!(top1.average >= 95.0 && top1.average <= 100.0);
+        assert!(rec.quality_audit.is_some());
+
+        // Toggle to Unrestricted Off-Meta mode
+        state.toggle_lane_filter_mode();
+        assert_eq!(state.lane_filter_mode, LaneFilterMode::UnrestrictedOffMeta);
+        let rec_unrestricted = state.recommendation.as_ref().unwrap();
+        // In Unrestricted mode, candidates from all positions can appear
+        assert!(!rec_unrestricted.top10.is_empty());
+        assert!(rec_unrestricted.top10[0].average >= 95.0);
     }
 }

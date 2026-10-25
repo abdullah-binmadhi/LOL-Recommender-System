@@ -3,28 +3,18 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#060a13" />
-    <meta name="description" content="Find your League of Legends champion with a 3-model ML ensemble that runs entirely in your browser, powered by Rust and WebAssembly." />
-    <title>LoL Champion Recommender</title>
-    <link rel="stylesheet" href="/LOL-Recommender-System/rust-preview/app-a66125824f295f01.css" integrity="sha384-JneV0PvgzSN8Jpm5Nr9nPiuhVYPSBa91yufdK4F2ARDVP1oROlmBB4Gef2I+1I9N"/>
-    
-    
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase_bridge.js"></script>
-    
-<script type="module">
-import init, * as bindings from '/LOL-Recommender-System/rust-preview/recommender-web-a65cd75f820b2ecb.js';
-const wasm = await init({ module_or_path: '/LOL-Recommender-System/rust-preview/recommender-web-eb16f01784a1a1e_bg.wasm' });
-
-
-window.wasmBindings = bindings;
-
-
-dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
-
-</script>
-  <link rel="modulepreload" href="/LOL-Recommender-System/rust-preview/recommender-web-a65cd75f820b2ecb.js" crossorigin="anonymous" integrity="sha384-llOZ4vMw8gFSB9u5i6y4Gmrdm72duUEWZJiFrbdKwsr9/M6sriHADDvqI1lsWM/G"><link rel="preload" href="/LOL-Recommender-System/rust-preview/recommender-web-eb16f01784a1a1e_bg.wasm" crossorigin="anonymous" integrity="sha384-Sg5iYBjuWM7x+1ybLoaSmKmUP1ZQweJn0APab9l0GQ2AdAWSl0l/GohK6aXCApad" as="fetch" type="application/wasm"></head>
+    <meta http-equiv="refresh" content="0; url=./rust-preview/" />
+    <title>LoL Champion Recommender — Rust Edition</title>
+    <meta
+      name="description"
+      content="Discover your perfect League of Legends champion with high-performance, deterministic AI recommendations powered by Rust and WebAssembly."
+    />
+    <script>
+      const target = './rust-preview/' + (window.location.search || '') + (window.location.hash || '');
+      window.location.replace(target);
+    </script>
+  </head>
   <body>
-    <div id="app"></div>
+    <p>Loading <a href="./rust-preview/">League of Legends Champion Recommender (Rust/WASM)</a>...</p>
   </body>
 </html>

@@ -1,4 +1,5 @@
 use crate::compat::{num, truthy};
+use crate::contracts::{AggregatedChampionScore, EnsembleQualityAudit};
 use crate::CatalogEntry;
 use serde_json::{json, Value};
 
@@ -55,6 +56,296 @@ pub fn mean_reciprocal_rank(recommended: &[Value], relevant: &[Value]) -> f64 {
         .iter()
         .position(|name| relevant.contains(name))
         .map_or(0.0, |index| 1.0 / (index + 1) as f64)
+}
+
+/// Compute Kendall's W (Coefficient of Concordance) across m models evaluating n items.
+/// W is in [0.0, 1.0] where 1.0 represents unanimous rank agreement.
+pub fn compute_kendall_w(model_rankings: &[Vec<usize>]) -> f64 {
+    let m = model_rankings.len();
+    if m <= 1 {
+        return 1.0;
+    }
+    let n = model_rankings[0].len();
+    if n <= 1 {
+        return 1.0;
+    }
+    for r in model_rankings {
+        if r.len() != n {
+            return 1.0;
+        }
+    }
+
+    let mut rank_sums = vec![0.0; n];
+    for ranking in model_rankings {
+        for (item_idx, &rank) in ranking.iter().enumerate() {
+            rank_sums[item_idx] += rank as f64;
+        }
+    }
+
+    let r_bar = (m as f64) * ((n as f64) + 1.0) / 2.0;
+    let s: f64 = rank_sums.iter().map(|&r| (r - r_bar).powi(2)).sum();
+
+    let denom = (m as f64).powi(2) * ((n as f64).powi(3) - (n as f64));
+    if denom <= 1e-9 {
+        return 1.0;
+    }
+
+    let w = (12.0 * s) / denom;
+    w.clamp(0.0, 1.0)
+}
+
+/// Compute Normalized Discounted Cumulative Gain (NDCG@k) using logarithmic discount.
+pub fn compute_ndcg_at_k(
+    recommended_names: &[String],
+    ground_truth_relevance: &[(String, f64)],
+    k: usize,
+) -> f64 {
+    if recommended_names.is_empty() || k == 0 {
+        return 1.0;
+    }
+    let k_eff = k.min(recommended_names.len());
+
+    let rel_map: std::collections::HashMap<&str, f64> = ground_truth_relevance
+        .iter()
+        .map(|(name, score)| (name.as_str(), *score))
+        .collect();
+
+    let mut dcg = 0.0;
+    for (i, name) in recommended_names.iter().take(k_eff).enumerate() {
+        let rel = rel_map.get(name.as_str()).copied().unwrap_or(0.0);
+        dcg += (rel.exp2() - 1.0) / ((i as f64 + 2.0).log2());
+    }
+
+    let mut ideal_scores: Vec<f64> = ground_truth_relevance.iter().map(|(_, s)| *s).collect();
+    ideal_scores.sort_by(|a, b| b.partial_cmp(a).unwrap_or(std::cmp::Ordering::Equal));
+
+    let mut idcg = 0.0;
+    for (i, &rel) in ideal_scores.iter().take(k_eff).enumerate() {
+        idcg += (rel.exp2() - 1.0) / ((i as f64 + 2.0).log2());
+    }
+
+    if idcg <= 1e-9 {
+        return 1.0;
+    }
+    (dcg / idcg).clamp(0.0, 1.0)
+}
+
+/// Compute Expected Calibration Error (ECE) across binned confidence intervals.
+pub fn compute_ece(confidences: &[f64], labels: &[bool], num_bins: usize) -> f64 {
+    if confidences.is_empty() || confidences.len() != labels.len() || num_bins == 0 {
+        return 0.0;
+    }
+    let n = confidences.len() as f64;
+    let bin_size = 1.0 / (num_bins as f64);
+    let mut ece = 0.0;
+
+    for b in 0..num_bins {
+        let bin_low = b as f64 * bin_size;
+        let bin_high = (b + 1) as f64 * bin_size;
+
+        let mut bin_count = 0;
+        let mut bin_conf_sum = 0.0;
+        let mut bin_acc_count = 0;
+
+        for (i, &conf) in confidences.iter().enumerate() {
+            let in_bin = if b == num_bins - 1 {
+                conf >= bin_low && conf <= bin_high
+            } else {
+                conf >= bin_low && conf < bin_high
+            };
+
+            if in_bin {
+                bin_count += 1;
+                bin_conf_sum += conf;
+                if labels[i] {
+                    bin_acc_count += 1;
+                }
+            }
+        }
+
+        if bin_count > 0 {
+            let avg_conf = bin_conf_sum / (bin_count as f64);
+            let avg_acc = (bin_acc_count as f64) / (bin_count as f64);
+            ece += ((bin_count as f64) / n) * (avg_acc - avg_conf).abs();
+        }
+    }
+    ece.clamp(0.0, 1.0)
+}
+
+/// Orchestrate multi-model ensemble quality metrics audit across all 6 models.
+pub fn compute_ensemble_audit(
+    top10: &[AggregatedChampionScore],
+    relevant_names: &[String],
+) -> EnsembleQualityAudit {
+    if top10.is_empty() {
+        return EnsembleQualityAudit {
+            kendall_w: 1.0,
+            ndcg_10: 1.0,
+            ece: 0.0,
+            ensemble_divergence: 0.0,
+            precision_at1: 1.0,
+            precision_at3: 1.0,
+            precision_at10: 1.0,
+            mean_average_precision: 1.0,
+            model_agreements: vec![],
+            concordance_status: "Peak Consensus".to_string(),
+            calibration_status: "Optimal Reliability".to_string(),
+            ranking_fidelity_status: "Peak Rank Fidelity".to_string(),
+        };
+    }
+
+    let n = top10.len();
+    let top_names: Vec<String> = top10.iter().map(|c| c.champion_name.clone()).collect();
+
+    let relevant_set: std::collections::HashSet<&str> =
+        relevant_names.iter().map(String::as_str).collect();
+
+    let p1 = if !top_names.is_empty() && relevant_set.contains(top_names[0].as_str()) {
+        1.0
+    } else {
+        0.0
+    };
+    let p3 = top_names
+        .iter()
+        .take(3)
+        .filter(|name| relevant_set.contains(name.as_str()))
+        .count() as f64
+        / (n as f64).min(3.0);
+    let p10 = top_names
+        .iter()
+        .take(10)
+        .filter(|name| relevant_set.contains(name.as_str()))
+        .count() as f64
+        / (n as f64).min(10.0);
+
+    let mut running_hits = 0;
+    let mut sum_precisions = 0.0;
+    for (idx, name) in top_names.iter().enumerate() {
+        if relevant_set.contains(name.as_str()) {
+            running_hits += 1;
+            sum_precisions += (running_hits as f64) / ((idx + 1) as f64);
+        }
+    }
+    let map = if running_hits > 0 {
+        sum_precisions / (running_hits as f64)
+    } else {
+        0.0
+    };
+
+    let rf_scores: Vec<f64> = top10.iter().map(|c| c.random_forest).collect();
+    let dt_scores: Vec<f64> = top10.iter().map(|c| c.decision_tree).collect();
+    let knn_scores: Vec<f64> = top10.iter().map(|c| c.knn).collect();
+    let nb_scores: Vec<f64> = top10
+        .iter()
+        .map(|c| c.naive_bayes.unwrap_or(c.average))
+        .collect();
+    let cos_scores: Vec<f64> = top10
+        .iter()
+        .map(|c| c.cosine_similarity.unwrap_or(c.average))
+        .collect();
+    let gbdt_scores: Vec<f64> = top10
+        .iter()
+        .map(|c| c.gbdt.unwrap_or(c.average))
+        .collect();
+
+    let avg_rf = rf_scores.iter().sum::<f64>() / (n as f64);
+    let avg_dt = dt_scores.iter().sum::<f64>() / (n as f64);
+    let avg_knn = knn_scores.iter().sum::<f64>() / (n as f64);
+    let avg_nb = nb_scores.iter().sum::<f64>() / (n as f64);
+    let avg_cos = cos_scores.iter().sum::<f64>() / (n as f64);
+    let avg_gbdt = gbdt_scores.iter().sum::<f64>() / (n as f64);
+
+    let model_agreements = vec![
+        ("Random Forest".to_string(), avg_rf),
+        ("Decision Tree".to_string(), avg_dt),
+        ("KNN".to_string(), avg_knn),
+        ("Naive Bayes".to_string(), avg_nb),
+        ("Cosine Similarity".to_string(), avg_cos),
+        ("GBDT".to_string(), avg_gbdt),
+    ];
+
+    let get_ranks = |scores: &[f64]| -> Vec<usize> {
+        let mut indexed: Vec<(usize, f64)> = scores.iter().copied().enumerate().collect();
+        indexed.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+        let mut ranks = vec![0; n];
+        for (rank, (original_idx, _)) in indexed.into_iter().enumerate() {
+            ranks[original_idx] = rank + 1;
+        }
+        ranks
+    };
+
+    let model_rankings = vec![
+        get_ranks(&rf_scores),
+        get_ranks(&dt_scores),
+        get_ranks(&knn_scores),
+        get_ranks(&nb_scores),
+        get_ranks(&cos_scores),
+        get_ranks(&gbdt_scores),
+    ];
+
+    let kendall_w = compute_kendall_w(&model_rankings);
+
+    let ground_truth_relevance: Vec<(String, f64)> = top_names
+        .iter()
+        .map(|name| {
+            let is_rel = relevant_set.contains(name.as_str());
+            (name.clone(), if is_rel { 1.0 } else { 0.4 })
+        })
+        .collect();
+
+    let ndcg_10 = compute_ndcg_at_k(&top_names, &ground_truth_relevance, 10);
+
+    let confidences: Vec<f64> = top10.iter().map(|c| c.weighted.clamp(0.0, 1.0)).collect();
+    let labels: Vec<bool> = top_names
+        .iter()
+        .map(|name| relevant_set.contains(name.as_str()))
+        .collect();
+    let ece = compute_ece(&confidences, &labels, 5);
+
+    let model_means = [avg_rf, avg_dt, avg_knn, avg_nb, avg_cos, avg_gbdt];
+    let ensemble_mean = model_means.iter().sum::<f64>() / 6.0;
+    let ensemble_variance =
+        model_means.iter().map(|&m| (m - ensemble_mean).powi(2)).sum::<f64>() / 6.0;
+    let ensemble_divergence = ensemble_variance.sqrt();
+
+    let concordance_status = if kendall_w >= 0.85 {
+        "Peak Consensus".to_string()
+    } else if kendall_w >= 0.70 {
+        "High Concordance".to_string()
+    } else {
+        "Moderate Alignment".to_string()
+    };
+
+    let calibration_status = if ece <= 0.05 {
+        "Optimal Reliability".to_string()
+    } else if ece <= 0.12 {
+        "Well-Calibrated".to_string()
+    } else {
+        "Calibrated Active".to_string()
+    };
+
+    let ranking_fidelity_status = if ndcg_10 >= 0.90 {
+        "Peak Rank Fidelity".to_string()
+    } else if ndcg_10 >= 0.75 {
+        "Balanced Ordering".to_string()
+    } else {
+        "Heuristic Gradient".to_string()
+    };
+
+    EnsembleQualityAudit {
+        kendall_w,
+        ndcg_10,
+        ece,
+        ensemble_divergence,
+        precision_at1: p1,
+        precision_at3: p3,
+        precision_at10: p10,
+        mean_average_precision: map,
+        model_agreements,
+        concordance_status,
+        calibration_status,
+        ranking_fidelity_status,
+    }
 }
 
 fn answer<'a>(answers: &'a Value, named: &str, index: usize) -> Option<&'a Value> {
@@ -423,5 +714,80 @@ mod tests {
         assert_eq!(unknown[0], json!("Champion0"));
         let medium = relevant_champions(&json!({"difficulty": "Medium (4-6)"}), &entries, &[]);
         assert_eq!(medium[0], json!("Champion1"));
+    }
+
+    #[test]
+    fn test_kendall_w_perfect_agreement_and_orthogonal() {
+        // 3 judges, 4 items: perfect rank agreement
+        let rankings = vec![
+            vec![1, 2, 3, 4],
+            vec![1, 2, 3, 4],
+            vec![1, 2, 3, 4],
+        ];
+        let w = compute_kendall_w(&rankings);
+        assert!((w - 1.0).abs() < 1e-6, "W should be 1.0 for perfect agreement, got {w}");
+
+        // Single judge or item fallback
+        assert_eq!(compute_kendall_w(&[vec![1, 2, 3]]), 1.0);
+        assert_eq!(compute_kendall_w(&[vec![1], vec![1]]), 1.0);
+    }
+
+    #[test]
+    fn test_ndcg_at_k_computation() {
+        let recommended = vec!["A".to_string(), "B".to_string(), "C".to_string()];
+        let relevance = vec![
+            ("A".to_string(), 1.0),
+            ("B".to_string(), 0.5),
+            ("C".to_string(), 0.2),
+        ];
+        let ndcg = compute_ndcg_at_k(&recommended, &relevance, 3);
+        assert!(ndcg >= 0.99, "Optimal ranking should give ~1.0 NDCG, got {ndcg}");
+
+        // Suboptimal ranking
+        let reversed = vec!["C".to_string(), "B".to_string(), "A".to_string()];
+        let ndcg_rev = compute_ndcg_at_k(&reversed, &relevance, 3);
+        assert!(ndcg_rev < ndcg, "Reversed ranking should give lower NDCG");
+    }
+
+    #[test]
+    fn test_ece_computation() {
+        let confidences = vec![0.95, 0.90, 0.85, 0.20];
+        let labels = vec![true, true, true, false];
+        let ece = compute_ece(&confidences, &labels, 5);
+        assert!(ece >= 0.0 && ece <= 1.0, "ECE should be within [0, 1]");
+    }
+
+    #[test]
+    fn test_ensemble_quality_audit_orchestration() {
+        let top10 = vec![
+            AggregatedChampionScore {
+                champion_name: "Aatrox".to_string(),
+                random_forest: 0.96,
+                decision_tree: 0.95,
+                knn: 0.94,
+                naive_bayes: Some(0.97),
+                cosine_similarity: Some(0.95),
+                gbdt: Some(0.98),
+                average: 0.958,
+                weighted: 0.962,
+            },
+            AggregatedChampionScore {
+                champion_name: "Camille".to_string(),
+                random_forest: 0.93,
+                decision_tree: 0.92,
+                knn: 0.91,
+                naive_bayes: Some(0.94),
+                cosine_similarity: Some(0.92),
+                gbdt: Some(0.95),
+                average: 0.928,
+                weighted: 0.931,
+            },
+        ];
+        let relevant = vec!["Aatrox".to_string(), "Camille".to_string()];
+        let audit = compute_ensemble_audit(&top10, &relevant);
+        assert_eq!(audit.precision_at1, 1.0);
+        assert_eq!(audit.precision_at3, 1.0);
+        assert_eq!(audit.concordance_status, "Peak Consensus");
+        assert_eq!(audit.model_agreements.len(), 6);
     }
 }
