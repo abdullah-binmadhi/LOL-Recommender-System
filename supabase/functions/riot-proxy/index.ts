@@ -1,9 +1,9 @@
 // Supabase Edge Function: riot-proxy
 // Securely proxies Riot Games Developer API without exposing RIOT_API_KEY to browser WebAssembly clients
-// Persists authentic Match-V5 telemetry into Supabase PostgreSQL (public.player_matches)
+// Persists authentic Match-V5 telemetry into Supabase PostgreSQL (public.player_matches) via @supabase/supabase-js
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -121,49 +121,16 @@ function formatPlayedAgo(timestampMs?: number): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-async function ensureDatabaseTables(client: Client) {
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs = 6000): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    await client.queryArray(`
-      CREATE TABLE IF NOT EXISTS public.player_matches (
-        id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-        match_id TEXT NOT NULL UNIQUE,
-        puuid TEXT NOT NULL,
-        riot_id TEXT NOT NULL,
-        region TEXT NOT NULL,
-        game_creation BIGINT NOT NULL,
-        game_duration_mins INT NOT NULL,
-        queue_id INT NOT NULL,
-        queue_name TEXT NOT NULL,
-        champion_name TEXT NOT NULL,
-        role TEXT NOT NULL,
-        win BOOLEAN NOT NULL,
-        kills INT NOT NULL DEFAULT 0,
-        deaths INT NOT NULL DEFAULT 0,
-        assists INT NOT NULL DEFAULT 0,
-        cs INT NOT NULL DEFAULT 0,
-        cs_per_min DOUBLE PRECISION NOT NULL DEFAULT 0.0,
-        gold_diff_15 INT NOT NULL DEFAULT 0,
-        damage_dealt INT NOT NULL DEFAULT 0,
-        vision_score INT NOT NULL DEFAULT 0,
-        items JSONB NOT NULL DEFAULT '[]'::jsonb,
-        lane_opponent_champion TEXT,
-        allied_team JSONB NOT NULL DEFAULT '[]'::jsonb,
-        enemy_team JSONB NOT NULL DEFAULT '[]'::jsonb,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
-      );
-
-      ALTER TABLE public.player_matches
-        ADD COLUMN IF NOT EXISTS queue_name TEXT,
-        ADD COLUMN IF NOT EXISTS game_creation BIGINT,
-        ADD COLUMN IF NOT EXISTS lane_opponent_champion TEXT,
-        ADD COLUMN IF NOT EXISTS allied_team JSONB,
-        ADD COLUMN IF NOT EXISTS enemy_team JSONB;
-
-      CREATE INDEX IF NOT EXISTS idx_player_matches_puuid_creation 
-        ON public.player_matches (puuid, game_creation DESC);
-    `);
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timer);
+    return res;
   } catch (err) {
-    console.warn("Table auto-migration notice:", err);
+    clearTimeout(timer);
+    throw err;
   }
 }
 
@@ -174,7 +141,7 @@ async function resolveAccountPuuid(gameName: string, tagLine: string, preferredC
       const url = `https://${cluster}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(
         gameName
       )}/${encodeURIComponent(tagLine)}`;
-      const res = await fetch(url, { headers: { "X-Riot-Token": riotApiKey } });
+      const res = await fetchWithTimeout(url, { headers: { "X-Riot-Token": riotApiKey } }, 4000);
       if (res.ok) {
         const data = await res.json();
         return { puuid: data.puuid, gameName: data.gameName, tagLine: data.tagLine, workingCluster: cluster };
@@ -191,18 +158,13 @@ serve(async (req: Request) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  let dbClient: Client | null = null;
-  const dbUrl = Deno.env.get("SUPABASE_DB_URL");
-  if (dbUrl) {
-    try {
-      dbClient = new Client(dbUrl);
-      await dbClient.connect();
-      await ensureDatabaseTables(dbClient);
-    } catch (e) {
-      console.warn("Could not connect to Postgres DB:", e);
-      dbClient = null;
-    }
-  }
+  // Initialize Supabase Client with Service Role or Anon Key
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "https://erfybpoymihcepxnaosj.supabase.co";
+  const supabaseKey =
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ||
+    Deno.env.get("SUPABASE_ANON_KEY") ||
+    "";
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
   try {
     const {
@@ -218,6 +180,7 @@ serve(async (req: Request) => {
       return new Response(
         JSON.stringify({
           error: "Invalid Riot ID format. Expected 'GameName#TagLine' (e.g. SHENTRICK#SHEN)",
+          matches: [],
         }),
         { status: 400, headers: corsHeaders }
       );
@@ -231,7 +194,7 @@ serve(async (req: Request) => {
     if (!riotApiKey) {
       return new Response(
         JSON.stringify({
-          error: "Missing Riot API Key.",
+          error: "Missing Riot API Key. Provide a developer key or enter it in the dashboard.",
           matches: [],
         }),
         { status: 401, headers: corsHeaders }
@@ -240,254 +203,246 @@ serve(async (req: Request) => {
 
     // 1. Resolve Summoner PUUID
     const accountData = await resolveAccountPuuid(gameName, tagLine, cluster, riotApiKey);
-    if (!accountData) {
+    let puuid = accountData?.puuid;
+
+    // Fallback: If account resolution failed (e.g. key expired), try finding PUUID in existing Postgres matches
+    if (!puuid) {
+      const { data: existingPlayer } = await supabase
+        .from("player_matches")
+        .select("puuid")
+        .ilike("riot_id", `${gameName}%`)
+        .limit(1)
+        .maybeSingle();
+      if (existingPlayer && existingPlayer.puuid) {
+        puuid = existingPlayer.puuid;
+      }
+    }
+
+    if (!puuid) {
       return new Response(
         JSON.stringify({
-          error: `Player '${riot_id}' not found on Riot servers.`,
+          status: "riot_account_not_found",
+          error: `Player '${riot_id}' not found on Riot servers or developer key is invalid.`,
           matches: [],
         }),
         { status: 404, headers: corsHeaders }
       );
     }
 
-    const puuid = accountData.puuid;
     const safeStart = Math.max(0, Number(start) || 0);
     const safeCount = Math.min(30, Math.max(1, Number(count) || 20));
 
     // 2. Fetch match IDs from Riot Match-V5
-    const matchesUrl = `https://${cluster}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=${safeStart}&count=${safeCount}`;
-    const matchesRes = await fetch(matchesUrl, {
-      headers: { "X-Riot-Token": riotApiKey },
-    });
-
+    let apiKeyExpired = false;
+    let newMatchesCount = 0;
     const parsedNewMatches: any[] = [];
-    if (matchesRes.ok) {
-      const matchIds = (await matchesRes.json()) as string[];
 
-      // Query which match IDs already exist in Postgres
-      let existingIdsSet = new Set<string>();
-      if (dbClient) {
-        try {
-          const checkRes = await dbClient.queryObject<{ match_id: string }>(
-            `SELECT match_id FROM public.player_matches WHERE puuid = $1`,
-            [puuid]
-          );
-          existingIdsSet = new Set(checkRes.rows.map((r) => r.match_id));
-        } catch (e) {
-          console.warn("Failed checking existing match IDs:", e);
-        }
+    const matchesUrl = `https://${cluster}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=${safeStart}&count=${safeCount}`;
+    let matchIds: string[] = [];
+
+    try {
+      const matchesRes = await fetchWithTimeout(matchesUrl, {
+        headers: { "X-Riot-Token": riotApiKey },
+      }, 5000);
+
+      if (matchesRes.status === 401 || matchesRes.status === 403) {
+        apiKeyExpired = true;
+      } else if (matchesRes.ok) {
+        matchIds = ((await matchesRes.json()) as string[]) || [];
       }
+    } catch (e) {
+      console.warn("Match IDs fetch error/timeout:", e);
+    }
 
-      for (const matchId of matchIds) {
-        if (existingIdsSet.has(matchId)) {
-          continue; // Already persisted in Postgres
-        }
+    // If Riot Match IDs were obtained, check existing and ingest new matches concurrently
+    if (matchIds.length > 0) {
+      // Query existing match IDs in Supabase
+      const { data: existingRows } = await supabase
+        .from("player_matches")
+        .select("match_id")
+        .eq("puuid", puuid)
+        .in("match_id", matchIds);
 
-        try {
-          const mRes = await fetch(
-            `https://${cluster}.api.riotgames.com/lol/match/v5/matches/${matchId}`,
-            { headers: { "X-Riot-Token": riotApiKey } }
-          );
-          if (!mRes.ok) continue;
-          const mData = await mRes.json();
-          const participant = mData.info?.participants?.find(
-            (p: any) => p.puuid === puuid
-          );
-          if (!participant) continue;
+      const existingIdsSet = new Set((existingRows || []).map((r: any) => r.match_id));
+      const neededIds = matchIds.filter((id) => !existingIdsSet.has(id));
 
-          const durationMin = Math.max(1, (mData.info.gameDuration || 1800) / 60);
-          const totalCs = (participant.totalMinionsKilled || 0) + (participant.neutralMinionsKilled || 0);
-          const csPerMin = Math.round((totalCs / durationMin) * 10) / 10;
-          const pos = participant.teamPosition || participant.individualPosition || "TOP";
-          const role =
-            pos === "UTILITY"
-              ? "Support"
-              : pos === "MIDDLE"
-              ? "Mid"
-              : pos === "TOP"
-              ? "Top"
-              : pos === "JUNGLE"
-              ? "Jungle"
-              : pos === "BOTTOM"
-              ? "Bottom"
-              : "Top";
+      // Batch fetch match details in parallel chunks of 5 with concurrency control
+      const CHUNK_SIZE = 5;
+      for (let i = 0; i < neededIds.length; i += CHUNK_SIZE) {
+        const chunk = neededIds.slice(i, i + CHUNK_SIZE);
+        const chunkPromises = chunk.map(async (matchId) => {
+          try {
+            const mRes = await fetchWithTimeout(
+              `https://${cluster}.api.riotgames.com/lol/match/v5/matches/${matchId}`,
+              { headers: { "X-Riot-Token": riotApiKey } },
+              6000
+            );
+            if (!mRes.ok) return null;
+            const mData = await mRes.json();
+            const participant = mData.info?.participants?.find((p: any) => p.puuid === puuid);
+            if (!participant) return null;
 
-          const champName = participant.championName || "Unknown";
-          const goldDiff15 = participant.challenges?.goldDiffAtMin15
-            ? Math.round(participant.challenges.goldDiffAtMin15)
-            : 0;
+            const durationMin = Math.max(1, (mData.info.gameDuration || 1800) / 60);
+            const totalCs = (participant.totalMinionsKilled || 0) + (participant.neutralMinionsKilled || 0);
+            const csPerMin = Math.round((totalCs / durationMin) * 10) / 10;
+            const pos = participant.teamPosition || participant.individualPosition || "TOP";
+            const role =
+              pos === "UTILITY"
+                ? "Support"
+                : pos === "MIDDLE"
+                ? "Mid"
+                : pos === "TOP"
+                ? "Top"
+                : pos === "JUNGLE"
+                ? "Jungle"
+                : pos === "BOTTOM"
+                ? "Bottom"
+                : "Top";
 
-          const enemyOpponent = (mData.info.participants || []).find(
-            (p: any) => p.teamId !== participant.teamId && p.teamPosition === participant.teamPosition
-          );
-          const laneOpponentChampion = enemyOpponent ? (enemyOpponent.championName || null) : null;
-          const durationMins = Math.round((mData.info.gameDuration || 1800) / 60);
-          const items = [
-            participant.item0, participant.item1, participant.item2,
-            participant.item3, participant.item4, participant.item5, participant.item6
-          ].filter((id: number) => id && id > 0);
+            const champName = participant.championName || "Unknown";
+            const goldDiff15 = participant.challenges?.goldDiffAtMin15
+              ? Math.round(participant.challenges.goldDiffAtMin15)
+              : 0;
 
-          const teamDamageTotal = (mData.info.participants || [])
-            .filter((p: any) => p.teamId === participant.teamId)
-            .reduce((sum: number, p: any) => sum + (p.totalDamageDealtToChampions || 0), 0) || 1;
-          const enemyDamageTotal = (mData.info.participants || [])
-            .filter((p: any) => p.teamId !== participant.teamId)
-            .reduce((sum: number, p: any) => sum + (p.totalDamageDealtToChampions || 0), 0) || 1;
+            const enemyOpponent = (mData.info.participants || []).find(
+              (p: any) => p.teamId !== participant.teamId && p.teamPosition === participant.teamPosition
+            );
+            const laneOpponentChampion = enemyOpponent ? (enemyOpponent.championName || null) : null;
+            const durationMins = Math.round((mData.info.gameDuration || 1800) / 60);
+            const items = [
+              participant.item0, participant.item1, participant.item2,
+              participant.item3, participant.item4, participant.item5, participant.item6,
+            ].filter((id: number) => id && id > 0);
 
-          const alliedTeam = (mData.info.participants || [])
-            .filter((p: any) => p.teamId === participant.teamId)
-            .map((p: any) => {
-              const pCs = (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0);
-              const pDamage = p.totalDamageDealtToChampions || 0;
-              const pName = p.riotIdGameName ? `${p.riotIdGameName}#${p.riotIdTagline || ""}` : (p.summonerName || p.championName || "Summoner");
-              return {
-                champion_name: p.championName || "Unknown",
-                role: p.teamPosition || "Unknown",
-                summoner_name: pName,
-                kills: p.kills || 0,
-                deaths: p.deaths || 0,
-                assists: p.assists || 0,
-                damage_dealt: pDamage,
-                cs: pCs,
-                cs_per_min: durationMin > 0 ? Math.round((pCs / durationMin) * 10) / 10 : 0,
-                gold_earned: p.goldEarned || 0,
-                damage_share_pct: Math.round((pDamage / teamDamageTotal) * 1000) / 10,
-                vision_score: p.visionScore || 0,
-                is_user: p.puuid === puuid,
-                is_player: p.puuid === puuid,
-              };
-            });
+            const teamDamageTotal =
+              (mData.info.participants || [])
+                .filter((p: any) => p.teamId === participant.teamId)
+                .reduce((sum: number, p: any) => sum + (p.totalDamageDealtToChampions || 0), 0) || 1;
+            const enemyDamageTotal =
+              (mData.info.participants || [])
+                .filter((p: any) => p.teamId !== participant.teamId)
+                .reduce((sum: number, p: any) => sum + (p.totalDamageDealtToChampions || 0), 0) || 1;
 
-          const enemyTeam = (mData.info.participants || [])
-            .filter((p: any) => p.teamId !== participant.teamId)
-            .map((p: any) => {
-              const pCs = (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0);
-              const pDamage = p.totalDamageDealtToChampions || 0;
-              const pName = p.riotIdGameName ? `${p.riotIdGameName}#${p.riotIdTagline || ""}` : (p.summonerName || p.championName || "Summoner");
-              return {
-                champion_name: p.championName || "Unknown",
-                role: p.teamPosition || "Unknown",
-                summoner_name: pName,
-                kills: p.kills || 0,
-                deaths: p.deaths || 0,
-                assists: p.assists || 0,
-                damage_dealt: pDamage,
-                cs: pCs,
-                cs_per_min: durationMin > 0 ? Math.round((pCs / durationMin) * 10) / 10 : 0,
-                gold_earned: p.goldEarned || 0,
-                damage_share_pct: Math.round((pDamage / enemyDamageTotal) * 1000) / 10,
-                vision_score: p.visionScore || 0,
-                is_user: false,
-                is_player: false,
-              };
-            });
+            const alliedTeam = (mData.info.participants || [])
+              .filter((p: any) => p.teamId === participant.teamId)
+              .map((p: any) => {
+                const pCs = (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0);
+                const pDamage = p.totalDamageDealtToChampions || 0;
+                const pName = p.riotIdGameName
+                  ? `${p.riotIdGameName}#${p.riotIdTagline || ""}`
+                  : p.summonerName || p.championName || "Summoner";
+                return {
+                  champion_name: p.championName || "Unknown",
+                  role: p.teamPosition || "Unknown",
+                  summoner_name: pName,
+                  kills: p.kills || 0,
+                  deaths: p.deaths || 0,
+                  assists: p.assists || 0,
+                  damage_dealt: pDamage,
+                  cs: pCs,
+                  cs_per_min: durationMin > 0 ? Math.round((pCs / durationMin) * 10) / 10 : 0,
+                  gold_earned: p.goldEarned || 0,
+                  damage_share_pct: Math.round((pDamage / teamDamageTotal) * 1000) / 10,
+                  vision_score: p.visionScore || 0,
+                  is_user: p.puuid === puuid,
+                  is_player: p.puuid === puuid,
+                };
+              });
 
-          const queueId = Number(mData.info.queueId) || 0;
-          const queueName = resolveQueueName(queueId);
-          const gameCreation = Number(mData.info.gameCreation) || Date.now();
+            const enemyTeam = (mData.info.participants || [])
+              .filter((p: any) => p.teamId !== participant.teamId)
+              .map((p: any) => {
+                const pCs = (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0);
+                const pDamage = p.totalDamageDealtToChampions || 0;
+                const pName = p.riotIdGameName
+                  ? `${p.riotIdGameName}#${p.riotIdTagline || ""}`
+                  : p.summonerName || p.championName || "Summoner";
+                return {
+                  champion_name: p.championName || "Unknown",
+                  role: p.teamPosition || "Unknown",
+                  summoner_name: pName,
+                  kills: p.kills || 0,
+                  deaths: p.deaths || 0,
+                  assists: p.assists || 0,
+                  damage_dealt: pDamage,
+                  cs: pCs,
+                  cs_per_min: durationMin > 0 ? Math.round((pCs / durationMin) * 10) / 10 : 0,
+                  gold_earned: p.goldEarned || 0,
+                  damage_share_pct: Math.round((pDamage / enemyDamageTotal) * 1000) / 10,
+                  vision_score: p.visionScore || 0,
+                  is_user: false,
+                  is_player: false,
+                };
+              });
 
-          const record = {
-            match_id: matchId,
-            puuid,
-            riot_id,
-            region,
-            game_creation: gameCreation,
-            game_duration_mins: durationMins,
-            queue_id: queueId,
-            queue_name: queueName,
-            champion_name: champName,
-            role,
-            win: Boolean(participant.win),
-            kills: participant.kills || 0,
-            deaths: participant.deaths || 0,
-            assists: participant.assists || 0,
-            cs: totalCs,
-            cs_per_min: csPerMin,
-            gold_diff_15: goldDiff15,
-            damage_dealt: participant.totalDamageDealtToChampions || 0,
-            vision_score: participant.visionScore || 0,
-            items: JSON.stringify(items),
-            lane_opponent_champion: laneOpponentChampion,
-            allied_team: JSON.stringify(alliedTeam),
-            enemy_team: JSON.stringify(enemyTeam),
-          };
+            const queueId = Number(mData.info.queueId) || 0;
+            const queueName = resolveQueueName(queueId);
+            const gameCreation = Number(mData.info.gameCreation) || Date.now();
 
-          parsedNewMatches.push(record);
-
-          // Persist to Postgres
-          if (dbClient) {
-            try {
-              await dbClient.queryArray(
-                `INSERT INTO public.player_matches (
-                  match_id, puuid, riot_id, region, game_creation, game_duration_mins,
-                  queue_id, queue_name, champion_name, role, win, kills, deaths, assists,
-                  cs, cs_per_min, gold_diff_15, damage_dealt, vision_score, items,
-                  lane_opponent_champion, allied_team, enemy_team
-                ) VALUES (
-                  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
-                ) ON CONFLICT (match_id) DO NOTHING`,
-                [
-                  record.match_id,
-                  record.puuid,
-                  record.riot_id,
-                  record.region,
-                  record.game_creation,
-                  record.game_duration_mins,
-                  record.queue_id,
-                  record.queue_name,
-                  record.champion_name,
-                  record.role,
-                  record.win,
-                  record.kills,
-                  record.deaths,
-                  record.assists,
-                  record.cs,
-                  record.cs_per_min,
-                  record.gold_diff_15,
-                  record.damage_dealt,
-                  record.vision_score,
-                  record.items,
-                  record.lane_opponent_champion,
-                  record.allied_team,
-                  record.enemy_team,
-                ]
-              );
-            } catch (insErr) {
-              console.warn("Failed inserting match to Postgres:", insErr);
-            }
+            return {
+              match_id: matchId,
+              puuid,
+              riot_id,
+              region,
+              game_creation: gameCreation,
+              game_duration_mins: durationMins,
+              queue_id: queueId,
+              queue_name: queueName,
+              champion_name: champName,
+              role,
+              win: Boolean(participant.win),
+              kills: participant.kills || 0,
+              deaths: participant.deaths || 0,
+              assists: participant.assists || 0,
+              cs: totalCs,
+              cs_per_min: csPerMin,
+              gold_diff_15: goldDiff15,
+              damage_dealt: participant.totalDamageDealtToChampions || 0,
+              vision_score: participant.visionScore || 0,
+              items: items,
+              lane_opponent_champion: laneOpponentChampion,
+              allied_team: alliedTeam,
+              enemy_team: enemyTeam,
+            };
+          } catch (e) {
+            console.warn("Match parse failed for", matchId, e);
+            return null;
           }
-        } catch (e) {
-          console.warn("Failed to parse match", matchId, e);
+        });
+
+        const chunkResults = await Promise.all(chunkPromises);
+        for (const item of chunkResults) {
+          if (item) parsedNewMatches.push(item);
+        }
+      }
+
+      // Batch persist newly discovered matches to Supabase PostgreSQL
+      if (parsedNewMatches.length > 0) {
+        newMatchesCount = parsedNewMatches.length;
+        const { error: upsertErr } = await supabase
+          .from("player_matches")
+          .upsert(parsedNewMatches, { onConflict: "match_id" });
+        if (upsertErr) {
+          console.warn("Supabase upsert error:", upsertErr);
         }
       }
     }
 
-    // 3. Retrieve Authentic Matches from Postgres or Fallback In-Memory
-    let rawMatches: any[] = [];
-    if (dbClient) {
-      try {
-        const queryRes = await dbClient.queryObject<any>(
-          `SELECT match_id, puuid, riot_id, region, game_creation, game_duration_mins,
-                  queue_id, queue_name, champion_name, role, win, kills, deaths, assists,
-                  cs, cs_per_min, gold_diff_15, damage_dealt, vision_score, items,
-                  lane_opponent_champion, allied_team, enemy_team
-           FROM public.player_matches
-           WHERE puuid = $1
-           ORDER BY game_creation DESC
-           LIMIT $2 OFFSET $3`,
-          [puuid, Math.max(20, safeCount), safeStart]
-        );
-        rawMatches = queryRes.rows;
-      } catch (e) {
-        console.warn("Failed querying matches from Postgres:", e);
-      }
+    // 3. Query Authentic Matches from Supabase
+    const { data: dbMatches, count: totalCount, error: queryErr } = await supabase
+      .from("player_matches")
+      .select("*", { count: "exact" })
+      .eq("puuid", puuid)
+      .order("game_creation", { ascending: false })
+      .range(safeStart, safeStart + safeCount - 1);
+
+    if (queryErr) {
+      console.warn("Supabase query error:", queryErr);
     }
 
-    if (rawMatches.length === 0) {
-      rawMatches = parsedNewMatches;
-    }
+    const rawMatches = dbMatches && dbMatches.length > 0 ? dbMatches : parsedNewMatches;
 
-    // Transform into AdoptedMatch format with queue & timestamp labels
+    // Transform into AdoptedMatch format for Leptos client
     const adoptedMatches = rawMatches.map((m: any) => {
       const champName = m.champion_name;
       const recIdx = recommended_champions.findIndex(
@@ -537,26 +492,38 @@ serve(async (req: Request) => {
       };
     });
 
-    // 4. Query Full Lifetime Champion Masteries (from Day 1 debut to latest game)
-    const masteryUrl = `https://${platform}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}`;
-    const masteryRes = await fetch(masteryUrl, {
-      headers: { "X-Riot-Token": riotApiKey },
-    });
-
+    // 4. Query Champion Masteries
     let topMasteries: any[] = [];
-    if (masteryRes.ok) {
-      const allMasteries = await masteryRes.json();
-      topMasteries = Array.isArray(allMasteries) ? allMasteries.slice(0, 25) : [];
+    try {
+      const masteryUrl = `https://${platform}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}`;
+      const masteryRes = await fetchWithTimeout(masteryUrl, {
+        headers: { "X-Riot-Token": riotApiKey },
+      }, 4000);
+      if (masteryRes.ok) {
+        const allMasteries = await masteryRes.json();
+        topMasteries = Array.isArray(allMasteries) ? allMasteries.slice(0, 25) : [];
+      }
+    } catch (_) {
+      // Non-fatal
     }
+
+    const responseStatus = apiKeyExpired ? "api_key_expired" : "success";
+    const statusMsg = apiKeyExpired
+      ? "Riot Developer API Key expired (24h limit) or invalid. Enter a fresh RGAPI key to ingest latest games."
+      : null;
 
     return new Response(
       JSON.stringify({
-        status: "success",
+        status: responseStatus,
         data_source: "live_postgres",
+        new_matches_synced: newMatchesCount,
+        total_matches_in_db: totalCount || rawMatches.length,
+        riot_api_status: apiKeyExpired ? "key_expired" : "connected",
+        error: statusMsg,
         summoner: {
           puuid,
-          gameName: accountData.gameName,
-          tagLine: accountData.tagLine,
+          gameName: accountData?.gameName || gameName,
+          tagLine: accountData?.tagLine || tagLine,
           region,
           top_masteries: topMasteries.map((m: any) => ({
             championId: m.championId,
@@ -573,13 +540,5 @@ serve(async (req: Request) => {
       JSON.stringify({ error: (error as Error).message }),
       { status: 500, headers: corsHeaders }
     );
-  } finally {
-    if (dbClient) {
-      try {
-        await dbClient.end();
-      } catch (_) {
-        // Ignore close error
-      }
-    }
   }
 });

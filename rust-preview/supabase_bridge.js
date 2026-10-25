@@ -278,10 +278,14 @@
         }
       } catch (_) {}
 
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), 12000);
+
       try {
         const edgeFunctionUrl = `${SUPABASE_URL}/functions/v1/riot-proxy`;
         const res = await fetch(edgeFunctionUrl, {
           method: "POST",
+          signal: abortController.signal,
           headers: {
             "Content-Type": "application/json",
             "apikey": SUPABASE_ANON_KEY,
@@ -296,11 +300,20 @@
             count: typeof countLimit === "number" ? countLimit : 20
           })
         });
+        clearTimeout(timeoutId);
 
         if (!res.ok) {
           const errText = await res.text();
           console.warn("Riot proxy returned non-200:", res.status, errText);
-          window.dispatchEvent(new CustomEvent("riot-telemetry-synced", { detail: null }));
+          window.dispatchEvent(new CustomEvent("riot-telemetry-synced", {
+            detail: {
+              status: "error",
+              error: `Sync proxy returned HTTP ${res.status}.`,
+              new_matches_synced: 0,
+              riot_api_status: "error",
+              matches: []
+            }
+          }));
         } else {
           const telemetryData = await res.json();
           try {
@@ -349,8 +362,17 @@
           return telemetryData;
         }
       } catch (err) {
+        clearTimeout(timeoutId);
         console.warn("fetchRiotTelemetry exception:", err);
-        window.dispatchEvent(new CustomEvent("riot-telemetry-synced", { detail: null }));
+        window.dispatchEvent(new CustomEvent("riot-telemetry-synced", {
+          detail: {
+            status: "error",
+            error: err && err.name === "AbortError" ? "Sync request timed out after 12s." : "Network error contacting sync proxy.",
+            new_matches_synced: 0,
+            riot_api_status: "network_error",
+            matches: []
+          }
+        }));
       }
 
       return null;
@@ -370,15 +392,18 @@
         return; // Tab is inactive/hidden, don't waste bandwidth
       }
       const now = Date.now();
-      const last = window.SupabaseBridge.getLastSyncTime();
+      const last = (window.SupabaseBridge || window.supabaseAuth).getLastSyncTime();
       const minInterval = force ? 10000 : 45000; // 45s cooldown unless force (10s)
       if (now - last < minInterval) {
         return;
       }
       console.log("[Auto-Sync] Tab active or periodic tick — checking for newly completed games...");
-      return window.SupabaseBridge.fetchRiotTelemetry(null, null, null, 0, 5);
+      return (window.SupabaseBridge || window.supabaseAuth).fetchRiotTelemetry(null, null, null, 0, 5);
     }
   };
+
+  // Provide explicit aliases so both names are permanently available
+  window.SupabaseBridge = window.supabaseAuth;
 
   // OP.GG-style auto-update listeners:
   // Detects when the player finishes their 30-min match and tabs back into the recommender

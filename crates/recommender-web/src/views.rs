@@ -105,13 +105,42 @@ pub fn App() -> impl IntoView {
 
     let riot_listener = window_event_listener(
         leptos::ev::Custom::new("riot-telemetry-synced"),
-        move |_: web_sys::CustomEvent| {
-            if let Some(matches) = storage::load_cached_riot_matches() {
-                let src = storage::load_cached_riot_data_source();
-                state.update(|c| c.set_live_matches(Some(matches), src));
-            } else {
-                state.update(|c| c.set_syncing_riot(false));
+        move |ev: web_sys::CustomEvent| {
+            use wasm_bindgen::JsCast;
+            let detail_val = ev.detail();
+            let mut feedback_msg: Option<String> = None;
+            let mut status_ok = true;
+
+            if let Some(detail_obj) = detail_val.dyn_ref::<js_sys::Object>() {
+                let status = js_sys::Reflect::get(detail_obj, &wasm_bindgen::JsValue::from_str("status"))
+                    .ok().and_then(|v| v.as_string());
+                let err = js_sys::Reflect::get(detail_obj, &wasm_bindgen::JsValue::from_str("error"))
+                    .ok().and_then(|v| v.as_string());
+                let new_count = js_sys::Reflect::get(detail_obj, &wasm_bindgen::JsValue::from_str("new_matches_synced"))
+                    .ok().and_then(|v| v.as_f64()).unwrap_or(0.0) as usize;
+
+                if status.as_deref() == Some("api_key_expired") {
+                    feedback_msg = Some("⚠ Riot Developer API Key expired (24h limit). Please enter a fresh RGAPI key below to ingest today's matches.".to_string());
+                    status_ok = false;
+                } else if status.as_deref() == Some("error") {
+                    feedback_msg = err.or_else(|| Some("⚠ Could not reach sync proxy. Check your connection or try again.".to_string()));
+                    status_ok = false;
+                } else if new_count > 0 {
+                    feedback_msg = Some(format!("✓ Successfully ingested {} new matches from today into Supabase!", new_count));
+                } else {
+                    feedback_msg = Some("✓ Database is up to date (0 new games found on Riot servers).".to_string());
+                }
             }
+
+            let matches_opt = storage::load_cached_riot_matches();
+            let src = storage::load_cached_riot_data_source();
+            state.update(|c| {
+                if let Some(matches) = matches_opt {
+                    c.set_live_matches(Some(matches), src);
+                }
+                c.set_sync_feedback(feedback_msg, status_ok);
+                c.last_sync_timestamp = Some(js_sys::Date::now() as u64);
+            });
         },
     );
     on_cleanup(move || riot_listener.remove());

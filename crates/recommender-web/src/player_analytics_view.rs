@@ -315,11 +315,17 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
         selected_tracked_champion.set(champ);
     };
 
+    let show_quick_key_drawer = RwSignal::new(false);
+    let quick_key_input = RwSignal::new(crate::storage::get_local_storage_item("lol_riot_api_key").unwrap_or_default());
+
     let trigger_riot_sync = move |champ_opt: Option<String>| {
         if let Some(ref c) = champ_opt {
             refreshing_champion.set(Some(c.clone()));
         }
-        state.update(|c| c.set_syncing_riot(true));
+        state.update(|c| {
+            c.set_syncing_riot(true);
+            c.sync_feedback_message = None;
+        });
         let rep = report();
         let r_id = rep.riot_id.unwrap_or_else(|| "SHENTRICK#SHEN".into());
         let reg = rep.region.unwrap_or_else(|| "ME".into());
@@ -418,57 +424,150 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                                 </div>
                             </div>
 
-                            // Riot Account Controls
-                            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+                            // OP.GG-Style Interactive Update Database & Sync Controls
+                            <div style="display: flex; gap: 0.65rem; flex-wrap: wrap; align-items: center;">
                                 <button
                                     type="button"
-                                    style="background: rgba(10, 200, 185, 0.2); border: 1px solid var(--cyan); color: #fff; padding: 0.55rem 1.05rem; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; font-family: monospace; font-weight: bold; display: inline-flex; align-items: center; gap: 7px; transition: all 0.2s ease;"
+                                    style="background: linear-gradient(135deg, rgba(10, 200, 185, 0.35), rgba(200, 170, 110, 0.25)); border: 1px solid var(--cyan); color: #fff; padding: 0.55rem 1.15rem; cursor: pointer; font-size: 0.82rem; text-transform: uppercase; font-family: monospace; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease; box-shadow: 0 0 12px rgba(10, 200, 185, 0.25);"
                                     disabled=move || state.with(|c| c.is_syncing_riot)
                                     on:click=move |_| trigger_riot_sync(None)
                                 >
                                     {view_lol_icon("nexus-pulse")}
                                     <span>
                                         {move || if state.with(|c| c.is_syncing_riot) {
-                                            "Syncing Riot API..."
+                                            "Ingesting from Riot API..."
                                         } else {
-                                            "Sync Live Games"
+                                            "⚡ Update Database"
                                         }}
                                     </span>
                                 </button>
+
+                                <button
+                                    type="button"
+                                    style="background: rgba(9, 20, 40, 0.7); border: 1px solid rgba(200, 170, 110, 0.4); color: var(--gold); padding: 0.55rem 0.85rem; cursor: pointer; font-size: 0.76rem; text-transform: uppercase; font-family: monospace; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;"
+                                    on:click=move |_| show_quick_key_drawer.update(|v| *v = !*v)
+                                >
+                                    {view_lol_icon("hex-compass")}
+                                    <span>{move || if show_quick_key_drawer.get() { "Hide API Key Drawer" } else { "✦ Quick Riot API Key" }}</span>
+                                </button>
+
                                 {move || {
                                     let ts = crate::storage::get_last_sync_timestamp();
                                     let label = crate::storage::format_last_sync_label(ts);
                                     let is_syncing = state.with(|c| c.is_syncing_riot);
-                                    view! {
-                                        <span style="font-family: monospace; font-size: 0.76rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: 6px; padding: 0.4rem 0.65rem; background: rgba(9, 20, 40, 0.8); border: 1px solid rgba(200, 170, 110, 0.25);">
-                                            <span style=format!("width: 7px; height: 7px; border-radius: 50%; display: inline-block; background: {};", if is_syncing { "var(--cyan)" } else { "#10b981" })></span>
-                                            <span>
-                                                {if is_syncing {
-                                                    "Checking live games...".to_string()
-                                                } else {
-                                                    format!("Updated {} · Auto-Sync on Tab Focus", label)
-                                                }}
-                                            </span>
-                                        </span>
-                                    }
-                                }}
-                                {move || {
-                                    let src = state.with(|c| c.riot_data_source.clone());
-                                    let is_live = src.as_deref().map(|s| s.starts_with("live")).unwrap_or(false);
-                                    let (bg, border, col, icon, text) = if is_live {
-                                        ("rgba(16, 185, 129, 0.18)", "#10b981", "#10b981", "diamond", "LIVE MATCH-V5 TELEMETRY ACTIVE")
+                                    let is_ok = state.with(|c| c.riot_api_status_ok);
+                                    let status_color = if is_syncing { "var(--cyan)" } else if is_ok { "#10b981" } else { "#f59e0b" };
+                                    let status_label = if is_syncing {
+                                        "Ingesting live matches...".to_string()
+                                    } else if is_ok {
+                                        format!("Updated {} · Live Synced", label)
                                     } else {
-                                        ("rgba(200, 170, 110, 0.12)", "rgba(200, 170, 110, 0.4)", "var(--gold)", "hex-compass", "VERIFIED TELEMETRY STANDARDS")
+                                        "Riot Key Expired (24h limit)".to_string()
                                     };
                                     view! {
-                                        <span style=format!("background: {}; border: 1px solid {}; color: {}; font-size: 0.72rem; padding: 0.45rem 0.75rem; text-transform: uppercase; font-family: monospace; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.04em;", bg, border, col)>
-                                            {view_lol_icon(icon)}
-                                            <span>{text}</span>
+                                        <span style="font-family: monospace; font-size: 0.76rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: 6px; padding: 0.4rem 0.65rem; background: rgba(9, 20, 40, 0.8); border: 1px solid rgba(200, 170, 110, 0.25);">
+                                            <span style=format!("width: 7px; height: 7px; border-radius: 50%; display: inline-block; background: {};", status_color)></span>
+                                            <span>{status_label}</span>
                                         </span>
                                     }
                                 }}
                             </div>
                         </div>
+
+                        // Inline Quick Riot Developer Key Drawer (Collapsible)
+                        {move || {
+                            if show_quick_key_drawer.get() {
+                                view! {
+                                    <div style="background: rgba(1, 10, 19, 0.95); border: 1px solid var(--cyan); padding: 1rem 1.25rem; margin-top: 1rem; display: flex; flex-direction: column; gap: 0.65rem; box-shadow: inset 0 0 16px rgba(10, 200, 185, 0.15);">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                                            <div style="display: flex; align-items: center; gap: 0.45rem;">
+                                                <span style="color: var(--cyan); font-weight: bold; font-family: monospace; font-size: 0.85rem;">"✦ Personal 24-Hour Riot Developer Key"</span>
+                                                <span style="color: var(--text-muted); font-size: 0.74rem;">"(Bypasses rate limits & ingests today's fresh matches)"</span>
+                                            </div>
+                                            <a
+                                                href="https://developer.riotgames.com"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style="color: var(--gold); font-family: monospace; font-size: 0.74rem; text-decoration: underline;"
+                                            >
+                                                "Get free key from developer.riotgames.com ↗"
+                                            </a>
+                                        </div>
+                                        <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
+                                            <input
+                                                type="password"
+                                                placeholder="RGAPI-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                                                style="flex: 1; min-width: 280px; background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.4); color: #fff; padding: 0.5rem 0.75rem; font-family: monospace; font-size: 0.82rem;"
+                                                prop:value=move || quick_key_input.get()
+                                                on:input=move |ev| quick_key_input.set(event_target_value(&ev))
+                                            />
+                                            <button
+                                                type="button"
+                                                style="background: var(--cyan); border: none; color: #010a13; padding: 0.5rem 1.2rem; cursor: pointer; font-family: monospace; font-size: 0.82rem; font-weight: bold; text-transform: uppercase;"
+                                                on:click=move |_| {
+                                                    let key = quick_key_input.get().trim().to_string();
+                                                    if !key.is_empty() {
+                                                        crate::storage::set_local_storage_item("lol_riot_api_key", &key);
+                                                    } else {
+                                                        crate::storage::remove_local_storage_item("lol_riot_api_key");
+                                                    }
+                                                    show_quick_key_drawer.set(false);
+                                                    trigger_riot_sync(None);
+                                                }
+                                            >
+                                                "Save & Ingest Latest Games"
+                                            </button>
+                                        </div>
+                                    </div>
+                                }.into_any()
+                            } else {
+                                view! { <span></span> }.into_any()
+                            }
+                        }}
+
+                        // Dynamic Sync Feedback Toast / Banner
+                        {move || {
+                            if let Some(msg) = state.with(|c| c.sync_feedback_message.clone()) {
+                                let is_ok = state.with(|c| c.riot_api_status_ok);
+                                let (bg, border, col, icon) = if is_ok {
+                                    ("rgba(16, 185, 129, 0.14)", "1px solid #10b981", "#10b981", "diamond")
+                                } else {
+                                    ("rgba(245, 158, 11, 0.14)", "1px solid #f59e0b", "#f59e0b", "hex-compass")
+                                };
+                                view! {
+                                    <div style=format!("background: {}; border: {}; color: {}; padding: 0.75rem 1rem; margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; font-family: monospace; font-size: 0.82rem;", bg, border, col)>
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            {view_lol_icon(icon)}
+                                            <span>{msg}</span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 0.65rem;">
+                                            {if !is_ok {
+                                                view! {
+                                                    <button
+                                                        type="button"
+                                                        style="background: transparent; border: 1px solid currentColor; color: inherit; padding: 0.25rem 0.55rem; cursor: pointer; font-size: 0.74rem; text-transform: uppercase;"
+                                                        on:click=move |_| show_quick_key_drawer.set(true)
+                                                    >
+                                                        "Enter Key"
+                                                    </button>
+                                                }.into_any()
+                                            } else {
+                                                view! { <span></span> }.into_any()
+                                            }}
+                                            <button
+                                                type="button"
+                                                style="background: transparent; border: none; color: inherit; cursor: pointer; font-size: 1rem; padding: 0 0.25rem; line-height: 1;"
+                                                on:click=move |_| state.update(|c| c.sync_feedback_message = None)
+                                            >
+                                                "✕"
+                                            </button>
+                                        </div>
+                                    </div>
+                                }.into_any()
+                            } else {
+                                view! { <span></span> }.into_any()
+                            }
+                        }}
 
                         // 5-Page Sub-Navigation Bar with Custom League of Legends Hextech SVG Crests
                         <div class="analytics-subnav-bar" style="display: flex; gap: 0.65rem; flex-wrap: wrap; padding-top: 1.1rem; align-items: center;">

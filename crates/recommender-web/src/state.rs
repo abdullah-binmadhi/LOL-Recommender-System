@@ -165,6 +165,10 @@ pub struct AppState {
     pub demo_telemetry: bool,
     pub live_player_matches: Option<Vec<recommender_core::player_analytics::AdoptedMatch>>,
     pub is_syncing_riot: bool,
+    pub sync_feedback_message: Option<String>,
+    #[allow(dead_code)]
+    pub last_sync_timestamp: Option<u64>,
+    pub riot_api_status_ok: bool,
     pub riot_data_source: Option<String>,
     #[allow(dead_code)]
     pub analytics_active_tab: String,
@@ -204,6 +208,9 @@ impl Default for AppState {
             demo_telemetry: false,
             live_player_matches: None,
             is_syncing_riot: false,
+            sync_feedback_message: None,
+            last_sync_timestamp: None,
+            riot_api_status_ok: true,
             riot_data_source: None,
             analytics_active_tab: "overview".to_string(),
             analytics_selected_match_id: None,
@@ -321,6 +328,13 @@ impl AppState {
     #[allow(dead_code)]
     pub fn set_syncing_riot(&mut self, syncing: bool) {
         self.is_syncing_riot = syncing;
+    }
+
+    #[allow(dead_code)]
+    pub fn set_sync_feedback(&mut self, msg: Option<String>, status_ok: bool) {
+        self.sync_feedback_message = msg;
+        self.riot_api_status_ok = status_ok;
+        self.is_syncing_riot = false;
     }
 
     #[allow(dead_code)]
