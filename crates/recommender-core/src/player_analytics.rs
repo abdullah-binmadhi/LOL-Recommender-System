@@ -2440,6 +2440,9 @@ impl AdoptedMatch {
 
         let dur = deep.duration_mins.max(20);
         let kda = self.kda_ratio();
+        let norm_role = normalize_role_name(&self.role);
+        let is_support = norm_role == "Support";
+        let is_jungle = norm_role == "Jungle";
         let is_tank = self.champion_name.eq_ignore_ascii_case("Shen")
             || self.champion_name.eq_ignore_ascii_case("Ornn")
             || self.champion_name.eq_ignore_ascii_case("Malphite")
@@ -2447,14 +2450,29 @@ impl AdoptedMatch {
             || self.champion_name.eq_ignore_ascii_case("Sion")
             || self.champion_name.eq_ignore_ascii_case("Maokai")
             || self.champion_name.eq_ignore_ascii_case("Tahm Kench")
-            || self.champion_name.eq_ignore_ascii_case("Poppy");
+            || self.champion_name.eq_ignore_ascii_case("Poppy")
+            || self.champion_name.eq_ignore_ascii_case("Braum")
+            || self.champion_name.eq_ignore_ascii_case("Nautilus")
+            || self.champion_name.eq_ignore_ascii_case("Leona")
+            || self.champion_name.eq_ignore_ascii_case("Alistar")
+            || self.champion_name.eq_ignore_ascii_case("Rell")
+            || self.champion_name.eq_ignore_ascii_case("Taric");
 
         // OP/AI Score (0.0 - 10.0) & Execution Rank Tier Equivalent for this single game
+        let role_farming_or_vision_factor = if is_support {
+            let vis_m = deep.user_vision_score as f64 / dur as f64;
+            ((vis_m - 1.6) * 0.45).clamp(-0.5, 0.8)
+        } else if is_jungle {
+            ((self.cs_per_min - 5.5) * 0.35).clamp(-0.5, 0.8)
+        } else {
+            ((self.cs_per_min - 6.5) * 0.35).clamp(-0.5, 0.8)
+        };
+
         let raw_ai_score = 5.4
             + (if self.win { 1.4 } else { -0.6 })
             + (kda.min(8.0) * 0.28)
             + ((self.gold_diff_15 as f64 / 1200.0).clamp(-1.0, 1.2) * 0.85)
-            + (((self.cs_per_min - 6.5) * 0.35).clamp(-0.5, 0.8));
+            + role_farming_or_vision_factor;
         let ai_op_score = (raw_ai_score.clamp(4.2, 9.9) * 10.0).round() / 10.0;
 
         let (lobby_placement, execution_rank_tier) = if ai_op_score >= 9.2 {
@@ -2571,7 +2589,13 @@ impl AdoptedMatch {
                 continue;
             }
             let frac = m as f64 / 30.0;
-            let bench_gold = 500 + (m * 375) + (if m >= 15 { (m - 15) * 65 } else { 0 });
+            let bench_gold = if is_support {
+                500 + (m * 215) + (if m >= 15 { (m - 15) * 45 } else { 0 })
+            } else if is_jungle {
+                500 + (m * 340) + (if m >= 15 { (m - 15) * 55 } else { 0 })
+            } else {
+                500 + (m * 375) + (if m >= 15 { (m - 15) * 65 } else { 0 })
+            };
             let gd_at_m = if m <= 10 {
                 (gd_at_10 as f64 * (m as f64 / 10.0)).round() as i32
             } else if m <= 15 {
@@ -2613,7 +2637,15 @@ impl AdoptedMatch {
                 0.96
             };
             let u_csm = ((self.cs_per_min * wave_eff) * 10.0).round() / 10.0;
-            let b_csm = if is_tank { 7.3 } else { 8.1 };
+            let b_csm = if is_support {
+                1.3
+            } else if is_jungle {
+                5.8
+            } else if is_tank {
+                7.3
+            } else {
+                8.1
+            };
             let u_cs = (u_csm * m as f64).round() as u32;
             let o_cs = ((u_cs as i32) - ((csd_at_15 as f64 * (m as f64 / 15.0)).round() as i32))
                 .max(0) as u32;
@@ -2631,7 +2663,14 @@ impl AdoptedMatch {
 
         // 8-Axis Single-Game Performance Radar (0-100): (Axis Label, This Game, Your Career Avg, Master+ Benchmark)
         let fight_score = (62.0 + (kda.min(7.0) * 4.8) + (if self.win { 6.0 } else { -4.0 })).clamp(38.0, 99.0);
-        let farm_score = ((self.cs_per_min / 8.8) * 100.0).clamp(42.0, 98.0);
+        let farm_score = if is_support {
+            // Evaluates Support Quest & Relic pacing against 1.25 CS/m benchmark
+            ((self.cs_per_min / 1.25).min(1.4) * 82.0 + (vision_per_min * 6.5)).clamp(50.0, 98.0)
+        } else if is_jungle {
+            ((self.cs_per_min / 5.8) * 88.0).clamp(42.0, 98.0)
+        } else {
+            ((self.cs_per_min / 8.8) * 100.0).clamp(42.0, 98.0)
+        };
         let lane_score = (65.0 + (gd_at_15 as f64 / 65.0)).clamp(35.0, 99.0);
         let surv_score = (96.0 - (self.deaths as f64 * 8.2)).clamp(36.0, 99.0);
         let obj_score = (64.0 + (turret_plates as f64 * 5.5) + (if self.win { 12.0 } else { -6.0 })).clamp(40.0, 98.0);
@@ -2639,10 +2678,30 @@ impl AdoptedMatch {
         let gold_eff_score = (60.0 + (damage_per_gold * 18.0)).clamp(45.0, 97.0);
         let macro_roam_score = (58.0 + (deep.user_kill_participation_pct * 0.48)).clamp(44.0, 99.0);
 
+        let fight_axis_label = if is_support {
+            "Fighting & Carry Peel".to_string()
+        } else {
+            "Fighting & Trades".to_string()
+        };
+
+        let farm_axis_label = if is_support {
+            "Quest & Support Economy".to_string()
+        } else if is_jungle {
+            "Jungle Camp Clear & Tempo".to_string()
+        } else {
+            "Farming & Wave CS".to_string()
+        };
+
+        let lane_axis_label = if is_support {
+            "Bot 2v2 Laning @15m".to_string()
+        } else {
+            "Laning @15m".to_string()
+        };
+
         let radar_axes = vec![
-            ("Fighting & Trades".to_string(), (fight_score * 10.0).round() / 10.0, 78.5, 76.0),
-            ("Farming & Wave CS".to_string(), (farm_score * 10.0).round() / 10.0, 79.2, 81.0),
-            ("Laning @15m".to_string(), (lane_score * 10.0).round() / 10.0, 82.0, 75.0),
+            (fight_axis_label, (fight_score * 10.0).round() / 10.0, 78.5, 76.0),
+            (farm_axis_label, (farm_score * 10.0).round() / 10.0, 79.2, 81.0),
+            (lane_axis_label, (lane_score * 10.0).round() / 10.0, 82.0, 75.0),
             ("Survivability & Tanking".to_string(), (surv_score * 10.0).round() / 10.0, 86.4, 78.0),
             ("Objective Pressure".to_string(), (obj_score * 10.0).round() / 10.0, 80.5, 77.0),
             ("Vision & Map Control".to_string(), (vis_score * 10.0).round() / 10.0, 77.8, 74.0),
@@ -2658,6 +2717,81 @@ impl AdoptedMatch {
         };
         let role_percentile = ((fight_score + farm_score + lane_score + surv_score + macro_roam_score) / 5.0)
             .clamp(42.0, 99.4);
+
+        let gbm_plain_english = if is_support {
+            if gd_at_15 >= 0 {
+                format!(
+                    "Your minute-by-minute Support Quest progression and vision line on {} outpaced {} ({:+}g @ 10m → {:+}g @ 15m), completing World Atlas on curve and securing river vision ahead of neutral objectives.",
+                    self.champion_name, deep.lane_opponent_champion, gd_at_10, gd_at_15
+                )
+            } else {
+                format!(
+                    "Your support quest generation dipped behind {} ({:+}g @ 10m, {:+}g @ 15m), delaying World Atlas tier upgrades and forcing reactive vision face-checks around Dragon.",
+                    deep.lane_opponent_champion, gd_at_10, gd_at_15
+                )
+            }
+        } else if is_jungle {
+            if gd_at_15 >= 0 {
+                format!(
+                    "Your jungle camp clear efficiency and neutral monster pressure on {} outpaced {} ({:+}g @ 10m), securing early river scuttles and controlling cross-map trades.",
+                    self.champion_name, deep.lane_opponent_champion, gd_at_10
+                )
+            } else {
+                format!(
+                    "Conceded early scuttle and jungle quadrant pressure to {}, falling behind on camp respawn tempos.",
+                    deep.lane_opponent_champion
+                )
+            }
+        } else if gd_at_15 >= 0 {
+            format!(
+                "Your minute-by-minute gold and XP trajectory on {} consistently outpaced {} ({:+}g @ 10m → {:+}g @ 15m), meaning you controlled lane tempo and hit every item spike ahead of the lobby curve.",
+                self.champion_name, deep.lane_opponent_champion, gd_at_10, gd_at_15
+            )
+        } else {
+            format!(
+                "Your early frame trajectory dipped below {} ({:+}g @ 10m, {:+}g @ 15m), meaning you played from an item-component deficit until mid-game objective bounties stabilized your curve.",
+                deep.lane_opponent_champion, gd_at_10, gd_at_15
+            )
+        };
+
+        let gbm_key_alert = if is_support {
+            format!(
+                "QUEST & VISION SPIKE WINDOW: Completed World Atlas quest and unlocked 4 stealth wards on {} ({} total vision score). Maintain this by sweeping river 45s before Dragon.",
+                self.champion_name, deep.user_vision_score
+            )
+        } else if is_jungle {
+            format!(
+                "PRIMAL SMITE LEVERAGE: Converted early camp sequence into neutral monster pressure with {} damage dealt.",
+                deep.user_damage_dealt
+            )
+        } else if gd_at_15 >= 0 {
+            format!(
+                "HIGH-LEVERAGE SPIKE WINDOW: Your strongest frame acceleration occurred between 10m and 18m ({} turret plates + 1st core completion). Protect this window by never trading 1-for-1 when holding a bounty.",
+                turret_plates
+            )
+        } else {
+            format!(
+                "EARLY INCOME BOTTLENECK: Between 04:00 and 11:00 your gold/min dropped 14% below Master+ {} benchmark due to wave-state resets against {}.",
+                self.champion_name, deep.lane_opponent_champion
+            )
+        };
+
+        let gbm_improvement = if is_support {
+            format!(
+                "On {}, execute front-line melee/cannon minions at 02:15, 06:10, and 09:15 to hit the 1,000g World Atlas quest upgrade before 10:00, unlocking 4 rechargeable stealth wards.",
+                self.champion_name
+            )
+        } else if is_jungle {
+            format!(
+                "Path camps toward the lane with allied hard CC on {} to guarantee gank conversion or scuttle priority at 03:30.",
+                self.champion_name
+            )
+        } else {
+            format!(
+                "On {}, lock in a cannon-wave slow push at 09:30 and 13:00 to guarantee uncontested component recalls or 1–2 turret plates (+160g–320g) before rotating to river.",
+                self.champion_name
+            )
+        };
 
         let ml_models = vec![
             SingleGameMlModelValidation {
@@ -2679,32 +2813,9 @@ impl AdoptedMatch {
                 } else {
                     "TEMPO WARNING".to_string()
                 },
-                plain_english_meaning: if gd_at_15 >= 0 {
-                    format!(
-                        "Your minute-by-minute gold and XP trajectory on {} consistently outpaced {} ({:+}g @ 10m → {:+}g @ 15m), meaning you controlled lane tempo and hit every item spike ahead of the lobby curve.",
-                        self.champion_name, deep.lane_opponent_champion, gd_at_10, gd_at_15
-                    )
-                } else {
-                    format!(
-                        "Your early frame trajectory dipped below {} ({:+}g @ 10m, {:+}g @ 15m), meaning you played from an item-component deficit until mid-game objective bounties stabilized your curve.",
-                        deep.lane_opponent_champion, gd_at_10, gd_at_15
-                    )
-                },
-                key_alert_notification: if gd_at_15 >= 0 {
-                    format!(
-                        "HIGH-LEVERAGE SPIKE WINDOW: Your strongest frame acceleration occurred between 10m and 18m ({} turret plates + 1st core completion). Protect this window by never trading 1-for-1 when holding a bounty.",
-                        turret_plates
-                    )
-                } else {
-                    format!(
-                        "EARLY INCOME BOTTLENECK: Between 04:00 and 11:00 your gold/min dropped 14% below Master+ {} benchmark due to wave-state resets against {}.",
-                        self.champion_name, deep.lane_opponent_champion
-                    )
-                },
-                actionable_improvement: format!(
-                    "On {}, lock in a cannon-wave slow push at 09:30 and 13:00 to guarantee uncontested component recalls or 1–2 turret plates (+160g–320g) before rotating to river.",
-                    self.champion_name
-                ),
+                plain_english_meaning: gbm_plain_english,
+                key_alert_notification: gbm_key_alert,
+                actionable_improvement: gbm_improvement,
             },
             SingleGameMlModelValidation {
                 model_name: "L2 Logistic Win-Probability Added (WPA)".to_string(),
@@ -2770,16 +2881,19 @@ impl AdoptedMatch {
                     "Compared against thousands of Master+ {} {} games, your performance in this specific match outscored {:.1}% of players across Combat, Laning, Farming, Survivability, Vision, and Macro.",
                     self.champion_name, self.role, role_percentile
                 ),
-                key_alert_notification: if vision_per_min < 0.95 {
-                    format!(
-                        "AXIS BOTTLENECK DETECTED: While your Combat/Mitigation scored in the top tier, your Vision Control ({:.2} Vis/min, {} Control Wards) lagged behind the Master+ 1.05 Vis/min target.",
-                        vision_per_min, control_wards
-                    )
-                } else {
-                    format!(
-                        "ALL-AROUND DOMINANCE: Your 8-axis profile had zero structural weak spots ({:.0} DPM, {:.1}% KP, {:.2} Vis/min), matching {} tier execution.",
-                        dpm, deep.user_kill_participation_pct, vision_per_min, execution_rank_tier
-                    )
+                key_alert_notification: {
+                    let vis_bench = if is_support { 1.65 } else { 0.85 };
+                    if vision_per_min < vis_bench {
+                        format!(
+                            "AXIS BOTTLENECK DETECTED: While your Combat/Mitigation scored in the top tier, your Vision Control ({:.2} Vis/min, {} Control Wards) lagged behind the Master+ {:.2} Vis/min target.",
+                            vision_per_min, control_wards, vis_bench
+                        )
+                    } else {
+                        format!(
+                            "ALL-AROUND DOMINANCE: Your 8-axis profile had zero structural weak spots ({:.0} DPM, {:.1}% KP, {:.2} Vis/min), matching {} tier execution.",
+                            dpm, deep.user_kill_participation_pct, vision_per_min, execution_rank_tier
+                        )
+                    }
                 },
                 actionable_improvement: "To push your 8-axis percentile above 95%, purchase 1 Control Ward on every post-10m recall and sweep river pixel brush 50s before objective spawns.".to_string(),
             },
@@ -2912,743 +3026,184 @@ impl AdoptedMatch {
         // Single-Game SHAP Feature Attributions (What drove YOUR performance in THIS game)
         let shap_attributions = vec![
             SingleGameFeatureAttribution {
-                feature_name: format!("Early Lane Economy ({:+} GD@15 / {:+} CSD@15)", gd_at_15, csd_at_15),
+                feature_name: if is_support {
+                    format!("Bot 2v2 Prio & Quest Lead ({:+} GD@15)", gd_at_15)
+                } else {
+                    format!("Early Lane Economy ({:+} GD@15 / {:+} CSD@15)", gd_at_15, csd_at_15)
+                },
                 shap_impact_pct: if gd_at_15 >= 0 {
                     ((gd_at_15 as f64 / 95.0).clamp(4.2, 22.5) * 10.0).round() / 10.0
                 } else {
                     ((gd_at_15 as f64 / 85.0).clamp(-22.0, -4.5) * 10.0).round() / 10.0
                 },
                 explanation: if gd_at_15 >= 0 {
-                    format!("Out-traded {} early and secured {} turret plates before 14m.", deep.lane_opponent_champion, turret_plates)
+                    if is_support {
+                        format!("Controlled bot brush priority vs {}, securing {} turret plates and early quest acceleration.", deep.lane_opponent_champion, turret_plates)
+                    } else {
+                        format!("Out-traded {} early and secured {} turret plates before 14m.", deep.lane_opponent_champion, turret_plates)
+                    }
                 } else {
-                    format!("Conceded early wave priority to {}, delaying 1st core item spike by 95s.", deep.lane_opponent_champion)
+                    if is_support {
+                        format!("Conceded bot lane brush control to {}, delaying support quest completion by 80s.", deep.lane_opponent_champion)
+                    } else {
+                        format!("Conceded early wave priority to {}, delaying 1st core item spike by 95s.", deep.lane_opponent_champion)
+                    }
                 },
             },
             SingleGameFeatureAttribution {
-                feature_name: format!("Cross-Map Kill Participation ({:.1}% KP · {} Roam/TP Assists)", deep.user_kill_participation_pct, roam_tp_assists),
+                feature_name: if is_support {
+                    format!("Carry Peel & Kill Participation ({:.1}% KP · {} Assists)", deep.user_kill_participation_pct, self.assists)
+                } else {
+                    format!("Cross-Map Kill Participation ({:.1}% KP · {} Roam/TP Assists)", deep.user_kill_participation_pct, roam_tp_assists)
+                },
                 shap_impact_pct: (((deep.user_kill_participation_pct - 52.0) * 0.65).clamp(-14.0, 19.5) * 10.0).round() / 10.0,
-                explanation: format!(
-                    "Participated in {} of {} allied takedowns with high-impact global/river rotations.",
-                    self.kills + self.assists,
-                    deep.allied_objectives.total_kills
-                ),
+                explanation: if is_support {
+                    format!(
+                        "Anchored {} of {} team takedowns, maintaining disciplined peel tether to allied carries.",
+                        self.kills + self.assists,
+                        deep.allied_objectives.total_kills
+                    )
+                } else {
+                    format!(
+                        "Participated in {} of {} allied takedowns with high-impact global/river rotations.",
+                        self.kills + self.assists,
+                        deep.allied_objectives.total_kills
+                    )
+                },
             },
             SingleGameFeatureAttribution {
-                feature_name: format!("Survivability & Frontline Mitigation ({} Deaths · {} Mitigated)", self.deaths, self_mitigated_damage),
+                feature_name: if is_support && is_tank {
+                    format!("Unbreakable Frontline Mitigation ({} Deaths · {} Mitigated)", self.deaths, self_mitigated_damage)
+                } else {
+                    format!("Survivability & Frontline Mitigation ({} Deaths · {} Mitigated)", self.deaths, self_mitigated_damage)
+                },
                 shap_impact_pct: if self.deaths <= 3 {
                     ((14.5 - (self.deaths as f64 * 2.8)) * 10.0).round() / 10.0
                 } else {
                     ((-4.2 * (self.deaths as f64 - 2.5)) * 10.0).round() / 10.0
                 },
                 explanation: if self.deaths <= 3 {
-                    format!("Absorbed {} mitigated damage while denying enemy shutdown bounties.", self_mitigated_damage)
+                    if is_support && is_tank {
+                        format!("Soaked {} self-mitigated damage on {}, neutralizing high-impact enemy skillshots before they reached allied backline carries.", self_mitigated_damage, self.champion_name)
+                    } else {
+                        format!("Absorbed {} mitigated damage while denying enemy shutdown bounties.", self_mitigated_damage)
+                    }
                 } else {
                     format!("Spent {}s dead in mid-game skirmishes, opening objective windows for enemy team.", time_spent_dead_secs)
                 },
             },
-            SingleGameFeatureAttribution {
-                feature_name: format!("Farming & Wave Tempo ({:.1} CS/m · {:.1}% Recall Efficiency)", self.cs_per_min, recall_tempo_efficiency_pct),
-                shap_impact_pct: (((self.cs_per_min - 6.8) * 6.8).clamp(-12.0, 15.0) * 10.0).round() / 10.0,
-                explanation: format!(
-                    "Collected {} total CS ({:.1}/m) with {:.1}% cannon-wave recall timing efficiency.",
-                    (self.cs_per_min * dur as f64).round() as u32,
-                    self.cs_per_min,
-                    recall_tempo_efficiency_pct
-                ),
+            if is_support {
+                SingleGameFeatureAttribution {
+                    feature_name: format!("Support Quest & Roam Economy ({:.1} CS/m · {} Wards Cleared)", self.cs_per_min, deep.user_wards_cleared),
+                    shap_impact_pct: (((deep.user_vision_score as f64 / dur as f64 - 1.4) * 8.5).clamp(-8.0, 14.0) * 10.0).round() / 10.0,
+                    explanation: format!(
+                        "Collected {} CS via support execute charges while clearing {} enemy wards and maintaining {:.2} vision/min.",
+                        (self.cs_per_min * dur as f64).round() as u32,
+                        deep.user_wards_cleared,
+                        vision_per_min
+                    ),
+                }
+            } else {
+                SingleGameFeatureAttribution {
+                    feature_name: format!("Farming & Wave Tempo ({:.1} CS/m · {:.1}% Recall Efficiency)", self.cs_per_min, recall_tempo_efficiency_pct),
+                    shap_impact_pct: (((self.cs_per_min - 6.8) * 6.8).clamp(-12.0, 15.0) * 10.0).round() / 10.0,
+                    explanation: format!(
+                        "Collected {} total CS ({:.1}/m) with {:.1}% cannon-wave recall timing efficiency.",
+                        (self.cs_per_min * dur as f64).round() as u32,
+                        self.cs_per_min,
+                        recall_tempo_efficiency_pct
+                    ),
+                }
             },
             SingleGameFeatureAttribution {
-                feature_name: format!("Combat DPS & Crowd Control ({:.0} DPM · {}s CC Lockdown)", dpm, cc_score_secs),
-                shap_impact_pct: (((dpm - 520.0) / 38.0).clamp(-8.5, 14.2) * 10.0).round() / 10.0,
-                explanation: format!(
-                    "Dealt {} total champion damage ({:.1}% team share) and applied {}s of hard/soft CC.",
-                    deep.user_damage_dealt, deep.user_damage_share_pct, cc_score_secs
-                ),
+                feature_name: if is_support {
+                    format!("CC Lockdown & Skillshot Interception ({}s CC · {:.0} DPM)", cc_score_secs, dpm)
+                } else {
+                    format!("Combat DPS & Crowd Control ({:.0} DPM · {}s CC Lockdown)", dpm, cc_score_secs)
+                },
+                shap_impact_pct: if is_support {
+                    (((cc_score_secs as f64 - 18.0) * 0.45).clamp(-6.0, 14.5) * 10.0).round() / 10.0
+                } else {
+                    (((dpm - 520.0) / 38.0).clamp(-8.5, 14.2) * 10.0).round() / 10.0
+                },
+                explanation: if is_support {
+                    format!(
+                        "Applied {}s of hard/soft CC and dealt {} damage while peeling for backline carries.",
+                        cc_score_secs, deep.user_damage_dealt
+                    )
+                } else {
+                    format!(
+                        "Dealt {} total champion damage ({:.1}% team share) and applied {}s of hard/soft CC.",
+                        deep.user_damage_dealt, deep.user_damage_share_pct, cc_score_secs
+                    )
+                },
             },
             SingleGameFeatureAttribution {
                 feature_name: format!("Vision & River Control ({} Vision · {} Control Wards)", deep.user_vision_score, control_wards),
-                shap_impact_pct: (((vision_per_min - 0.85) * 14.0).clamp(-6.0, 9.8) * 10.0).round() / 10.0,
-                explanation: format!(
-                    "Placed {} wards, cleared {} enemy wards, and anchored Baron/Dragon river vision ({:.2} Vis/m).",
-                    deep.user_wards_placed, deep.user_wards_cleared, vision_per_min
-                ),
+                shap_impact_pct: if is_support {
+                    (((vision_per_min - 1.45) * 12.0).clamp(-5.0, 16.0) * 10.0).round() / 10.0
+                } else {
+                    (((vision_per_min - 0.85) * 14.0).clamp(-6.0, 9.8) * 10.0).round() / 10.0
+                },
+                explanation: if is_support {
+                    format!(
+                        "Placed {} wards, cleared {} enemy wards with sweeper, and anchored 45s pre-objective river control ({:.2} Vis/m).",
+                        deep.user_wards_placed, deep.user_wards_cleared, vision_per_min
+                    )
+                } else {
+                    format!(
+                        "Placed {} wards, cleared {} enemy wards, and anchored Baron/Dragon river vision ({:.2} Vis/m).",
+                        deep.user_wards_placed, deep.user_wards_cleared, vision_per_min
+                    )
+                },
             },
         ];
 
-        // Item Build Spike Timeline & Rune Telemetry for This Specific Game
-        let item_spikes = if is_tank {
-            vec![
-                SingleGameItemSpike {
-                    minute: 1,
-                    item_name: "Doran's Shield + Health Potion".to_string(),
-                    gold_cost: 450,
-                    spike_impact: "Sustained 410 HP through level 1–4 lane trades".to_string(),
-                },
-                SingleGameItemSpike {
-                    minute: 5,
-                    item_name: "Bami's Cinder + Plated Steelcaps".to_string(),
-                    gold_cost: 2_100,
-                    spike_impact: "Unlocked slow-push wave control & -12% auto-attack mitigation".to_string(),
-                },
-                SingleGameItemSpike {
-                    minute: if gd_at_15 >= 0 { 11 } else { 13 },
-                    item_name: "Heartsteel / Hollow Radiance (1st Core)".to_string(),
-                    gold_cost: 3_000,
-                    spike_impact: format!("Stacked +{} bonus HP and accelerated skirmish burst", 380 + (dur * 12)),
-                },
-                SingleGameItemSpike {
-                    minute: if gd_at_15 >= 0 { 18 } else { 20 },
-                    item_name: "Titanic Hydra (2nd Core)".to_string(),
-                    gold_cost: 3_300,
-                    spike_impact: "Enabled 6.5s side-lane waveclear & auto-reset combo threat".to_string(),
-                },
-                SingleGameItemSpike {
-                    minute: 24,
-                    item_name: "Kaenic Rookern / Unending Despair (3rd Core)".to_string(),
-                    gold_cost: 2_900,
-                    spike_impact: "Sealed late-game 5v5 frontline invulnerability around Baron".to_string(),
-                },
-            ]
-        } else {
-            vec![
-                SingleGameItemSpike {
-                    minute: 1,
-                    item_name: "Doran's Ring / Blade + 2 Potions".to_string(),
-                    gold_cost: 500,
-                    spike_impact: "Established early mana/HP trade priority".to_string(),
-                },
-                SingleGameItemSpike {
-                    minute: 5,
-                    item_name: "Lost Chapter / Noonquiver + Boots".to_string(),
-                    gold_cost: 1_500,
-                    spike_impact: "First recall wave-shove and roam tempo spike".to_string(),
-                },
-                SingleGameItemSpike {
-                    minute: if gd_at_15 >= 0 { 11 } else { 13 },
-                    item_name: "1st Core Mythic/Legendary Spike".to_string(),
-                    gold_cost: 3_100,
-                    spike_impact: "Triggered primary 2nd-Dragon river skirmish power spike".to_string(),
-                },
-                SingleGameItemSpike {
-                    minute: 18,
-                    item_name: "2nd Core Power Spike + Tier-2 Boots".to_string(),
-                    gold_cost: 3_000,
-                    spike_impact: "Unlocked mid-game pick & side-lane pressure".to_string(),
-                },
-                SingleGameItemSpike {
-                    minute: 24,
-                    item_name: "Rabadon's / Lord Dominik's (3rd Core)".to_string(),
-                    gold_cost: 3_500,
-                    spike_impact: "Maximized 5v5 teamfight penetration & burst ceiling".to_string(),
-                },
-            ]
-        };
+        // Item Build Spike Timeline, Dynamic Skill Order & Rune Telemetry
+        let item_spikes = self.generate_item_spikes(dur, gd_at_15, norm_role, is_tank);
+        let skill_order = self.compute_champion_skill_order(&self.champion_name, norm_role);
+        let rune_telemetry = self.generate_rune_telemetry(dur, &deep, norm_role, is_tank);
 
-        let skill_order = if self.champion_name.eq_ignore_ascii_case("Shen") {
-            "Q (Twilight Assault) → E (Shadow Dash) → W (Spirit's Refuge) · R at 6/11/16".to_string()
-        } else {
-            "Q (Primary Wave/Trade) → E (Mobility/CC) → W (Utility/Shield) · R at 6/11/16".to_string()
-        };
-
-        let rune_telemetry = if is_tank {
-            vec![
-                SingleGameRuneTelemetry {
-                    rune_name: "Grasp of the Undying (Keystone)".to_string(),
-                    tree_name: "Resolve".to_string(),
-                    stat_summary: format!("{} Procs · {} Bonus Magic Dmg · {} Healing", 22 + (dur / 2), 920 + (dur * 28), 680 + (dur * 21)),
-                    efficiency_grade: "96.4% Procs/Min Efficiency".to_string(),
-                },
-                SingleGameRuneTelemetry {
-                    rune_name: "Shield Bash".to_string(),
-                    tree_name: "Resolve".to_string(),
-                    stat_summary: format!("{} Bonus Shield-Empowered Damage vs {}", 780 + (self.kills * 85), deep.lane_opponent_champion),
-                    efficiency_grade: "S+ Trade Synergy".to_string(),
-                },
-                SingleGameRuneTelemetry {
-                    rune_name: "Second Wind / Bone Plating".to_string(),
-                    tree_name: "Resolve".to_string(),
-                    stat_summary: format!("{} Post-Trade Damage Regenerated / Mitigated", 1_180 + (dur * 34)),
-                    efficiency_grade: "High Lane Sustain".to_string(),
-                },
-                SingleGameRuneTelemetry {
-                    rune_name: "Ultimate Hunter".to_string(),
-                    tree_name: "Domination".to_string(),
-                    stat_summary: "5/5 Bounty Stacks · 34.5s Total Ultimate Cooldown Saved".to_string(),
-                    efficiency_grade: "Global Tempo Anchor".to_string(),
-                },
-            ]
-        } else {
-            vec![
-                SingleGameRuneTelemetry {
-                    rune_name: "Electrocute / Conqueror (Keystone)".to_string(),
-                    tree_name: "Primary Tree".to_string(),
-                    stat_summary: format!("{} Bonus Adaptive Damage Across {} Skirmishes", 1_420 + (self.kills * 140), 14 + self.kills),
-                    efficiency_grade: "94.2% Burst Conversion".to_string(),
-                },
-                SingleGameRuneTelemetry {
-                    rune_name: "Taste of Blood / Presence of Mind".to_string(),
-                    tree_name: "Primary Tree".to_string(),
-                    stat_summary: format!("{} Resource / HP Restored in Lane", 890 + (dur * 22)),
-                    efficiency_grade: "A+ Lane Sustain".to_string(),
-                },
-                SingleGameRuneTelemetry {
-                    rune_name: "Transcendence / Manaflow Band".to_string(),
-                    tree_name: "Sorcery".to_string(),
-                    stat_summary: "+250 Max Mana & 18s Ability Cooldown Refunded on Takedowns".to_string(),
-                    efficiency_grade: "Optimal Scaling".to_string(),
-                },
-                SingleGameRuneTelemetry {
-                    rune_name: "Scorch / Cut Down".to_string(),
-                    tree_name: "Secondary".to_string(),
-                    stat_summary: format!("{} Early Poke & Threshold Bonus Damage", 640 + (self.kills * 55)),
-                    efficiency_grade: "High Early Pressure".to_string(),
-                },
-            ]
-        };
-
-        // 18 Exhaustive Chronological Timestamped Single-Game Moments (01:35 -> Match End)
         let opp = &deep.lane_opponent_champion;
         let champ = &self.champion_name;
         let end_min = dur.max(22);
-        let timestamped_moments = vec![
-            // 1. 01:35 — Level-1 Wave Priority & Bush Control
-            SingleGameTimestampedMistake {
-                timestamp: "01:35".to_string(),
-                phase_label: "Early Laning".to_string(),
-                is_mistake: false,
-                severity_badge: "HIGH-LEVERAGE PLAY".to_string(),
-                gold_xp_swing_label: "+45 XP / Bush Prio".to_string(),
-                event_title: format!("Level-1 Wave Priority & Brush Control vs {}", opp),
-                what_happened: format!(
-                    "Positioned forward in lane brush at 01:30 on {} and tagged the first 3 melee minions while zoning {} off early auto-attack spacing.",
-                    champ, opp
-                ),
-                win_prob_delta_pct: 2.1,
-                warning_notification: format!(
-                    "LEVEL-1 SPACING NOTE: Always track whether {} started Doran's Blade/Shield or Long Sword before committing to extended level-1 auto trades.",
-                    opp
-                ),
-                improvement_action: format!(
-                    "Drop a ward in the middle lane brush or river entrance at 01:25 if {} has stronger level-1 all-in threat, then pull the first melee wave slightly toward your side.",
-                    opp
-                ),
-            },
-            // 2. 02:40 — Level-2 Experience Spike (7th Minion)
-            SingleGameTimestampedMistake {
-                timestamp: "02:40".to_string(),
-                phase_label: "Early Laning".to_string(),
-                is_mistake: csd_at_10 < 0,
-                severity_badge: if csd_at_10 >= 0 {
-                    "HIGH-LEVERAGE PLAY".to_string()
-                } else {
-                    "MICRO / TEMPO LEAK".to_string()
-                },
-                gold_xp_swing_label: if csd_at_10 >= 0 {
-                    "+140g / Lv2 First".to_string()
-                } else {
-                    "-110g / Conceded Lv2".to_string()
-                },
-                event_title: format!("Level-2 Experience Spike (1st Wave + 1 Melee) vs {}", opp),
-                what_happened: if csd_at_10 >= 0 {
-                    format!(
-                        "Secured the 7th minion (1st melee of wave 2) 3 seconds before {}, unlocking Level-2 ability combo and chunking 220 HP.",
-                        opp
-                    )
-                } else {
-                    format!(
-                        "Allowed {} to hit the 7th minion first on wave 2, forcing {} to back off the caster wave and concede {:+} CSD@10.",
-                        opp, champ, csd_at_10
-                    )
-                },
-                win_prob_delta_pct: if csd_at_10 >= 0 { 3.4 } else { -3.8 },
-                warning_notification: "LEVEL-2 SPIKE RULE: In solo lanes, hitting the 1st melee minion of Wave 2 grants Level 2; losing this timer by even 1 minion forces a 25-second defensive zone.".to_string(),
-                improvement_action: format!(
-                    "Count the 6 minions of Wave 1 and step forward as the 1st melee minion of Wave 2 drops below 35% HP so you can immediately level your 2nd ability and trade onto {}.",
-                    opp
-                ),
-            },
-            // 3. 03:35 — First Jungle Clear & River Scuttle Window
-            SingleGameTimestampedMistake {
-                timestamp: "03:35".to_string(),
-                phase_label: "Early Laning".to_string(),
-                is_mistake: self.deaths >= 4 && gd_at_10 < 0,
-                severity_badge: if self.deaths >= 4 && gd_at_10 < 0 {
-                    "CRITICAL MISTAKE".to_string()
-                } else {
-                    "HIGH-LEVERAGE PLAY".to_string()
-                },
-                gold_xp_swing_label: if self.deaths >= 4 && gd_at_10 < 0 {
-                    "-300g / River Flash".to_string()
-                } else {
-                    "+70g / Scuttle Prio".to_string()
-                },
-                event_title: "03:30 First Jungle Clear & River Scuttle Crab Window".to_string(),
-                what_happened: if self.deaths >= 4 && gd_at_10 < 0 {
-                    format!(
-                        "Pushed past river line at 03:30 without river trinket ward while enemy jungler finished top-side clear, forcing defensive cooldowns against {}.",
-                        opp
-                    )
-                } else {
-                    format!(
-                        "Tracked enemy jungler's 6-camp clear timer at 03:25, leaned toward allied warded side, and helped secure top/river Scuttle Crab vision."
-                    )
-                },
-                win_prob_delta_pct: if self.deaths >= 4 && gd_at_10 < 0 { -5.6 } else { 2.9 },
-                warning_notification: "03:15–03:45 JUNGLE GANK HAZARD: 78% of early first-blood ganks occur between 03:15 and 03:45 right as full-clear junglers exit their 6th camp into river.".to_string(),
-                improvement_action: "Place your first Yellow Trinket ward in the river pixel or tribush at exactly 02:55–03:10, and hold your mobility/dash cooldown until the enemy jungler shows on the minimap.".to_string(),
-            },
-            // 4. 04:55 — 3rd/4th Wave Crash & First Recall ("Cheater / Component Reset")
-            SingleGameTimestampedMistake {
-                timestamp: "04:55".to_string(),
-                phase_label: "Early Laning".to_string(),
-                is_mistake: gd_at_10 < 0,
-                severity_badge: if gd_at_10 >= 0 {
-                    "HIGH-LEVERAGE PLAY".to_string()
-                } else {
-                    "MICRO / TEMPO LEAK".to_string()
-                },
-                gold_xp_swing_label: if gd_at_10 >= 0 {
-                    "+280g / Clean Reset".to_string()
-                } else {
-                    "-190g / Late Recall".to_string()
-                },
-                event_title: format!("Cannon Wave Crash & First Component Recall vs {}", opp),
-                what_happened: if gd_at_10 >= 0 {
-                    format!(
-                        "Stacked waves 3–4 on {} and crashed a 9-minion wave into {}'s turret, recalling cleanly for early component spike with zero CS lost.",
-                        champ, opp
-                    )
-                } else {
-                    format!(
-                        "Stayed in lane at 35% HP for an extra wave against {}, allowing {} to freeze the bounce outside their turret and delay your recall by 35s.",
-                        opp, opp
-                    )
-                },
-                win_prob_delta_pct: if gd_at_10 >= 0 { 4.8 } else { -5.2 },
-                warning_notification: "WAVE BOUNCE ALERT: Leaving 3+ caster minions alive outside the enemy turret Range creates an automatic freeze for your opponent when you recall.".to_string(),
-                improvement_action: format!(
-                    "Use your AoE/waveclear on {} to ensure the entire wave crosses into enemy turret range before pressing B; if you lack mana/HP to crash, ping your jungler to help shove.",
-                    champ
-                ),
-            },
-            // 5. 06:10 — Level-6 Ultimate Unlock & All-In / Cross-Map Readiness
-            SingleGameTimestampedMistake {
-                timestamp: "06:10".to_string(),
-                phase_label: "Early Laning".to_string(),
-                is_mistake: false,
-                severity_badge: "HIGH-LEVERAGE PLAY".to_string(),
-                gold_xp_swing_label: "+350g / Lv6 Tempo".to_string(),
-                event_title: format!("Level-6 Ultimate Power Spike & Map Pressure on {}", champ),
-                what_happened: format!(
-                    "Hit Level 6 on wave 7 and immediately leveraged {}'s ultimate threat to pressure {} and pan camera to bot/river skirmish windows.",
-                    champ, opp
-                ),
-                win_prob_delta_pct: 4.5,
-                warning_notification: format!(
-                    "ULTIMATE COOLDOWN TRACKING: At Level 6, {}'s combat ultimate has a different cooldown window than {} — always trade during their downtime.",
-                    opp, champ
-                ),
-                improvement_action: format!(
-                    "The exact second you hit Level 6 on {}, ping your R cooldown twice for your team and look for either an immediate lane trade or a cross-map bot/dragon play.",
-                    champ
-                ),
-            },
-            // 6. 07:45 — First Voidgrubs / River Skirmish Rotation
-            SingleGameTimestampedMistake {
-                timestamp: "07:45".to_string(),
-                phase_label: "Objective Setup".to_string(),
-                is_mistake: gd_at_10 < -150,
-                severity_badge: if gd_at_10 >= -150 {
-                    "HIGH-LEVERAGE PLAY".to_string()
-                } else {
-                    "MICRO / TEMPO LEAK".to_string()
-                },
-                gold_xp_swing_label: if gd_at_10 >= -150 {
-                    "+420g / Grub Prio".to_string()
-                } else {
-                    "-260g / Late Move".to_string()
-                },
-                event_title: "First Voidgrubs / River Objective Priority Rotation".to_string(),
-                what_happened: if gd_at_10 >= -150 {
-                    format!(
-                        "Shoved lane wave 20s before Voidgrubs contest, rotating first into river with {} to out-number enemy jungler and secure objective control.",
-                        champ
-                    )
-                } else {
-                    format!(
-                        "Got pinned under turret by {}'s slow-push at 07:40, giving enemy top/jungle first move into the river Voidgrubs pit.",
-                        opp
-                    )
-                },
-                win_prob_delta_pct: if gd_at_10 >= -150 { 5.4 } else { -4.7 },
-                warning_notification: "VOIDGRUBS SPAWN TIMER: Voidgrubs require lane wave priority at 05:45 and 07:45; rotating while a stacked wave is crashing into your tower costs 180g + 220 XP.".to_string(),
-                improvement_action: "Begin thinning and shoving your wave 35 seconds before Voidgrubs/Dragon spawns so you can move into river first without losing tower CS.".to_string(),
-            },
-            // 7. 09:15 — Pre-10m Wave Bounce & Freeze / Slow-Push Discipline
-            SingleGameTimestampedMistake {
-                timestamp: "09:15".to_string(),
-                phase_label: "Early Laning".to_string(),
-                is_mistake: csd_at_10 < 4,
-                severity_badge: if csd_at_10 >= 4 {
-                    "HIGH-LEVERAGE PLAY".to_string()
-                } else {
-                    "MICRO / TEMPO LEAK".to_string()
-                },
-                gold_xp_swing_label: if csd_at_10 >= 4 {
-                    "+210g / +8 CS Freeze".to_string()
-                } else {
-                    "-150g / Broken Freeze".to_string()
-                },
-                event_title: format!("Pre-10m Wave Freeze & Trade Spacing vs {}", opp),
-                what_happened: if csd_at_10 >= 4 {
-                    format!(
-                        "Held a 4-caster minion freeze outside your turret range on {}, denying {} 8 CS and forcing them to overextend in gank range.",
-                        champ, opp
-                    )
-                } else {
-                    format!(
-                        "Used AoE abilities on the minion wave while trading against {}, accidentally breaking the freeze and pushing the wave back into {}'s safe zone.",
-                        opp, opp
-                    )
-                },
-                win_prob_delta_pct: if csd_at_10 >= 4 { 3.9 } else { -3.5 },
-                warning_notification: "WAVE MANAGEMENT ALERT: Auto-attacking or casting AoE spells inside an even minion wave pushes it toward the enemy tower within 20 seconds.".to_string(),
-                improvement_action: format!(
-                    "When holding a freeze near your tower against {}, last-hit at the final 5% HP threshold and pull enemy melee minions toward the lane bush before letting them hit tower range.",
-                    opp
-                ),
-            },
-            // 8. 10:30 — 10-Minute Laning Checkpoint (GD@10, CSD@10) & Plate Pressure
-            SingleGameTimestampedMistake {
-                timestamp: "10:30".to_string(),
-                phase_label: "Early Laning".to_string(),
-                is_mistake: gd_at_10 < 0,
-                severity_badge: if gd_at_10 >= 0 {
-                    "HIGH-LEVERAGE PLAY".to_string()
-                } else {
-                    "CRITICAL MISTAKE".to_string()
-                },
-                gold_xp_swing_label: format!("{:+}g GD@10 / {:+} CSD@10", gd_at_10, csd_at_10),
-                event_title: format!("10-Minute Laning Checkpoint & Turret Plate Window vs {}", opp),
-                what_happened: if gd_at_10 >= 0 {
-                    format!(
-                        "Reached the 10:00 benchmark with {:+}g GD@10 and {:+} CSD@10 on {}, converting wave lead into Demolish/auto turret plate gold.",
-                        gd_at_10, csd_at_10, champ
-                    )
-                } else {
-                    format!(
-                        "Hit 10:00 at {:+}g GD@10 and {:+} CSD@10 against {}, conceding early plate pressure before completing 1st core item.",
-                        gd_at_10, csd_at_10, opp
-                    )
-                },
-                win_prob_delta_pct: if gd_at_10 >= 0 { 6.2 } else { -6.4 },
-                warning_notification: format!(
-                    "10-MINUTE BENCHMARK: Master+ {} players average +280 GD@10; your {:+}g @ 10m directly dictated your 1st core item completion minute.",
-                    champ, gd_at_10
-                ),
-                improvement_action: "Focus on hitting 80+ CS by 10:30 and securing at least 1 turret plate (+125g) whenever your lane opponent recalls or teleports cross-map.".to_string(),
-            },
-            // 9. 12:00 — Second Dragon / Rift Herald Vision Line & Control Ward Placement
-            SingleGameTimestampedMistake {
-                timestamp: "12:00".to_string(),
-                phase_label: "Objective Setup".to_string(),
-                is_mistake: control_wards < 2,
-                severity_badge: if control_wards >= 2 {
-                    "HIGH-LEVERAGE PLAY".to_string()
-                } else {
-                    "MICRO / TEMPO LEAK".to_string()
-                },
-                gold_xp_swing_label: format!("{} Control Wards / {} Vis", control_wards, deep.user_vision_score),
-                event_title: "12-Minute 1st Core Item Spike & River Control Ward Setup".to_string(),
-                what_happened: if control_wards >= 2 {
-                    format!(
-                        "Completed 1st Core Item spike on {} and anchored river entrance with a Control Ward ({} total purchased, {} enemy wards cleared).",
-                        champ, control_wards, deep.user_wards_cleared
-                    )
-                } else {
-                    format!(
-                        "Completed 1st Core Item spike but entered the 12:00 river skirmish with low Control Ward coverage ({} purchased), reducing flank visibility.",
-                        control_wards
-                    )
-                },
-                win_prob_delta_pct: if control_wards >= 2 { 4.1 } else { -3.9 },
-                warning_notification: "VISION DENIAL ALERT: Clearing 1 enemy river ward before Herald/Dragon increases successful ambush/pick probability by +28%.".to_string(),
-                improvement_action: "Reserve 75g on your 1st Core Item recall (11m–12m) for a Control Ward and place it in the river pixel or pit brush before contesting Herald/2nd Dragon.".to_string(),
-            },
-            // 10. 13:45 — Final Turret Plate Window (14:00 Bastion Drop) & Greed Check
-            SingleGameTimestampedMistake {
-                timestamp: "13:45".to_string(),
-                phase_label: "Objective Setup".to_string(),
-                is_mistake: turret_plates < 2,
-                severity_badge: if turret_plates >= 2 {
-                    "HIGH-LEVERAGE PLAY".to_string()
-                } else {
-                    "MICRO / TEMPO LEAK".to_string()
-                },
-                gold_xp_swing_label: format!("+{}g ({} Turret Plates)", turret_plates * 125, turret_plates),
-                event_title: "13:45 Final Turret Plate Window Before 14:00 Bastion Expiry".to_string(),
-                what_happened: if turret_plates >= 2 {
-                    format!(
-                        "Timed cannon wave crash at 13:35 to cash in {} total turret plates (+{}g) and backed cleanly 10s before plates expired at 14:00.",
-                        turret_plates,
-                        turret_plates * 125
-                    )
-                } else {
-                    format!(
-                        "Overstayed at enemy tower around 13:45 with only {} plate(s) secured, losing reset tempo right as Turret Bastion expired at 14:00.",
-                        turret_plates
-                    )
-                },
-                win_prob_delta_pct: if turret_plates >= 2 { 5.8 } else { -4.6 },
-                warning_notification: "14:00 PLATE EXPIRY RULE: Turret plates permanently vanish at exactly 14:00. Greeding for a plate at 13:50 with low mana/HP is the #1 cause of mid-game tempo throws.".to_string(),
-                improvement_action: "Push your wave hard at 13:15 to harvest final turret plate gold before 13:50, then immediately recall so you are on the map with spent gold at 14:15.".to_string(),
-            },
-            // 11. 15:00 — Laning Phase Transition Verdict (GD@15, CSD@15, XPD@15)
-            SingleGameTimestampedMistake {
-                timestamp: "15:00".to_string(),
-                phase_label: "Mid-Game Macro".to_string(),
-                is_mistake: gd_at_15 < 0,
-                severity_badge: if gd_at_15 >= 0 {
-                    "GAME-WINNING CALL".to_string()
-                } else {
-                    "CRITICAL MISTAKE".to_string()
-                },
-                gold_xp_swing_label: format!("{:+}g GD@15 · {:+} XP@15", gd_at_15, xpd_at_15),
-                event_title: format!("15:00 Laning Phase Verdict vs {} ({:+} CSD@15)", opp, csd_at_15),
-                what_happened: if gd_at_15 >= 0 {
-                    format!(
-                        "Exited the 15-minute laning phase with a decisive {:+}g Gold Diff, {:+} CS Diff, and {:+} XP Diff over {}, entering mid-game as the strongest sidelaner.",
-                        gd_at_15, csd_at_15, xpd_at_15, opp
-                    )
-                } else {
-                    format!(
-                        "Finished the 15-minute laning phase at {:+}g Gold Diff and {:+} XP Diff vs {}, requiring disciplined weak-side wave collection to recover.",
-                        gd_at_15, xpd_at_15, opp
-                    )
-                },
-                win_prob_delta_pct: if gd_at_15 >= 0 { 8.4 } else { -7.8 },
-                warning_notification: format!(
-                    "15-MINUTE TRANSITION: Your {:+}g GD@15 and {:+} XP@15 determined whether you could 1v1 {} in the side lane or needed to play for 5v5 teamfight utility.",
-                    gd_at_15, xpd_at_15, opp
-                ),
-                improvement_action: format!(
-                    "At 15:00, immediately check the scoreboard item tab: if you are ahead of {} by 500g+, force side-lane tier-2 pressure; if behind, catch waves at your tier-2 and look for numbers-advantage picks.",
-                    opp
-                ),
-            },
-            // 12. 16:35 — Tier-1 Outer Tower Rotation & Side-Lane Assignment
-            SingleGameTimestampedMistake {
-                timestamp: "16:35".to_string(),
-                phase_label: "Mid-Game Macro".to_string(),
-                is_mistake: recall_tempo_efficiency_pct < 80.0,
-                severity_badge: if recall_tempo_efficiency_pct >= 80.0 {
-                    "HIGH-LEVERAGE PLAY".to_string()
-                } else {
-                    "MICRO / TEMPO LEAK".to_string()
-                },
-                gold_xp_swing_label: format!("{:.1}% Macro Sync", recall_tempo_efficiency_pct),
-                event_title: "16:35 Bot/Top Lane Swap & Outer Tier-1 Tower Macro".to_string(),
-                what_happened: if recall_tempo_efficiency_pct >= 80.0 {
-                    format!(
-                        "Rotated cleanly to the opposite side lane after bot outer tower fell, absorbing solo-lane XP and maintaining {:.1}% recall tempo efficiency.",
-                        recall_tempo_efficiency_pct
-                    )
-                } else {
-                    format!(
-                        "Shared mid-lane minion XP with allied ADC/Support for 2 waves around 16:35 instead of rotating to the vacant side lane ({:.1}% tempo efficiency).",
-                        recall_tempo_efficiency_pct
-                    )
-                },
-                win_prob_delta_pct: if recall_tempo_efficiency_pct >= 80.0 { 4.9 } else { -5.1 },
-                warning_notification: "MID-GAME XP BLEED: Sharing mid-lane waves 3-ways after 15:00 reduces your solo level progression by 38% and gifts free side-lane tier-1/tier-2 towers.".to_string(),
-                improvement_action: format!(
-                    "Once the first bot-lane turret falls (~14m–16m), let your ADC/Support take mid lane and immediately move {} to the side lane opposite the next spawning objective.",
-                    champ
-                ),
-            },
-            // 13. 18:15 — 2-Item Core Power Spike Skirmish & Cooldown Alignment
-            SingleGameTimestampedMistake {
-                timestamp: "18:15".to_string(),
-                phase_label: "Mid-Game Macro".to_string(),
-                is_mistake: self.cs_per_min < 7.2,
-                severity_badge: if self.cs_per_min >= 7.2 {
-                    "HIGH-LEVERAGE PLAY".to_string()
-                } else {
-                    "MICRO / TEMPO LEAK".to_string()
-                },
-                gold_xp_swing_label: format!("{:.1} CS/m · {:.0} DPM", self.cs_per_min, dpm),
-                event_title: format!("18:15 2-Item Core Spike & Side-Lane Wave Push on {}", champ),
-                what_happened: if self.cs_per_min >= 7.2 {
-                    format!(
-                        "Completed 2-Item Core on schedule ({:.1} CS/m) and pushed side wave past river 45s before 3rd Dragon, forcing {} to answer under tower.",
-                        self.cs_per_min, opp
-                    )
-                } else {
-                    format!(
-                        "Delayed 2-Item Core completion due to missed side-lane waves ({:.1} CS/m), entering the 18m river fight 1 component behind.",
-                        self.cs_per_min
-                    )
-                },
-                win_prob_delta_pct: if self.cs_per_min >= 7.2 { 6.7 } else { -6.3 },
-                warning_notification: "PUSH-BEFORE-GROUP RULE: Grouping for a mid-game skirmish BEFORE pushing your side wave guarantees you lose 2 waves + turret HP even if your team wins the fight.".to_string(),
-                improvement_action: format!(
-                    "Always follow the 'Push First, Rotate Second' rule on {}: clear the side-lane wave past river at X:15, then walk/TP into river fog to create a 5v4 advantage.",
-                    champ
-                ),
-            },
-            // 14. 20:00 — Baron / Atakhan Spawn Vision Control & Fog-of-War Pathing
-            SingleGameTimestampedMistake {
-                timestamp: "20:00".to_string(),
-                phase_label: "Objective Setup".to_string(),
-                is_mistake: isolated_deaths > 1,
-                severity_badge: if isolated_deaths <= 1 {
-                    "HIGH-LEVERAGE PLAY".to_string()
-                } else {
-                    "CRITICAL MISTAKE".to_string()
-                },
-                gold_xp_swing_label: format!("{:.2} Vis/m · {} Iso Deaths", vision_per_min, isolated_deaths),
-                event_title: "20:00 Baron / Atakhan Spawn & Top-Side River Vision Line".to_string(),
-                what_happened: if isolated_deaths <= 1 {
-                    format!(
-                        "Established top-side river control at 20:00 ({:.2} Vision/min) while applying cross-map pressure without getting picked in fog of war.",
-                        vision_per_min
-                    )
-                } else {
-                    format!(
-                        "Pushed deep into unwarded side-lane territory around 20:00 ({} isolated deaths this game), giving enemy team a numbers advantage on Baron side.",
-                        isolated_deaths
-                    )
-                },
-                win_prob_delta_pct: if isolated_deaths <= 1 { 5.5 } else { -8.4 },
-                warning_notification: "20:00 BARON HAZARD: After 20:00, dying in the bot side lane without Teleport or Global Ultimate active is an automatic free Baron for the enemy team.".to_string(),
-                improvement_action: "After 20:00, check your minimap every 4 seconds while sidelaning: if 3+ enemies disappear from vision, immediately step back into tier-2 brush until they show mid.".to_string(),
-            },
-            // 15. 21:45 — Mid-Game Side-Lane Overextension & Shutdown Bounty Protection
-            SingleGameTimestampedMistake {
-                timestamp: "21:45".to_string(),
-                phase_label: "Mid-Game Macro".to_string(),
-                is_mistake: self.deaths >= 4,
-                severity_badge: if self.deaths < 4 {
-                    "HIGH-LEVERAGE PLAY".to_string()
-                } else {
-                    "CRITICAL MISTAKE".to_string()
-                },
-                gold_xp_swing_label: if self.deaths < 4 {
-                    format!("+600g Bounty Protected ({} Deaths)", self.deaths)
-                } else {
-                    format!("-650g Shutdown Given ({}s Dead)", time_spent_dead_secs)
-                },
-                event_title: "21:45 Shutdown Bounty Discipline & Threat Assessment".to_string(),
-                what_happened: if self.deaths < 4 {
-                    format!(
-                        "Protected personal KDA ({}/{}/{}, {:.2} KDA) and absorbed enemy collapse pressure without donating shutdown gold.",
-                        self.kills, self.deaths, self.assists, kda
-                    )
-                } else {
-                    format!(
-                        "Overextended during a mid-game skirmish at 21:45 ({} total deaths, {}s grey-screen time), transferring shutdown gold to enemy carries.",
-                        self.deaths, time_spent_dead_secs
-                    )
-                },
-                win_prob_delta_pct: if self.deaths < 4 { 6.1 } else { -9.2 },
-                warning_notification: format!(
-                    "DEATH TIMER PENALTY: At 22+ minutes, a single death costs a 38s–45s respawn timer ({}s total dead this match) plus up to 700g shutdown bounty.",
-                    time_spent_dead_secs
-                ),
-                improvement_action: "When you have 3+ kills or a shutdown bounty, value your life above chasing a low-HP support: surviving a fight lets you immediately take Baron or 2 towers.".to_string(),
-            },
-            // 16. 23:20 — 3rd/4th Dragon (Soul Point) Choke-Point Positioning
-            SingleGameTimestampedMistake {
-                timestamp: "23:20".to_string(),
-                phase_label: "Late-Game Siege".to_string(),
-                is_mistake: deep.user_kill_participation_pct < 55.0 && !self.win,
-                severity_badge: if deep.user_kill_participation_pct >= 55.0 || self.win {
-                    "GAME-WINNING CALL".to_string()
-                } else {
-                    "CRITICAL MISTAKE".to_string()
-                },
-                gold_xp_swing_label: format!("{:.1}% KP · {}s CC", deep.user_kill_participation_pct, cc_score_secs),
-                event_title: format!("23:20 Dragon Soul Point Choke-Point Engagement on {}", champ),
-                what_happened: format!(
-                    "Anchored the river choke-point fight with {:.1}% Kill Participation, applying {}s of CC and dealing {:.1}% of allied team damage.",
-                    deep.user_kill_participation_pct, cc_score_secs, deep.user_damage_share_pct
-                ),
-                win_prob_delta_pct: if self.win { 9.8 } else { -8.6 },
-                warning_notification: "SOUL POINT CHOKE RULE: The team that controls the river entrance bushes 40 seconds before Soul Point wins 71% of Dragon teamfights.".to_string(),
-                improvement_action: format!(
-                    "Arrive at the Dragon river entrance 40s early (or channel {} R onto your engaging diver at the exact moment enemy carries commit their dash cooldowns).",
-                    champ
-                ),
-            },
-            // 17. 25:10 — High-Leverage River / Baron Teamfight Target Selection
-            SingleGameTimestampedMistake {
-                timestamp: format!("{}:10", end_min.saturating_sub(3)),
-                phase_label: "Late-Game Siege".to_string(),
-                is_mistake: !self.win && self.deaths >= 5,
-                severity_badge: if self.win || self.deaths < 5 {
-                    "GAME-WINNING CALL".to_string()
-                } else {
-                    "CRITICAL MISTAKE".to_string()
-                },
-                gold_xp_swing_label: format!("{} Dmg · {} Mitigated", deep.user_damage_dealt, self_mitigated_damage),
-                event_title: format!("Late-Game 5v5 Frontline Mitigation & Target Selection ({}m)", end_min.saturating_sub(3)),
-                what_happened: if self.win {
-                    format!(
-                        "Absorbed {} self-mitigated damage and dealt {} champion damage ({:.2} Dmg/Gold) while locking down enemy primary threats.",
-                        self_mitigated_damage, deep.user_damage_dealt, damage_per_gold
-                    )
-                } else {
-                    format!(
-                        "Split target focus between diving enemy backline and peeling {} off allied carries during the decisive {}m Baron fight.",
-                        opp, end_min.saturating_sub(3)
-                    )
-                },
-                win_prob_delta_pct: if self.win { 12.4 } else { -13.5 },
-                warning_notification: "TEAMFIGHT ROLE CLARITY: Before a 25m+ Baron fight starts, decide whether your win condition is (A) diving the enemy carry or (B) peeling for your most fed teammate.".to_string(),
-                improvement_action: format!(
-                    "Identify which carry has the highest gold in the game at 24m: if it is your teammate, stand within 450 units of them on {} to peel; if it is the enemy carry, flank from fog with Flash-CC.",
-                    champ
-                ),
-            },
-            // 18. Final Minute — Inhibitor Siege, Multi-Lane Wave Sync & Final Nexus Call
-            SingleGameTimestampedMistake {
-                timestamp: format!("{}:00", end_min),
-                phase_label: "Late-Game Siege".to_string(),
-                is_mistake: !self.win,
-                severity_badge: if self.win {
-                    "GAME-WINNING CALL".to_string()
-                } else {
-                    "CRITICAL MISTAKE".to_string()
-                },
-                gold_xp_swing_label: if self.win {
-                    format!("+1,850g Team Lead · {}m Victory", dur)
-                } else {
-                    format!("-1,600g Siege Swing · {}m Defeat", dur)
-                },
-                event_title: if self.win {
-                    format!("Final Inhibitor Wave Sync & Nexus Finish ({}m)", dur)
-                } else {
-                    format!("Late-Game Base Defense & Elder/Baron Desync ({}m)", dur)
-                },
-                what_happened: if self.win {
-                    format!(
-                        "Synchronized two Baron/super-minion waves across mid and side lane at {}m, breaking the enemy base and finishing with a {:.1}/10 AI OP Score ({}).",
-                        dur, ai_op_score, lobby_placement
-                    )
-                } else {
-                    format!(
-                        "Staggered respawn timers during the final {}m base defense allowed the enemy team to crack two inhibitors and close the Nexus despite your {:.1}/10 OP Score.",
-                        dur, ai_op_score
-                    )
-                },
-                win_prob_delta_pct: if self.win { 15.8 } else { -16.9 },
-                warning_notification: "END-GAME CLOSING RULE: Never siege a single inhibitor 5v5 while your side-lane waves are on your half of the map — syncing 2 lanes simultaneously forces an un-defendable split.".to_string(),
-                improvement_action: if self.win {
-                    "Keep executing disciplined 2-lane wave synchronization with Baron buff rather than forcing low-percentage 5v5 dives under Nexus turrets.".to_string()
-                } else {
-                    "When defending base at 26m+, wait for all 5 teammates to respawn before engaging — fighting 3v5 to save one inhibitor staggered death timers and ended the game.".to_string()
-                },
-            },
-        ];
+        let meta_status = detect_meta_status(&self.champion_name, &self.role);
+
+        let ctx = AutopsyContext {
+            deep: &deep,
+            opp,
+            champ,
+            dur,
+            end_min,
+            ai_op_score,
+            lobby_placement: &lobby_placement,
+            csd_at_10,
+            csd_at_15,
+            gd_at_10,
+            gd_at_15,
+            xpd_at_15,
+            cc_score_secs,
+            self_mitigated_damage,
+            damage_per_gold,
+            dpm,
+            time_spent_dead_secs,
+            isolated_deaths,
+            turret_plates,
+            control_wards,
+            recall_tempo_efficiency_pct,
+            vision_per_min,
+            kda,
+            meta: &meta_status,
+        };
+
+        let norm_role = normalize_role_name(&self.role);
+        let timestamped_moments = match norm_role {
+            "Support" => self.generate_support_autopsy(&ctx),
+            "Jungle" => self.generate_jungle_autopsy(&ctx),
+            "Mid" => self.generate_mid_autopsy(&ctx),
+            "Bottom" => self.generate_bot_autopsy(&ctx),
+            _ => self.generate_top_autopsy(&ctx),
+        };
 
         SingleGameChampionCurveAnalysis {
             match_id: self.match_id.clone(),
@@ -3657,6 +3212,7 @@ impl AdoptedMatch {
             lane_opponent: deep.lane_opponent_champion,
             win: self.win,
             duration_mins: dur,
+            meta_status,
             ai_op_score,
             lobby_placement,
             execution_rank_tier,
@@ -3772,6 +3328,8 @@ pub struct SingleGameChampionCurveAnalysis {
     pub lane_opponent: String,
     pub win: bool,
     pub duration_mins: u32,
+    #[serde(default)]
+    pub meta_status: MetaPickStatus,
     pub ai_op_score: f64,
     pub lobby_placement: String,
     pub execution_rank_tier: String,
@@ -5818,3 +5376,1923 @@ pub fn all_cataloged_recurring_mistakes() -> Vec<RecurringMistakeInsight> {
         .collect()
 }
 
+
+
+/// Meta vs Off-Meta Classification & Playstyle Standards for any champion in any role.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+pub struct MetaPickStatus {
+    pub is_meta: bool,
+    pub canonical_role: String,
+    pub archetype_label: String,
+    pub classification_badge: String,
+    pub playstyle_focus_label: String,
+}
+
+/// Canonical and flex roles for any League of Legends champion to detect meta vs off-meta picks.
+pub fn canonical_roles_for_champion(champ: &str) -> &'static [&'static str] {
+    match champ.to_ascii_lowercase().as_str() {
+        "braum" | "nautilus" | "thresh" | "blitzcrank" | "leona" | "lulu" | "nami"
+        | "janna" | "pyke" | "rakan" | "alistar" | "taric" | "morgana" | "bard"
+        | "senna" | "soraka" | "yuumi" | "renata glasc" | "renata" | "sona" | "milio"
+        | "rell" | "zilean" => &["Support"],
+
+        "shen" => &["Top", "Support"],
+        "poppy" => &["Top", "Jungle", "Support"],
+        "tahm kench" | "tahmkench" => &["Top", "Support"],
+        "maokai" => &["Support", "Top", "Jungle"],
+        "galio" => &["Mid", "Support"],
+        "pantheon" => &["Support", "Mid", "Top"],
+        "gragas" => &["Top", "Jungle", "Mid"],
+
+        "jinx" | "caitlyn" | "jhin" | "ezreal" | "ashe" | "draven" | "samira"
+        | "sivir" | "tristana" | "twitch" | "xayah" | "zeri" | "aphelios"
+        | "kalista" | "kog'maw" | "kogmaw" | "miss fortune" | "smolder" => &["Bottom", "ADC"],
+
+        "kai'sa" | "kaisa" => &["Bottom", "ADC", "Mid"],
+        "vayne" => &["Bottom", "ADC", "Top"],
+        "lucian" => &["Bottom", "ADC", "Mid"],
+        "varus" => &["Bottom", "ADC", "Mid"],
+
+        "lee sin" | "leesin" | "viego" | "jarvan iv" | "jarvan" | "sejuani"
+        | "nocturne" | "hecarim" | "zac" | "graves" | "kha'zix" | "khazix"
+        | "vi" | "xin zhao" | "xinzhao" | "volibear" | "kindred" | "ekko"
+        | "nidalee" | "elise" | "kayn" | "amumu" | "diana" | "master yi"
+        | "masteryi" | "rammus" | "shaco" | "warwick" | "fiddlesticks"
+        | "lillia" | "bel'veth" | "belveth" | "briar" | "reksai" | "rek'sai"
+        | "ivern" | "evelynn" | "shyvana" => &["Jungle"],
+
+        "karthus" => &["Jungle", "Bottom"],
+        "brand" => &["Support", "Jungle", "Mid"],
+        "zyra" => &["Support", "Jungle"],
+
+        "ahri" | "syndra" | "orianna" | "zed" | "viktor" | "leblanc"
+        | "vex" | "katarina" | "fizz" | "kassadin" | "anivia" | "cassiopeia"
+        | "hwei" | "talon" | "veigar" | "twisted fate" | "aurora" | "zoe"
+        | "aurelion sol" | "malzahar" | "neeko" | "ryze" | "taliyah" => &["Mid"],
+
+        "yasuo" => &["Mid", "Top", "Bottom"],
+        "yone" => &["Mid", "Top"],
+        "sylas" => &["Mid", "Top", "Jungle"],
+        "lux" | "xerath" | "vel'koz" | "velkoz" => &["Mid", "Support"],
+        "swain" => &["Support", "Mid", "Bottom", "Top"],
+
+        "ornn" | "sion" | "jax" | "darius" | "camille" | "aatrox"
+        | "renekton" | "fiora" | "gwen" | "mordekaiser" | "sett"
+        | "k'sante" | "ksante" | "garen" | "jayce" | "riven" | "urgot"
+        | "nasus" | "malphite" | "gangplank" | "chogath" | "cho'gath"
+        | "dr. mundo" | "drmundo" | "mundo" | "teemo" | "quinn"
+        | "illaoi" | "trundle" | "yorick" | "singed" | "kled" => &["Top"],
+
+        _ => &["Top", "Mid", "Jungle", "Bottom", "Support"],
+    }
+}
+
+/// Normalizes raw role strings into standard League of Legends positions.
+pub fn normalize_role_name(role: &str) -> &'static str {
+    match role.trim().to_ascii_lowercase().as_str() {
+        "utility" | "support" | "supp" => "Support",
+        "bottom" | "bot" | "adc" => "Bottom",
+        "middle" | "mid" => "Mid",
+        "top" => "Top",
+        "jungle" | "jng" => "Jungle",
+        _ => "Top",
+    }
+}
+
+/// Detects whether a champion is being played in their canonical meta role or as an off-meta innovation.
+pub fn detect_meta_status(champ: &str, played_role: &str) -> MetaPickStatus {
+    let norm_role = normalize_role_name(played_role);
+    let (canonical_primary, archetype_desc) = canonical_role_and_archetype(champ);
+    let canonical_roles = canonical_roles_for_champion(champ);
+
+    let is_meta = canonical_roles.iter().any(|&r| {
+        r.eq_ignore_ascii_case(norm_role)
+            || (r == "ADC" && norm_role == "Bottom")
+            || (r == "Bottom" && norm_role == "Bottom")
+    });
+
+    let archetype_short = if archetype_desc.contains("Warden") {
+        "WARDEN"
+    } else if archetype_desc.contains("Vanguard") {
+        "VANGUARD"
+    } else if archetype_desc.contains("Enchanter") {
+        "ENCHANTER"
+    } else if archetype_desc.contains("Marksman") {
+        "MARKSMAN"
+    } else if archetype_desc.contains("Assassin") {
+        "ASSASSIN"
+    } else if archetype_desc.contains("Skirmisher") || archetype_desc.contains("Duelist") {
+        "SKIRMISHER"
+    } else if archetype_desc.contains("Juggernaut") || archetype_desc.contains("Brawler") {
+        "JUGGERNAUT"
+    } else if archetype_desc.contains("Mage") {
+        "MAGE"
+    } else {
+        "SPECIALIST"
+    };
+
+    let classification_badge = if is_meta {
+        format!("META {} {}", archetype_short, norm_role.to_uppercase())
+    } else {
+        format!("OFF-META {} {}", archetype_short, norm_role.to_uppercase())
+    };
+
+    let playstyle_focus_label = if is_meta {
+        format!("Canonical {} Standards & Competitive Macro", norm_role)
+    } else {
+        format!("Experimental {} {} Theorycrafting", champ, norm_role)
+    };
+
+    MetaPickStatus {
+        is_meta,
+        canonical_role: canonical_primary.to_string(),
+        archetype_label: archetype_desc.to_string(),
+        classification_badge,
+        playstyle_focus_label,
+    }
+}
+
+// ============================================================================
+// ROLE-TAILORED CHRONOLOGICAL AUTOPSY GENERATORS (SUPPORT, JUNGLE, MID, BOT, TOP)
+// ============================================================================
+
+#[allow(dead_code)]
+struct AutopsyContext<'a> {
+    pub deep: &'a SingleMatchDeepAnalysis,
+    pub opp: &'a str,
+    pub champ: &'a str,
+    pub dur: u32,
+    pub end_min: u32,
+    pub ai_op_score: f64,
+    pub lobby_placement: &'a str,
+    pub csd_at_10: i32,
+    pub csd_at_15: i32,
+    pub gd_at_10: i32,
+    pub gd_at_15: i32,
+    pub xpd_at_15: i32,
+    pub cc_score_secs: u32,
+    pub self_mitigated_damage: u32,
+    pub damage_per_gold: f64,
+    pub dpm: f64,
+    pub time_spent_dead_secs: u32,
+    pub isolated_deaths: u32,
+    pub turret_plates: u32,
+    pub control_wards: u32,
+    pub recall_tempo_efficiency_pct: f64,
+    pub vision_per_min: f64,
+    pub kda: f64,
+    pub meta: &'a MetaPickStatus,
+}
+
+impl AdoptedMatch {
+    fn generate_item_spikes(&self, dur: u32, gd_at_15: i32, norm_role: &str, is_tank: bool) -> Vec<SingleGameItemSpike> {
+        let is_supp = norm_role == "Support";
+        let is_jng = norm_role == "Jungle";
+        let is_bot = norm_role == "Bottom";
+
+        if is_supp {
+            if is_tank {
+                vec![
+                    SingleGameItemSpike {
+                        minute: 1,
+                        item_name: "World Atlas + 2 Health Potions".to_string(),
+                        gold_cost: 400,
+                        spike_impact: "Unlocked support quest gold generation & 3 execute charges".to_string(),
+                    },
+                    SingleGameItemSpike {
+                        minute: 5,
+                        item_name: "Boots of Swiftness / Steelcaps + Control Ward".to_string(),
+                        gold_cost: 1_000,
+                        spike_impact: "River roam tempo mobility & 45s pre-Dragon vision setup".to_string(),
+                    },
+                    SingleGameItemSpike {
+                        minute: if gd_at_15 >= 0 { 9 } else { 11 },
+                        item_name: "Runic Compass / Bounty of Worlds (1,000g Milestone)".to_string(),
+                        gold_cost: 1_000,
+                        spike_impact: "Completed World Atlas quest, unlocking 4 rechargeable stealth wards".to_string(),
+                    },
+                    SingleGameItemSpike {
+                        minute: if gd_at_15 >= 0 { 15 } else { 17 },
+                        item_name: "Locket of the Iron Solari (1st Core)".to_string(),
+                        gold_cost: 2_200,
+                        spike_impact: "AOE 380 HP shield active mitigating burst against allied backline".to_string(),
+                    },
+                    SingleGameItemSpike {
+                        minute: if gd_at_15 >= 0 { 21 } else { 23 },
+                        item_name: "Knight's Vow (2nd Core)".to_string(),
+                        gold_cost: 2_200,
+                        spike_impact: "Redirected 12% damage from primary carry with 10% combat healing".to_string(),
+                    },
+                    SingleGameItemSpike {
+                        minute: 26,
+                        item_name: "Trailblazer / Thornmail / Kaenic Rookern (3rd Core)".to_string(),
+                        gold_cost: 2_500,
+                        spike_impact: "Frontline bulk & engage movement speed aura around Baron".to_string(),
+                    },
+                ]
+            } else {
+                vec![
+                    SingleGameItemSpike {
+                        minute: 1,
+                        item_name: "World Atlas + 2 Health Potions".to_string(),
+                        gold_cost: 400,
+                        spike_impact: "Unlocked tribute gold generation & ranged poke harassment".to_string(),
+                    },
+                    SingleGameItemSpike {
+                        minute: 5,
+                        item_name: "Ionian Boots of Lucidity + Control Ward".to_string(),
+                        gold_cost: 1_000,
+                        spike_impact: "+15 Ability Haste & Summoner Spell cooldown acceleration".to_string(),
+                    },
+                    SingleGameItemSpike {
+                        minute: if gd_at_15 >= 0 { 9 } else { 11 },
+                        item_name: "Dream Maker / Solstice Sleigh (1,000g Milestone)".to_string(),
+                        gold_cost: 1_000,
+                        spike_impact: "Transformed support item into bonus shielding & move speed aura".to_string(),
+                    },
+                    SingleGameItemSpike {
+                        minute: 15,
+                        item_name: "Moonstone Renewer / Imperial Mandate (1st Core)".to_string(),
+                        gold_cost: 2_200,
+                        spike_impact: "Chain healing amplification & allied target focus damage mark".to_string(),
+                    },
+                    SingleGameItemSpike {
+                        minute: 21,
+                        item_name: "Ardent Censer / Staff of Flowing Water (2nd Core)".to_string(),
+                        gold_cost: 2_300,
+                        spike_impact: "Empowered allied ADC attack speed & on-hit magic damage".to_string(),
+                    },
+                    SingleGameItemSpike {
+                        minute: 26,
+                        item_name: "Redemption / Dawncore (3rd Core)".to_string(),
+                        gold_cost: 2_500,
+                        spike_impact: "Global 5v5 teamfight heal active across neutral pits".to_string(),
+                    },
+                ]
+            }
+        } else if is_jng {
+            vec![
+                SingleGameItemSpike {
+                    minute: 1,
+                    item_name: "Scorchclaw / Gustwalker Pup + Health Potion".to_string(),
+                    gold_cost: 450,
+                    spike_impact: "Started jungle pet feeding route & bonus monster burn".to_string(),
+                },
+                SingleGameItemSpike {
+                    minute: 5,
+                    item_name: "Tiamat / Serrated Dirk / Caulfield's + Boots".to_string(),
+                    gold_cost: 1_400,
+                    spike_impact: "Accelerated camp clear velocity & early skirmish lethality".to_string(),
+                },
+                SingleGameItemSpike {
+                    minute: if gd_at_15 >= 0 { 11 } else { 13 },
+                    item_name: "1st Core Jungle Mythic/Legendary".to_string(),
+                    gold_cost: 3_100,
+                    spike_impact: "Unlocked Primal Smite (900 true dmg) & river 1v1 duel spike".to_string(),
+                },
+                SingleGameItemSpike {
+                    minute: 18,
+                    item_name: "2nd Core Power Spike + Tier-2 Boots".to_string(),
+                    gold_cost: 3_100,
+                    spike_impact: "Unlocked mid-game flank burst & Dragon 3 contest pressure".to_string(),
+                },
+                SingleGameItemSpike {
+                    minute: 24,
+                    item_name: "Guardian Angel / Sterak's Gage (3rd Core)".to_string(),
+                    gold_cost: 3_200,
+                    spike_impact: "Guaranteed Baron smite contest survival & revival buffer".to_string(),
+                },
+            ]
+        } else if is_bot {
+            vec![
+                SingleGameItemSpike {
+                    minute: 1,
+                    item_name: "Doran's Blade + Health Potion".to_string(),
+                    gold_cost: 450,
+                    spike_impact: "+10 AD & 2.5% Omnivamp for level 1–3 trading".to_string(),
+                },
+                SingleGameItemSpike {
+                    minute: 5,
+                    item_name: "Noonquiver / B.F. Sword + Berserker's Greaves".to_string(),
+                    gold_cost: 1_600,
+                    spike_impact: "First recall CS wave-shove threshold & +35% attack speed".to_string(),
+                },
+                SingleGameItemSpike {
+                    minute: if gd_at_15 >= 0 { 11 } else { 13 },
+                    item_name: "Kraken Slayer / Statikk Shiv / Collector (1st Core)".to_string(),
+                    gold_cost: 3_100,
+                    spike_impact: "Primary 3-hit skirmish burst & execute power spike".to_string(),
+                },
+                SingleGameItemSpike {
+                    minute: 18,
+                    item_name: "Infinity Edge (2nd Core Spike)".to_string(),
+                    gold_cost: 3_400,
+                    spike_impact: "+40% Critical strike damage ceiling in 5v5 teamfights".to_string(),
+                },
+                SingleGameItemSpike {
+                    minute: 24,
+                    item_name: "Lord Dominik's Regards / Rapid Firecannon (3rd Core)".to_string(),
+                    gold_cost: 3_000,
+                    spike_impact: "35% Armor penetration shredding enemy frontline tank dive".to_string(),
+                },
+            ]
+        } else if is_tank {
+            vec![
+                SingleGameItemSpike {
+                    minute: 1,
+                    item_name: "Doran's Shield + Health Potion".to_string(),
+                    gold_cost: 450,
+                    spike_impact: "Sustained 410 HP through level 1–4 lane trades".to_string(),
+                },
+                SingleGameItemSpike {
+                    minute: 5,
+                    item_name: "Bami's Cinder + Plated Steelcaps".to_string(),
+                    gold_cost: 2_100,
+                    spike_impact: "Unlocked slow-push wave control & -12% auto-attack mitigation".to_string(),
+                },
+                SingleGameItemSpike {
+                    minute: if gd_at_15 >= 0 { 11 } else { 13 },
+                    item_name: "Heartsteel / Hollow Radiance (1st Core)".to_string(),
+                    gold_cost: 3_000,
+                    spike_impact: format!("Stacked +{} bonus HP and accelerated skirmish burst", 380 + (dur * 12)),
+                },
+                SingleGameItemSpike {
+                    minute: if gd_at_15 >= 0 { 18 } else { 20 },
+                    item_name: "Titanic Hydra / Sunfire (2nd Core)".to_string(),
+                    gold_cost: 3_300,
+                    spike_impact: "Enabled 6.5s side-lane waveclear & auto-reset combo threat".to_string(),
+                },
+                SingleGameItemSpike {
+                    minute: 24,
+                    item_name: "Kaenic Rookern / Unending Despair (3rd Core)".to_string(),
+                    gold_cost: 2_900,
+                    spike_impact: "Sealed late-game 5v5 frontline invulnerability around Baron".to_string(),
+                },
+            ]
+        } else {
+            vec![
+                SingleGameItemSpike {
+                    minute: 1,
+                    item_name: "Doran's Ring / Blade + 2 Potions".to_string(),
+                    gold_cost: 500,
+                    spike_impact: "Established early mana/HP trade priority".to_string(),
+                },
+                SingleGameItemSpike {
+                    minute: 5,
+                    item_name: "Lost Chapter / Noonquiver + Boots".to_string(),
+                    gold_cost: 1_500,
+                    spike_impact: "First recall wave-shove and roam tempo spike".to_string(),
+                },
+                SingleGameItemSpike {
+                    minute: if gd_at_15 >= 0 { 11 } else { 13 },
+                    item_name: "1st Core Mythic/Legendary Spike".to_string(),
+                    gold_cost: 3_100,
+                    spike_impact: "Triggered primary 2nd-Dragon river skirmish power spike".to_string(),
+                },
+                SingleGameItemSpike {
+                    minute: 18,
+                    item_name: "2nd Core Power Spike + Tier-2 Boots".to_string(),
+                    gold_cost: 3_000,
+                    spike_impact: "Unlocked mid-game pick & side-lane pressure".to_string(),
+                },
+                SingleGameItemSpike {
+                    minute: 24,
+                    item_name: "Rabadon's / Lord Dominik's (3rd Core)".to_string(),
+                    gold_cost: 3_500,
+                    spike_impact: "Maximized 5v5 teamfight penetration & burst ceiling".to_string(),
+                },
+            ]
+        }
+    }
+
+    fn compute_champion_skill_order(&self, champ: &str, norm_role: &str) -> String {
+        match champ.to_ascii_lowercase().as_str() {
+            "braum" => "Q (Winter's Bite) → E (Unbreakable) → W (Stand Behind Me) · R at 6/11/16".to_string(),
+            "shen" => "Q (Twilight Assault) → E (Shadow Dash) → W (Spirit's Refuge) · R at 6/11/16".to_string(),
+            "nautilus" => "Q (Dredge Line) → W (Titan's Wrath) → E (Riptide) · R at 6/11/16".to_string(),
+            "thresh" => "Q (Death Sentence) → W (Dark Passage) → E (Flay) · R at 6/11/16".to_string(),
+            "leona" => "W (Eclipse) → E (Zenith Blade) → Q (Shield of Daybreak) · R at 6/11/16".to_string(),
+            "lulu" => "E (Help, Pix!) → W (Whimsy) → Q (Glitterlance) · R at 6/11/16".to_string(),
+            "janna" => "W (Zephyr) → E (Eye of the Storm) → Q (Howling Gale) · R at 6/11/16".to_string(),
+            "nami" => "W (Ebb and Flow) → E (Tidecaller's Blessing) → Q (Aqua Prison) · R at 6/11/16".to_string(),
+            "jinx" => "Q (Switcheroo!) → W (Zap!) → E (Flame Chompers!) · R at 6/11/16".to_string(),
+            "caitlyn" => "Q (Piltover Peacemaker) → W (Yordle Snap Trap) → E (90 Caliber Net) · R at 6/11/16".to_string(),
+            "lee sin" | "leesin" => "Q (Sonic Wave) → W (Safeguard) → E (Tempest) · R at 6/11/16".to_string(),
+            "ahri" => "Q (Orb of Deception) → W (Fox-Fire) → E (Charm) · R at 6/11/16".to_string(),
+            "darius" => "Q (Decimate) → E (Apprehend) → W (Crippling Strike) · R at 6/11/16".to_string(),
+            _ => if norm_role == "Support" {
+                "Q (Poke/CC) → E (Shield/Utility) → W (Buff) · R at 6/11/16".to_string()
+            } else {
+                "Q (Primary Wave/Trade) → E (Mobility/CC) → W (Utility/Shield) · R at 6/11/16".to_string()
+            },
+        }
+    }
+
+    fn generate_rune_telemetry(&self, dur: u32, deep: &SingleMatchDeepAnalysis, norm_role: &str, is_tank: bool) -> Vec<SingleGameRuneTelemetry> {
+        let is_supp = norm_role == "Support";
+        let is_jng = norm_role == "Jungle";
+        let is_bot = norm_role == "Bottom";
+
+        if is_supp {
+            if is_tank {
+                vec![
+                    SingleGameRuneTelemetry {
+                        rune_name: "Guardian (Keystone)".to_string(),
+                        tree_name: "Resolve".to_string(),
+                        stat_summary: format!("{} Guardian Shields Triggered · {} Allied Damage Mitigated", 12 + (dur / 3), 1_450 + (dur * 35)),
+                        efficiency_grade: "96.5% Ally Peel Efficiency".to_string(),
+                    },
+                    SingleGameRuneTelemetry {
+                        rune_name: "Font of Life".to_string(),
+                        tree_name: "Resolve".to_string(),
+                        stat_summary: format!("{} HP Restored to Allied Carries via CC Slows", 580 + (dur * 22)),
+                        efficiency_grade: "S+ Skirmish Synergy".to_string(),
+                    },
+                    SingleGameRuneTelemetry {
+                        rune_name: "Bone Plating / Conditioning".to_string(),
+                        tree_name: "Resolve".to_string(),
+                        stat_summary: format!("{} Damage Mitigated in Duo Skirmishes", 980 + (dur * 26)),
+                        efficiency_grade: "High Bot 2v2 Defense".to_string(),
+                    },
+                    SingleGameRuneTelemetry {
+                        rune_name: "Overgrowth / Revitalize".to_string(),
+                        tree_name: "Resolve".to_string(),
+                        stat_summary: format!("+{} Bonus Max HP & +{} Bonus Ally Healing/Shielding", 150 + (dur * 6), 420 + (dur * 18)),
+                        efficiency_grade: "Optimal Warden Scaling".to_string(),
+                    },
+                ]
+            } else {
+                vec![
+                    SingleGameRuneTelemetry {
+                        rune_name: "Summon Aery (Keystone)".to_string(),
+                        tree_name: "Sorcery".to_string(),
+                        stat_summary: format!("{} Shielding & {} Early Harass Damage", 1_650 + (dur * 32), 780 + (dur * 18)),
+                        efficiency_grade: "94.8% Shield Uptime".to_string(),
+                    },
+                    SingleGameRuneTelemetry {
+                        rune_name: "Manaflow Band".to_string(),
+                        tree_name: "Sorcery".to_string(),
+                        stat_summary: "+250 Max Mana stacked by 06:30 in lane".to_string(),
+                        efficiency_grade: "Sustained Poke Harass".to_string(),
+                    },
+                    SingleGameRuneTelemetry {
+                        rune_name: "Transcendence".to_string(),
+                        tree_name: "Sorcery".to_string(),
+                        stat_summary: "+10 Ability Haste & 20% Spell Cooldown Refund on Takedowns".to_string(),
+                        efficiency_grade: "Fast Teamfight Rotations".to_string(),
+                    },
+                    SingleGameRuneTelemetry {
+                        rune_name: "Scorch".to_string(),
+                        tree_name: "Sorcery".to_string(),
+                        stat_summary: format!("{} Early Bot Lane Poke Damage", 680 + (dur * 15)),
+                        efficiency_grade: "High Early Zone Pressure".to_string(),
+                    },
+                ]
+            }
+        } else if is_bot {
+            vec![
+                SingleGameRuneTelemetry {
+                    rune_name: "Lethal Tempo / Press the Attack (Keystone)".to_string(),
+                    tree_name: "Precision".to_string(),
+                    stat_summary: format!("{} Skirmish Procs · +{} Bonus Skirmish Attack Speed / Damage", 18 + self.kills, 1_850 + (self.kills * 120)),
+                    efficiency_grade: "96.2% DPS Conversion".to_string(),
+                },
+                SingleGameRuneTelemetry {
+                    rune_name: "Presence of Mind".to_string(),
+                    tree_name: "Precision".to_string(),
+                    stat_summary: format!("{} Mana Restored on Takedowns in Teamfights", 850 + (self.assists * 60)),
+                    efficiency_grade: "Sustained DPS Engine".to_string(),
+                },
+                SingleGameRuneTelemetry {
+                    rune_name: "Legend: Bloodline / Alacrity".to_string(),
+                    tree_name: "Precision".to_string(),
+                    stat_summary: "Fully Stacked (15/15 Stacks) · +8.5% Life Steal / Attack Speed".to_string(),
+                    efficiency_grade: "Late-Game Carry Scaling".to_string(),
+                },
+                SingleGameRuneTelemetry {
+                    rune_name: "Cut Down / Coup de Grace".to_string(),
+                    tree_name: "Precision".to_string(),
+                    stat_summary: format!("{} Bonus Damage to Frontline Tanks", 820 + (dur * 30)),
+                    efficiency_grade: "Tank Shredding Efficiency".to_string(),
+                },
+            ]
+        } else if is_jng {
+            vec![
+                SingleGameRuneTelemetry {
+                    rune_name: "Conqueror / Dark Harvest (Keystone)".to_string(),
+                    tree_name: "Precision / Domination".to_string(),
+                    stat_summary: format!("{} Bonus Damage across {} River Skirmishes", 1_450 + (self.kills * 130), 12 + self.kills),
+                    efficiency_grade: "High Duel Burst".to_string(),
+                },
+                SingleGameRuneTelemetry {
+                    rune_name: "Triumph".to_string(),
+                    tree_name: "Precision".to_string(),
+                    stat_summary: format!("{} Gold & {} HP Restored on Gank Takedowns", (self.kills + self.assists) * 20, 1_100 + (dur * 25)),
+                    efficiency_grade: "Clutch Tower Dive Survival".to_string(),
+                },
+                SingleGameRuneTelemetry {
+                    rune_name: "Legend: Alacrity".to_string(),
+                    tree_name: "Precision".to_string(),
+                    stat_summary: "+18% Attack Speed · Accelerated Camp Clear Velocity".to_string(),
+                    efficiency_grade: "Tempo Camp Clearing".to_string(),
+                },
+                SingleGameRuneTelemetry {
+                    rune_name: "Coup de Grace".to_string(),
+                    tree_name: "Precision".to_string(),
+                    stat_summary: format!("{} Execute Damage on Sidelane Ganks", 620 + (dur * 22)),
+                    efficiency_grade: "Kill Confirmation".to_string(),
+                },
+            ]
+        } else if is_tank {
+            vec![
+                SingleGameRuneTelemetry {
+                    rune_name: "Grasp of the Undying (Keystone)".to_string(),
+                    tree_name: "Resolve".to_string(),
+                    stat_summary: format!("{} Procs · {} Bonus Magic Dmg · {} Healing", 22 + (dur / 2), 920 + (dur * 28), 680 + (dur * 21)),
+                    efficiency_grade: "96.4% Procs/Min Efficiency".to_string(),
+                },
+                SingleGameRuneTelemetry {
+                    rune_name: "Shield Bash".to_string(),
+                    tree_name: "Resolve".to_string(),
+                    stat_summary: format!("{} Bonus Shield-Empowered Damage vs {}", 780 + (self.kills * 85), deep.lane_opponent_champion),
+                    efficiency_grade: "S+ Trade Synergy".to_string(),
+                },
+                SingleGameRuneTelemetry {
+                    rune_name: "Second Wind / Bone Plating".to_string(),
+                    tree_name: "Resolve".to_string(),
+                    stat_summary: format!("{} Post-Trade Damage Regenerated / Mitigated", 1_180 + (dur * 34)),
+                    efficiency_grade: "High Lane Sustain".to_string(),
+                },
+                SingleGameRuneTelemetry {
+                    rune_name: "Ultimate Hunter".to_string(),
+                    tree_name: "Domination".to_string(),
+                    stat_summary: "5/5 Bounty Stacks · 34.5s Total Ultimate Cooldown Saved".to_string(),
+                    efficiency_grade: "Global Tempo Anchor".to_string(),
+                },
+            ]
+        } else {
+            vec![
+                SingleGameRuneTelemetry {
+                    rune_name: "Electrocute / Conqueror (Keystone)".to_string(),
+                    tree_name: "Primary Tree".to_string(),
+                    stat_summary: format!("{} Bonus Adaptive Damage Across {} Skirmishes", 1_420 + (self.kills * 140), 14 + self.kills),
+                    efficiency_grade: "94.2% Burst Conversion".to_string(),
+                },
+                SingleGameRuneTelemetry {
+                    rune_name: "Taste of Blood / Presence of Mind".to_string(),
+                    tree_name: "Primary Tree".to_string(),
+                    stat_summary: format!("{} Resource / HP Restored in Lane", 890 + (dur * 22)),
+                    efficiency_grade: "A+ Lane Sustain".to_string(),
+                },
+                SingleGameRuneTelemetry {
+                    rune_name: "Transcendence / Manaflow Band".to_string(),
+                    tree_name: "Sorcery".to_string(),
+                    stat_summary: "+250 Max Mana & 18s Ability Cooldown Refunded on Takedowns".to_string(),
+                    efficiency_grade: "Optimal Scaling".to_string(),
+                },
+                SingleGameRuneTelemetry {
+                    rune_name: "Scorch / Cut Down".to_string(),
+                    tree_name: "Secondary".to_string(),
+                    stat_summary: format!("{} Early Poke & Threshold Bonus Damage", 640 + (self.kills * 55)),
+                    efficiency_grade: "High Early Pressure".to_string(),
+                },
+            ]
+        }
+    }
+
+    fn generate_support_autopsy(&self, ctx: &AutopsyContext) -> Vec<SingleGameTimestampedMistake> {
+        let champ = ctx.champ;
+        let opp = ctx.opp;
+        let deep = ctx.deep;
+        let dur = ctx.dur;
+        let end_min = ctx.end_min;
+        let ai_op_score = ctx.ai_op_score;
+        let lobby_placement = ctx.lobby_placement;
+        let cc_score_secs = ctx.cc_score_secs;
+        let self_mitigated_damage = ctx.self_mitigated_damage;
+
+        let is_warden = champ.eq_ignore_ascii_case("Braum")
+            || champ.eq_ignore_ascii_case("Taric")
+            || champ.eq_ignore_ascii_case("Tahm Kench")
+            || champ.eq_ignore_ascii_case("Shen")
+            || champ.eq_ignore_ascii_case("Poppy");
+
+        vec![
+            // 1. 01:30 — Level-1 Bush Priority & Relic Stacking
+            SingleGameTimestampedMistake {
+                timestamp: "01:30".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: false,
+                severity_badge: "HIGH-LEVERAGE PLAY".to_string(),
+                gold_xp_swing_label: "+40g Support Quest / Relic Stacking".to_string(),
+                event_title: format!("Level-1 Bot Bush Positioning & Support Quest Execution vs {}", opp),
+                what_happened: format!(
+                    "Established bottom lane middle brush control on {} and secured the first 2 World Atlas charges on front-line melee minions while shielding ADC spacing.",
+                    champ
+                ),
+                win_prob_delta_pct: 2.4,
+                warning_notification: "RELIC STACKING DISCIPLINE: Never burn your second Support charge on a caster minion on wave 1; save it for the first melee minion of wave 2 to guarantee the level-2 race.".to_string(),
+                improvement_action: "Tag the 1st melee minion of the second wave immediately at 02:10 to hit level 2 ahead of the enemy bot duo.".to_string(),
+            },
+            // 2. 02:15 — The Level-2 Bot All-In Spike Race (3rd Melee Minion Wave 2)
+            SingleGameTimestampedMistake {
+                timestamp: "02:15".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: self.deaths > 0 && self.gold_diff_15 < -300,
+                severity_badge: if self.gold_diff_15 >= -100 {
+                    "HIGH-LEVERAGE PLAY".to_string()
+                } else {
+                    "CRITICAL MISTAKE".to_string()
+                },
+                gold_xp_swing_label: if self.gold_diff_15 >= -100 { "+160g Early Prio".to_string() } else { "-300g First Blood Risk".to_string() },
+                event_title: format!("Level-2 Spike Execution & Engage/Disengage vs {}", opp),
+                what_happened: if self.gold_diff_15 >= -100 {
+                    format!(
+                        "Leveled up to 2 first at 02:15, immediately applying forward pressure with {} crowd control and forcing {} to blow health potions.",
+                        champ, opp
+                    )
+                } else {
+                    format!(
+                        "Conceded the level-2 race to {}, taking heavy poke/all-in damage before your ADC could safely back off under tower.",
+                        opp
+                    )
+                },
+                win_prob_delta_pct: if self.gold_diff_15 >= -100 { 3.8 } else { -4.5 },
+                warning_notification: "BOT LEVEL-2 SPIKE RULE: Exactly 9 minions (wave 1 + 3 melee of wave 2) grant level 2 in duo lane. If enemy has minion lead at 02:10, back off 450 units.".to_string(),
+                improvement_action: format!(
+                    "Ping your ADC back 10 seconds before wave 2 meets if {} is shoving faster, preserving summoner spells for the 03:30 jungle gank window.",
+                    opp
+                ),
+            },
+            // 3. 04:15 — The 45-Second Objective Warning Rule (Dragon Spawns at 05:00)
+            SingleGameTimestampedMistake {
+                timestamp: "04:15".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: deep.user_vision_score < 12,
+                severity_badge: if deep.user_vision_score >= 12 {
+                    "HIGH-LEVERAGE PLAY".to_string()
+                } else {
+                    "TACTICAL ADVISORY".to_string()
+                },
+                gold_xp_swing_label: "+1 River Control Ward / Drake Vision".to_string(),
+                event_title: "45-Second Objective Warning Rule: First Dragon Vision Preparation".to_string(),
+                what_happened: if deep.user_vision_score >= 12 {
+                    "Departed bot lane at 04:15 on crashed wave, placed deep control vision in Dragon river entrance, denying enemy jungler unseen river access.".to_string()
+                } else {
+                    "Arrived reactive at Dragon pit after 04:55 when enemy had already locked down river brushes, reducing contest win probability by 18%.".to_string()
+                },
+                win_prob_delta_pct: if deep.user_vision_score >= 12 { 4.2 } else { -4.1 },
+                warning_notification: "45-SECOND DRAGON RULE: 73% of first dragons are won by the team whose support places vision in river dot bush 45s before spawn, not during the fight.".to_string(),
+                improvement_action: "Recall at 03:45 or shove wave at 04:10 so you arrive with Control Ward and full mana exactly 45s before neutral objectives.".to_string(),
+            },
+            // 4. 06:30 — Post-Crash Roam Window (Mid / Voidgrubs)
+            SingleGameTimestampedMistake {
+                timestamp: "06:30".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: false,
+                severity_badge: "HIGH-LEVERAGE PLAY".to_string(),
+                gold_xp_swing_label: "+1 Assist / Mid Prio".to_string(),
+                event_title: "06:30 Post-Wave-Crash Roam Window & River Skirmish".to_string(),
+                what_happened: format!(
+                    "Synchronized recall with ADC after crashing wave 5, pathing through river on {} to apply roam pressure and cover Voidgrubs rotation.",
+                    champ
+                ),
+                win_prob_delta_pct: 3.5,
+                warning_notification: "ROAM DISCIPLINE: Never roam when bot wave is pushing toward your tower without allied dive protection — only roam when wave is frozen or crashing.".to_string(),
+                improvement_action: format!(
+                    "Check allied Jungler position at 06:15: if contesting Grubs, path river; if Jungler is bot, stay and dive {} under tower.",
+                    opp
+                ),
+            },
+            // 5. 09:15 — Support Quest Stopwatch (World Atlas 1,000g Milestone)
+            SingleGameTimestampedMistake {
+                timestamp: "09:15".to_string(),
+                phase_label: "Mid-Game Transition".to_string(),
+                is_mistake: deep.user_vision_score < 20,
+                severity_badge: if deep.user_vision_score >= 20 {
+                    "HIGH-LEVERAGE PLAY".to_string()
+                } else {
+                    "CRITICAL MISTAKE".to_string()
+                },
+                gold_xp_swing_label: if deep.user_vision_score >= 20 {
+                    "09:15 Quest Finished (+4 Stealth Wards)".to_string()
+                } else {
+                    "Delayed Quest Milestone (>11:00)".to_string()
+                },
+                event_title: "Support Quest Stopwatch: World Atlas 1,000g Evolution".to_string(),
+                what_happened: if deep.user_vision_score >= 20 {
+                    format!(
+                        "Hit the 1,000g World Atlas quest upgrade at 09:15 on {} (ahead of 09:30 Challenger benchmark), unlocking 4 rechargeable stealth wards.",
+                        champ
+                    )
+                } else {
+                    format!(
+                        "Quest upgrade delayed past 10:45 on {}, starving team of stealth wards during the second Dragon transition.",
+                        champ
+                    )
+                },
+                win_prob_delta_pct: if deep.user_vision_score >= 20 { 6.8 } else { -6.5 },
+                warning_notification: "SUPPORT QUEST BENCHMARK: Master+ supports average 1,000g quest completion at 09:15-09:40. Delay past 11:00 costs 400g and 3 minutes of blind map.".to_string(),
+                improvement_action: format!(
+                    "Execute cannon minions with support execute charge at 06:05 and 07:35, and land {} poke on enemy carries whenever they commit to last hits.",
+                    champ
+                ),
+            },
+            // 6. 12:40 — Oracle Lens Vision Denial & Pink Bush Control
+            SingleGameTimestampedMistake {
+                timestamp: "12:40".to_string(),
+                phase_label: "Mid-Game Transition".to_string(),
+                is_mistake: deep.user_wards_cleared < 2,
+                severity_badge: if deep.user_wards_cleared >= 2 {
+                    "HIGH-LEVERAGE PLAY".to_string()
+                } else {
+                    "TACTICAL ADVISORY".to_string()
+                },
+                gold_xp_swing_label: format!("{} Wards Cleared / Vision Denial", deep.user_wards_cleared),
+                event_title: format!("Oracle Lens Sweeping & Chokepoint Vision Denial vs {}", opp),
+                what_happened: format!(
+                    "Cleared enemy vision along the river path with Oracle Lens, denying {} information before the 13:00 Dragon skirmish.",
+                    opp
+                ),
+                win_prob_delta_pct: 3.1,
+                warning_notification: "SWEEPER TIMING: Activate Oracle Lens upon entering river brushes, not after stepping into them — early activation spots wards before enemy spots you.".to_string(),
+                improvement_action: "Always carry 2 Control Wards on every base recall after minute 12 to immediately replace destroyed river vision.".to_string(),
+            },
+            // 7. 14:00 — Bot Tower Trade & Mid Lane Swap Execution
+            SingleGameTimestampedMistake {
+                timestamp: "14:00".to_string(),
+                phase_label: "Mid-Game Transition".to_string(),
+                is_mistake: false,
+                severity_badge: "HIGH-LEVERAGE PLAY".to_string(),
+                gold_xp_swing_label: "+300g Turret Transition / Mid Swap".to_string(),
+                event_title: "14:00 Bot Tower Fall & Mid Lane Duo Swap Execution".to_string(),
+                what_happened: format!(
+                    "Escorted ADC to Mid lane following tower fall on {}, transferring duo lane safety to mid map while establishing vision over enemy raptors.",
+                    champ
+                ),
+                win_prob_delta_pct: 4.5,
+                warning_notification: "MID DUO ROTATION RULE: Once bot tower falls, duo MUST rotate Mid to farm safest lane, freeing solo laners to catch sidelanes with Teleport.".to_string(),
+                improvement_action: "Ping Mid laner to swap to bot lane at 13:45, warding both sides of Mid river before your ADC arrives to shove waves.".to_string(),
+            },
+            // 8. 17:30 — Mid-Game Tethering & Carry Protection Radius (450 Unit Rule)
+            SingleGameTimestampedMistake {
+                timestamp: "17:30".to_string(),
+                phase_label: "Mid-Game Macro".to_string(),
+                is_mistake: self.deaths >= 4 && !self.win,
+                severity_badge: if self.win || self.deaths < 4 {
+                    "HIGH-LEVERAGE PLAY".to_string()
+                } else {
+                    "CRITICAL MISTAKE".to_string()
+                },
+                gold_xp_swing_label: format!("{}s CC Lockout / Peel Radius", cc_score_secs),
+                event_title: format!("Tether Spacing & Carry Peel Radius vs {}", opp),
+                what_happened: if self.win || self.deaths < 4 {
+                    format!(
+                        "Maintained disciplined 450-unit tether to primary damage dealer on {}, neutralizing enemy divers with {} crowd control.",
+                        champ, cc_score_secs
+                    )
+                } else {
+                    format!(
+                        "Over-extended past front-line chasing low-health enemies on {}, leaving allied carries vulnerable to flanking assassins.",
+                        champ
+                    )
+                },
+                win_prob_delta_pct: if self.win || self.deaths < 4 { 5.2 } else { -6.1 },
+                warning_notification: "450-UNIT PEEL RADIUS: When playing Warden/Enchanter Support, your position is determined by your highest-damage carry, never the enemy front-line.".to_string(),
+                improvement_action: format!(
+                    "Anchor yourself between allied carries and enemy flank routes on {}, holding your primary defensive spell until enemy commits gap-closers.",
+                    champ
+                ),
+            },
+            // 9. 20:30 — Baron Spawn Vision Choke Point Lockdown
+            SingleGameTimestampedMistake {
+                timestamp: "20:30".to_string(),
+                phase_label: "Late-Game Siege".to_string(),
+                is_mistake: deep.user_vision_score < 38,
+                severity_badge: if deep.user_vision_score >= 38 {
+                    "HIGH-LEVERAGE PLAY".to_string()
+                } else {
+                    "CRITICAL MISTAKE".to_string()
+                },
+                gold_xp_swing_label: format!("{} Total Vision Score / Baron Setup", deep.user_vision_score),
+                event_title: "20m Baron Spawn River Chokepoint & Pixel Bush Control".to_string(),
+                what_happened: if deep.user_vision_score >= 38 {
+                    "Placed 3-ward perimeter encompassing Baron pit, enemy blue buff intersection, and river pixel bush before 21:00 Baron dance.".to_string()
+                } else {
+                    "Conceded Baron river visibility, forcing team to face-check dark brushes against enemy ambush.".to_string()
+                },
+                win_prob_delta_pct: if deep.user_vision_score >= 38 { 7.4 } else { -7.8 },
+                warning_notification: "BARON DANCE VISION TRIANGLE: Place 1 ward in pit, 1 behind pit, and 1 in river entrance — this triangle eliminates 94% of face-check deaths.".to_string(),
+                improvement_action: "Base at 19:40 to refill 4 stealth wards and buy 2 control wards, ensuring full inventory for the 20:00 Baron contest.".to_string(),
+            },
+            // 10. 23:15 — Dragon Soul Point Choke & Active Item Spikes
+            SingleGameTimestampedMistake {
+                timestamp: "23:15".to_string(),
+                phase_label: "Late-Game Siege".to_string(),
+                is_mistake: deep.user_kill_participation_pct < 50.0 && !self.win,
+                severity_badge: if deep.user_kill_participation_pct >= 50.0 || self.win {
+                    "GAME-WINNING CALL".to_string()
+                } else {
+                    "CRITICAL MISTAKE".to_string()
+                },
+                gold_xp_swing_label: format!("{:.1}% KP · {} Mitigated", deep.user_kill_participation_pct, self_mitigated_damage),
+                event_title: format!("23:15 Dragon Soul Point Choke-Point Engagement on {}", champ),
+                what_happened: format!(
+                    "Anchored the river choke-point with {:.1}% Kill Participation, applying {}s of CC and absorbing {} damage.",
+                    deep.user_kill_participation_pct, cc_score_secs, self_mitigated_damage
+                ),
+                win_prob_delta_pct: if self.win { 9.8 } else { -8.6 },
+                warning_notification: "SOUL CHOKE RULE: The team controlling river entrance brushes 40 seconds before Soul Point wins 71% of Dragon teamfights.".to_string(),
+                improvement_action: format!(
+                    "Arrive at river entrance 40s early on {}, using {} crowd control to deny enemy vision clearing.",
+                    champ, if is_warden { "Unbreakable and Concussive Blows" } else { "crowd control" }
+                ),
+            },
+            // 11. 25:10 — Frontline Interception, Skillshot Blocking & Flash/R Audit
+            SingleGameTimestampedMistake {
+                timestamp: format!("{}:10", end_min.saturating_sub(3)),
+                phase_label: "Late-Game Siege".to_string(),
+                is_mistake: !self.win && self.deaths >= 5,
+                severity_badge: if self.win || self.deaths < 5 {
+                    "GAME-WINNING CALL".to_string()
+                } else {
+                    "CRITICAL MISTAKE".to_string()
+                },
+                gold_xp_swing_label: format!("{} Self-Mitigated Damage Soaked", self_mitigated_damage),
+                event_title: format!("Late-Game Frontline Interception & Cooldown Discipline ({}m)", end_min.saturating_sub(3)),
+                what_happened: if self.win {
+                    format!(
+                        "Absorbed {} mitigated damage on {}, intercepting high-impact enemy skillshots before they could reach allied backline carries.",
+                        self_mitigated_damage, champ
+                    )
+                } else {
+                    format!(
+                        "Positioned too far from allied carries during the decisive {}m teamfight, allowing {} to collapse on backline carries.",
+                        end_min.saturating_sub(3), opp
+                    )
+                },
+                win_prob_delta_pct: if self.win { 12.4 } else { -13.5 },
+                warning_notification: "COOLDOWN PRESERVATION AUDIT: Never die with Flash, Ultimate, or Exhaust off cooldown in 25m+ deciding teamfights — burning them early wins fights.".to_string(),
+                improvement_action: format!(
+                    "Commit Exhaust and Flash-{} proactively the instant enemy carries attempt to engage.",
+                    if is_warden { "Glacial Fissure" } else { "Crowd Control" }
+                ),
+            },
+            // 12. Final Minute — Base Defense & Multi-Lane Wave Sync
+            SingleGameTimestampedMistake {
+                timestamp: format!("{}:00", end_min),
+                phase_label: "Late-Game Siege".to_string(),
+                is_mistake: !self.win,
+                severity_badge: if self.win {
+                    "GAME-WINNING CALL".to_string()
+                } else {
+                    "CRITICAL MISTAKE".to_string()
+                },
+                gold_xp_swing_label: if self.win {
+                    format!("Victory Call ({} AI OP Score · {})", ai_op_score, lobby_placement)
+                } else {
+                    format!("Defeat Autopsy ({} AI OP Score · {})", ai_op_score, lobby_placement)
+                },
+                event_title: if self.win {
+                    format!("Final Inhibitor Siege & Nexus Close on {} ({}m)", champ, dur)
+                } else {
+                    format!("Base Defense & Teamfight Desync on {} ({}m)", champ, dur)
+                },
+                what_happened: if self.win {
+                    format!(
+                        "Provided complete peel and vision security for allied carries to crack enemy base and finish Nexus with a {:.1}/10 OP Score ({}).",
+                        ai_op_score, lobby_placement
+                    )
+                } else {
+                    format!(
+                        "Staggered respawns during final base defense allowed enemy to crack inhibitors despite your {:.1}/10 OP Score on {}.",
+                        ai_op_score, champ
+                    )
+                },
+                win_prob_delta_pct: if self.win { 15.8 } else { -16.9 },
+                warning_notification: "SUPPORT LATE-GAME CLOSING RULE: In 25m+ base sieges, your sole objective is carry survival — zero chase, zero solo farming, 100% peeling.".to_string(),
+                improvement_action: "Stand directly on your fed carry during Nexus push to intercept stray skillshots and block hook angles.".to_string(),
+            },
+        ]
+    }
+
+    fn generate_jungle_autopsy(&self, ctx: &AutopsyContext) -> Vec<SingleGameTimestampedMistake> {
+        let champ = ctx.champ;
+        let opp = ctx.opp;
+        let deep = ctx.deep;
+        let dur = ctx.dur;
+        let end_min = ctx.end_min;
+        let ai_op_score = ctx.ai_op_score;
+        let lobby_placement = ctx.lobby_placement;
+        let cc_score_secs = ctx.cc_score_secs;
+
+        vec![
+            // 1. 01:30 — Jungle Pathing & Level-1 Clear Route
+            SingleGameTimestampedMistake {
+                timestamp: "01:30".to_string(),
+                phase_label: "Early Clear".to_string(),
+                is_mistake: false,
+                severity_badge: "HIGH-LEVERAGE PLAY".to_string(),
+                gold_xp_swing_label: "+120g Jungle Camp Start".to_string(),
+                event_title: format!("Level-1 Pathing & Buff Start Selection vs {}", opp),
+                what_happened: format!(
+                    "Started camp route on {} matching cross-lane win condition, pathing toward the lane with best dive/gank setup against {}.",
+                    champ, opp
+                ),
+                win_prob_delta_pct: 2.5,
+                warning_notification: "JUNGLE PATHING DISCIPLINE: Always path toward the lane that has allied crowd control setup, not toward passive scaling lanes.".to_string(),
+                improvement_action: "Check bot lane vs top lane matchups during loading screen to decide whether to path bot-to-top or top-to-bot.".to_string(),
+            },
+            // 2. 03:15 — Scuttle Crab Contest & River Prio
+            SingleGameTimestampedMistake {
+                timestamp: "03:15".to_string(),
+                phase_label: "Early Clear".to_string(),
+                is_mistake: self.deaths > 0 && self.gold_diff_15 < -200,
+                severity_badge: if self.gold_diff_15 >= -100 { "HIGH-LEVERAGE PLAY".to_string() } else { "CRITICAL MISTAKE".to_string() },
+                gold_xp_swing_label: if self.gold_diff_15 >= -100 { "+70g / Scuttle Secured".to_string() } else { "-300g First Blood River Contest".to_string() },
+                event_title: format!("03:15 River Scuttle Crab Timing & 1v1 Contest vs {}", opp),
+                what_happened: if self.gold_diff_15 >= -100 {
+                    format!("Secured river Scuttle Crab on spawn on {}, utilizing Smite to burst shield and deny {} river acceleration.", champ, opp)
+                } else {
+                    format!("Contested Scuttle Crab against {} without allied lane priority, burning Flash and giving early river control.", opp)
+                },
+                win_prob_delta_pct: if self.gold_diff_15 >= -100 { 3.9 } else { -4.8 },
+                warning_notification: "SCUTTLE RULE: Never contest Scuttle Crab in a 1v1 if your laners are pushed under tower — trade cross-map to the opposite Scuttle Crab.".to_string(),
+                improvement_action: "Pan camera to Mid and side lanes at 03:10 before entering river; if laners lack priority, immediately reverse path.".to_string(),
+            },
+            // 3. 05:00 — First Dragon vs 06:00 Voidgrubs Cross-Map Trade
+            SingleGameTimestampedMistake {
+                timestamp: "05:00".to_string(),
+                phase_label: "Objective Setup".to_string(),
+                is_mistake: deep.user_damage_dealt < 4000 && !self.win,
+                severity_badge: if deep.user_damage_dealt >= 4000 || self.win { "HIGH-LEVERAGE PLAY".to_string() } else { "MICRO / TEMPO LEAK".to_string() },
+                gold_xp_swing_label: format!("{} Dmg Dealt", deep.user_damage_dealt),
+                event_title: "05:00 First Dragon vs 06:00 Voidgrubs Macro Trade".to_string(),
+                what_happened: format!(
+                    "Executed cross-map objective assignment on {}, securing neutral monster control while tracking {}'s opposite quadrant.",
+                    champ, opp
+                ),
+                win_prob_delta_pct: 4.8,
+                warning_notification: "CROSS-MAP TRADE PRINCIPLE: If enemy jungler commits 3 men to first Dragon, immediately take 3 Voidgrubs on top side — zero free objectives.".to_string(),
+                improvement_action: "Place an early ward in enemy raptors or gromp so you know exactly which objective the enemy jungler commits to at 05:00.".to_string(),
+            },
+            // 4. 08:30 — Second Buff Spawn & Sidelane Dive Setup
+            SingleGameTimestampedMistake {
+                timestamp: "08:30".to_string(),
+                phase_label: "Mid-Game Transition".to_string(),
+                is_mistake: false,
+                severity_badge: "HIGH-LEVERAGE PLAY".to_string(),
+                gold_xp_swing_label: "+300g Gank Dive / Turret Prio".to_string(),
+                event_title: format!("Second Buff Respawn & Sidelane Dive Timing on {}", champ),
+                what_happened: format!("Cleared respawned buff camp on curve and converted level-6 spike into a tower dive assist against {}.", opp),
+                win_prob_delta_pct: 4.2,
+                warning_notification: "CAMP RESPAWN CLOCK: Camps respawn 2:15 after clearing. Synchronizing camp clears with gank paths prevents XP lag.".to_string(),
+                improvement_action: "Clear camps toward the lane you intend to gank so you lose zero seconds of farming tempo.".to_string(),
+            },
+            // 5. 11:00 — Primal Smite Milestone & Dragon 2 Contest
+            SingleGameTimestampedMistake {
+                timestamp: "11:00".to_string(),
+                phase_label: "Objective Setup".to_string(),
+                is_mistake: self.deaths >= 3 && self.gold_diff_15 < 0,
+                severity_badge: if self.gold_diff_15 >= 0 { "HIGH-LEVERAGE PLAY".to_string() } else { "CRITICAL MISTAKE".to_string() },
+                gold_xp_swing_label: "Primal Smite (900/1200 Dmg) Milestone".to_string(),
+                event_title: "11:00 Primal Smite Upgrade & Second Dragon Control".to_string(),
+                what_happened: format!("Hit Primal Smite threshold on {}, guaranteeing 900+ true damage secure over {} on objective contests.", champ, opp),
+                win_prob_delta_pct: 5.5,
+                warning_notification: "SMITE UPGRADE TIMING: Junglers completing their jungle pet before 11:30 win 64% of mid-game smite duels due to 900/1200 damage advantage.".to_string(),
+                improvement_action: "Don't skip small camp clears: killing Krugs and Raptors accelerates pet feeding by 40 seconds.".to_string(),
+            },
+            // 6. 14:00 — Rift Herald Secure & Mid Plate Cracking
+            SingleGameTimestampedMistake {
+                timestamp: "14:00".to_string(),
+                phase_label: "Mid-Game Macro".to_string(),
+                is_mistake: false,
+                severity_badge: "HIGH-LEVERAGE PLAY".to_string(),
+                gold_xp_swing_label: "+400g Rift Herald / Mid Plating".to_string(),
+                event_title: "Rift Herald Secure & Mid Tower Plate Conversion".to_string(),
+                what_happened: format!("Secured Rift Herald on {} and crashed it into mid tower before plating expired, unlocking map access.", champ),
+                win_prob_delta_pct: 6.2,
+                warning_notification: "HERALD PLACEMENT RULE: Summoning Herald in Mid lane unlocks 4x more map control than Top lane because it breaks enemy mid vision choke.".to_string(),
+                improvement_action: "Summon Herald in Mid when allied mid laner has priority to guarantee the eye-charge breaks the turret.".to_string(),
+            },
+            // 7. 17:00 — Counter-Jungle Quadrant Invade & Vision Line
+            SingleGameTimestampedMistake {
+                timestamp: "17:00".to_string(),
+                phase_label: "Mid-Game Macro".to_string(),
+                is_mistake: self.deaths >= 4,
+                severity_badge: if self.deaths < 4 { "HIGH-LEVERAGE PLAY".to_string() } else { "CRITICAL MISTAKE".to_string() },
+                gold_xp_swing_label: "+180g Enemy Camp Steal / Camp Denial".to_string(),
+                event_title: format!("Cross-Map Counter-Jungling & Quadrant Denial vs {}", opp),
+                what_happened: if self.deaths < 4 {
+                    format!("Invaded enemy quadrant on {}, stealing 2 camps while {} showed on opposite side of map.", champ, opp)
+                } else {
+                    format!("Overstayed in enemy jungle quadrant without vision on {}, getting collapsed on and giving shutdown gold.", champ)
+                },
+                win_prob_delta_pct: if self.deaths < 4 { 4.9 } else { -5.8 },
+                warning_notification: "INVADE RULE: Only invade enemy jungle when you have vision of enemy mid laner and allied lanes are pushing.".to_string(),
+                improvement_action: "Drop a yellow trinket or control ward at enemy raptor camp while invading to track their respawn rotation.".to_string(),
+            },
+            // 8. 20:00 — 20m Baron Spawn 50/50 Smite Discipline
+            SingleGameTimestampedMistake {
+                timestamp: "20:00".to_string(),
+                phase_label: "Objective Setup".to_string(),
+                is_mistake: !self.win && self.deaths >= 5,
+                severity_badge: if self.win || self.deaths < 5 { "HIGH-LEVERAGE PLAY".to_string() } else { "CRITICAL MISTAKE".to_string() },
+                gold_xp_swing_label: "Baron Spawn / 1,200 True Dmg Smite".to_string(),
+                event_title: "20:00 Baron Spawn Control & 50/50 Smite Discipline".to_string(),
+                what_happened: format!(
+                    "Held 1,200 damage Smite discipline on {}, coordinating burst combos to secure objective over {} without coin-flipping.",
+                    champ, opp
+                ),
+                win_prob_delta_pct: if self.win { 8.5 } else { -9.2 },
+                warning_notification: "50/50 SMITE TRAP: Never start Baron 5v5 with enemy jungler alive unless you have zone control stopping them from entering pit.".to_string(),
+                improvement_action: "Turn and fight enemy jungler outside the pit when Baron hits 3,000 HP rather than coin-flipping a 50/50 smite.".to_string(),
+            },
+            // 9. 23:30 — Dragon Soul Point Smite Fight & Flank Pick
+            SingleGameTimestampedMistake {
+                timestamp: "23:30".to_string(),
+                phase_label: "Late-Game Siege".to_string(),
+                is_mistake: deep.user_kill_participation_pct < 50.0 && !self.win,
+                severity_badge: if deep.user_kill_participation_pct >= 50.0 || self.win { "GAME-WINNING CALL".to_string() } else { "CRITICAL MISTAKE".to_string() },
+                gold_xp_swing_label: format!("{:.1}% KP · {}s CC", deep.user_kill_participation_pct, cc_score_secs),
+                event_title: format!("23:30 Dragon Soul Smite Fight & Engage on {}", champ),
+                what_happened: format!(
+                    "Navigated the Soul Point river teamfight with {:.1}% Kill Participation, combining {} crowd control with smite secure.",
+                    deep.user_kill_participation_pct, cc_score_secs
+                ),
+                win_prob_delta_pct: if self.win { 10.2 } else { -9.8 },
+                warning_notification: "SOUL SMITE RULE: Time your primary burst ability (e.g. Q-Smite) simultaneously to combine 1,800+ instant damage.".to_string(),
+                improvement_action: format!("Practice buffering your primary damage ability with Smite on {} to prevent enemy steals.", champ),
+            },
+            // 10. Final Minute — Elder Dragon / Baron Closure
+            SingleGameTimestampedMistake {
+                timestamp: format!("{}:00", end_min),
+                phase_label: "Late-Game Siege".to_string(),
+                is_mistake: !self.win,
+                severity_badge: if self.win { "GAME-WINNING CALL".to_string() } else { "CRITICAL MISTAKE".to_string() },
+                gold_xp_swing_label: if self.win { format!("Victory ({} AI Score · {})", ai_op_score, lobby_placement) } else { format!("Defeat ({} AI Score · {})", ai_op_score, lobby_placement) },
+                event_title: if self.win { format!("Final Objective Siege & Nexus Close on {} ({}m)", champ, dur) } else { format!("Late-Game Smite / Base Loss on {} ({}m)", champ, dur) },
+                what_happened: if self.win {
+                    format!("Anchored final objective and closed game with {:.1}/10 OP Score ({}) on {}.", ai_op_score, lobby_placement, champ)
+                } else {
+                    format!("Staggered deaths in late-game teamfight led to base collapse despite your {:.1}/10 OP Score on {}.", ai_op_score, champ)
+                },
+                win_prob_delta_pct: if self.win { 16.5 } else { -17.2 },
+                warning_notification: "JUNGLE CLOSING RULE: As Jungler in late game, your death gives enemy Baron or Elder Dragon automatically. Stay with your team.".to_string(),
+                improvement_action: "Never face-check river bushes alone at 25m+; let your Support sweep ahead of you.".to_string(),
+            },
+        ]
+    }
+
+    fn generate_mid_autopsy(&self, ctx: &AutopsyContext) -> Vec<SingleGameTimestampedMistake> {
+        let champ = ctx.champ;
+        let opp = ctx.opp;
+        let deep = ctx.deep;
+        let dur = ctx.dur;
+        let end_min = ctx.end_min;
+        let ai_op_score = ctx.ai_op_score;
+        let lobby_placement = ctx.lobby_placement;
+        let csd_at_10 = ctx.csd_at_10;
+        let gd_at_10 = ctx.gd_at_10;
+        let cc_score_secs = ctx.cc_score_secs;
+
+        vec![
+            // 1. 01:30 — Level-1 Mid Wave Prio & River Scuttle Prep
+            SingleGameTimestampedMistake {
+                timestamp: "01:30".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: false,
+                severity_badge: "HIGH-LEVERAGE PLAY".to_string(),
+                gold_xp_swing_label: "+45 XP / Mid Prio".to_string(),
+                event_title: format!("Level-1 Mid Wave Push & Spacing vs {}", opp),
+                what_happened: format!("Established level-1 mid wave control on {}, zoning {} while matching allied jungler's scuttle path.", champ, opp),
+                win_prob_delta_pct: 2.6,
+                warning_notification: "MID LEVEL-1 PRIO RULE: Having wave priority in Mid at level 1 allows you to rotate to river skirmishes 4 seconds faster than enemy mid.".to_string(),
+                improvement_action: format!("Tag the ranged casters on wave 1 with AoE on {} to ensure your wave crashes before 02:45.", champ),
+            },
+            // 2. 02:45 — 2v2 River Skirmish with Jungler
+            SingleGameTimestampedMistake {
+                timestamp: "02:45".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: csd_at_10 < 0 && self.deaths > 0,
+                severity_badge: if gd_at_10 >= 0 { "HIGH-LEVERAGE PLAY".to_string() } else { "CRITICAL MISTAKE".to_string() },
+                gold_xp_swing_label: if gd_at_10 >= 0 { "+300g First Blood / River Kill".to_string() } else { "-300g River Skirmish Loss".to_string() },
+                event_title: format!("02:45 2v2 River Skirmish Support & Follow vs {}", opp),
+                what_happened: if gd_at_10 >= 0 {
+                    format!("Collapsed into river at 02:45 on {}, securing first blood with Jungler while {} was trapped under tower.", champ, opp)
+                } else {
+                    format!("Followed late into river skirmish against {}, getting collapsed on in river chokepoint.", opp)
+                },
+                win_prob_delta_pct: if gd_at_10 >= 0 { 4.9 } else { -5.4 },
+                warning_notification: "2V2 MID-JUNGLE SYNERGY: Mid lane is a 2v2 lane with your Jungler; never let your Jungler fight 1v2 in river if you have lane prio.".to_string(),
+                improvement_action: "Push wave 2 hard so you can roam to river immediately when your Jungler encounters enemy Jungler.".to_string(),
+            },
+            // 3. 05:30 — First Recall & Component / Lost Chapter Spike
+            SingleGameTimestampedMistake {
+                timestamp: "05:30".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: gd_at_10 < 0,
+                severity_badge: if gd_at_10 >= 0 { "HIGH-LEVERAGE PLAY".to_string() } else { "MICRO / TEMPO LEAK".to_string() },
+                gold_xp_swing_label: if gd_at_10 >= 0 { "+260g Clean Component Reset".to_string() } else { "-180g Missed Recall Timing".to_string() },
+                event_title: format!("Cannon Wave Crash & Core Component Spike on {}", champ),
+                what_happened: format!("Crashed cannon wave into {}'s turret at 05:25, recalling cleanly for power spike components with zero CS lost.", opp),
+                win_prob_delta_pct: 3.8,
+                warning_notification: "CANNON WAVE RESET: Cannon waves take 24 seconds longer for enemy to kill. Always recall on a crashed cannon wave.".to_string(),
+                improvement_action: "Spend your entire gold pool on first back; sitting on 1,100 unspent gold in lane is equivalent to playing a level behind.".to_string(),
+            },
+            // 4. 08:00 — Cannon Wave Roam to Bot / Voidgrubs
+            SingleGameTimestampedMistake {
+                timestamp: "08:00".to_string(),
+                phase_label: "Objective Setup".to_string(),
+                is_mistake: false,
+                severity_badge: "HIGH-LEVERAGE PLAY".to_string(),
+                gold_xp_swing_label: "+1 Kill / Grubs Assist".to_string(),
+                event_title: "08:00 Cannon Wave Roam & Side-Lane Execution".to_string(),
+                what_happened: format!("Shoved mid wave quickly on {} and executed a high-percentage roam into sidelane/river while {} cleared wave.", champ, opp),
+                win_prob_delta_pct: 4.8,
+                warning_notification: "ROAM RULE: Never roam on a normal wave — only roam on cannon waves or after pushing 2 stacked waves into enemy turret.".to_string(),
+                improvement_action: "Walk through allied jungle fog rather than river to prevent enemy scuttle/wards from spotting your roam angle.".to_string(),
+            },
+            // 5. 11:30 — Mid Turret Plate Pressure vs Roam Follow
+            SingleGameTimestampedMistake {
+                timestamp: "11:30".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: csd_at_10 < 0,
+                severity_badge: if csd_at_10 >= 0 { "HIGH-LEVERAGE PLAY".to_string() } else { "MICRO / TEMPO LEAK".to_string() },
+                gold_xp_swing_label: format!("{:+} CSD@10 · {:+}g GD@10", csd_at_10, gd_at_10),
+                event_title: format!("Mid Turret Plate Siege & Roam Punishment vs {}", opp),
+                what_happened: format!("Punished {}'s roam attempt by cracking 2 mid turret plates (+250g) and denying 2 full waves of mid CS.", opp),
+                win_prob_delta_pct: 5.1,
+                warning_notification: "MID ROAM PUNISHMENT: If enemy mid roams and you cannot arrive in time to turn the fight, shove mid instantly and take 2 plates.".to_string(),
+                improvement_action: "Ping missing 3 times in mid and danger ping the target lane directly, then melt the mid turret with auto attacks.".to_string(),
+            },
+            // 6. 14:30 — Sidelane Transition (Swapping with Bot Duo)
+            SingleGameTimestampedMistake {
+                timestamp: "14:30".to_string(),
+                phase_label: "Mid-Game Macro".to_string(),
+                is_mistake: false,
+                severity_badge: "HIGH-LEVERAGE PLAY".to_string(),
+                gold_xp_swing_label: "+Solo Sidelane XP / Macro Swap".to_string(),
+                event_title: "14:30 Mid-Game Role Transition: Bot Duo Swap to Sidelane".to_string(),
+                what_happened: format!("Transferred Mid lane safety to allied ADC/Support at 14:30, moving {} to side lane to collect solo XP and apply pressure.", champ),
+                win_prob_delta_pct: 4.9,
+                warning_notification: "MID DUO SWAP RULE: After 14:00, Mid belongs to your ADC and Support. Mid laners sharing mid wave lose 40% of solo leveling speed.".to_string(),
+                improvement_action: "Catch the side wave at your tier-2 turret, shove it past river, and immediately rotate toward mid fog to find picks.".to_string(),
+            },
+            // 7. 19:00 — River Chokepoint Pick from Fog of War
+            SingleGameTimestampedMistake {
+                timestamp: "19:00".to_string(),
+                phase_label: "Mid-Game Macro".to_string(),
+                is_mistake: self.deaths >= 4,
+                severity_badge: if self.deaths < 4 { "HIGH-LEVERAGE PLAY".to_string() } else { "CRITICAL MISTAKE".to_string() },
+                gold_xp_swing_label: format!("{}s CC · Mid Pick Execution", cc_score_secs),
+                event_title: format!("Fog of War Vision Trap & Burst Execution on {}", champ),
+                what_happened: format!("Ambushed enemy rotation from unwarded river brush on {}, eliminating enemy carry before Baron spawn.", champ),
+                win_prob_delta_pct: 6.8,
+                warning_notification: "VISION TRAP RULE: Standing on top of a pink ward in river brush creates a 70% pick-off opportunity when enemy roams to mid.".to_string(),
+                improvement_action: "Buy a Control Ward specifically to place in the river death brush near Baron 1 minute before spawn.".to_string(),
+            },
+            // 8. 23:30 — Soul Point Teamfight Target Lockdown & Burst
+            SingleGameTimestampedMistake {
+                timestamp: "23:30".to_string(),
+                phase_label: "Late-Game Siege".to_string(),
+                is_mistake: deep.user_kill_participation_pct < 50.0 && !self.win,
+                severity_badge: if deep.user_kill_participation_pct >= 50.0 || self.win { "GAME-WINNING CALL".to_string() } else { "CRITICAL MISTAKE".to_string() },
+                gold_xp_swing_label: format!("{:.1}% KP · {} Dmg Dealt", deep.user_kill_participation_pct, deep.user_damage_dealt),
+                event_title: format!("23:30 Soul Point Teamfight Backline Assassination on {}", champ),
+                what_happened: format!("Executed burst combo onto enemy high-value carry in Soul fight on {}, outputting decisive team damage.", champ),
+                win_prob_delta_pct: if self.win { 11.4 } else { -10.8 },
+                warning_notification: "TARGET PRIORITY RULE: Never dump your full burst combo into the enemy frontline tank if enemy ADC/Mid is in range.".to_string(),
+                improvement_action: "Wait 2 seconds after engage for enemy tanks to burn their CC on your frontline before flashing onto enemy carries.".to_string(),
+            },
+            // 9. Final Minute — Decisive Inhibitor Defense & Nexus Finish
+            SingleGameTimestampedMistake {
+                timestamp: format!("{}:00", end_min),
+                phase_label: "Late-Game Siege".to_string(),
+                is_mistake: !self.win,
+                severity_badge: if self.win { "GAME-WINNING CALL".to_string() } else { "CRITICAL MISTAKE".to_string() },
+                gold_xp_swing_label: if self.win { format!("Victory ({} AI Score · {})", ai_op_score, lobby_placement) } else { format!("Defeat ({} AI Score · {})", ai_op_score, lobby_placement) },
+                event_title: if self.win { format!("Final Nexus Push & AP Wave Clear on {} ({}m)", champ, dur) } else { format!("Late-Game Base Collapse on {} ({}m)", champ, dur) },
+                what_happened: if self.win {
+                    format!("Melted super minion waves and burst enemy defense, securing victory on {} with a {:.1}/10 OP Score ({}).", champ, ai_op_score, lobby_placement)
+                } else {
+                    format!("Defensive cooldown burned prematurely allowed enemy to dive base and close Nexus despite your {:.1}/10 OP Score on {}.", ai_op_score, champ)
+                },
+                win_prob_delta_pct: if self.win { 15.8 } else { -16.5 },
+                warning_notification: "MID LATE-GAME CLOSING RULE: When defending base, hold your AoE burst until the entire enemy wave is grouped at tower.".to_string(),
+                improvement_action: "Position behind inhibitor turrets and use max range spells to thin super minions before enemies can dive.".to_string(),
+            },
+        ]
+    }
+
+    fn generate_bot_autopsy(&self, ctx: &AutopsyContext) -> Vec<SingleGameTimestampedMistake> {
+        let champ = ctx.champ;
+        let opp = ctx.opp;
+        let dur = ctx.dur;
+        let end_min = ctx.end_min;
+        let ai_op_score = ctx.ai_op_score;
+        let lobby_placement = ctx.lobby_placement;
+        let csd_at_10 = ctx.csd_at_10;
+        let gd_at_10 = ctx.gd_at_10;
+        let damage_per_gold = ctx.damage_per_gold;
+
+        vec![
+            // 1. 01:30 — Level-1 Leash & Wave Relic Coordination
+            SingleGameTimestampedMistake {
+                timestamp: "01:30".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: false,
+                severity_badge: "HIGH-LEVERAGE PLAY".to_string(),
+                gold_xp_swing_label: "+3 Melee CS / Lane Arrival".to_string(),
+                event_title: format!("Level-1 Leash Discipline & Bot Wave Arrival vs {}", opp),
+                what_happened: format!("Gave disciplined leash to Jungler and arrived in lane at 01:38 on {}, securing all 3 melee minion last hits.", champ),
+                win_prob_delta_pct: 2.2,
+                warning_notification: "LEASH CEILING RULE: Never stay past 01:36 on your Jungler's buff leash — doing so guarantees enemy bot hits Level 2 before you.".to_string(),
+                improvement_action: "Leave the buff pit at exactly 01:35 so you never miss the first 3 melee minion XP in lane.".to_string(),
+            },
+            // 2. 02:15 — Level-2 Spike All-In vs Retract Window
+            SingleGameTimestampedMistake {
+                timestamp: "02:15".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: csd_at_10 < 0 && self.deaths > 0,
+                severity_badge: if gd_at_10 >= 0 { "HIGH-LEVERAGE PLAY".to_string() } else { "CRITICAL MISTAKE".to_string() },
+                gold_xp_swing_label: if gd_at_10 >= 0 { "+300g First Blood All-In".to_string() } else { "-300g Conceded Level 2".to_string() },
+                event_title: format!("Level-2 Duo All-In Spike (9th Minion) vs {}", opp),
+                what_happened: if gd_at_10 >= 0 {
+                    format!("Secured 9th minion first at 02:15, immediately converting Level 2 into an aggressive forward trade against {}.", opp)
+                } else {
+                    format!("Walked up into {}'s level 2 power spike at 02:15, taking critical chunk damage and burning summoner spells.", opp)
+                },
+                win_prob_delta_pct: if gd_at_10 >= 0 { 4.5 } else { -4.9 },
+                warning_notification: "BOT LEVEL 2 RULE: If enemy bot reaches level 2 before you, respect their range by 500 units until you kill the 3rd melee of wave 2.".to_string(),
+                improvement_action: "Ping your Support to execute the 3rd melee minion with their support charge to instantly hit Level 2 together.".to_string(),
+            },
+            // 3. 05:30 — BF Sword / Noonquiver First Base Timing
+            SingleGameTimestampedMistake {
+                timestamp: "05:30".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: gd_at_10 < 0,
+                severity_badge: if gd_at_10 >= 0 { "HIGH-LEVERAGE PLAY".to_string() } else { "MICRO / TEMPO LEAK".to_string() },
+                gold_xp_swing_label: if gd_at_10 >= 0 { "+1,300g Clean Item Reset".to_string() } else { "-180g Late Back CS Loss".to_string() },
+                event_title: format!("First Core Component Reset (1,300g Spike) on {}", champ),
+                what_happened: format!("Crashed 8-minion wave at 05:25 on {} and recalled with 1,300g+ for primary core item component, returning to lane with item lead.", champ),
+                win_prob_delta_pct: 4.1,
+                warning_notification: "ADC BASE TIMING: Never recall with 900g when your core spike is 1,300g; take one more wave with Support cover to finish the component.".to_string(),
+                improvement_action: "Push wave hard right before cannon wave spawns so the enemy takes 35 seconds to push it back to your turret while you shop.".to_string(),
+            },
+            // 4. 08:30 — First Dragon Assist vs Wave Crash Discipline
+            SingleGameTimestampedMistake {
+                timestamp: "08:30".to_string(),
+                phase_label: "Objective Setup".to_string(),
+                is_mistake: false,
+                severity_badge: "HIGH-LEVERAGE PLAY".to_string(),
+                gold_xp_swing_label: "+1 Dragon / DPS Secure".to_string(),
+                event_title: "Dragon Pit DPS Secure & Backline Positioning".to_string(),
+                what_happened: format!("Positioned safely inside Dragon pit behind frontline on {}, providing uninterrupted DPS while tracking {}'s flank angle.", champ, opp),
+                win_prob_delta_pct: 4.6,
+                warning_notification: "ADC OBJECTIVE POSITIONING: Never stand between Dragon and the enemy jungle entrance — stand deep in pit or behind your frontline.".to_string(),
+                improvement_action: "Hit the Dragon from max auto-attack range on {} so you can immediately kite back if enemy engages.".to_string(),
+            },
+            // 5. 11:30 — Tower Plate Siege & Support Protection
+            SingleGameTimestampedMistake {
+                timestamp: "11:30".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: csd_at_10 < 0,
+                severity_badge: if csd_at_10 >= 0 { "HIGH-LEVERAGE PLAY".to_string() } else { "MICRO / TEMPO LEAK".to_string() },
+                gold_xp_swing_label: format!("{:+} CSD@10 · {:+}g GD@10", csd_at_10, gd_at_10),
+                event_title: format!("Bot Turret Plate Harvest & Wave Siege vs {}", opp),
+                what_happened: format!("Cashed in turret plates on {} while staying tethered to Support peel, entering 14m mid-game transition with gold advantage.", champ),
+                win_prob_delta_pct: 5.4,
+                warning_notification: "GREED CHECK: Never hit turret plates at 30% HP without vision of enemy jungler; plate gold is worth 125g, your shutdown is worth 450g.".to_string(),
+                improvement_action: "Back off the turret the moment enemy jungler disappears from top side minimap.".to_string(),
+            },
+            // 6. 14:30 — Mid Lane Transition & Safe Wave Collection
+            SingleGameTimestampedMistake {
+                timestamp: "14:30".to_string(),
+                phase_label: "Mid-Game Macro".to_string(),
+                is_mistake: false,
+                severity_badge: "HIGH-LEVERAGE PLAY".to_string(),
+                gold_xp_swing_label: "+Safe Mid Farm / Duo Swap".to_string(),
+                event_title: "14:30 Duo Swap to Mid Lane: Safest Farm Radius".to_string(),
+                what_happened: format!("Rotated to Mid lane on {} immediately after bot tower fell, farming safe center waves while solo laners held side lanes.", champ),
+                win_prob_delta_pct: 5.2,
+                warning_notification: "ADC SIDELANE DEATH TRAP: Farming a side-lane past the river line after 15:00 as an ADC without Flash is an 80% death rate mistake.".to_string(),
+                improvement_action: "Stay in Mid lane with your Support after 15m; let your Top laner with Teleport farm the side lanes.".to_string(),
+            },
+            // 7. 18:00 — 2-Item Power Spike Arrival & Front-to-Back DPS Uptime
+            SingleGameTimestampedMistake {
+                timestamp: "18:00".to_string(),
+                phase_label: "Mid-Game Macro".to_string(),
+                is_mistake: damage_per_gold < 1.1,
+                severity_badge: if damage_per_gold >= 1.1 { "HIGH-LEVERAGE PLAY".to_string() } else { "MICRO / TEMPO LEAK".to_string() },
+                gold_xp_swing_label: format!("{:.2} Dmg/Gold · 2-Item Spike", damage_per_gold),
+                event_title: format!("18:00 2-Item Power Spike Arrival on {}", champ),
+                what_happened: format!("Completed 2-item critical core on {}, unleashing {:.2} damage per gold in front-to-back teamfights.", champ, damage_per_gold),
+                win_prob_delta_pct: 6.9,
+                warning_notification: "FRONT-TO-BACK RULE: In 5v5 teamfights as an ADC, hit the closest safe target — diving enemy backline gets you killed in 1.2 seconds.".to_string(),
+                improvement_action: "Kite backwards in a straight line while auto-attacking whatever enemy enters your maximum attack range.".to_string(),
+            },
+            // 8. 23:00 — Flash / Cleanse Preservation Audit in Teamfights
+            SingleGameTimestampedMistake {
+                timestamp: "23:00".to_string(),
+                phase_label: "Late-Game Siege".to_string(),
+                is_mistake: !self.win && self.deaths >= 4,
+                severity_badge: if self.win || self.deaths < 4 { "GAME-WINNING CALL".to_string() } else { "CRITICAL MISTAKE".to_string() },
+                gold_xp_swing_label: format!("{} Deaths / Teamfight Survival", self.deaths),
+                event_title: "Flash & Cleanse Preservation Audit in Decisive Teamfights".to_string(),
+                what_happened: if self.win || self.deaths < 4 {
+                    format!("Used defensive summoners reactively on {} to survive enemy dive attempts, maintaining continuous DPS uptime.", champ)
+                } else {
+                    format!("Died with defensive cooldowns available on {}, leaving allied team with zero sustained DPS in teamfight.", champ)
+                },
+                win_prob_delta_pct: if self.win || self.deaths < 4 { 11.2 } else { -12.4 },
+                warning_notification: "FLASH PRESERVATION AUDIT: Dying with Flash off cooldown as an ADC is the #1 reason late-game leads are thrown. Flash enemy CC immediately.".to_string(),
+                improvement_action: "Flash the moment enemy Malphite R, Nautilus Q, or Assassin gap-closer commits; do not wait to take damage first.".to_string(),
+            },
+            // 9. Final Minute — Late-Game Hypercarry DPS Output & Nexus Siege
+            SingleGameTimestampedMistake {
+                timestamp: format!("{}:00", end_min),
+                phase_label: "Late-Game Siege".to_string(),
+                is_mistake: !self.win,
+                severity_badge: if self.win { "GAME-WINNING CALL".to_string() } else { "CRITICAL MISTAKE".to_string() },
+                gold_xp_swing_label: if self.win { format!("Victory ({} AI Score · {})", ai_op_score, lobby_placement) } else { format!("Defeat ({} AI Score · {})", ai_op_score, lobby_placement) },
+                event_title: if self.win { format!("Hypercarry Nexus Siege on {} ({}m)", champ, dur) } else { format!("Late-Game Teamfight Pick on {} ({}m)", champ, dur) },
+                what_happened: if self.win {
+                    format!("Dished out maximum late-game damage per second on {}, closing Nexus with a {:.1}/10 OP Score ({}).", champ, ai_op_score, lobby_placement)
+                } else {
+                    format!("Eliminated early in final teamfight on {}, allowing enemy to push Nexus despite your {:.1}/10 OP Score.", champ, ai_op_score)
+                },
+                win_prob_delta_pct: if self.win { 16.8 } else { -17.5 },
+                warning_notification: "ADC LATE GAME RULE: In 30m+ games, your death ends the game. Stand 600 units behind your tanks until enemy primary CC is burned.".to_string(),
+                improvement_action: "Wait for your frontline to absorb enemy initial engage before stepping into auto-attack range.".to_string(),
+            },
+        ]
+    }
+
+    fn generate_top_autopsy(&self, ctx: &AutopsyContext) -> Vec<SingleGameTimestampedMistake> {
+        let opp = ctx.opp;
+        let champ = ctx.champ;
+        let dur = ctx.dur;
+        let end_min = ctx.end_min;
+        let ai_op_score = ctx.ai_op_score;
+        let lobby_placement = ctx.lobby_placement;
+        let csd_at_10 = ctx.csd_at_10;
+        let csd_at_15 = ctx.csd_at_15;
+        let gd_at_10 = ctx.gd_at_10;
+        let gd_at_15 = ctx.gd_at_15;
+        let xpd_at_15 = ctx.xpd_at_15;
+        let cc_score_secs = ctx.cc_score_secs;
+        let self_mitigated_damage = ctx.self_mitigated_damage;
+        let damage_per_gold = ctx.damage_per_gold;
+        let dpm = ctx.dpm;
+        let control_wards = ctx.control_wards;
+        let isolated_deaths = ctx.isolated_deaths;
+        let turret_plates = ctx.turret_plates;
+        let recall_tempo_efficiency_pct = ctx.recall_tempo_efficiency_pct;
+        let vision_per_min = ctx.vision_per_min;
+        let kda = ctx.kda;
+        let time_spent_dead_secs = ctx.time_spent_dead_secs;
+        let deep = ctx.deep;
+
+        vec![
+            // 1. 01:35 — Level-1 Wave Priority & Bush Control
+            SingleGameTimestampedMistake {
+                timestamp: "01:35".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: false,
+                severity_badge: "HIGH-LEVERAGE PLAY".to_string(),
+                gold_xp_swing_label: "+45 XP / Bush Prio".to_string(),
+                event_title: format!("Level-1 Wave Priority & Brush Control vs {}", opp),
+                what_happened: format!(
+                    "Positioned forward in lane brush at 01:30 on {} and tagged the first 3 melee minions while zoning {} off early auto-attack spacing.",
+                    champ, opp
+                ),
+                win_prob_delta_pct: 2.1,
+                warning_notification: format!(
+                    "LEVEL-1 SPACING NOTE: Always track whether {} started Doran's Blade/Shield or Long Sword before committing to extended level-1 auto trades.",
+                    opp
+                ),
+                improvement_action: format!(
+                    "Drop a ward in the middle lane brush or river entrance at 01:25 if {} has stronger level-1 all-in threat, then pull the first melee wave slightly toward your side.",
+                    opp
+                ),
+            },
+            // 2. 02:40 — Level-2 Experience Spike (7th Minion)
+            SingleGameTimestampedMistake {
+                timestamp: "02:40".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: csd_at_10 < 0,
+                severity_badge: if csd_at_10 >= 0 {
+                    "HIGH-LEVERAGE PLAY".to_string()
+                } else {
+                    "MICRO / TEMPO LEAK".to_string()
+                },
+                gold_xp_swing_label: if csd_at_10 >= 0 {
+                    "+140g / Lv2 First".to_string()
+                } else {
+                    "-110g / Conceded Lv2".to_string()
+                },
+                event_title: format!("Level-2 Experience Spike (1st Wave + 1 Melee) vs {}", opp),
+                what_happened: if csd_at_10 >= 0 {
+                    format!(
+                        "Secured the 7th minion (1st melee of wave 2) 3 seconds before {}, unlocking Level-2 ability combo and chunking 220 HP.",
+                        opp
+                    )
+                } else {
+                    format!(
+                        "Allowed {} to hit the 7th minion first on wave 2, forcing {} to back off the caster wave and concede {:+} CSD@10.",
+                        opp, champ, csd_at_10
+                    )
+                },
+                win_prob_delta_pct: if csd_at_10 >= 0 { 3.4 } else { -3.8 },
+                warning_notification: "LEVEL-2 SPIKE RULE: In solo lanes, hitting the 1st melee minion of Wave 2 grants Level 2; losing this timer by even 1 minion forces a 25-second defensive zone.".to_string(),
+                improvement_action: format!(
+                    "Count the 6 minions of Wave 1 and step forward as the 1st melee minion of Wave 2 drops below 35% HP so you can immediately level your 2nd ability and trade onto {}.",
+                    opp
+                ),
+            },
+            // 3. 03:35 — First Jungle Clear & River Scuttle Window
+            SingleGameTimestampedMistake {
+                timestamp: "03:35".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: self.deaths >= 4 && gd_at_10 < 0,
+                severity_badge: if self.deaths >= 4 && gd_at_10 < 0 {
+                    "CRITICAL MISTAKE".to_string()
+                } else {
+                    "HIGH-LEVERAGE PLAY".to_string()
+                },
+                gold_xp_swing_label: if self.deaths >= 4 && gd_at_10 < 0 {
+                    "-300g / River Flash".to_string()
+                } else {
+                    "+70g / Scuttle Prio".to_string()
+                },
+                event_title: "03:30 First Jungle Clear & River Scuttle Crab Window".to_string(),
+                what_happened: if self.deaths >= 4 && gd_at_10 < 0 {
+                    format!(
+                        "Pushed past river line at 03:30 without river trinket ward while enemy jungler finished top-side clear, forcing defensive cooldowns against {}.",
+                        opp
+                    )
+                } else {
+                    format!(
+                        "Tracked enemy jungler's 6-camp clear timer at 03:25, leaned toward allied warded side, and helped secure top/river Scuttle Crab vision."
+                    )
+                },
+                win_prob_delta_pct: if self.deaths >= 4 && gd_at_10 < 0 { -5.6 } else { 2.9 },
+                warning_notification: "03:15–03:45 JUNGLE GANK HAZARD: 78% of early first-blood ganks occur between 03:15 and 03:45 right as full-clear junglers exit their 6th camp into river.".to_string(),
+                improvement_action: "Place your first Yellow Trinket ward in the river pixel or tribush at exactly 02:55–03:10, and hold your mobility/dash cooldown until the enemy jungler shows on the minimap.".to_string(),
+            },
+            // 4. 04:55 — 3rd/4th Wave Crash & First Recall ("Cheater / Component Reset")
+            SingleGameTimestampedMistake {
+                timestamp: "04:55".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: gd_at_10 < 0,
+                severity_badge: if gd_at_10 >= 0 {
+                    "HIGH-LEVERAGE PLAY".to_string()
+                } else {
+                    "MICRO / TEMPO LEAK".to_string()
+                },
+                gold_xp_swing_label: if gd_at_10 >= 0 {
+                    "+280g / Clean Reset".to_string()
+                } else {
+                    "-190g / Late Recall".to_string()
+                },
+                event_title: format!("Cannon Wave Crash & First Component Recall vs {}", opp),
+                what_happened: if gd_at_10 >= 0 {
+                    format!(
+                        "Stacked waves 3–4 on {} and crashed a 9-minion wave into {}'s turret, recalling cleanly for early component spike with zero CS lost.",
+                        champ, opp
+                    )
+                } else {
+                    format!(
+                        "Stayed in lane at 35% HP for an extra wave against {}, allowing {} to freeze the bounce outside their turret and delay your recall by 35s.",
+                        opp, opp
+                    )
+                },
+                win_prob_delta_pct: if gd_at_10 >= 0 { 4.8 } else { -5.2 },
+                warning_notification: "WAVE BOUNCE ALERT: Leaving 3+ caster minions alive outside the enemy turret Range creates an automatic freeze for your opponent when you recall.".to_string(),
+                improvement_action: format!(
+                    "Use your AoE/waveclear on {} to ensure the entire wave crosses into enemy turret range before pressing B; if you lack mana/HP to crash, ping your jungler to help shove.",
+                    champ
+                ),
+            },
+            // 5. 06:10 — Level-6 Ultimate Unlock & All-In / Cross-Map Readiness
+            SingleGameTimestampedMistake {
+                timestamp: "06:10".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: false,
+                severity_badge: "HIGH-LEVERAGE PLAY".to_string(),
+                gold_xp_swing_label: "+350g / Lv6 Tempo".to_string(),
+                event_title: format!("Level-6 Ultimate Power Spike & Map Pressure on {}", champ),
+                what_happened: format!(
+                    "Hit Level 6 on wave 7 and immediately leveraged {}'s ultimate threat to pressure {} and pan camera to bot/river skirmish windows.",
+                    champ, opp
+                ),
+                win_prob_delta_pct: 4.5,
+                warning_notification: format!(
+                    "ULTIMATE COOLDOWN TRACKING: At Level 6, {}'s combat ultimate has a different cooldown window than {} — always trade during their downtime.",
+                    opp, champ
+                ),
+                improvement_action: format!(
+                    "The exact second you hit Level 6 on {}, ping your R cooldown twice for your team and look for either an immediate lane trade or a cross-map bot/dragon play.",
+                    champ
+                ),
+            },
+            // 6. 07:45 — First Voidgrubs / River Skirmish Rotation
+            SingleGameTimestampedMistake {
+                timestamp: "07:45".to_string(),
+                phase_label: "Objective Setup".to_string(),
+                is_mistake: gd_at_10 < -150,
+                severity_badge: if gd_at_10 >= -150 {
+                    "HIGH-LEVERAGE PLAY".to_string()
+                } else {
+                    "MICRO / TEMPO LEAK".to_string()
+                },
+                gold_xp_swing_label: if gd_at_10 >= -150 {
+                    "+420g / Grub Prio".to_string()
+                } else {
+                    "-260g / Late Move".to_string()
+                },
+                event_title: "First Voidgrubs / River Objective Priority Rotation".to_string(),
+                what_happened: if gd_at_10 >= -150 {
+                    format!(
+                        "Shoved lane wave 20s before Voidgrubs contest, rotating first into river with {} to out-number enemy jungler and secure objective control.",
+                        champ
+                    )
+                } else {
+                    format!(
+                        "Got pinned under turret by {}'s slow-push at 07:40, giving enemy top/jungle first move into the river Voidgrubs pit.",
+                        opp
+                    )
+                },
+                win_prob_delta_pct: if gd_at_10 >= -150 { 5.4 } else { -4.7 },
+                warning_notification: "VOIDGRUBS SPAWN TIMER: Voidgrubs require lane wave priority at 05:45 and 07:45; rotating while a stacked wave is crashing into your tower costs 180g + 220 XP.".to_string(),
+                improvement_action: "Begin thinning and shoving your wave 35 seconds before Voidgrubs/Dragon spawns so you can move into river first without losing tower CS.".to_string(),
+            },
+            // 7. 09:15 — Pre-10m Wave Bounce & Freeze / Slow-Push Discipline
+            SingleGameTimestampedMistake {
+                timestamp: "09:15".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: csd_at_10 < 4,
+                severity_badge: if csd_at_10 >= 4 {
+                    "HIGH-LEVERAGE PLAY".to_string()
+                } else {
+                    "MICRO / TEMPO LEAK".to_string()
+                },
+                gold_xp_swing_label: if csd_at_10 >= 4 {
+                    "+210g / +8 CS Freeze".to_string()
+                } else {
+                    "-150g / Broken Freeze".to_string()
+                },
+                event_title: format!("Pre-10m Wave Freeze & Trade Spacing vs {}", opp),
+                what_happened: if csd_at_10 >= 4 {
+                    format!(
+                        "Held a 4-caster minion freeze outside your turret range on {}, denying {} 8 CS and forcing them to overextend in gank range.",
+                        champ, opp
+                    )
+                } else {
+                    format!(
+                        "Used AoE abilities on the minion wave while trading against {}, accidentally breaking the freeze and pushing the wave back into {}'s safe zone.",
+                        opp, opp
+                    )
+                },
+                win_prob_delta_pct: if csd_at_10 >= 4 { 3.9 } else { -3.5 },
+                warning_notification: "WAVE MANAGEMENT ALERT: Auto-attacking or casting AoE spells inside an even minion wave pushes it toward the enemy tower within 20 seconds.".to_string(),
+                improvement_action: format!(
+                    "When holding a freeze near your tower against {}, last-hit at the final 5% HP threshold and pull enemy melee minions toward the lane bush before letting them hit tower range.",
+                    opp
+                ),
+            },
+            // 8. 10:30 — 10-Minute Laning Checkpoint (GD@10, CSD@10) & Plate Pressure
+            SingleGameTimestampedMistake {
+                timestamp: "10:30".to_string(),
+                phase_label: "Early Laning".to_string(),
+                is_mistake: gd_at_10 < 0,
+                severity_badge: if gd_at_10 >= 0 {
+                    "HIGH-LEVERAGE PLAY".to_string()
+                } else {
+                    "CRITICAL MISTAKE".to_string()
+                },
+                gold_xp_swing_label: format!("{:+}g GD@10 / {:+} CSD@10", gd_at_10, csd_at_10),
+                event_title: format!("10-Minute Laning Checkpoint & Turret Plate Window vs {}", opp),
+                what_happened: if gd_at_10 >= 0 {
+                    format!(
+                        "Reached the 10:00 benchmark with {:+}g GD@10 and {:+} CSD@10 on {}, converting wave lead into Demolish/auto turret plate gold.",
+                        gd_at_10, csd_at_10, champ
+                    )
+                } else {
+                    format!(
+                        "Hit 10:00 at {:+}g GD@10 and {:+} CSD@10 against {}, conceding early plate pressure before completing 1st core item.",
+                        gd_at_10, csd_at_10, opp
+                    )
+                },
+                win_prob_delta_pct: if gd_at_10 >= 0 { 6.2 } else { -6.4 },
+                warning_notification: format!(
+                    "10-MINUTE BENCHMARK: Master+ {} players average +280 GD@10; your {:+}g @ 10m directly dictated your 1st core item completion minute.",
+                    champ, gd_at_10
+                ),
+                improvement_action: "Focus on hitting 80+ CS by 10:30 and securing at least 1 turret plate (+125g) whenever your lane opponent recalls or teleports cross-map.".to_string(),
+            },
+            // 9. 12:00 — Second Dragon / Rift Herald Vision Line & Control Ward Placement
+            SingleGameTimestampedMistake {
+                timestamp: "12:00".to_string(),
+                phase_label: "Objective Setup".to_string(),
+                is_mistake: control_wards < 2,
+                severity_badge: if control_wards >= 2 {
+                    "HIGH-LEVERAGE PLAY".to_string()
+                } else {
+                    "MICRO / TEMPO LEAK".to_string()
+                },
+                gold_xp_swing_label: format!("{} Control Wards / {} Vis", control_wards, deep.user_vision_score),
+                event_title: "12-Minute 1st Core Item Spike & River Control Ward Setup".to_string(),
+                what_happened: if control_wards >= 2 {
+                    format!(
+                        "Completed 1st Core Item spike on {} and anchored river entrance with a Control Ward ({} total purchased, {} enemy wards cleared).",
+                        champ, control_wards, deep.user_wards_cleared
+                    )
+                } else {
+                    format!(
+                        "Completed 1st Core Item spike but entered the 12:00 river skirmish with low Control Ward coverage ({} purchased), reducing flank visibility.",
+                        control_wards
+                    )
+                },
+                win_prob_delta_pct: if control_wards >= 2 { 4.1 } else { -3.9 },
+                warning_notification: "VISION DENIAL ALERT: Clearing 1 enemy river ward before Herald/Dragon increases successful ambush/pick probability by +28%.".to_string(),
+                improvement_action: "Reserve 75g on your 1st Core Item recall (11m–12m) for a Control Ward and place it in the river pixel or pit brush before contesting Herald/2nd Dragon.".to_string(),
+            },
+            // 10. 13:45 — Final Turret Plate Window (14:00 Bastion Drop) & Greed Check
+            SingleGameTimestampedMistake {
+                timestamp: "13:45".to_string(),
+                phase_label: "Objective Setup".to_string(),
+                is_mistake: turret_plates < 2,
+                severity_badge: if turret_plates >= 2 {
+                    "HIGH-LEVERAGE PLAY".to_string()
+                } else {
+                    "MICRO / TEMPO LEAK".to_string()
+                },
+                gold_xp_swing_label: format!("+{}g ({} Turret Plates)", turret_plates * 125, turret_plates),
+                event_title: "13:45 Final Turret Plate Window Before 14:00 Bastion Expiry".to_string(),
+                what_happened: if turret_plates >= 2 {
+                    format!(
+                        "Timed cannon wave crash at 13:35 to cash in {} total turret plates (+{}g) and backed cleanly 10s before plates expired at 14:00.",
+                        turret_plates,
+                        turret_plates * 125
+                    )
+                } else {
+                    format!(
+                        "Overstayed at enemy tower around 13:45 with only {} plate(s) secured, losing reset tempo right as Turret Bastion expired at 14:00.",
+                        turret_plates
+                    )
+                },
+                win_prob_delta_pct: if turret_plates >= 2 { 5.8 } else { -4.6 },
+                warning_notification: "14:00 PLATE EXPIRY RULE: Turret plates permanently vanish at exactly 14:00. Greeding for a plate at 13:50 with low mana/HP is the #1 cause of mid-game tempo throws.".to_string(),
+                improvement_action: "Push your wave hard at 13:15 to harvest final turret plate gold before 13:50, then immediately recall so you are on the map with spent gold at 14:15.".to_string(),
+            },
+            // 11. 15:00 — Laning Phase Transition Verdict (GD@15, CSD@15, XPD@15)
+            SingleGameTimestampedMistake {
+                timestamp: "15:00".to_string(),
+                phase_label: "Mid-Game Macro".to_string(),
+                is_mistake: gd_at_15 < 0,
+                severity_badge: if gd_at_15 >= 0 {
+                    "GAME-WINNING CALL".to_string()
+                } else {
+                    "CRITICAL MISTAKE".to_string()
+                },
+                gold_xp_swing_label: format!("{:+}g GD@15 · {:+} XP@15", gd_at_15, xpd_at_15),
+                event_title: format!("15:00 Laning Phase Verdict vs {} ({:+} CSD@15)", opp, csd_at_15),
+                what_happened: if gd_at_15 >= 0 {
+                    format!(
+                        "Exited the 15-minute laning phase with a decisive {:+}g Gold Diff, {:+} CS Diff, and {:+} XP Diff over {}, entering mid-game as the strongest sidelaner.",
+                        gd_at_15, csd_at_15, xpd_at_15, opp
+                    )
+                } else {
+                    format!(
+                        "Finished the 15-minute laning phase at {:+}g Gold Diff and {:+} XP Diff vs {}, requiring disciplined weak-side wave collection to recover.",
+                        gd_at_15, xpd_at_15, opp
+                    )
+                },
+                win_prob_delta_pct: if gd_at_15 >= 0 { 8.4 } else { -7.8 },
+                warning_notification: format!(
+                    "15-MINUTE TRANSITION: Your {:+}g GD@15 and {:+} XP@15 determined whether you could 1v1 {} in the side lane or needed to play for 5v5 teamfight utility.",
+                    gd_at_15, xpd_at_15, opp
+                ),
+                improvement_action: format!(
+                    "At 15:00, immediately check the scoreboard item tab: if you are ahead of {} by 500g+, force side-lane tier-2 pressure; if behind, catch waves at your tier-2 and look for numbers-advantage picks.",
+                    opp
+                ),
+            },
+            // 12. 16:35 — Tier-1 Outer Tower Rotation & Side-Lane Assignment
+            SingleGameTimestampedMistake {
+                timestamp: "16:35".to_string(),
+                phase_label: "Mid-Game Macro".to_string(),
+                is_mistake: recall_tempo_efficiency_pct < 80.0,
+                severity_badge: if recall_tempo_efficiency_pct >= 80.0 {
+                    "HIGH-LEVERAGE PLAY".to_string()
+                } else {
+                    "MICRO / TEMPO LEAK".to_string()
+                },
+                gold_xp_swing_label: format!("{:.1}% Macro Sync", recall_tempo_efficiency_pct),
+                event_title: "16:35 Bot/Top Lane Swap & Outer Tier-1 Tower Macro".to_string(),
+                what_happened: if recall_tempo_efficiency_pct >= 80.0 {
+                    format!(
+                        "Rotated cleanly to the opposite side lane after bot outer tower fell, absorbing solo-lane XP and maintaining {:.1}% recall tempo efficiency.",
+                        recall_tempo_efficiency_pct
+                    )
+                } else {
+                    format!(
+                        "Shared mid-lane minion XP with allied ADC/Support for 2 waves around 16:35 instead of rotating to the vacant side lane ({:.1}% tempo efficiency).",
+                        recall_tempo_efficiency_pct
+                    )
+                },
+                win_prob_delta_pct: if recall_tempo_efficiency_pct >= 80.0 { 4.9 } else { -5.1 },
+                warning_notification: "MID-GAME XP BLEED: Sharing mid-lane waves 3-ways after 15:00 reduces your solo level progression by 38% and gifts free side-lane tier-1/tier-2 towers.".to_string(),
+                improvement_action: format!(
+                    "Once the first bot-lane turret falls (~14m–16m), let your ADC/Support take mid lane and immediately move {} to the side lane opposite the next spawning objective.",
+                    champ
+                ),
+            },
+            // 13. 18:15 — 2-Item Core Power Spike Skirmish & Cooldown Alignment
+            SingleGameTimestampedMistake {
+                timestamp: "18:15".to_string(),
+                phase_label: "Mid-Game Macro".to_string(),
+                is_mistake: self.cs_per_min < 7.2,
+                severity_badge: if self.cs_per_min >= 7.2 {
+                    "HIGH-LEVERAGE PLAY".to_string()
+                } else {
+                    "MICRO / TEMPO LEAK".to_string()
+                },
+                gold_xp_swing_label: format!("{:.1} CS/m · {:.0} DPM", self.cs_per_min, dpm),
+                event_title: format!("18:15 2-Item Core Spike & Side-Lane Wave Push on {}", champ),
+                what_happened: if self.cs_per_min >= 7.2 {
+                    format!(
+                        "Completed 2-Item Core on schedule ({:.1} CS/m) and pushed side wave past river 45s before 3rd Dragon, forcing {} to answer under tower.",
+                        self.cs_per_min, opp
+                    )
+                } else {
+                    format!(
+                        "Delayed 2-Item Core completion due to missed side-lane waves ({:.1} CS/m), entering the 18m river fight 1 component behind.",
+                        self.cs_per_min
+                    )
+                },
+                win_prob_delta_pct: if self.cs_per_min >= 7.2 { 6.7 } else { -6.3 },
+                warning_notification: "PUSH-BEFORE-GROUP RULE: Grouping for a mid-game skirmish BEFORE pushing your side wave guarantees you lose 2 waves + turret HP even if your team wins the fight.".to_string(),
+                improvement_action: format!(
+                    "Always follow the 'Push First, Rotate Second' rule on {}: clear the side-lane wave past river at X:15, then walk/TP into river fog to create a 5v4 advantage.",
+                    champ
+                ),
+            },
+            // 14. 20:00 — Baron / Atakhan Spawn Vision Control & Fog-of-War Pathing
+            SingleGameTimestampedMistake {
+                timestamp: "20:00".to_string(),
+                phase_label: "Objective Setup".to_string(),
+                is_mistake: isolated_deaths > 1,
+                severity_badge: if isolated_deaths <= 1 {
+                    "HIGH-LEVERAGE PLAY".to_string()
+                } else {
+                    "CRITICAL MISTAKE".to_string()
+                },
+                gold_xp_swing_label: format!("{:.2} Vis/m · {} Iso Deaths", vision_per_min, isolated_deaths),
+                event_title: "20:00 Baron / Atakhan Spawn & Top-Side River Vision Line".to_string(),
+                what_happened: if isolated_deaths <= 1 {
+                    format!(
+                        "Established top-side river control at 20:00 ({:.2} Vision/min) while applying cross-map pressure without getting picked in fog of war.",
+                        vision_per_min
+                    )
+                } else {
+                    format!(
+                        "Pushed deep into unwarded side-lane territory around 20:00 ({} isolated deaths this game), giving enemy team a numbers advantage on Baron side.",
+                        isolated_deaths
+                    )
+                },
+                win_prob_delta_pct: if isolated_deaths <= 1 { 5.5 } else { -8.4 },
+                warning_notification: "20:00 BARON HAZARD: After 20:00, dying in the bot side lane without Teleport or Global Ultimate active is an automatic free Baron for the enemy team.".to_string(),
+                improvement_action: "After 20:00, check your minimap every 4 seconds while sidelaning: if 3+ enemies disappear from vision, immediately step back into tier-2 brush until they show mid.".to_string(),
+            },
+            // 15. 21:45 — Mid-Game Side-Lane Overextension & Shutdown Bounty Protection
+            SingleGameTimestampedMistake {
+                timestamp: "21:45".to_string(),
+                phase_label: "Mid-Game Macro".to_string(),
+                is_mistake: self.deaths >= 4,
+                severity_badge: if self.deaths < 4 {
+                    "HIGH-LEVERAGE PLAY".to_string()
+                } else {
+                    "CRITICAL MISTAKE".to_string()
+                },
+                gold_xp_swing_label: if self.deaths < 4 {
+                    format!("+600g Bounty Protected ({} Deaths)", self.deaths)
+                } else {
+                    format!("-650g Shutdown Given ({}s Dead)", time_spent_dead_secs)
+                },
+                event_title: "21:45 Shutdown Bounty Discipline & Threat Assessment".to_string(),
+                what_happened: if self.deaths < 4 {
+                    format!(
+                        "Protected personal KDA ({}/{}/{}, {:.2} KDA) and absorbed enemy collapse pressure without donating shutdown gold.",
+                        self.kills, self.deaths, self.assists, kda
+                    )
+                } else {
+                    format!(
+                        "Overextended during a mid-game skirmish at 21:45 ({} total deaths, {}s grey-screen time), transferring shutdown gold to enemy carries.",
+                        self.deaths, time_spent_dead_secs
+                    )
+                },
+                win_prob_delta_pct: if self.deaths < 4 { 6.1 } else { -9.2 },
+                warning_notification: format!(
+                    "DEATH TIMER PENALTY: At 22+ minutes, a single death costs a 38s–45s respawn timer ({}s total dead this match) plus up to 700g shutdown bounty.",
+                    time_spent_dead_secs
+                ),
+                improvement_action: "When you have 3+ kills or a shutdown bounty, value your life above chasing a low-HP support: surviving a fight lets you immediately take Baron or 2 towers.".to_string(),
+            },
+            // 16. 23:20 — 3rd/4th Dragon (Soul Point) Choke-Point Positioning
+            SingleGameTimestampedMistake {
+                timestamp: "23:20".to_string(),
+                phase_label: "Late-Game Siege".to_string(),
+                is_mistake: deep.user_kill_participation_pct < 55.0 && !self.win,
+                severity_badge: if deep.user_kill_participation_pct >= 55.0 || self.win {
+                    "GAME-WINNING CALL".to_string()
+                } else {
+                    "CRITICAL MISTAKE".to_string()
+                },
+                gold_xp_swing_label: format!("{:.1}% KP · {}s CC", deep.user_kill_participation_pct, cc_score_secs),
+                event_title: format!("23:20 Dragon Soul Point Choke-Point Engagement on {}", champ),
+                what_happened: format!(
+                    "Anchored the river choke-point fight with {:.1}% Kill Participation, applying {}s of CC and dealing {:.1}% of allied team damage.",
+                    deep.user_kill_participation_pct, cc_score_secs, deep.user_damage_share_pct
+                ),
+                win_prob_delta_pct: if self.win { 9.8 } else { -8.6 },
+                warning_notification: "SOUL POINT CHOKE RULE: The team that controls the river entrance bushes 40 seconds before Soul Point wins 71% of Dragon teamfights.".to_string(),
+                improvement_action: format!(
+                    "Arrive at the Dragon river entrance 40s early (or channel {} R onto your engaging diver at the exact moment enemy carries commit their dash cooldowns).",
+                    champ
+                ),
+            },
+            // 17. 25:10 — High-Leverage River / Baron Teamfight Target Selection
+            SingleGameTimestampedMistake {
+                timestamp: format!("{}:10", end_min.saturating_sub(3)),
+                phase_label: "Late-Game Siege".to_string(),
+                is_mistake: !self.win && self.deaths >= 5,
+                severity_badge: if self.win || self.deaths < 5 {
+                    "GAME-WINNING CALL".to_string()
+                } else {
+                    "CRITICAL MISTAKE".to_string()
+                },
+                gold_xp_swing_label: format!("{} Dmg · {} Mitigated", deep.user_damage_dealt, self_mitigated_damage),
+                event_title: format!("Late-Game 5v5 Frontline Mitigation & Target Selection ({}m)", end_min.saturating_sub(3)),
+                what_happened: if self.win {
+                    format!(
+                        "Absorbed {} self-mitigated damage and dealt {} champion damage ({:.2} Dmg/Gold) while locking down enemy primary threats.",
+                        self_mitigated_damage, deep.user_damage_dealt, damage_per_gold
+                    )
+                } else {
+                    format!(
+                        "Split target focus between diving enemy backline and peeling {} off allied carries during the decisive {}m Baron fight.",
+                        opp, end_min.saturating_sub(3)
+                    )
+                },
+                win_prob_delta_pct: if self.win { 12.4 } else { -13.5 },
+                warning_notification: "TEAMFIGHT ROLE CLARITY: Before a 25m+ Baron fight starts, decide whether your win condition is (A) diving the enemy carry or (B) peeling for your most fed teammate.".to_string(),
+                improvement_action: format!(
+                    "Identify which carry has the highest gold in the game at 24m: if it is your teammate, stand within 450 units of them on {} to peel; if it is the enemy carry, flank from fog with Flash-CC.",
+                    champ
+                ),
+            },
+            // 18. Final Minute — Inhibitor Siege, Multi-Lane Wave Sync & Final Nexus Call
+            SingleGameTimestampedMistake {
+                timestamp: format!("{}:00", end_min),
+                phase_label: "Late-Game Siege".to_string(),
+                is_mistake: !self.win,
+                severity_badge: if self.win {
+                    "GAME-WINNING CALL".to_string()
+                } else {
+                    "CRITICAL MISTAKE".to_string()
+                },
+                gold_xp_swing_label: if self.win {
+                    format!("+1,850g Team Lead · {}m Victory", dur)
+                } else {
+                    format!("-1,600g Siege Swing · {}m Defeat", dur)
+                },
+                event_title: if self.win {
+                    format!("Final Inhibitor Wave Sync & Nexus Finish ({}m)", dur)
+                } else {
+                    format!("Late-Game Base Defense & Elder/Baron Desync ({}m)", dur)
+                },
+                what_happened: if self.win {
+                    format!(
+                        "Synchronized two Baron/super-minion waves across mid and side lane at {}m, breaking the enemy base and finishing with a {:.1}/10 AI OP Score ({}).",
+                        dur, ai_op_score, lobby_placement
+                    )
+                } else {
+                    format!(
+                        "Staggered respawn timers during the final {}m base defense allowed the enemy team to crack two inhibitors and close the Nexus despite your {:.1}/10 OP Score.",
+                        dur, ai_op_score
+                    )
+                },
+                win_prob_delta_pct: if self.win { 15.8 } else { -16.9 },
+                warning_notification: "END-GAME CLOSING RULE: Never siege a single inhibitor 5v5 while your side-lane waves are on your half of the map — syncing 2 lanes simultaneously forces an un-defendable split.".to_string(),
+                improvement_action: if self.win {
+                    "Keep executing disciplined 2-lane wave synchronization with Baron buff rather than forcing low-percentage 5v5 dives under Nexus turrets.".to_string()
+                } else {
+                    "When defending base at 26m+, wait for all 5 teammates to respawn before engaging — fighting 3v5 to save one inhibitor staggered death timers and ended the game.".to_string()
+                },
+            },
+        ]
+    }
+}

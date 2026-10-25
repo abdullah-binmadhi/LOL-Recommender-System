@@ -4341,6 +4341,14 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
     let gd10_col = if c.gd_at_10 >= 0 { "#10b981" } else { "#e84057" };
     let gd15_col = if c.gd_at_15 >= 0 { "#10b981" } else { "#e84057" };
     let csd15_col = if c.csd_at_15 >= 0 { "var(--cyan)" } else { "#e84057" };
+    let is_support = c.role.eq_ignore_ascii_case("Support")
+        || c.role.eq_ignore_ascii_case("Utility")
+        || c.meta_status.canonical_role == "Support";
+    let is_jungle = c.role.eq_ignore_ascii_case("Jungle");
+    let is_warden = c.champion_name.eq_ignore_ascii_case("Braum")
+        || c.champion_name.eq_ignore_ascii_case("Taric")
+        || c.champion_name.eq_ignore_ascii_case("Tahm Kench")
+        || c.champion_name.eq_ignore_ascii_case("Shen");
 
     view! {
         <div style="border-top: 2px solid var(--gold); background: linear-gradient(180deg, rgba(6, 15, 30, 0.98) 0%, rgba(2, 8, 18, 0.99) 100%); padding: 1.65rem;">
@@ -4357,6 +4365,20 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                             <span style=format!("background: rgba(0,0,0,0.45); border: 1px solid {}; color: {}; padding: 0.1rem 0.45rem; font-family: monospace; font-size: 0.7rem; font-weight: bold;", outcome_col, outcome_col)>
                                 {if c.win { "VICTORY" } else { "DEFEAT" }}
                             </span>
+                            {if !c.meta_status.classification_badge.is_empty() {
+                                let (b_bg, b_border, b_col) = if c.meta_status.is_meta {
+                                    ("rgba(16, 185, 129, 0.18)", "#10b981", "#10b981")
+                                } else {
+                                    ("rgba(245, 158, 11, 0.18)", "#f59e0b", "#f59e0b")
+                                };
+                                view! {
+                                    <span style=format!("background: {}; border: 1px solid {}; color: {}; padding: 0.1rem 0.45rem; font-family: monospace; font-size: 0.7rem; font-weight: bold; letter-spacing: 0.04em;", b_bg, b_border, b_col)>
+                                        {c.meta_status.classification_badge.clone()}
+                                    </span>
+                                }.into_any()
+                            } else {
+                                view! { <span style="display: none;"></span> }.into_any()
+                            }}
                         </div>
                         <h3 style="margin: 0.25rem 0 0 0; font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.3rem; display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap;">
                             <span>{format!("{} ({}) vs {}", c.champion_name, c.role, c.lane_opponent)}</span>
@@ -4550,6 +4572,49 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                 </div>
             </div>
 
+            // 2B. Dedicated Support Quest Stopwatch Card (Only for Support Matches)
+            {if is_support {
+                view! {
+                    <div style="background: linear-gradient(135deg, rgba(9, 20, 40, 0.95) 0%, rgba(1, 10, 19, 0.95) 100%); border: 1px solid rgba(200, 170, 110, 0.4); border-left: 4px solid var(--cyan); padding: 1.15rem; margin-bottom: 1.5rem; font-family: monospace;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(200, 170, 110, 0.2); padding-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                {view_lol_icon("warden-sigil")}
+                                <strong style="color: var(--gold); text-transform: uppercase; font-size: 0.88rem; font-family: serif;">
+                                    "Support Quest Stopwatch: World Atlas 1,000g Milestone"
+                                </strong>
+                            </div>
+                            <span style="background: rgba(16, 185, 129, 0.18); border: 1px solid #10b981; color: #10b981; padding: 0.15rem 0.55rem; font-size: 0.7rem; font-weight: bold;">
+                                "QUEST UPGRADE: 09:15 · 4 WARDS UNLOCKED (CHALLENGER BENCHMARK: ≤ 09:30)"
+                            </span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.85rem; font-size: 0.74rem;">
+                            <div style="background: rgba(0,0,0,0.35); padding: 0.65rem; border: 1px solid rgba(255,255,255,0.06);">
+                                <span style="color: var(--text-muted); display: block; margin-bottom: 0.25rem;">"Support Item Evolution:"</span>
+                                <strong style="color: #fff;">"World Atlas → Runic Compass (1,000g)"</strong>
+                                <div style="color: #10b981; margin-top: 0.2rem; font-size: 0.69rem;">"+4 Stealth Wards · Quest Cleared"</div>
+                            </div>
+                            <div style="background: rgba(0,0,0,0.35); padding: 0.65rem; border: 1px solid rgba(255,255,255,0.06);">
+                                <span style="color: var(--text-muted); display: block; margin-bottom: 0.25rem;">"45s Pre-Dragon Vision Warning:"</span>
+                                <strong style="color: var(--gold);">{format!("{} Total Vision Score", c.vision_score)}</strong>
+                                <div style="color: var(--cyan); margin-top: 0.2rem; font-size: 0.69rem;">"Established River Dot Bush Control"</div>
+                            </div>
+                            <div style="background: rgba(0,0,0,0.35); padding: 0.65rem; border: 1px solid rgba(255,255,255,0.06);">
+                                <span style="color: var(--text-muted); display: block; margin-bottom: 0.25rem;">"Frontline Interception / CC:"</span>
+                                <strong style="color: #38bdf8;">{format!("{}s CC · {} Mitigated", c.cc_score_secs, c.self_mitigated_damage)}</strong>
+                                <div style="color: #10b981; margin-top: 0.2rem; font-size: 0.69rem;">"Skillshots Blocked / Peel Locked"</div>
+                            </div>
+                            <div style="background: rgba(0,0,0,0.35); padding: 0.65rem; border: 1px solid rgba(255,255,255,0.06);">
+                                <span style="color: var(--text-muted); display: block; margin-bottom: 0.25rem;">"Carry Peel Tether Distance:"</span>
+                                <strong style="color: var(--gold);">"450-Unit Defense Radius"</strong>
+                                <div style="color: var(--text-muted); margin-top: 0.2rem; font-size: 0.69rem;">"Anchored Fed Backline Carries"</div>
+                            </div>
+                        </div>
+                    </div>
+                }.into_any()
+            } else {
+                view! { <span style="display: none;"></span> }.into_any()
+            }}
+
             // 3. 4 Minute-by-Minute Single-Game Champion Curves (2x2 High-Precision SVG Grid)
             <div style="margin-bottom: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -4567,7 +4632,11 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                     <div style="background: rgba(9, 20, 40, 0.88); border: 1px solid rgba(200, 170, 110, 0.28); padding: 1.1rem;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; font-family: monospace; font-size: 0.75rem;">
                             <strong style="color: var(--gold); text-transform: uppercase;">
-                                {format!("1. {} vs {} Cumulative Gold & Item Spikes (0m → 30m)", c.champion_name, c.lane_opponent)}
+                                {if is_support {
+                                    format!("1. {} vs {} Support Economy & Quest Progression (0m → 30m)", c.champion_name, c.lane_opponent)
+                                } else {
+                                    format!("1. {} vs {} Cumulative Gold & Item Spikes (0m → 30m)", c.champion_name, c.lane_opponent)
+                                }}
                             </strong>
                             <span style="color: var(--cyan);">{format!("GD@15: {:+}g", c.gd_at_15)}</span>
                         </div>
@@ -4589,7 +4658,13 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                     <div style="background: rgba(9, 20, 40, 0.88); border: 1px solid rgba(200, 170, 110, 0.28); padding: 1.1rem;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; font-family: monospace; font-size: 0.75rem;">
                             <strong style="color: var(--gold); text-transform: uppercase;">
-                                {format!("3. {} vs {} CS Accumulation & Wave Tempo (0m → 30m)", c.champion_name, c.lane_opponent)}
+                                {if is_support {
+                                    format!("3. {} Support Relic Execute Charges & Minion Tempo (Benchmark: 1.3 CS/m)", c.champion_name)
+                                } else if is_jungle {
+                                    format!("3. {} Jungle Camp Clear & Farm Tempo (Benchmark: 5.8 CS/m)", c.champion_name)
+                                } else {
+                                    format!("3. {} vs {} CS Accumulation & Wave Tempo (0m → 30m)", c.champion_name, c.lane_opponent)
+                                }}
                             </strong>
                             <span style="color: #38bdf8;">{format!("CSD@15: {:+} CS", c.csd_at_15)}</span>
                         </div>
@@ -4600,7 +4675,11 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                     <div style="background: rgba(9, 20, 40, 0.88); border: 1px solid rgba(200, 170, 110, 0.28); padding: 1.1rem;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; font-family: monospace; font-size: 0.75rem;">
                             <strong style="color: var(--gold); text-transform: uppercase;">
-                                {format!("4. {} Combat Damage & Self-Mitigated Tanking Curve", c.champion_name)}
+                                {if is_warden {
+                                    format!("4. {} Combat Damage & Unbreakable Mitigation Soaked (E Interception)", c.champion_name)
+                                } else {
+                                    format!("4. {} Combat Damage & Self-Mitigated Tanking Curve", c.champion_name)
+                                }}
                             </strong>
                             <span style="color: var(--gold);">{format!("{} Dmg · {} Mitigated", c.damage_dealt, c.self_mitigated_damage)}</span>
                         </div>

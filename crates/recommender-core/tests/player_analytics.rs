@@ -704,4 +704,309 @@ fn test_deserialize_supabase_edge_function_matches() {
     assert_eq!(allied2[0].gold_earned, 11200);
 }
 
+#[test]
+fn test_taxonomy_and_meta_detection() {
+    use recommender_core::player_analytics::{detect_meta_status, normalize_role_name};
+
+    assert_eq!(normalize_role_name("UTILITY"), "Support");
+    assert_eq!(normalize_role_name("BOTTOM"), "Bottom");
+    assert_eq!(normalize_role_name("MIDDLE"), "Mid");
+    assert_eq!(normalize_role_name("TOP"), "Top");
+    assert_eq!(normalize_role_name("JUNGLE"), "Jungle");
+
+    // 1. Braum Support vs Braum Top
+    let braum_supp = detect_meta_status("Braum", "Support");
+    assert!(braum_supp.is_meta, "Braum Support must be meta");
+    assert_eq!(braum_supp.canonical_role, "Support");
+    assert!(braum_supp.classification_badge.contains("META"));
+    assert!(braum_supp.classification_badge.contains("WARDEN"));
+
+    let braum_top = detect_meta_status("Braum", "Top");
+    assert!(!braum_top.is_meta, "Braum Top must be recognized as off-meta");
+    assert!(braum_top.classification_badge.contains("OFF-META"));
+
+    // 2. Shen Top vs Shen Support vs Shen Mid
+    let shen_top = detect_meta_status("Shen", "Top");
+    assert!(shen_top.is_meta, "Shen Top is meta");
+
+    let shen_supp = detect_meta_status("Shen", "Support");
+    assert!(shen_supp.is_meta, "Shen Support is a recognized flex pick");
+
+    let shen_mid = detect_meta_status("Shen", "Mid");
+    assert!(!shen_mid.is_meta, "Shen Mid is off-meta");
+
+    // 3. Jinx Bot vs Jinx Top
+    let jinx_bot = detect_meta_status("Jinx", "Bottom");
+    assert!(jinx_bot.is_meta, "Jinx Bot is meta");
+
+    let jinx_top = detect_meta_status("Jinx", "Top");
+    assert!(!jinx_top.is_meta, "Jinx Top is off-meta");
+
+    // 4. Lee Sin Jungle vs Lee Sin Support
+    let lee_jng = detect_meta_status("Lee Sin", "Jungle");
+    assert!(lee_jng.is_meta, "Lee Sin Jungle is meta");
+
+    let lee_supp = detect_meta_status("Lee Sin", "Support");
+    assert!(!lee_supp.is_meta, "Lee Sin Support is off-meta");
+
+    // 5. Verify build_champion_curve_analysis attaches meta_status
+    let sample_match = recommender_core::player_analytics::AdoptedMatch {
+        match_id: "ME1_999".into(),
+        champion_name: "Braum".into(),
+        role: "Support".into(),
+        win: true,
+        kills: 1,
+        deaths: 2,
+        assists: 15,
+        cs_per_min: 1.1,
+        gold_diff_15: 400,
+        is_calibrated: false,
+        calibrated_rank: None,
+        lane_opponent_champion: Some("Nautilus".into()),
+        duration_mins: Some(26),
+        user_damage_dealt: Some(7200),
+        user_vision_score: Some(58),
+        items: Some(vec![3865, 3109]),
+        allied_team: None,
+        enemy_team: None,
+        game_creation_timestamp: Some(1729860000000),
+        queue_id: Some(420),
+        queue_name: Some("Ranked Solo/Duo".into()),
+        played_ago_label: Some("1 hour ago".into()),
+    };
+
+    let curve_analysis = sample_match.build_champion_curve_analysis("SHENTRICK");
+    assert!(curve_analysis.meta_status.is_meta);
+    assert_eq!(curve_analysis.meta_status.canonical_role, "Support");
+    assert!(curve_analysis.meta_status.classification_badge.contains("META"));
+}
+
+#[test]
+fn test_role_tailored_autopsy_generators() {
+    let make_match = |champ: &str, role: &str, opp: &str| recommender_core::player_analytics::AdoptedMatch {
+        match_id: format!("TEST_{}_{}", champ, role),
+        champion_name: champ.into(),
+        role: role.into(),
+        win: true,
+        kills: 3,
+        deaths: 2,
+        assists: 12,
+        cs_per_min: if role == "Support" { 1.2 } else { 7.8 },
+        gold_diff_15: 500,
+        is_calibrated: false,
+        calibrated_rank: None,
+        lane_opponent_champion: Some(opp.into()),
+        duration_mins: Some(28),
+        user_damage_dealt: Some(15000),
+        user_vision_score: Some(if role == "Support" { 65 } else { 25 }),
+        items: Some(vec![3865, 3109]),
+        allied_team: None,
+        enemy_team: None,
+        game_creation_timestamp: Some(1729860000000),
+        queue_id: Some(420),
+        queue_name: Some("Ranked Solo/Duo".into()),
+        played_ago_label: Some("1 hour ago".into()),
+    };
+
+    // 1. Support Autopsy Verification (Braum vs Nautilus)
+    let braum_supp = make_match("Braum", "Support", "Nautilus");
+    let braum_analysis = braum_supp.build_champion_curve_analysis("TEST_SUMMONER");
+    assert!(!braum_analysis.timestamped_moments.is_empty(), "Support autopsy must have timestamped moments");
+    
+    let has_quest = braum_analysis.timestamped_moments.iter().any(|m| m.event_title.contains("Support Quest"));
+    assert!(has_quest, "Support autopsy must include Support Quest Stopwatch milestone");
+
+    let has_45s_dragon = braum_analysis.timestamped_moments.iter().any(|m| m.event_title.contains("45-Second Objective Warning"));
+    assert!(has_45s_dragon, "Support autopsy must include 45-Second Objective Warning Rule");
+
+    let has_peel_radius = braum_analysis.timestamped_moments.iter().any(|m| m.event_title.contains("Peel Radius") || m.event_title.contains("Tether"));
+    assert!(has_peel_radius, "Support autopsy must evaluate 450-Unit Peel Radius & Carry Tethering");
+
+    // 2. Jungle Autopsy Verification (Lee Sin vs Viego)
+    let lee_jng = make_match("Lee Sin", "Jungle", "Viego");
+    let lee_analysis = lee_jng.build_champion_curve_analysis("TEST_SUMMONER");
+    assert!(!lee_analysis.timestamped_moments.is_empty(), "Jungle autopsy must have timestamped moments");
+
+    let has_buff_start = lee_analysis.timestamped_moments.iter().any(|m| m.event_title.contains("Buff Start"));
+    assert!(has_buff_start, "Jungle autopsy must include Level-1 Pathing & Buff Start Selection");
+
+    let has_scuttle = lee_analysis.timestamped_moments.iter().any(|m| m.event_title.contains("Scuttle Crab"));
+    assert!(has_scuttle, "Jungle autopsy must include Scuttle Crab Timing");
+
+    let has_smite_audit = lee_analysis.timestamped_moments.iter().any(|m| m.event_title.contains("Smite"));
+    assert!(has_smite_audit, "Jungle autopsy must include Smite milestone or 50/50 smite discipline");
+
+    // 3. Bot Autopsy Verification (Jinx vs Caitlyn)
+    let jinx_bot = make_match("Jinx", "Bottom", "Caitlyn");
+    let jinx_analysis = jinx_bot.build_champion_curve_analysis("TEST_SUMMONER");
+    assert!(!jinx_analysis.timestamped_moments.is_empty(), "Bot autopsy must have timestamped moments");
+    let has_bot_mechanics = jinx_analysis.timestamped_moments.iter().any(|m| {
+        m.event_title.contains("Duo") || m.event_title.contains("ADC") || m.warning_notification.contains("ADC") || m.warning_notification.contains("DUO")
+    });
+    assert!(has_bot_mechanics, "Bot autopsy must evaluate Bot duo mechanics and ADC positioning");
+
+    // 4. Mid Autopsy Verification (Ahri vs Zed)
+    let ahri_mid = make_match("Ahri", "Mid", "Zed");
+    let ahri_analysis = ahri_mid.build_champion_curve_analysis("TEST_SUMMONER");
+    assert!(!ahri_analysis.timestamped_moments.is_empty(), "Mid autopsy must have timestamped moments");
+
+    // 5. Top Autopsy Verification (Darius vs Garen)
+    let darius_top = make_match("Darius", "Top", "Garen");
+    let darius_analysis = darius_top.build_champion_curve_analysis("TEST_SUMMONER");
+    assert!(!darius_analysis.timestamped_moments.is_empty(), "Top autopsy must have timestamped moments");
+}
+
+#[test]
+fn test_phase3_dynamic_curves_and_item_keystone_spikes() {
+    let make_match = |champ: &str, role: &str, opp: &str| recommender_core::player_analytics::AdoptedMatch {
+        match_id: format!("TEST_PH3_{}_{}", champ, role),
+        champion_name: champ.into(),
+        role: role.into(),
+        win: true,
+        kills: 2,
+        deaths: 1,
+        assists: 16,
+        cs_per_min: if role == "Support" { 1.2 } else if role == "Jungle" { 5.6 } else { 8.4 },
+        gold_diff_15: 450,
+        is_calibrated: false,
+        calibrated_rank: None,
+        lane_opponent_champion: Some(opp.into()),
+        duration_mins: Some(27),
+        user_damage_dealt: Some(9500),
+        user_vision_score: Some(if role == "Support" { 68 } else { 22 }),
+        items: Some(vec![3865, 3109]),
+        allied_team: None,
+        enemy_team: None,
+        game_creation_timestamp: Some(1729860000000),
+        queue_id: Some(420),
+        queue_name: Some("Ranked Solo/Duo".into()),
+        played_ago_label: Some("1 hour ago".into()),
+    };
+
+    // 1. Support Role: Braum
+    let braum = make_match("Braum", "Support", "Nautilus");
+    let braum_analysis = braum.build_champion_curve_analysis("TEST_SUMMONER");
+
+    // Dynamic Skill Order for Braum
+    assert_eq!(
+        braum_analysis.skill_order,
+        "Q (Winter's Bite) → E (Unbreakable) → W (Stand Behind Me) · R at 6/11/16",
+        "Braum must have his unique skill level priority"
+    );
+
+    // Support Item Spikes (Locket, Knight's Vow, World Atlas)
+    let has_world_atlas = braum_analysis.item_spikes.iter().any(|s| s.item_name.contains("World Atlas"));
+    let has_locket = braum_analysis.item_spikes.iter().any(|s| s.item_name.contains("Locket of the Iron Solari"));
+    let has_knights_vow = braum_analysis.item_spikes.iter().any(|s| s.item_name.contains("Knight's Vow"));
+    let has_heartsteel = braum_analysis.item_spikes.iter().any(|s| s.item_name.contains("Heartsteel"));
+
+    assert!(has_world_atlas, "Support item spikes must include World Atlas quest item");
+    assert!(has_locket, "Support Warden item spikes must include Locket of the Iron Solari");
+    assert!(has_knights_vow, "Support Warden item spikes must include Knight's Vow");
+    assert!(!has_heartsteel, "Support Warden item spikes must NOT include Top tank items like Heartsteel");
+
+    // Support Keystone & Runes (Guardian, Font of Life)
+    let has_guardian = braum_analysis.rune_telemetry.iter().any(|r| r.rune_name.contains("Guardian"));
+    let has_font_of_life = braum_analysis.rune_telemetry.iter().any(|r| r.rune_name.contains("Font of Life"));
+    assert!(has_guardian, "Braum Support must receive Guardian keystone telemetry");
+    assert!(has_font_of_life, "Braum Support must receive Font of Life rune telemetry");
+
+    // Dynamic Support CS Benchmark (1.3 CS/m instead of 7.3/8.1)
+    let bench_csm_m10 = braum_analysis.cs_tempo_curve.iter().find(|(m, _, _, _, _)| *m == 10).unwrap().4;
+    assert_eq!(bench_csm_m10, 1.3, "Support benchmark CS/min must be calibrated to ~1.3, not solo lane CS");
+
+    // Dynamic Radar Axis: Quest & Support Economy instead of Farming & Wave CS
+    let has_support_economy_axis = braum_analysis.radar_axes.iter().any(|(name, score, _, _)| {
+        name == "Quest & Support Economy" && *score >= 70.0
+    });
+    assert!(has_support_economy_axis, "Support radar must feature Quest & Support Economy without CS penalty");
+
+    // Dynamic SHAP Win-Impact Attribution
+    let has_support_shap = braum_analysis.shap_attributions.iter().any(|attr| attr.feature_name.contains("Support Quest"));
+    assert!(has_support_shap, "SHAP win-impact attribution must evaluate Support Quest & Roam Economy");
+
+    // 2. ADC Role: Jinx
+    let jinx = make_match("Jinx", "Bottom", "Caitlyn");
+    let jinx_analysis = jinx.build_champion_curve_analysis("TEST_SUMMONER");
+    assert!(jinx_analysis.skill_order.contains("Switcheroo"), "Jinx must max Switcheroo (Q)");
+    let has_ie = jinx_analysis.item_spikes.iter().any(|s| s.item_name.contains("Infinity Edge"));
+    assert!(has_ie, "Jinx item spikes must include Infinity Edge");
+    let has_lethal_tempo = jinx_analysis.rune_telemetry.iter().any(|r| r.rune_name.contains("Lethal Tempo"));
+    assert!(has_lethal_tempo, "Jinx runes must feature Lethal Tempo / Press the Attack");
+
+    // 3. Jungle Role: Lee Sin
+    let lee = make_match("Lee Sin", "Jungle", "Viego");
+    let lee_analysis = lee.build_champion_curve_analysis("TEST_SUMMONER");
+    assert!(lee_analysis.skill_order.contains("Sonic Wave"), "Lee Sin must max Sonic Wave (Q)");
+    let has_pet = lee_analysis.item_spikes.iter().any(|s| s.item_name.contains("Pup"));
+    assert!(has_pet, "Jungle item spikes must start with Jungle Pet");
+    let bench_csm_jng = lee_analysis.cs_tempo_curve.iter().find(|(m, _, _, _, _)| *m == 10).unwrap().4;
+    assert_eq!(bench_csm_jng, 5.8, "Jungle benchmark CS/min must be calibrated to ~5.8");
+}
+
+#[test]
+fn test_phase4_shap_attribution_and_ml_models() {
+    let make_match = |champ: &str, role: &str, opp: &str| recommender_core::player_analytics::AdoptedMatch {
+        match_id: format!("TEST_PH4_{}_{}", champ, role),
+        champion_name: champ.into(),
+        role: role.into(),
+        win: true,
+        kills: 1,
+        deaths: 2,
+        assists: 18,
+        cs_per_min: if role == "Support" { 1.1 } else { 7.5 },
+        gold_diff_15: 350,
+        is_calibrated: false,
+        calibrated_rank: None,
+        lane_opponent_champion: Some(opp.into()),
+        duration_mins: Some(29),
+        user_damage_dealt: Some(8500),
+        user_vision_score: Some(if role == "Support" { 72 } else { 24 }),
+        items: Some(vec![3865, 3109]),
+        allied_team: None,
+        enemy_team: None,
+        game_creation_timestamp: Some(1729860000000),
+        queue_id: Some(420),
+        queue_name: Some("Ranked Solo/Duo".into()),
+        played_ago_label: Some("1 hour ago".into()),
+    };
+
+    // 1. Support Role: Braum
+    let braum = make_match("Braum", "Support", "Nautilus");
+    let braum_analysis = braum.build_champion_curve_analysis("TEST_SUMMONER");
+
+    // Dynamic 8-Axis Radar Labels
+    let axis_names: Vec<&str> = braum_analysis.radar_axes.iter().map(|(n, _, _, _)| n.as_str()).collect();
+    assert!(axis_names.contains(&"Fighting & Carry Peel"), "Support radar must feature Fighting & Carry Peel");
+    assert!(axis_names.contains(&"Quest & Support Economy"), "Support radar must feature Quest & Support Economy");
+    assert!(axis_names.contains(&"Bot 2v2 Laning @15m"), "Support radar must feature Bot 2v2 Laning @15m");
+
+    // Dynamic SHAP Win-Impact Features
+    let shap_names: Vec<&str> = braum_analysis.shap_attributions.iter().map(|s| s.feature_name.as_str()).collect();
+    assert!(shap_names.iter().any(|n| n.contains("Bot 2v2 Prio & Quest Lead")), "SHAP must feature Bot 2v2 Prio");
+    assert!(shap_names.iter().any(|n| n.contains("Carry Peel & Kill Participation")), "SHAP must feature Carry Peel & KP");
+    assert!(shap_names.iter().any(|n| n.contains("Unbreakable Frontline Mitigation")), "SHAP must feature Unbreakable Frontline Mitigation for Braum");
+    assert!(shap_names.iter().any(|n| n.contains("CC Lockdown & Skillshot Interception")), "SHAP must feature CC Lockdown & Interception");
+
+    // Single-Game ML Model Validation
+    let gbm_model = braum_analysis.ml_models.iter().find(|m| m.model_name.contains("Gradient Boosted")).unwrap();
+    assert!(gbm_model.plain_english_meaning.contains("Support Quest progression"), "GBM model must evaluate Support Quest progression");
+    assert!(gbm_model.actionable_improvement.contains("World Atlas quest upgrade"), "GBM improvement must guide World Atlas timing");
+
+    // 2. Jungle Role: Lee Sin
+    let lee = make_match("Lee Sin", "Jungle", "Viego");
+    let lee_analysis = lee.build_champion_curve_analysis("TEST_SUMMONER");
+
+    let jng_axis_names: Vec<&str> = lee_analysis.radar_axes.iter().map(|(n, _, _, _)| n.as_str()).collect();
+    assert!(jng_axis_names.contains(&"Jungle Camp Clear & Tempo"), "Jungle radar must feature Jungle Camp Clear & Tempo");
+
+    let jng_gbm = lee_analysis.ml_models.iter().find(|m| m.model_name.contains("Gradient Boosted")).unwrap();
+    assert!(jng_gbm.plain_english_meaning.contains("jungle camp clear efficiency"), "Jungle GBM must evaluate camp clear efficiency");
+    assert!(jng_gbm.key_alert_notification.contains("PRIMAL SMITE"), "Jungle GBM must highlight Primal Smite leverage");
+}
+
+
+
+
+
 
