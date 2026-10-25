@@ -20,4 +20,15 @@ if (fs.existsSync(rustIndex)) {
   fs.copyFileSync(rustIndex, path.join(dist, 'index.html'));
 }
 
+// Copy supabase_bridge.js to both root dist and rust-preview to ensure scripts load without 404
+const bridgeSrc = path.resolve('web/supabase_bridge.js');
+if (fs.existsSync(bridgeSrc)) {
+  fs.copyFileSync(bridgeSrc, path.join(dist, 'supabase_bridge.js'));
+  fs.copyFileSync(bridgeSrc, path.join(dist, 'rust-preview', 'supabase_bridge.js'));
+  const previewDir = path.resolve('rust-preview');
+  if (fs.existsSync(previewDir)) {
+    fs.copyFileSync(bridgeSrc, path.join(previewDir, 'supabase_bridge.js'));
+  }
+}
+
 console.log('Vercel static distribution successfully prepared in dist/');

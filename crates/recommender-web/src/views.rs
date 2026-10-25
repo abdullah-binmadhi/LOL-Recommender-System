@@ -313,12 +313,8 @@ fn view_navbar(state: RwSignal<AppState>) -> impl IntoView {
                         class=quiz_class
                         disabled=quiz_locked
                         on:click=move |_| {
-                            let is_authed = state.with(|c| c.auth_user.is_some());
-                            if is_authed {
-                                state.update(AppState::start_quiz);
-                            } else {
-                                storage::supabase_sign_in_google();
-                            }
+                            go_to_hash("");
+                            state.update(AppState::start_quiz);
                         }
                     >
                         "Quiz"
@@ -426,23 +422,18 @@ fn view_start(
                         "Complete our 25-dimensional calibration assessment across 5 tactical stages. A 6-model machine learning suite (Random Forest, Decision Tree, KNN, Naive Bayes, Cosine Vector Space, and GBDT) scores all 172 champions and calibrates directly against your live Riot match telemetry."
                     </p>
                     <div class="hero-actions">
+                        <Button variant=ButtonVariant::Primary size=ButtonSize::Lg
+                            on:click=move |_| state.update(AppState::start_quiz)>
+                            "Find My Champion →"
+                        </Button>
                         {move || {
                             let is_authed = state.with(|c| c.auth_user.is_some());
-                            if is_authed {
-                                view! {
-                                    <Button variant=ButtonVariant::Primary size=ButtonSize::Lg
-                                        on:click=move |_| state.update(AppState::start_quiz)>
-                                        "Find My Champion →"
-                                    </Button>
-                                }.into_any()
-                            } else {
-                                view! {
-                                    <Button variant=ButtonVariant::Primary size=ButtonSize::Lg
-                                        on:click=move |_| storage::supabase_sign_in_google()>
-                                        "✦ Sign in with Google to Start ✦"
-                                    </Button>
-                                }.into_any()
-                            }
+                            (!is_authed).then(|| view! {
+                                <Button variant=ButtonVariant::Secondary size=ButtonSize::Lg
+                                    on:click=move |_| storage::supabase_sign_in_google()>
+                                    "✦ Sign in with Google"
+                                </Button>
+                            })
                         }}
                         <Button variant=ButtonVariant::Ghost size=ButtonSize::Lg
                             on:click=move |_| open_analytics(state)>

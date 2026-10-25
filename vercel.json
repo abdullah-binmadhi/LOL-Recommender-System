@@ -2,6 +2,10 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/supabase_bridge.js",
+      "destination": "/supabase_bridge.js"
+    },
+    {
       "source": "/rust-preview",
       "destination": "/rust-preview/index.html"
     },

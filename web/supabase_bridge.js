@@ -150,8 +150,14 @@
 
       if (error) {
         console.error("Google sign-in error:", error);
-        alert("Google sign-in failed: " + error.message);
+        window.dispatchEvent(new CustomEvent("supabase-oauth-config-required"));
+        alert("Google sign-in notice: " + error.message);
         return false;
+      }
+
+      if (data && data.url) {
+        window.location.assign(data.url);
+        return true;
       }
 
       return true;
