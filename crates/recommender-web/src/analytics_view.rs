@@ -326,7 +326,12 @@ pub fn view_analytics(state: RwSignal<AppState>, summary: Arc<AnalyticsSummary>)
                 } else {
                     view! {
                         <div class="zero-match-banner">
-                            <div class="zero-match-title">"⚠️ No Champions Match This Exact Combination"</div>
+                            <div class="zero-match-title">
+                                <span style="display:inline-flex;width:15px;height:15px;margin-right:6px;vertical-align:middle;">
+                                    {crate::player_analytics_view::view_lol_icon("arcane-matrix")}
+                                </span>
+                                "No Champions Match This Exact Combination"
+                            </div>
                             <p>"No champions currently satisfy all of the active filters simultaneously. Try removing a filter to broaden your query."</p>
                             <button
                                 type="button"

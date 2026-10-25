@@ -18,12 +18,16 @@ pub fn from_answers(answers: &Value) -> Value {
         "Very Hard (9-10)" => 9.5,
         _ => 5.0,
     };
+    fn split_answers(s: &str) -> Vec<&str> {
+        if s.contains(";;") {
+            s.split(";;").map(str::trim).filter(|x| !x.is_empty()).collect()
+        } else {
+            s.split(',').map(str::trim).filter(|x| !x.is_empty()).collect()
+        }
+    }
+
     let q4_raw = answer("4", "");
-    let q4_parts: Vec<&str> = q4_raw
-        .split(',')
-        .map(str::trim)
-        .filter(|s| !s.is_empty())
-        .collect();
+    let q4_parts: Vec<&str> = split_answers(&q4_raw);
     let (playstyle, damage, toughness, mobility, control, utility) = if q4_parts.is_empty() {
         ("balanced", 5.0, 5.0, 5.0, 5.0, 5.0)
     } else {
@@ -150,18 +154,16 @@ pub fn from_answers(answers: &Value) -> Value {
     };
 
     let raw_role = answer("2", "No Preference");
-    let primary_role = raw_role
-        .split(',')
-        .next()
+    let primary_role = split_answers(&raw_role)
+        .first()
+        .copied()
         .unwrap_or("No Preference")
-        .trim()
         .to_string();
     let raw_pos = answer("3", "No Preference");
-    let primary_pos = raw_pos
-        .split(',')
-        .next()
+    let primary_pos = split_answers(&raw_pos)
+        .first()
+        .copied()
         .unwrap_or("No Preference")
-        .trim()
         .to_string();
 
     let mut feat = json!({

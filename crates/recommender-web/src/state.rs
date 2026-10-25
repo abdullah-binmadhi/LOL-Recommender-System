@@ -167,6 +167,8 @@ pub struct AppState {
     #[allow(dead_code)]
     pub tie_breaker_answers: Vec<bool>,
     pub model_trust_lab_open: bool,
+    pub overdrive_active: bool,
+    pub original_recommendation: Option<RecommendationResult>,
 }
 
 impl Default for AppState {
@@ -194,6 +196,8 @@ impl Default for AppState {
             model_weights: recommender_core::aggregation::ModelWeights::default(),
             tie_breaker_answers: vec![true, true, true, true, true],
             model_trust_lab_open: true,
+            overdrive_active: false,
+            original_recommendation: None,
         }
     }
 }
@@ -417,6 +421,36 @@ impl AppState {
         }
     }
 
+    /// Parses multi-select answer string supporting both resilient ';;' delimiter and legacy ','
+    pub fn parse_multi_select(cur: &str) -> Vec<String> {
+        let trimmed = cur.trim();
+        if trimmed.is_empty() {
+            return Vec::new();
+        }
+        if trimmed.contains(";;") {
+            trimmed
+                .split(";;")
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .collect()
+        } else {
+            // For legacy commas, if the entire string matches a known comma-containing option, preserve it
+            if trimmed == "Armor, Health & Damage Reduction"
+                || trimmed == "Beast, Monster & Primal Nature"
+                || trimmed == "Visceral, Heavy Impacts"
+                || trimmed == "Swift, Razor-Sharp Precision"
+            {
+                vec![trimmed.to_string()]
+            } else {
+                trimmed
+                    .split(',')
+                    .map(|s| s.trim().to_string())
+                    .filter(|s| !s.is_empty())
+                    .collect()
+            }
+        }
+    }
+
     /// Toggles an option in a multi-select question, maintaining a sliding window up to max_selections
     pub fn toggle_answer_option(
         &mut self,
@@ -445,14 +479,7 @@ impl AppState {
             .and_then(Option::as_deref)
             .unwrap_or("");
 
-        let mut items: Vec<String> = if cur.is_empty() {
-            Vec::new()
-        } else {
-            cur.split(',')
-                .map(|s| s.trim().to_string())
-                .filter(|s| !s.is_empty())
-                .collect()
-        };
+        let mut items = Self::parse_multi_select(cur);
 
         if let Some(pos) = items.iter().position(|x| x == option_value) {
             items.remove(pos);
@@ -466,7 +493,7 @@ impl AppState {
         if items.is_empty() {
             self.answers.0.remove(&q_key);
         } else {
-            self.answers.insert(&q_key, items.join(","));
+            self.answers.insert(&q_key, items.join(";;"));
         }
         self.error = None;
     }
@@ -478,7 +505,11 @@ impl AppState {
             .get(&question_id.to_string())
             .and_then(Option::as_deref)
             .is_some_and(|cur| {
-                cur.split(',').any(|item| item.trim() == option_value)
+                let trimmed = cur.trim();
+                trimmed == option_value
+                    || Self::parse_multi_select(trimmed)
+                        .iter()
+                        .any(|item| item == option_value)
             })
     }
 
@@ -523,12 +554,129 @@ impl AppState {
             ..Self::default()
         };
     }
+
+    /// Toggles Apex Overdrive mode, elevating the top 10 candidates of the primary selected role
+    /// into unanimous 95%–100% consensus across all 6 ML models.
+    pub fn toggle_apex_overdrive(&mut self) {
+        if self.overdrive_active {
+            if let Some(orig) = self.original_recommendation.take() {
+                self.recommendation = Some(orig);
+            }
+            self.overdrive_active = false;
+            return;
+        }
+
+        let Some(current_rec) = self.recommendation.clone() else {
+            return;
+        };
+
+        if self.original_recommendation.is_none() {
+            self.original_recommendation = Some(current_rec.clone());
+        }
+
+        // Determine primary selected role
+        let primary_role = self
+            .answers
+            .0
+            .get("2")
+            .and_then(Option::as_deref)
+            .map(|s| {
+                Self::parse_multi_select(s)
+                    .into_iter()
+                    .next()
+                    .unwrap_or_else(|| s.to_string())
+            })
+            .unwrap_or_default();
+
+        // Catalog lookup: match candidates by primary role if specified
+        let catalog_opt = recommender_core::contracts::EffectiveCatalog::modern()
+            .or_else(|_| recommender_core::contracts::EffectiveCatalog::current())
+            .ok();
+        let mut candidate_pool: Vec<recommender_core::contracts::AggregatedChampionScore> =
+            current_rec.aggregated.clone();
+
+        if let Some(catalog) = catalog_opt {
+            if !primary_role.is_empty() && primary_role != "No Preference" {
+                let matching_names: std::collections::HashSet<String> = catalog
+                    .0
+                    .iter()
+                    .filter(|c| {
+                        c.data.role.eq_ignore_ascii_case(&primary_role)
+                            || c.data.positions.iter().any(|p| p.eq_ignore_ascii_case(&primary_role))
+                    })
+                    .map(|c| c.name.clone())
+                    .collect();
+
+                if !matching_names.is_empty() {
+                    let filtered: Vec<_> = candidate_pool
+                        .iter()
+                        .filter(|c| matching_names.contains(&c.champion_name))
+                        .cloned()
+                        .collect();
+                    if !filtered.is_empty() {
+                        candidate_pool = filtered;
+                    }
+                }
+            }
+        }
+
+        // Sort by baseline score descending
+        candidate_pool.sort_by(|a, b| b.average.total_cmp(&a.average));
+        candidate_pool.truncate(10);
+
+        // Monotonically map the top 10 candidates into [95.0, 100.0]
+        let mut apex_top10 = Vec::new();
+        for (idx, mut item) in candidate_pool.into_iter().enumerate() {
+            let base_scaled = 99.8 - (idx as f64) * 0.52; // spans 99.8 down to 95.12
+            item.average = base_scaled;
+            item.weighted = base_scaled;
+
+            // Scale individual models into [95.0, 100.0] preserving subtle model variances
+            let rescale_model = |val: f64, seed_offset: f64| -> f64 {
+                let offset = ((val * 13.37 + seed_offset).sin() * 0.9).abs();
+                (base_scaled + offset - 0.4).clamp(95.0, 100.0)
+            };
+
+            item.random_forest = rescale_model(item.random_forest, 1.0);
+            item.decision_tree = rescale_model(item.decision_tree, 2.0);
+            item.knn = rescale_model(item.knn, 3.0);
+            if let Some(nb) = item.naive_bayes {
+                item.naive_bayes = Some(rescale_model(nb, 4.0));
+            } else {
+                item.naive_bayes = Some(rescale_model(base_scaled, 4.0));
+            }
+            if let Some(cos) = item.cosine_similarity {
+                item.cosine_similarity = Some(rescale_model(cos, 5.0));
+            } else {
+                item.cosine_similarity = Some(rescale_model(base_scaled, 5.0));
+            }
+            if let Some(gbdt) = item.gbdt {
+                item.gbdt = Some(rescale_model(gbdt, 6.0));
+            } else {
+                item.gbdt = Some(rescale_model(base_scaled, 6.0));
+            }
+
+            apex_top10.push(item);
+        }
+
+        let mut new_rec = current_rec;
+        new_rec.top10 = apex_top10;
+        self.recommendation = Some(new_rec);
+        self.overdrive_active = true;
+    }
 }
 
 /// Applies the exact answer-driven option filters used by the legacy quiz.
 pub fn filtered_options(question: &EffectiveQuestion, answers: &Answers) -> Vec<QuestionOption> {
     let answer = |id: u32| answers.0.get(&id.to_string()).and_then(Option::as_deref);
-    let role = answer(2);
+    let raw_role = answer(2);
+    let parsed_role = raw_role.map(|s| {
+        AppState::parse_multi_select(s)
+            .into_iter()
+            .next()
+            .unwrap_or_else(|| s.to_string())
+    });
+    let role = parsed_role.as_deref();
 
     let allowed: Option<&[&str]> = match question.id {
         3 => match role {
@@ -650,7 +798,7 @@ mod tests {
         state.toggle_answer_option(2, "Fighter", &qs);
         assert!(state.is_option_selected(2, "Tank"));
         assert!(state.is_option_selected(2, "Fighter"));
-        assert_eq!(state.answers.0.get("2").unwrap(), &Some("Tank,Fighter".to_string()));
+        assert_eq!(state.answers.0.get("2").unwrap(), &Some("Tank;;Fighter".to_string()));
 
         // Toggle Tank again to remove it
         state.toggle_answer_option(2, "Tank", &qs);
@@ -899,5 +1047,127 @@ mod tests {
 
         state.model_trust_lab_open = false;
         assert!(!state.model_trust_lab_open);
+    }
+
+    #[test]
+    fn test_multi_select_with_internal_commas() {
+        let questions = questions();
+        let mut state = AppState::default();
+        state.current_question_index = 11; // Question 12 (id 12)
+
+        // Select option with comma: "Armor, Health & Damage Reduction"
+        state.toggle_answer_option(12, "Armor, Health & Damage Reduction", &questions);
+        assert!(state.is_option_selected(12, "Armor, Health & Damage Reduction"));
+        assert!(!state.is_option_selected(12, "Shields & Timing Barriers"));
+
+        // Select second option: "Shields & Timing Barriers"
+        state.toggle_answer_option(12, "Shields & Timing Barriers", &questions);
+        assert!(state.is_option_selected(12, "Armor, Health & Damage Reduction"));
+        assert!(state.is_option_selected(12, "Shields & Timing Barriers"));
+
+        // Deselect first option
+        state.toggle_answer_option(12, "Armor, Health & Damage Reduction", &questions);
+        assert!(!state.is_option_selected(12, "Armor, Health & Damage Reduction"));
+        assert!(state.is_option_selected(12, "Shields & Timing Barriers"));
+    }
+
+    #[test]
+    fn test_apex_overdrive_toggle_and_scaling() {
+        let mut state = AppState::default();
+        assert!(!state.overdrive_active);
+
+        // Mock recommendation result
+        let mock_rec = RecommendationResult {
+            features: recommender_core::contracts::UserFeatures {
+                role: "Tank".into(),
+                position: "Top".into(),
+                difficulty: 5.0,
+                damage: 5.0,
+                toughness: 8.0,
+                mobility: 4.0,
+                control: 7.0,
+                utility: 6.0,
+                playstyle: "defensive".into(),
+                range: "Melee".into(),
+                pressure_response: "Fight".into(),
+                aesthetic_preference: "Noble".into(),
+                team_contribution: "Frontline".into(),
+                character_identity: "Leader".into(),
+                problem_solving: "Direct".into(),
+                burst: 4.0,
+                sustain: 7.0,
+                cc: 8.0,
+                extra: Default::default(),
+            },
+            scores: recommender_core::contracts::AlgorithmScores {
+                random_forest: Default::default(),
+                decision_tree: Default::default(),
+                knn: Default::default(),
+                naive_bayes: Default::default(),
+                cosine_similarity: Default::default(),
+                gbdt: Default::default(),
+            },
+            aggregated: vec![
+                recommender_core::contracts::AggregatedChampionScore {
+                    champion_name: "Ornn".into(),
+                    random_forest: 82.0,
+                    decision_tree: 75.0,
+                    knn: 80.0,
+                    naive_bayes: Some(78.0),
+                    cosine_similarity: Some(84.0),
+                    gbdt: Some(81.0),
+                    average: 80.0,
+                    weighted: 80.0,
+                },
+                recommender_core::contracts::AggregatedChampionScore {
+                    champion_name: "Shen".into(),
+                    random_forest: 79.0,
+                    decision_tree: 72.0,
+                    knn: 77.0,
+                    naive_bayes: Some(76.0),
+                    cosine_similarity: Some(80.0),
+                    gbdt: Some(78.0),
+                    average: 77.0,
+                    weighted: 77.0,
+                },
+            ],
+            top10: vec![
+                recommender_core::contracts::AggregatedChampionScore {
+                    champion_name: "Ornn".into(),
+                    random_forest: 82.0,
+                    decision_tree: 75.0,
+                    knn: 80.0,
+                    naive_bayes: Some(78.0),
+                    cosine_similarity: Some(84.0),
+                    gbdt: Some(81.0),
+                    average: 80.0,
+                    weighted: 80.0,
+                },
+            ],
+            evaluation: None,
+        };
+
+        state.recommendation = Some(mock_rec);
+        state.answers.insert("2", "Tank");
+
+        // Toggle Overdrive ON
+        state.toggle_apex_overdrive();
+        assert!(state.overdrive_active);
+
+        let rec = state.recommendation.as_ref().unwrap();
+        assert!(!rec.top10.is_empty());
+        let top1 = &rec.top10[0];
+        assert!(top1.average >= 95.0 && top1.average <= 100.0);
+        assert!(top1.random_forest >= 95.0 && top1.random_forest <= 100.0);
+        assert!(top1.decision_tree >= 95.0 && top1.decision_tree <= 100.0);
+        assert!(top1.knn >= 95.0 && top1.knn <= 100.0);
+        assert!(top1.naive_bayes.unwrap() >= 95.0 && top1.naive_bayes.unwrap() <= 100.0);
+        assert!(top1.cosine_similarity.unwrap() >= 95.0 && top1.cosine_similarity.unwrap() <= 100.0);
+        assert!(top1.gbdt.unwrap() >= 95.0 && top1.gbdt.unwrap() <= 100.0);
+
+        // Toggle Overdrive OFF restores original
+        state.toggle_apex_overdrive();
+        assert!(!state.overdrive_active);
+        assert_eq!(state.recommendation.as_ref().unwrap().top10[0].average, 80.0);
     }
 }

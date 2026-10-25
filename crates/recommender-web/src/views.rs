@@ -1322,6 +1322,24 @@ fn view_analysis_content(
                     <a class="btn btn-ghost btn-md" href=build_url target="_blank" rel="noopener noreferrer">
                         "Build on U.GG"
                     </a>
+                    {move || {
+                        let is_ov = state.with(|s| s.overdrive_active);
+                        view! {
+                            <button
+                                type="button"
+                                class=if is_ov { "btn btn-primary btn-md" } else { "btn btn-secondary btn-md" }
+                                style=if is_ov { "box-shadow: 0 0 14px rgba(10, 200, 185, 0.45); border-color: var(--cyan); color: #fff;" } else { "" }
+                                on:click=move |_| {
+                                    state.update(|s| s.toggle_apex_overdrive());
+                                }
+                            >
+                                <span style="display:inline-flex;width:15px;height:15px;margin-right:6px;vertical-align:middle;">
+                                    {crate::player_analytics_view::view_lol_icon("hex-core")}
+                                </span>
+                                {if is_ov { "Apex Active (95-100%)" } else { "Apex Overdrive" }}
+                            </button>
+                        }
+                    }}
                 </div>
             </div>
             <div class="spotlight-side">
@@ -1335,20 +1353,42 @@ fn view_analysis_content(
                     {model_bar("Cosine Similarity", top.cosine_similarity)}
                     {model_bar("GBDT", top.gbdt)}
                 </div>
-                <div style="margin-top: 0.75rem; text-align: center;">
-                    <Button
-                        variant=ButtonVariant::Ghost
-                        size=ButtonSize::Md
-                        on:click=move |_| state.update(|s| s.open_modal(Modal::TieBreaker))
-                    >
-                        <span style="display:inline-flex;width:13px;height:13px;margin-right:5px;vertical-align:middle;">
-                            {crate::player_analytics_view::view_lol_icon("hex-swords")}
-                        </span>
-                        "Resolve Divergence (Tie-Breaker)"
-                    </Button>
-                </div>
             </div>
         </section>
+
+        // Step 1 -> Step 2 Auto-Wizard Progression Banner
+        {move || {
+            if state.with(|s| s.overdrive_active) {
+                view! {
+                    <div style="background: linear-gradient(135deg, rgba(10, 200, 185, 0.15), rgba(1, 10, 19, 0.95)); border: 1px solid var(--cyan); border-radius: 6px; padding: 1rem 1.25rem; margin: 1rem 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <span style="display: inline-flex; width: 22px; height: 22px; color: var(--cyan);">{crate::player_analytics_view::view_lol_icon("hex-core")}</span>
+                            <div>
+                                <div style="font-family: serif; color: var(--cyan); font-weight: 700; font-size: 0.98rem; letter-spacing: 0.04em;">
+                                    "STEP 1 COMPLETE: APEX 95%–100% CONSENSUS ACTIVE"
+                                </div>
+                                <div style="color: #c8aa6e; font-size: 0.82rem; margin-top: 2px;">
+                                    "Top 10 candidates from your primary role are locked into peak agreement across all 6 models."
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <button
+                                type="button"
+                                class="btn btn-primary btn-sm"
+                                style="box-shadow: 0 0 12px rgba(10, 200, 185, 0.4); font-size: 0.82rem; padding: 0.45rem 1rem;"
+                                on:click=move |_| state.update(|s| s.open_modal(Modal::TieBreaker))
+                            >
+                                <span style="display: inline-flex; width: 14px; height: 14px; margin-right: 6px; vertical-align: middle;">{crate::player_analytics_view::view_lol_icon("hex-swords")}</span>
+                                "Step 2: Tactical Tie-Breaker ➔"
+                            </button>
+                        </div>
+                    </div>
+                }.into_any()
+            } else {
+                view! { <span style="display:none"></span> }.into_any()
+            }
+        }}
 
         // Live Riot API Telemetry & Bayesian Performance Integration Card
         <div style="background: linear-gradient(135deg, rgba(10, 200, 185, 0.12), rgba(200, 170, 110, 0.08)); border: 1px solid var(--cyan); border-radius: 6px; padding: 1.25rem 1.5rem; margin: 1.5rem 0 2rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
@@ -3058,7 +3098,12 @@ fn view_oauth_config_modal(state: RwSignal<AppState>) -> impl IntoView {
             class="inspector"
         >
             <header class="modal-head">
-                <span class="eyebrow" style="color: var(--warn);">"⚠️ Supabase Configuration Required"</span>
+                <span class="eyebrow" style="color: var(--warn);">
+                    <span style="display:inline-flex;width:14px;height:14px;margin-right:5px;vertical-align:middle;">
+                        {crate::player_analytics_view::view_lol_icon("arcane-matrix")}
+                    </span>
+                    "Supabase Configuration Required"
+                </span>
                 <h2>"Google Provider Not Enabled"</h2>
                 <p class="muted">
                     "Supabase returned: <code>msg: \"Unsupported provider: provider is not enabled\"</code>"
@@ -3104,7 +3149,10 @@ fn view_oauth_config_modal(state: RwSignal<AppState>) -> impl IntoView {
                         });
                     }
                 >
-                    "⚡ Continue in Summoner Mode →"
+                    <span style="display:inline-flex;width:14px;height:14px;margin-right:6px;vertical-align:middle;">
+                        {crate::player_analytics_view::view_lol_icon("hex-core")}
+                    </span>
+                    "Continue in Summoner Mode →"
                 </Button>
             </footer>
         </Dialog>
@@ -3539,11 +3587,15 @@ fn view_tie_breaker_modal(
                         on:click=move |_| {
                             state.update(|s| {
                                 s.model_weights = rec_weights;
+                                s.model_trust_lab_open = true;
                                 s.close_modal();
                             });
                         }
                     >
-                        "Accept Alignment & Apply Sliders"
+                        <span style="display:inline-flex;width:14px;height:14px;margin-right:6px;vertical-align:middle;">
+                            {crate::player_analytics_view::view_lol_icon("hex-gears")}
+                        </span>
+                        "Accept Alignment & Calibrate Sliders (Step 3) ➔"
                     </Button>
                 </div>
             </div>
