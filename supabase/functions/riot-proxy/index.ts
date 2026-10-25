@@ -1,7 +1,9 @@
 // Supabase Edge Function: riot-proxy
 // Securely proxies Riot Games Developer API without exposing RIOT_API_KEY to browser WebAssembly clients
+// Persists authentic Match-V5 telemetry into Supabase PostgreSQL (public.player_matches)
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -66,196 +68,107 @@ function getPlatformId(reg: string): string {
   return map[r] || "me1";
 }
 
-function getFallbackTelemetry(gameName: string, tagLine: string, region: string) {
-  const isShen = gameName.toUpperCase().includes("SHEN") || tagLine.toUpperCase().includes("SHEN");
-  const regUpper = (region || "ME").toUpperCase();
-  const prefix = regUpper === "ME" || regUpper === "ME1" ? "ME1-" : `${regUpper}-`;
+function resolveQueueName(queueId?: number): string {
+  switch (queueId) {
+    case 420:
+      return "Ranked Solo/Duo";
+    case 440:
+      return "Ranked Flex";
+    case 400:
+      return "Normal Draft";
+    case 430:
+      return "Normal Blind";
+    case 450:
+      return "ARAM";
+    case 490:
+      return "Quickplay";
+    case 1700:
+      return "Arena";
+    case 1900:
+      return "Pick URF";
+    case 830:
+    case 840:
+    case 850:
+      return "Co-op vs AI";
+    default:
+      return queueId ? `Queue #${queueId}` : "Normal / Custom";
+  }
+}
 
-  const matches = isShen
-    ? [
-        {
-          match_id: `${prefix}104928`,
-          champion_name: "Ornn",
-          role: "Top",
-          win: true,
-          kills: 5,
-          deaths: 1,
-          assists: 14,
-          cs_per_min: 7.8,
-          gold_diff_15: 840,
-          is_calibrated: true,
-          calibrated_rank: 1,
-          lane_opponent_champion: "Vel'Koz",
-          duration_mins: 31,
-          user_damage_dealt: 21850,
-          user_vision_score: 42,
-          items: [3068, 6665, 3075, 3111, 2055, 3340],
-          allied_team: [
-            { champion_name: "Ornn", role: "Top", kills: 5, deaths: 1, assists: 14, damage_dealt: 21850, cs: 242, is_player: true },
-            { champion_name: "Sejuani", role: "Jungle", kills: 4, deaths: 2, assists: 16, damage_dealt: 14200, cs: 178, is_player: false },
-            { champion_name: "Ahri", role: "Mid", kills: 10, deaths: 3, assists: 8, damage_dealt: 26400, cs: 255, is_player: false },
-            { champion_name: "Jinx", role: "ADC", kills: 9, deaths: 2, assists: 11, damage_dealt: 31200, cs: 284, is_player: false },
-            { champion_name: "Thresh", role: "Support", kills: 1, deaths: 3, assists: 22, damage_dealt: 6800, cs: 38, is_player: false },
-          ],
-          enemy_team: [
-            { champion_name: "Vel'Koz", role: "Top", kills: 3, deaths: 6, assists: 4, damage_dealt: 23500, cs: 215, is_player: false },
-            { champion_name: "Jarvan IV", role: "Jungle", kills: 3, deaths: 6, assists: 7, damage_dealt: 12100, cs: 162, is_player: false },
-            { champion_name: "Syndra", role: "Mid", kills: 4, deaths: 5, assists: 5, damage_dealt: 22100, cs: 240, is_player: false },
-            { champion_name: "Kai'Sa", role: "ADC", kills: 1, deaths: 7, assists: 3, damage_dealt: 17400, cs: 230, is_player: false },
-            { champion_name: "Nautilus", role: "Support", kills: 0, deaths: 5, assists: 6, damage_dealt: 5100, cs: 42, is_player: false },
-          ],
-        },
-        {
-          match_id: `${prefix}104855`,
-          champion_name: "Shen",
-          role: "Top",
-          win: true,
-          kills: 4,
-          deaths: 2,
-          assists: 18,
-          cs_per_min: 6.9,
-          gold_diff_15: 980,
-          is_calibrated: true,
-          calibrated_rank: 1,
-        },
-        {
-          match_id: `${prefix}104712`,
-          champion_name: "Shen",
-          role: "Top",
-          win: true,
-          kills: 8,
-          deaths: 0,
-          assists: 11,
-          cs_per_min: 7.8,
-          gold_diff_15: 2100,
-          is_calibrated: true,
-          calibrated_rank: 1,
-        },
-        {
-          match_id: `${prefix}104640`,
-          champion_name: "Darius",
-          role: "Top",
-          win: false,
-          kills: 3,
-          deaths: 6,
-          assists: 2,
-          cs_per_min: 6.2,
-          gold_diff_15: -1150,
-          is_calibrated: false,
-          calibrated_rank: null,
-        },
-        {
-          match_id: `${prefix}104519`,
-          champion_name: "Shen",
-          role: "Top",
-          win: true,
-          kills: 5,
-          deaths: 3,
-          assists: 16,
-          cs_per_min: 7.1,
-          gold_diff_15: 850,
-          is_calibrated: true,
-          calibrated_rank: 1,
-        },
-        {
-          match_id: `${prefix}104402`,
-          champion_name: "Ornn",
-          role: "Top",
-          win: true,
-          kills: 3,
-          deaths: 2,
-          assists: 15,
-          cs_per_min: 7.3,
-          gold_diff_15: 640,
-          is_calibrated: true,
-          calibrated_rank: 2,
-        },
-        {
-          match_id: `${prefix}104331`,
-          champion_name: "Aatrox",
-          role: "Top",
-          win: false,
-          kills: 4,
-          deaths: 7,
-          assists: 3,
-          cs_per_min: 6.5,
-          gold_diff_15: -890,
-          is_calibrated: false,
-          calibrated_rank: null,
-        },
-        {
-          match_id: `${prefix}104215`,
-          champion_name: "Shen",
-          role: "Top",
-          win: true,
-          kills: 7,
-          deaths: 1,
-          assists: 13,
-          cs_per_min: 7.6,
-          gold_diff_15: 1750,
-          is_calibrated: true,
-          calibrated_rank: 1,
-        },
-        {
-          match_id: `${prefix}104108`,
-          champion_name: "K'Sante",
-          role: "Top",
-          win: true,
-          kills: 5,
-          deaths: 2,
-          assists: 8,
-          cs_per_min: 7.9,
-          gold_diff_15: 1100,
-          is_calibrated: true,
-          calibrated_rank: 3,
-        },
-        {
-          match_id: `${prefix}103980`,
-          champion_name: "Shen",
-          role: "Top",
-          win: true,
-          kills: 4,
-          deaths: 1,
-          assists: 12,
-          cs_per_min: 7.2,
-          gold_diff_15: 1200,
-          is_calibrated: true,
-          calibrated_rank: 1,
-        },
-      ]
-    : [
-        {
-          match_id: `${prefix}901234`,
-          champion_name: "Ahri",
-          role: "Mid",
-          win: true,
-          kills: 9,
-          deaths: 2,
-          assists: 11,
-          cs_per_min: 8.4,
-          gold_diff_15: 1350,
-          is_calibrated: true,
-          calibrated_rank: 1,
-        },
-      ];
+function formatPlayedAgo(timestampMs?: number): string {
+  if (!timestampMs || timestampMs <= 0) return "Recent Match";
+  const now = Date.now();
+  const diffMs = Math.max(0, now - timestampMs);
+  const diffMinutes = Math.floor(diffMs / (60 * 1000));
+  const diffHours = Math.floor(diffMs / (60 * 60 * 1000));
+  const diffDays = Math.floor(diffMs / (24 * 60 * 60 * 1000));
 
-  return {
-    status: "simulated_telemetry",
-    data_source: "fallback",
-    summoner: {
-      gameName,
-      tagLine,
-      region,
-      primary_role: isShen ? "Top" : "Mid",
-      top_champions: isShen ? ["Shen", "Ornn", "K'Sante"] : ["Ahri", "Hwei", "Zed"],
-    },
-    matches,
-  };
+  if (diffMinutes < 60) {
+    return `${Math.max(1, diffMinutes)} mins ago`;
+  }
+  if (diffHours < 24) {
+    return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+  }
+  if (diffDays === 1) {
+    const d = new Date(timestampMs);
+    const timeStr = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+    return `Yesterday at ${timeStr}`;
+  }
+  if (diffDays < 7) {
+    return `${diffDays} days ago`;
+  }
+  const d = new Date(timestampMs);
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+async function ensureDatabaseTables(client: Client) {
+  try {
+    await client.queryArray(`
+      CREATE TABLE IF NOT EXISTS public.player_matches (
+        id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        match_id TEXT NOT NULL UNIQUE,
+        puuid TEXT NOT NULL,
+        riot_id TEXT NOT NULL,
+        region TEXT NOT NULL,
+        game_creation BIGINT NOT NULL,
+        game_duration_mins INT NOT NULL,
+        queue_id INT NOT NULL,
+        queue_name TEXT NOT NULL,
+        champion_name TEXT NOT NULL,
+        role TEXT NOT NULL,
+        win BOOLEAN NOT NULL,
+        kills INT NOT NULL DEFAULT 0,
+        deaths INT NOT NULL DEFAULT 0,
+        assists INT NOT NULL DEFAULT 0,
+        cs INT NOT NULL DEFAULT 0,
+        cs_per_min DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+        gold_diff_15 INT NOT NULL DEFAULT 0,
+        damage_dealt INT NOT NULL DEFAULT 0,
+        vision_score INT NOT NULL DEFAULT 0,
+        items JSONB NOT NULL DEFAULT '[]'::jsonb,
+        lane_opponent_champion TEXT,
+        allied_team JSONB NOT NULL DEFAULT '[]'::jsonb,
+        enemy_team JSONB NOT NULL DEFAULT '[]'::jsonb,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+      );
+
+      ALTER TABLE public.player_matches
+        ADD COLUMN IF NOT EXISTS queue_name TEXT,
+        ADD COLUMN IF NOT EXISTS game_creation BIGINT,
+        ADD COLUMN IF NOT EXISTS lane_opponent_champion TEXT,
+        ADD COLUMN IF NOT EXISTS allied_team JSONB,
+        ADD COLUMN IF NOT EXISTS enemy_team JSONB;
+
+      CREATE INDEX IF NOT EXISTS idx_player_matches_puuid_creation 
+        ON public.player_matches (puuid, game_creation DESC);
+    `);
+  } catch (err) {
+    console.warn("Table auto-migration notice:", err);
+  }
 }
 
 async function resolveAccountPuuid(gameName: string, tagLine: string, preferredCluster: string, riotApiKey: string) {
-  // Try preferred cluster first, then fallback to americas / asia
-  const clusters = [preferredCluster, "americas", "asia", "europe"].filter((v, i, a) => a.indexOf(v) === i);
+  const clusters = [preferredCluster, "europe", "americas", "asia"].filter((v, i, a) => a.indexOf(v) === i);
   for (const cluster of clusters) {
     try {
       const url = `https://${cluster}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(
@@ -276,6 +189,19 @@ async function resolveAccountPuuid(gameName: string, tagLine: string, preferredC
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
+  }
+
+  let dbClient: Client | null = null;
+  const dbUrl = Deno.env.get("SUPABASE_DB_URL");
+  if (dbUrl) {
+    try {
+      dbClient = new Client(dbUrl);
+      await dbClient.connect();
+      await ensureDatabaseTables(dbClient);
+    } catch (e) {
+      console.warn("Could not connect to Postgres DB:", e);
+      dbClient = null;
+    }
   }
 
   try {
@@ -300,42 +226,63 @@ serve(async (req: Request) => {
     const [gameName, tagLine] = riot_id.split("#");
     const cluster = getRegionalCluster(region);
     const platform = getPlatformId(region);
-    const riotApiKey = api_key || Deno.env.get("RIOT_API_KEY");
 
-    // Fallback if no Riot API key is configured
+    const riotApiKey = api_key || Deno.env.get("RIOT_API_KEY");
     if (!riotApiKey) {
-      const fallback = getFallbackTelemetry(gameName, tagLine, region);
-      return new Response(JSON.stringify(fallback), {
-        status: 200,
-        headers: corsHeaders,
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Missing Riot API Key.",
+          matches: [],
+        }),
+        { status: 401, headers: corsHeaders }
+      );
     }
 
-    // 1. Resolve PUUID from Riot Account API with fallback clusters
+    // 1. Resolve Summoner PUUID
     const accountData = await resolveAccountPuuid(gameName, tagLine, cluster, riotApiKey);
     if (!accountData) {
-      console.warn("Riot Account API lookup failed across clusters, returning fallback telemetry");
-      const fallback = getFallbackTelemetry(gameName, tagLine, region);
-      return new Response(JSON.stringify(fallback), {
-        status: 200,
-        headers: corsHeaders,
-      });
+      return new Response(
+        JSON.stringify({
+          error: `Player '${riot_id}' not found on Riot servers.`,
+          matches: [],
+        }),
+        { status: 404, headers: corsHeaders }
+      );
     }
 
     const puuid = accountData.puuid;
-
-    // 2. Fetch Recent Match-V5 IDs (supports OP.GG-style pagination via start & count)
     const safeStart = Math.max(0, Number(start) || 0);
-    const safeCount = Math.min(25, Math.max(10, Number(count) || 20));
+    const safeCount = Math.min(30, Math.max(10, Number(count) || 20));
+
+    // 2. Fetch match IDs from Riot Match-V5
     const matchesUrl = `https://${cluster}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=${safeStart}&count=${safeCount}`;
     const matchesRes = await fetch(matchesUrl, {
       headers: { "X-Riot-Token": riotApiKey },
     });
 
-    const adoptedMatches: any[] = [];
+    const parsedNewMatches: any[] = [];
     if (matchesRes.ok) {
       const matchIds = (await matchesRes.json()) as string[];
-      for (const matchId of matchIds.slice(0, safeCount)) {
+
+      // Query which match IDs already exist in Postgres
+      let existingIdsSet = new Set<string>();
+      if (dbClient) {
+        try {
+          const checkRes = await dbClient.queryObject<{ match_id: string }>(
+            `SELECT match_id FROM public.player_matches WHERE puuid = $1`,
+            [puuid]
+          );
+          existingIdsSet = new Set(checkRes.rows.map((r) => r.match_id));
+        } catch (e) {
+          console.warn("Failed checking existing match IDs:", e);
+        }
+      }
+
+      for (const matchId of matchIds) {
+        if (existingIdsSet.has(matchId)) {
+          continue; // Already persisted in Postgres
+        }
+
         try {
           const mRes = await fetch(
             `https://${cluster}.api.riotgames.com/lol/match/v5/matches/${matchId}`,
@@ -365,19 +312,11 @@ serve(async (req: Request) => {
               ? "Bottom"
               : "Top";
 
-          // Calculate real calibration rank based on user recommendations
           const champName = participant.championName || "Unknown";
-          const recIdx = recommended_champions.findIndex(
-            (c: string) => c.toLowerCase() === champName.toLowerCase()
-          );
-          const isCalibrated = recIdx !== -1;
-          const calibratedRank = isCalibrated ? recIdx + 1 : null;
-
           const goldDiff15 = participant.challenges?.goldDiffAtMin15
             ? Math.round(participant.challenges.goldDiffAtMin15)
             : 0;
 
-          // Extract authentic lane opponent
           const enemyOpponent = (mData.info.participants || []).find(
             (p: any) => p.teamId !== participant.teamId && p.teamPosition === participant.teamPosition
           );
@@ -414,33 +353,162 @@ serve(async (req: Request) => {
               is_player: false,
             }));
 
-          adoptedMatches.push({
+          const queueId = Number(mData.info.queueId) || 0;
+          const queueName = resolveQueueName(queueId);
+          const gameCreation = Number(mData.info.gameCreation) || Date.now();
+
+          const record = {
             match_id: matchId,
+            puuid,
+            riot_id,
+            region,
+            game_creation: gameCreation,
+            game_duration_mins: durationMins,
+            queue_id: queueId,
+            queue_name: queueName,
             champion_name: champName,
             role,
             win: Boolean(participant.win),
             kills: participant.kills || 0,
             deaths: participant.deaths || 0,
             assists: participant.assists || 0,
+            cs: totalCs,
             cs_per_min: csPerMin,
             gold_diff_15: goldDiff15,
-            is_calibrated: isCalibrated,
-            calibrated_rank: calibratedRank,
+            damage_dealt: participant.totalDamageDealtToChampions || 0,
+            vision_score: participant.visionScore || 0,
+            items: JSON.stringify(items),
             lane_opponent_champion: laneOpponentChampion,
-            duration_mins: durationMins,
-            user_damage_dealt: participant.totalDamageDealtToChampions || 0,
-            user_vision_score: participant.visionScore || 0,
-            items,
-            allied_team: alliedTeam,
-            enemy_team: enemyTeam,
-          });
+            allied_team: JSON.stringify(alliedTeam),
+            enemy_team: JSON.stringify(enemyTeam),
+          };
+
+          parsedNewMatches.push(record);
+
+          // Persist to Postgres
+          if (dbClient) {
+            try {
+              await dbClient.queryArray(
+                `INSERT INTO public.player_matches (
+                  match_id, puuid, riot_id, region, game_creation, game_duration_mins,
+                  queue_id, queue_name, champion_name, role, win, kills, deaths, assists,
+                  cs, cs_per_min, gold_diff_15, damage_dealt, vision_score, items,
+                  lane_opponent_champion, allied_team, enemy_team
+                ) VALUES (
+                  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
+                ) ON CONFLICT (match_id) DO NOTHING`,
+                [
+                  record.match_id,
+                  record.puuid,
+                  record.riot_id,
+                  record.region,
+                  record.game_creation,
+                  record.game_duration_mins,
+                  record.queue_id,
+                  record.queue_name,
+                  record.champion_name,
+                  record.role,
+                  record.win,
+                  record.kills,
+                  record.deaths,
+                  record.assists,
+                  record.cs,
+                  record.cs_per_min,
+                  record.gold_diff_15,
+                  record.damage_dealt,
+                  record.vision_score,
+                  record.items,
+                  record.lane_opponent_champion,
+                  record.allied_team,
+                  record.enemy_team,
+                ]
+              );
+            } catch (insErr) {
+              console.warn("Failed inserting match to Postgres:", insErr);
+            }
+          }
         } catch (e) {
           console.warn("Failed to parse match", matchId, e);
         }
       }
     }
 
-    // 3. Query Full Lifetime Champion Masteries (from Day 1 debut to latest game)
+    // 3. Retrieve Authentic Matches from Postgres or Fallback In-Memory
+    let rawMatches: any[] = [];
+    if (dbClient) {
+      try {
+        const queryRes = await dbClient.queryObject<any>(
+          `SELECT match_id, puuid, riot_id, region, game_creation, game_duration_mins,
+                  queue_id, queue_name, champion_name, role, win, kills, deaths, assists,
+                  cs, cs_per_min, gold_diff_15, damage_dealt, vision_score, items,
+                  lane_opponent_champion, allied_team, enemy_team
+           FROM public.player_matches
+           WHERE puuid = $1
+           ORDER BY game_creation DESC
+           LIMIT $2 OFFSET $3`,
+          [puuid, safeCount, safeStart]
+        );
+        rawMatches = queryRes.rows;
+      } catch (e) {
+        console.warn("Failed querying matches from Postgres:", e);
+      }
+    }
+
+    if (rawMatches.length === 0) {
+      rawMatches = parsedNewMatches;
+    }
+
+    // Transform into AdoptedMatch format with queue & timestamp labels
+    const adoptedMatches = rawMatches.map((m: any) => {
+      const champName = m.champion_name;
+      const recIdx = recommended_champions.findIndex(
+        (c: string) => c.toLowerCase() === champName.toLowerCase()
+      );
+      const isCalibrated = recIdx !== -1;
+      const calibratedRank = isCalibrated ? recIdx + 1 : null;
+
+      let items = m.items;
+      if (typeof items === "string") {
+        try { items = JSON.parse(items); } catch (_) { items = []; }
+      }
+      let alliedTeam = m.allied_team;
+      if (typeof alliedTeam === "string") {
+        try { alliedTeam = JSON.parse(alliedTeam); } catch (_) { alliedTeam = []; }
+      }
+      let enemyTeam = m.enemy_team;
+      if (typeof enemyTeam === "string") {
+        try { enemyTeam = JSON.parse(enemyTeam); } catch (_) { enemyTeam = []; }
+      }
+
+      const gameCreation = Number(m.game_creation) || 0;
+
+      return {
+        match_id: m.match_id,
+        champion_name: champName,
+        role: m.role,
+        win: Boolean(m.win),
+        kills: Number(m.kills) || 0,
+        deaths: Number(m.deaths) || 0,
+        assists: Number(m.assists) || 0,
+        cs_per_min: Number(m.cs_per_min) || 0.0,
+        gold_diff_15: Number(m.gold_diff_15) || 0,
+        is_calibrated: isCalibrated,
+        calibrated_rank: calibratedRank,
+        lane_opponent_champion: m.lane_opponent_champion || null,
+        duration_mins: Number(m.game_duration_mins) || 20,
+        user_damage_dealt: Number(m.damage_dealt) || 0,
+        user_vision_score: Number(m.vision_score) || 0,
+        items: items || [],
+        allied_team: alliedTeam || [],
+        enemy_team: enemyTeam || [],
+        game_creation_timestamp: gameCreation,
+        queue_id: Number(m.queue_id) || 0,
+        queue_name: m.queue_name || resolveQueueName(m.queue_id),
+        played_ago_label: formatPlayedAgo(gameCreation),
+      };
+    });
+
+    // 4. Query Full Lifetime Champion Masteries (from Day 1 debut to latest game)
     const masteryUrl = `https://${platform}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${puuid}`;
     const masteryRes = await fetch(masteryUrl, {
       headers: { "X-Riot-Token": riotApiKey },
@@ -452,16 +520,10 @@ serve(async (req: Request) => {
       topMasteries = Array.isArray(allMasteries) ? allMasteries.slice(0, 25) : [];
     }
 
-    // Determine final matches and data source
-    const isLive = adoptedMatches.length > 0;
-    const finalMatches = isLive
-      ? adoptedMatches
-      : getFallbackTelemetry(gameName, tagLine, region).matches;
-
     return new Response(
       JSON.stringify({
         status: "success",
-        data_source: isLive ? "live" : "fallback",
+        data_source: "live_postgres",
         summoner: {
           puuid,
           gameName: accountData.gameName,
@@ -473,7 +535,7 @@ serve(async (req: Request) => {
             championPoints: m.championPoints,
           })),
         },
-        matches: finalMatches,
+        matches: adoptedMatches,
       }),
       { status: 200, headers: corsHeaders }
     );
@@ -482,5 +544,13 @@ serve(async (req: Request) => {
       JSON.stringify({ error: (error as Error).message }),
       { status: 500, headers: corsHeaders }
     );
+  } finally {
+    if (dbClient) {
+      try {
+        await dbClient.end();
+      } catch (_) {
+        // Ignore close error
+      }
+    }
   }
 });

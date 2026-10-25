@@ -34,6 +34,14 @@ pub struct AdoptedMatch {
     pub allied_team: Option<Vec<MatchParticipantSummary>>,
     #[serde(default)]
     pub enemy_team: Option<Vec<MatchParticipantSummary>>,
+    #[serde(default)]
+    pub game_creation_timestamp: Option<i64>,
+    #[serde(default)]
+    pub queue_id: Option<u32>,
+    #[serde(default)]
+    pub queue_name: Option<String>,
+    #[serde(default)]
+    pub played_ago_label: Option<String>,
 }
 
 impl AdoptedMatch {
@@ -2034,123 +2042,13 @@ impl PlayerAnalyticsReport {
         }
     }
 
-    /// Returns an expanded chronological match list up to `total_desired` games (e.g., 50 games)
-    /// so OP.GG-style "+ Reveal 10 More Games" pagination reveals 10 -> 20 -> 30 -> 40 -> 50 matches.
+    /// Returns an expanded chronological match list up to `total_desired` games
+    /// strictly from verified authentic telemetry, without any synthetic padding or mock data.
     pub fn extended_match_history(&self, total_desired: usize) -> Vec<AdoptedMatch> {
         let mut all = self.recent_matches.clone();
-        if all.len() >= total_desired {
+        if all.len() > total_desired {
             all.truncate(total_desired);
-            return all;
         }
-
-        let reg = self.region.as_deref().unwrap_or("ME");
-        let prefix = match reg {
-            "ME" | "ME1" => "ME1-",
-            "EUW" | "EUW1" => "EUW1-",
-            "EUNE" | "EUN1" => "EUN1-",
-            "NA" | "NA1" => "NA1-",
-            "KR" => "KR-",
-            "SEA" | "SG" => "SG2-",
-            _ => "ME1-",
-        };
-
-        let is_tank = self
-            .evolution
-            .anchor_champions
-            .first()
-            .map(|c| c.eq_ignore_ascii_case("Shen"))
-            .unwrap_or(false)
-            || self.summoner_name.to_uppercase().contains("SHEN");
-
-        let roster_pool: &[(&str, &str, bool, Option<usize>)] = if is_tank {
-            &[
-                ("Shen", "Top", true, Some(1)),
-                ("Ornn", "Top", true, Some(2)),
-                ("K'Sante", "Top", true, Some(3)),
-                ("Galio", "Mid", true, Some(4)),
-                ("Poppy", "Top", true, Some(5)),
-                ("Maokai", "Support", true, Some(6)),
-                ("Mordekaiser", "Top", false, None),
-                ("Sion", "Top", false, None),
-                ("Malphite", "Top", true, Some(7)),
-                ("Jax", "Top", false, None),
-                ("Gnar", "Top", false, None),
-                ("tahmkench", "Top", false, None),
-            ]
-        } else {
-            &[
-                ("Ahri", "Mid", true, Some(1)),
-                ("Syndra", "Mid", true, Some(2)),
-                ("Vex", "Mid", true, Some(3)),
-                ("Orianna", "Mid", true, Some(4)),
-                ("Lux", "Mid", true, Some(5)),
-                ("Taliyah", "Mid", true, Some(6)),
-                ("Zed", "Mid", false, None),
-                ("Yasuo", "Mid", false, None),
-                ("Hwei", "Mid", true, Some(7)),
-                ("Akali", "Mid", false, None),
-                ("Viktor", "Mid", false, None),
-                ("LeBlanc", "Mid", false, None),
-            ]
-        };
-
-        let mut next_idx = all.len();
-        while all.len() < total_desired {
-            let (champ, role, is_cal, cal_rank) = roster_pool[next_idx % roster_pool.len()];
-            let champ_clean = if champ == "tahmkench" {
-                "Tahm Kench"
-            } else {
-                champ
-            };
-            let win = if is_cal {
-                (next_idx % 4) != 3
-            } else {
-                (next_idx % 3) == 0
-            };
-            let kills = if win {
-                5 + ((next_idx * 3) % 7) as u32
-            } else {
-                2 + ((next_idx * 2) % 5) as u32
-            };
-            let deaths = if win {
-                1 + (next_idx % 3) as u32
-            } else {
-                5 + (next_idx % 4) as u32
-            };
-            let assists = if win {
-                9 + ((next_idx * 5) % 10) as u32
-            } else {
-                4 + ((next_idx * 3) % 6) as u32
-            };
-            let cs_per_min = if win {
-                ((7.1 + ((next_idx % 16) as f64) * 0.1) * 10.0).round() / 10.0
-            } else {
-                ((6.1 + ((next_idx % 12) as f64) * 0.1) * 10.0).round() / 10.0
-            };
-            let gold_diff_15 = if win {
-                450 + ((next_idx * 170) % 1650) as i32
-            } else {
-                -350 - ((next_idx * 190) % 1250) as i32
-            };
-
-            all.push(AdoptedMatch {
-                match_id: format!("{prefix}{}", 103000usize.saturating_sub(next_idx * 117)),
-                champion_name: champ_clean.to_string(),
-                role: role.to_string(),
-                win,
-                kills,
-                deaths,
-                assists,
-                cs_per_min,
-                gold_diff_15,
-                is_calibrated: is_cal,
-                calibrated_rank: cal_rank,
-            
-                ..Default::default()
-});
-            next_idx += 1;
-        }
-
         all
     }
 

@@ -152,6 +152,7 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
     let log_role_filter = RwSignal::new("ALL".to_string());
     let log_outcome_filter = RwSignal::new("ALL".to_string());
     let log_champ_filter = RwSignal::new("ALL".to_string());
+    let log_queue_filter = RwSignal::new("ALL".to_string());
 
     // OP.GG-style pagination: starts at 10 games and reveals +10 more per click
     let visible_games_count = RwSignal::new(initial_visible);
@@ -286,7 +287,7 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                                     <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                                         <h1 style="margin: 0; font-family: serif; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); font-size: 1.6rem;">{rep.summoner_name}</h1>
                                         <span style="background: rgba(10, 200, 185, 0.15); border: 1px solid var(--cyan); color: var(--cyan); font-size: 0.75rem; padding: 0.15rem 0.5rem; text-transform: uppercase; font-family: monospace;">{region_label}</span>
-                                        {if state.with(|c| c.riot_data_source.as_deref() == Some("live")) {
+                                        {if state.with(|c| c.riot_data_source.as_deref().map(|s| s.starts_with("live")).unwrap_or(false)) {
                                             view! {
                                                 <span style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #10b981; font-size: 0.75rem; padding: 0.15rem 0.55rem; text-transform: uppercase; font-family: monospace; font-weight: bold; display: inline-flex; align-items: center; gap: 5px;">
                                                     {view_lol_icon("diamond")}
@@ -328,7 +329,7 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                                 </button>
                                 {move || {
                                     let src = state.with(|c| c.riot_data_source.clone());
-                                    let is_live = src.as_deref() == Some("live");
+                                    let is_live = src.as_deref().map(|s| s.starts_with("live")).unwrap_or(false);
                                     let (bg, border, col, icon, text) = if is_live {
                                         ("rgba(16, 185, 129, 0.18)", "#10b981", "#10b981", "diamond", "LIVE MATCH-V5 TELEMETRY ACTIVE")
                                     } else {
@@ -392,7 +393,7 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                 let rep = report();
                 match active_tab.get().as_str() {
                     "ml_lab" => view_page_no_quiz_ml_lab(rep, active_tab, selected_tracked_champion, toggle_pin_champion).into_any(),
-                    "game_logs" => view_page_complete_game_logs(rep, visible_games_count, selected_match_id, selected_curve_match_id, log_role_filter, log_outcome_filter, log_champ_filter).into_any(),
+                    "game_logs" => view_page_complete_game_logs(rep, visible_games_count, selected_match_id, selected_curve_match_id, log_role_filter, log_outcome_filter, log_champ_filter, log_queue_filter).into_any(),
                     "champions_pool" => view_page_champions_pool(rep, pinned_champions, refreshing_champion, active_tab, selected_tracked_champion, toggle_pin_champion, trigger_riot_sync).into_any(),
                     "pinned_tracker" => view_page_pinned_champion_tracker(rep, pinned_champions, refreshing_champion, selected_tracked_champion, toggle_pin_champion, trigger_riot_sync).into_any(),
                     _ => view_page_overview_and_radar(rep, active_tab, selected_tracked_champion).into_any(),
@@ -3686,6 +3687,7 @@ fn view_page_complete_game_logs(
     log_role_filter: RwSignal<String>,
     log_outcome_filter: RwSignal<String>,
     log_champ_filter: RwSignal<String>,
+    log_queue_filter: RwSignal<String>,
 ) -> impl IntoView {
     let all_matches = rep.extended_match_history(50);
     let summoner_name = rep.summoner_name.clone();
@@ -3717,6 +3719,16 @@ fn view_page_complete_game_logs(
                 <div style="display: flex; gap: 0.65rem; flex-wrap: wrap; align-items: center; font-family: monospace; font-size: 0.78rem;">
                     <select
                         style="background: rgba(9, 20, 40, 0.95); border: 1px solid var(--gold); color: var(--gold); padding: 0.4rem 0.65rem; font-family: monospace; font-size: 0.78rem;"
+                        on:change=move |ev| log_queue_filter.set(event_target_value(&ev))
+                    >
+                        <option value="ALL" selected=move || log_queue_filter.get() == "ALL">"All Modes"</option>
+                        <option value="RANKED" selected=move || log_queue_filter.get() == "RANKED">"Ranked (Solo / Flex)"</option>
+                        <option value="NORMAL" selected=move || log_queue_filter.get() == "NORMAL">"Normal (Draft / Blind)"</option>
+                        <option value="ARAM" selected=move || log_queue_filter.get() == "ARAM">"ARAM"</option>
+                    </select>
+
+                    <select
+                        style="background: rgba(9, 20, 40, 0.95); border: 1px solid rgba(200, 170, 110, 0.6); color: #fff; padding: 0.4rem 0.65rem; font-family: monospace; font-size: 0.78rem;"
                         on:change=move |ev| log_outcome_filter.set(event_target_value(&ev))
                     >
                         <option value="ALL" selected=move || log_outcome_filter.get() == "ALL">"All Outcomes"</option>
@@ -3755,6 +3767,7 @@ fn view_page_complete_game_logs(
             // Filtered & Paginated Game Log Rows + Expandable Single-Match 5v5 Deep Inspector
             <div style="display: flex; flex-direction: column; gap: 0.85rem;">
                 {move || {
+                    let queue_f = log_queue_filter.get();
                     let role_f = log_role_filter.get();
                     let out_f = log_outcome_filter.get();
                     let champ_f = log_champ_filter.get();
@@ -3770,7 +3783,13 @@ fn view_page_complete_game_logs(
                                 _ => true,
                             };
                             let champ_ok = champ_f == "ALL" || m.champion_name.eq_ignore_ascii_case(&champ_f);
-                            role_ok && out_ok && champ_ok
+                            let queue_ok = match queue_f.as_str() {
+                                "RANKED" => m.queue_name.as_deref().unwrap_or("").to_lowercase().contains("ranked"),
+                                "NORMAL" => m.queue_name.as_deref().unwrap_or("").to_lowercase().contains("normal"),
+                                "ARAM" => m.queue_name.as_deref().unwrap_or("").to_lowercase().contains("aram"),
+                                _ => true,
+                            };
+                            role_ok && out_ok && champ_ok && queue_ok
                         })
                         .cloned()
                         .collect();
@@ -3894,7 +3913,31 @@ fn view_rich_match_row_with_inspector(
                         {outcome_label}
                     </span>
 
-                    <span style="font-family: monospace; font-size: 0.74rem; color: #aaa; background: rgba(0,0,0,0.35); padding: 0.15rem 0.45rem; border: 1px solid rgba(255,255,255,0.08);">
+                    {if let Some(q_name) = m.queue_name.as_ref() {
+                        let is_ranked = q_name.to_lowercase().contains("ranked");
+                        let badge_border = if is_ranked { "1px solid rgba(200, 170, 110, 0.6)" } else { "1px solid rgba(10, 200, 185, 0.5)" };
+                        let badge_color = if is_ranked { "var(--gold)" } else { "var(--cyan)" };
+                        let badge_bg = if is_ranked { "rgba(200, 170, 110, 0.15)" } else { "rgba(10, 200, 185, 0.12)" };
+                        view! {
+                            <span style=format!("font-family: monospace; font-size: 0.72rem; color: {}; background: {}; padding: 0.15rem 0.5rem; border: {}; text-transform: uppercase; font-weight: bold;", badge_color, badge_bg, badge_border)>
+                                {q_name.clone()}
+                            </span>
+                        }.into_any()
+                    } else {
+                        view! { <span></span> }.into_any()
+                    }}
+
+                    {if let Some(played_ago) = m.played_ago_label.as_ref() {
+                        view! {
+                            <span style="font-family: monospace; font-size: 0.74rem; color: #bbb; background: rgba(0,0,0,0.35); padding: 0.15rem 0.45rem; border: 1px solid rgba(255,255,255,0.08);">
+                                {played_ago.clone()}
+                            </span>
+                        }.into_any()
+                    } else {
+                        view! { <span></span> }.into_any()
+                    }}
+
+                    <span style="font-family: monospace; font-size: 0.74rem; color: #888; background: rgba(0,0,0,0.25); padding: 0.15rem 0.45rem; border: 1px solid rgba(255,255,255,0.05);">
                         {format!("{} · {}m", m_id, deep.duration_mins)}
                     </span>
 

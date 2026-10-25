@@ -188,9 +188,9 @@ fn test_for_player_shentrick_middle_east() {
     assert_eq!(dna.phase_ratings.len(), 3);
     assert!(dna.phase_ratings[0] > 50.0);
 
-    // Verify Tab 3 Extended 50-Match History & Single-Match 5v5 Deep Analysis
+    // Verify Tab 3 Extended Match History strictly mirrors verified matches (no fake games)
     let extended = report.extended_match_history(50);
-    assert_eq!(extended.len(), 50);
+    assert_eq!(extended.len(), report.recent_matches.len());
     assert_eq!(extended[0].champion_name, "Ornn");
     assert_eq!(extended[0].lane_opponent_champion.as_deref(), Some("Vel'Koz"));
     let deep = extended[0].build_deep_analysis("SHENTRICK");
