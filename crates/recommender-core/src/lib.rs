@@ -1,6 +1,6 @@
 //! Offline deterministic scoring, with a narrow JSON boundary for native/Wasm callers.
 //! No browser, filesystem, networking, clocks, or JavaScript runtime in the library.
-mod aggregation;
+pub mod aggregation;
 pub mod analytics;
 mod compat;
 pub mod contracts;
@@ -15,6 +15,7 @@ mod naive_bayes;
 pub mod player_analytics;
 mod random_forest;
 pub mod riot_api;
+pub mod tie_breaker;
 #[cfg(target_arch = "wasm32")]
 mod wasm_abi;
 

@@ -18,12 +18,39 @@ pub fn from_answers(answers: &Value) -> Value {
         "Very Hard (9-10)" => 9.5,
         _ => 5.0,
     };
-    let (playstyle, damage, toughness, mobility, control, utility) = match answer("4", "").as_str()
-    {
-        "High Damage Output" => ("aggressive", 8.0, 3.0, 7.0, 4.0, 2.0),
-        "Tanky and Durable" => ("defensive", 4.0, 8.0, 3.0, 6.0, 5.0),
-        "Support Team" => ("supportive", 3.0, 5.0, 4.0, 7.0, 8.0),
-        _ => ("balanced", 5.0, 5.0, 5.0, 5.0, 5.0),
+    let q4_raw = answer("4", "");
+    let q4_parts: Vec<&str> = q4_raw
+        .split(',')
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .collect();
+    let (playstyle, damage, toughness, mobility, control, utility) = if q4_parts.is_empty() {
+        ("balanced", 5.0, 5.0, 5.0, 5.0, 5.0)
+    } else {
+        let mut d_sum = 0.0;
+        let mut t_sum = 0.0;
+        let mut m_sum = 0.0;
+        let mut c_sum = 0.0;
+        let mut u_sum = 0.0;
+        let mut p_style = "balanced";
+        for part in &q4_parts {
+            let (ps, d, t, m, c, u) = match *part {
+                "High Damage Output" => ("aggressive", 8.0, 3.0, 7.0, 4.0, 2.0),
+                "Tanky and Durable" => ("defensive", 4.0, 8.0, 3.0, 6.0, 5.0),
+                "Support Team" => ("supportive", 3.0, 5.0, 4.0, 7.0, 8.0),
+                _ => ("balanced", 5.0, 5.0, 5.0, 5.0, 5.0),
+            };
+            d_sum += d;
+            t_sum += t;
+            m_sum += m;
+            c_sum += c;
+            u_sum += u;
+            if p_style == "balanced" {
+                p_style = ps;
+            }
+        }
+        let n = q4_parts.len() as f64;
+        (p_style, d_sum / n, t_sum / n, m_sum / n, c_sum / n, u_sum / n)
     };
     let range = answers
         .get("5")
@@ -122,9 +149,24 @@ pub fn from_answers(answers: &Value) -> Value {
         )
     };
 
+    let raw_role = answer("2", "No Preference");
+    let primary_role = raw_role
+        .split(',')
+        .next()
+        .unwrap_or("No Preference")
+        .trim()
+        .to_string();
+    let raw_pos = answer("3", "No Preference");
+    let primary_pos = raw_pos
+        .split(',')
+        .next()
+        .unwrap_or("No Preference")
+        .trim()
+        .to_string();
+
     let mut feat = json!({
-        "role": answer("2", "No Preference"),
-        "position": answer("3", "No Preference"),
+        "role": primary_role,
+        "position": primary_pos,
         "difficulty": difficulty,
         "damage": damage, "toughness": toughness, "mobility": mobility,
         "control": control, "utility": utility,
@@ -146,11 +188,22 @@ pub fn from_answers(answers: &Value) -> Value {
                 .or_else(|| answers.get("6"))
                 .and_then(Value::as_str)
                 .unwrap_or("No Preference");
-            let dmg_type = answers
+            let raw_dmg = answers
                 .get("damage_type")
                 .or_else(|| answers.get("7"))
                 .and_then(Value::as_str)
                 .unwrap_or("No Preference");
+            let dmg_type = if raw_dmg.to_lowercase().contains("hybrid")
+                || (raw_dmg.contains("Physical") && raw_dmg.contains("Magic"))
+            {
+                "Hybrid".to_string()
+            } else if raw_dmg.contains("Magic") {
+                "Magic".to_string()
+            } else if raw_dmg.contains("Physical") {
+                "Physical".to_string()
+            } else {
+                "No Preference".to_string()
+            };
             map.insert("resource".to_string(), json!(res));
             map.insert("damage_type".to_string(), json!(dmg_type));
 

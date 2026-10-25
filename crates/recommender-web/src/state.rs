@@ -49,6 +49,8 @@ pub enum Modal {
     LinkRiotAccount,
     #[allow(dead_code)]
     OAuthConfigRequired,
+    #[allow(dead_code)]
+    TieBreaker,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default, serde::Serialize, serde::Deserialize)]
@@ -160,6 +162,10 @@ pub struct AppState {
     pub analytics_tracked_champion: String,
     #[allow(dead_code)]
     pub analytics_visible_games: usize,
+    #[allow(dead_code)]
+    pub model_weights: recommender_core::aggregation::ModelWeights,
+    #[allow(dead_code)]
+    pub tie_breaker_answers: Vec<bool>,
 }
 
 impl Default for AppState {
@@ -184,6 +190,8 @@ impl Default for AppState {
             analytics_curve_match_id: None,
             analytics_tracked_champion: String::new(),
             analytics_visible_games: 10,
+            model_weights: recommender_core::aggregation::ModelWeights::default(),
+            tie_breaker_answers: vec![true, true, true],
         }
     }
 }
@@ -394,6 +402,84 @@ impl AppState {
         }
     }
 
+    /// Checks if a question ID supports multi-selection (Tier 1 questions)
+    pub fn is_multi_select_question(question_id: u32) -> bool {
+        matches!(question_id, 2 | 3 | 7 | 12 | 13 | 14 | 16 | 23)
+    }
+
+    /// Maximum number of selections allowed for a multi-select question
+    pub fn max_selections_for_question(question_id: u32) -> usize {
+        match question_id {
+            2 | 3 | 7 | 12 | 13 | 14 | 16 | 23 => 2,
+            _ => 1,
+        }
+    }
+
+    /// Toggles an option in a multi-select question, maintaining a sliding window up to max_selections
+    pub fn toggle_answer_option(
+        &mut self,
+        question_id: u32,
+        option_value: &str,
+        questions: &[EffectiveQuestion],
+    ) {
+        if questions
+            .get(self.current_question_index)
+            .is_none_or(|question| question.id != question_id)
+        {
+            return;
+        }
+
+        if !Self::is_multi_select_question(question_id) {
+            self.select_answer(question_id, option_value.to_string(), questions);
+            return;
+        }
+
+        let q_key = question_id.to_string();
+        let max_sel = Self::max_selections_for_question(question_id);
+        let cur = self
+            .answers
+            .0
+            .get(&q_key)
+            .and_then(Option::as_deref)
+            .unwrap_or("");
+
+        let mut items: Vec<String> = if cur.is_empty() {
+            Vec::new()
+        } else {
+            cur.split(',')
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .collect()
+        };
+
+        if let Some(pos) = items.iter().position(|x| x == option_value) {
+            items.remove(pos);
+        } else {
+            if items.len() >= max_sel {
+                items.remove(0);
+            }
+            items.push(option_value.to_string());
+        }
+
+        if items.is_empty() {
+            self.answers.0.remove(&q_key);
+        } else {
+            self.answers.insert(&q_key, items.join(","));
+        }
+        self.error = None;
+    }
+
+    /// Checks if an option is currently selected for a question
+    pub fn is_option_selected(&self, question_id: u32, option_value: &str) -> bool {
+        self.answers
+            .0
+            .get(&question_id.to_string())
+            .and_then(Option::as_deref)
+            .is_some_and(|cur| {
+                cur.split(',').any(|item| item.trim() == option_value)
+            })
+    }
+
     pub fn begin_scoring(&mut self) -> Answers {
         self.scoring = true;
         self.error = None;
@@ -462,17 +548,9 @@ pub fn filtered_options(question: &EffectiveQuestion, answers: &Answers) -> Vec<
             Some("Support") => Some(&["Support Team", "Balanced/Hybrid"]),
             _ => None,
         },
-        5 => match role {
-            Some("Marksman" | "Mage") => Some(&["Ranged"]),
-            Some("Assassin" | "Tank" | "Fighter") => Some(&["Melee", "No Preference"]),
-            Some("Support") => Some(&["Ranged", "Melee", "No Preference"]),
-            _ => None,
-        },
-        7 => match role {
-            Some("Tank" | "Fighter" | "Marksman") => Some(&["Physical", "No Preference"]),
-            Some("Support" | "Mage") => Some(&["Magic", "No Preference"]),
-            _ => None,
-        },
+        // Range (Q5) and Damage Profile (Q7) are universally unlocked for all classes/roles
+        5 => None,
+        7 => None,
         1 => {
             let challenge_answer = answer(12).or_else(|| answer(10));
             match challenge_answer {
@@ -500,7 +578,8 @@ mod tests {
     use recommender_core::contracts::QuestionnaireDefinition;
 
     fn questions() -> Vec<EffectiveQuestion> {
-        QuestionnaireDefinition::current()
+        QuestionnaireDefinition::modern()
+            .or_else(|_| QuestionnaireDefinition::current())
             .unwrap()
             .effective_questions()
     }
@@ -551,6 +630,34 @@ mod tests {
     }
 
     #[test]
+    fn test_multi_select_toggling_and_limits() {
+        let qs = questions();
+        let mut state = AppState::default();
+        state.current_question_index = 1; // Question 2
+
+        assert!(AppState::is_multi_select_question(2));
+        assert!(AppState::is_multi_select_question(7));
+        assert!(!AppState::is_multi_select_question(1));
+
+        // Toggle Tank on Q2
+        state.toggle_answer_option(2, "Tank", &qs);
+        assert!(state.is_option_selected(2, "Tank"));
+        assert_eq!(state.answers.0.get("2").unwrap(), &Some("Tank".to_string()));
+
+        // Toggle Fighter on Q2
+        state.toggle_answer_option(2, "Fighter", &qs);
+        assert!(state.is_option_selected(2, "Tank"));
+        assert!(state.is_option_selected(2, "Fighter"));
+        assert_eq!(state.answers.0.get("2").unwrap(), &Some("Tank,Fighter".to_string()));
+
+        // Toggle Tank again to remove it
+        state.toggle_answer_option(2, "Tank", &qs);
+        assert!(!state.is_option_selected(2, "Tank"));
+        assert!(state.is_option_selected(2, "Fighter"));
+        assert_eq!(state.answers.0.get("2").unwrap(), &Some("Fighter".to_string()));
+    }
+
+    #[test]
     fn legacy_role_filters_match_the_questionnaire_contract() {
         type FilterCase<'a> = (
             &'a str,
@@ -561,48 +668,51 @@ mod tests {
         );
 
         let questions = questions();
+        let all_ranges = &["Ranged", "Melee", "No Preference"];
+        let all_damages = &["Physical", "Magic", "Hybrid (Physical & Magic)", "No Preference"];
+
         let cases: [FilterCase<'_>; 6] = [
             (
                 "Tank",
                 &["Top", "Jungle", "Support"],
                 &["Tanky and Durable", "Support Team", "Balanced/Hybrid"],
-                &["Melee", "No Preference"],
-                &["Physical", "No Preference"],
+                all_ranges,
+                all_damages,
             ),
             (
                 "Fighter",
                 &["Top", "Jungle", "Mid"],
                 &["High Damage Output", "Tanky and Durable", "Balanced/Hybrid"],
-                &["Melee", "No Preference"],
-                &["Physical", "No Preference"],
+                all_ranges,
+                all_damages,
             ),
             (
                 "Assassin",
                 &["Jungle", "Mid"],
                 &["High Damage Output"],
-                &["Melee", "No Preference"],
-                &["Physical", "Magic", "No Preference"],
+                all_ranges,
+                all_damages,
             ),
             (
                 "Marksman",
                 &["Bot"],
                 &["High Damage Output"],
-                &["Ranged"],
-                &["Physical", "No Preference"],
+                all_ranges,
+                all_damages,
             ),
             (
                 "Mage",
                 &["Mid", "Support"],
                 &["High Damage Output", "Support Team", "Balanced/Hybrid"],
-                &["Ranged"],
-                &["Magic", "No Preference"],
+                all_ranges,
+                all_damages,
             ),
             (
                 "Support",
                 &["Support"],
                 &["Support Team", "Balanced/Hybrid"],
-                &["Ranged", "Melee", "No Preference"],
-                &["Magic", "No Preference"],
+                all_ranges,
+                all_damages,
             ),
         ];
 
@@ -698,9 +808,10 @@ mod tests {
         assert_eq!(state.current_question_index, 0);
 
         state.current_question_index = questions.len() - 1;
+        let last_q = &questions[questions.len() - 1];
         state
             .answers
-            .insert("12", "Analyze carefully before acting");
+            .insert(&last_q.id.to_string(), &last_q.options[0].value);
         assert!(state.advance(&questions));
         assert_eq!(state.current_question_index, questions.len() - 1);
     }

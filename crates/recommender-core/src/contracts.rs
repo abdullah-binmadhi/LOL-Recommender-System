@@ -72,6 +72,16 @@ impl EffectiveCatalog {
             .collect()
     }
 
+    pub fn to_engine_entries(&self) -> Vec<CatalogEntry> {
+        self.0
+            .iter()
+            .map(|champion| CatalogEntry {
+                name: champion.name.clone(),
+                data: serde_json::to_value(&champion.data).unwrap_or(serde_json::Value::Null),
+            })
+            .collect()
+    }
+
     pub fn len(&self) -> usize {
         self.0.len()
     }

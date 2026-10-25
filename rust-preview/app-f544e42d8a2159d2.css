@@ -556,6 +556,9 @@ button {
 }
 .option.selected .option-mark { border-color: var(--gold); background: var(--gold); }
 .option.selected .option-mark::after { content: "✓"; color: #010a13; font-size: 0.8rem; font-weight: 900; line-height: 1; }
+.option.selected .option-mark-checkbox::after { display: none; }
+.option-mark-checkbox { border-radius: 3px; }
+.option-mark-checkbox .hex-check-icon { display: flex; align-items: center; justify-content: center; width: 14px; height: 14px; color: #010a13; }
 .option-body { display: flex; flex-direction: column; gap: 4px; }
 .option-text { font-family: var(--font-title); font-weight: 700; color: var(--text); font-size: 0.95rem; letter-spacing: 0.04em; }
 .option-desc { font-size: 0.86rem; color: var(--text-3); }

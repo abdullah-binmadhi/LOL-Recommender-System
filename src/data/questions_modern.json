@@ -58,7 +58,7 @@
       "id": 7,
       "text": "What damage profile do you prefer outputting?",
       "type": "multiple_choice",
-      "options": ["Physical", "Magic", "No Preference"],
+      "options": ["Physical", "Magic", "Hybrid (Physical & Magic)", "No Preference"],
       "weight": 0.8,
       "feature_mapping": "damage_type",
       "dimension": "Damage Profile & Composition"

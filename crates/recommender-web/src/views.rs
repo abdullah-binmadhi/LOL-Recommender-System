@@ -13,8 +13,8 @@ use crate::{
 use leptos::prelude::*;
 use recommender_core::analytics::AnalyticsSummary;
 use recommender_core::contracts::{
-    EffectiveCatalog, EffectiveQuestion, EvaluationResult, QuestionOption, QuestionnaireDefinition,
-    RecommendationResult,
+    AggregatedChampionScore, EffectiveCatalog, EffectiveQuestion, EvaluationResult, QuestionOption,
+    QuestionnaireDefinition, RecommendationResult, UserFeatures,
 };
 use recommender_core::Engine;
 use std::{collections::BTreeMap, sync::Arc};
@@ -242,6 +242,17 @@ pub fn App() -> impl IntoView {
                 Some(Modal::LinkRiotAccount) => view_link_riot_modal(state).into_any(),
                 Some(Modal::CloudHistory) => view_cloud_history_modal(state).into_any(),
                 Some(Modal::OAuthConfigRequired) => view_oauth_config_modal(state).into_any(),
+                Some(Modal::TieBreaker) => {
+                    match state.with(|current| current.recommendation.clone()) {
+                        Some(recommendation) => view_tie_breaker_modal(
+                            state,
+                            Arc::clone(&modal_catalog),
+                            recommendation,
+                        )
+                        .into_any(),
+                        None => ().into_view().into_any(),
+                    }
+                }
                 None => ().into_view().into_any(),
             }}
         </div>
@@ -684,11 +695,17 @@ fn view_questionnaire(
                     .and_then(Option::as_deref)
                     .unwrap_or_default()
                     .to_owned();
+                let is_multi = AppState::is_multi_select_question(question.id);
+                let max_selections = AppState::max_selections_for_question(question.id);
                 let options = filtered_options(&question, &snapshot.answers)
                     .into_iter()
                     .map(|option: QuestionOption| {
                         let option_value = option.value.clone();
-                        let selected = current_answer == option.value;
+                        let selected = if is_multi {
+                            snapshot.is_option_selected(question.id, &option_value)
+                        } else {
+                            current_answer == option_value
+                        };
                         let question_id = question.id;
                         let questions_for_selection = Arc::clone(&questions);
                         view! {
@@ -699,15 +716,29 @@ fn view_questionnaire(
                                 on:click=move |_| {
                                     let selected_value = option_value.clone();
                                     state.update(|current| {
-                                        current.select_answer(
-                                            question_id,
-                                            selected_value,
-                                            &questions_for_selection,
-                                        );
+                                        if is_multi {
+                                            current.toggle_answer_option(
+                                                question_id,
+                                                &selected_value,
+                                                &questions_for_selection,
+                                            );
+                                        } else {
+                                            current.select_answer(
+                                                question_id,
+                                                selected_value,
+                                                &questions_for_selection,
+                                            );
+                                        }
                                     });
                                 }
                             >
-                                <span class="option-mark" aria-hidden="true"></span>
+                                <span class=if is_multi { "option-mark option-mark-checkbox" } else { "option-mark" } aria-hidden="true">
+                                    {if selected && is_multi {
+                                        view! { <span class="hex-check-icon">{crate::player_analytics_view::view_lol_icon("hex-check")}</span> }.into_any()
+                                    } else {
+                                        view! { <span class="hex-check-empty"></span> }.into_any()
+                                    }}
+                                </span>
                                 <span class="option-body">
                                     <span class="option-text">{option.text}</span>
                                     {(!option.description.is_empty()).then(|| view! {
@@ -768,6 +799,16 @@ fn view_questionnaire(
                         </header>
 
                         <h2 class="quiz-question">{question.text}</h2>
+                        {if is_multi {
+                            view! {
+                                <div class="multi-select-guidance" style="display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(200, 155, 60, 0.12); border: 1px solid rgba(200, 155, 60, 0.35); border-radius: 4px; padding: 0.35rem 0.75rem; margin-bottom: 1.25rem; font-size: 0.78rem; color: #f0e6d2;">
+                                    <span style="display: inline-flex; width: 14px; height: 14px; color: var(--gold);">{crate::player_analytics_view::view_lol_icon("hex-shield")}</span>
+                                    <span><strong>"Multi-Select Active:"</strong> {format!(" Choose up to {} preferences that fit your playstyle", max_selections)}</span>
+                                </div>
+                            }.into_any()
+                        } else {
+                            view! { <span></span> }.into_any()
+                        }}
                         <div class="options">{options}</div>
 
                         {move || state.with(|current| current.error.clone()).map(|error| view! {
@@ -860,8 +901,15 @@ fn build_entries(
     recommendation: &RecommendationResult,
     catalog: &EffectiveCatalog,
 ) -> Vec<MatchEntry> {
-    recommendation
-        .top10
+    build_entries_from_scores(&recommendation.top10, &recommendation.features, catalog)
+}
+
+fn build_entries_from_scores(
+    scores: &[AggregatedChampionScore],
+    features: &UserFeatures,
+    catalog: &EffectiveCatalog,
+) -> Vec<MatchEntry> {
+    scores
         .iter()
         .enumerate()
         .filter_map(|(index, score)| {
@@ -902,9 +950,9 @@ fn build_entries(
                     utility: champion.utility,
                 },
                 breakdown: presenter::match_breakdown(
-                    &recommendation.features.role,
+                    &features.role,
                     &champion.role,
-                    recommendation.features.difficulty,
+                    features.difficulty,
                     champion.difficulty,
                     champion.toughness,
                 ),
@@ -1003,8 +1051,16 @@ fn view_analysis_content(
     counters: Arc<BTreeMap<String, CounterRecord>>,
     recommendation: RecommendationResult,
 ) -> impl IntoView {
-    let entries = build_entries(&recommendation, &catalog);
-    let top_count = recommendation.top10.len();
+    let weights = state.with(|s| s.model_weights);
+    let engine_entries = catalog.to_engine_entries();
+    let reweighted_top = recommender_core::aggregation::reweight_top10(
+        &recommendation.aggregated,
+        &engine_entries,
+        &weights,
+        true,
+    );
+    let entries = build_entries_from_scores(&reweighted_top, &recommendation.features, &catalog);
+    let top_count = entries.len();
     let preferred_role = recommendation.features.role.clone();
 
     let Some(top) = entries.first() else {
@@ -1279,6 +1335,18 @@ fn view_analysis_content(
                     {model_bar("Cosine Similarity", top.cosine_similarity)}
                     {model_bar("GBDT", top.gbdt)}
                 </div>
+                <div style="margin-top: 0.75rem; text-align: center;">
+                    <Button
+                        variant=ButtonVariant::Ghost
+                        size=ButtonSize::Md
+                        on:click=move |_| state.update(|s| s.open_modal(Modal::TieBreaker))
+                    >
+                        <span style="display:inline-flex;width:13px;height:13px;margin-right:5px;vertical-align:middle;">
+                            {crate::player_analytics_view::view_lol_icon("hex-swords")}
+                        </span>
+                        "Resolve Divergence (Tie-Breaker)"
+                    </Button>
+                </div>
             </div>
         </section>
 
@@ -1297,6 +1365,8 @@ fn view_analysis_content(
                 "View Player Telemetry & Efficacy Index →"
             </Button>
         </div>
+
+        {view_model_trust_lab(state, weights)}
 
         <section class="block" aria-labelledby="top10-title">
             <div class="block-head hex-block-head">
@@ -2995,6 +3065,421 @@ fn view_oauth_config_modal(state: RwSignal<AppState>) -> impl IntoView {
                     }
                 >
                     "⚡ Continue in Summoner Mode →"
+                </Button>
+            </footer>
+        </Dialog>
+    }
+    .into_any()
+}
+
+fn view_model_trust_lab(
+    state: RwSignal<AppState>,
+    weights: recommender_core::aggregation::ModelWeights,
+) -> impl IntoView {
+    let norm = weights.normalized();
+    let rf_pct = (norm.random_forest * 100.0).round() as i64;
+    let dt_pct = (norm.decision_tree * 100.0).round() as i64;
+    let knn_pct = (norm.knn * 100.0).round() as i64;
+    let nb_pct = (norm.naive_bayes * 100.0).round() as i64;
+    let cos_pct = (norm.cosine_similarity * 100.0).round() as i64;
+    let gbdt_pct = (norm.gbdt * 100.0).round() as i64;
+
+    let is_open = RwSignal::new(false);
+
+    view! {
+        <div class="model-trust-lab" style="background: linear-gradient(135deg, rgba(200, 170, 110, 0.06), rgba(1, 10, 19, 0.85)); border: 1px solid var(--gold-lo); border-radius: 6px; padding: 1.25rem 1.5rem; margin: 1.5rem 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" on:click=move |_| is_open.update(|o| *o = !*o)>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="display: inline-flex; width: 20px; height: 20px; color: var(--gold);">{crate::player_analytics_view::view_lol_icon("hex-gears")}</span>
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <h3 style="font-family: serif; color: var(--gold); margin: 0; font-size: 1.1rem; letter-spacing: 0.04em;">"Model Consensus Trust Lab"</h3>
+                            <span style="font-size: 0.72rem; background: rgba(200, 155, 60, 0.15); border: 1px solid var(--gold-lo); color: var(--gold); padding: 0.1rem 0.45rem; border-radius: 3px;">"6 Ensemble Models"</span>
+                        </div>
+                        <p style="color: #a09b8c; margin: 0.2rem 0 0; font-size: 0.82rem;">"Fine-tune individual model influence or trigger adaptive scenario tie-breakers."</p>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <button
+                        type="button"
+                        class="btn btn-secondary btn-sm"
+                        style="font-size: 0.78rem; padding: 0.35rem 0.75rem;"
+                        on:click=move |e| {
+                            e.stop_propagation();
+                            state.update(|s| s.open_modal(Modal::TieBreaker));
+                        }
+                    >
+                        <span style="display: inline-flex; width: 14px; height: 14px; margin-right: 5px; vertical-align: middle;">{crate::player_analytics_view::view_lol_icon("hex-swords")}</span>
+                        "Adaptive Tie-Breaker"
+                    </button>
+                    <span style="color: var(--gold); font-size: 1rem;">
+                        {move || if is_open.get() { "▲" } else { "▼" }}
+                    </span>
+                </div>
+            </div>
+
+            {move || is_open.get().then(|| {
+                view! {
+                    <div style="margin-top: 1.25rem; pt-3; border-top: 1px solid var(--line);">
+                        // Quick Presets Row
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 1.25rem;">
+                            <span style="font-size: 0.78rem; color: #888; margin-right: 0.25rem;">"Quick Presets:"</span>
+                            <button
+                                type="button"
+                                class="btn btn-ghost btn-sm"
+                                style="font-size: 0.75rem; padding: 0.25rem 0.6rem;"
+                                on:click=move |_| state.update(|s| s.model_weights = recommender_core::aggregation::ModelWeights::balanced())
+                            >
+                                "⚖️ Balanced Ensemble (Equal)"
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-ghost btn-sm"
+                                style="font-size: 0.75rem; padding: 0.25rem 0.6rem;"
+                                on:click=move |_| state.update(|s| s.model_weights = recommender_core::aggregation::ModelWeights::mechanics_and_kit())
+                            >
+                                "🎯 Kit & Synergy (KNN/Cosine)"
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-ghost btn-sm"
+                                style="font-size: 0.75rem; padding: 0.25rem 0.6rem;"
+                                on:click=move |_| state.update(|s| s.model_weights = recommender_core::aggregation::ModelWeights::pro_meta())
+                            >
+                                "🏆 Pro Meta (RF/GBDT)"
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-ghost btn-sm"
+                                style="font-size: 0.75rem; padding: 0.25rem 0.6rem;"
+                                on:click=move |_| state.update(|s| s.model_weights = recommender_core::aggregation::ModelWeights::rule_clarity())
+                            >
+                                "📐 Rule Logic (DT/NB)"
+                            </button>
+                        </div>
+
+                        // Sliders Grid
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                            // Random Forest
+                            <div class="slider-group" style="background: rgba(1, 10, 19, 0.4); border: 1px solid var(--line); border-radius: 4px; padding: 0.75rem;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.35rem;">
+                                    <strong style="color: var(--gold);">"Random Forest"</strong>
+                                    <span style="color: #f0e6d2; font-family: monospace;">{format!("{}%", rf_pct)}</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="1"
+                                    max="100"
+                                    value=rf_pct.to_string()
+                                    style="width: 100%; accent-color: var(--gold);"
+                                    on:input=move |e| {
+                                        let val = event_target_value(&e).parse::<f64>().unwrap_or(25.0);
+                                        state.update(|s| {
+                                            s.model_weights.random_forest = val;
+                                            s.model_weights = s.model_weights.normalized();
+                                        });
+                                    }
+                                />
+                                <div style="font-size: 0.72rem; color: #888; margin-top: 0.25rem;">"Non-linear multi-feature decision trees & interaction ensembles."</div>
+                            </div>
+
+                            // Decision Tree
+                            <div class="slider-group" style="background: rgba(1, 10, 19, 0.4); border: 1px solid var(--line); border-radius: 4px; padding: 0.75rem;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.35rem;">
+                                    <strong style="color: var(--gold);">"Decision Tree"</strong>
+                                    <span style="color: #f0e6d2; font-family: monospace;">{format!("{}%", dt_pct)}</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="1"
+                                    max="100"
+                                    value=dt_pct.to_string()
+                                    style="width: 100%; accent-color: var(--gold);"
+                                    on:input=move |e| {
+                                        let val = event_target_value(&e).parse::<f64>().unwrap_or(15.0);
+                                        state.update(|s| {
+                                            s.model_weights.decision_tree = val;
+                                            s.model_weights = s.model_weights.normalized();
+                                        });
+                                    }
+                                />
+                                <div style="font-size: 0.72rem; color: #888; margin-top: 0.25rem;">"Transparent hierarchical rule execution & direct split criteria."</div>
+                            </div>
+
+                            // KNN
+                            <div class="slider-group" style="background: rgba(1, 10, 19, 0.4); border: 1px solid var(--line); border-radius: 4px; padding: 0.75rem;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.35rem;">
+                                    <strong style="color: var(--cyan);">"K-Nearest Neighbors"</strong>
+                                    <span style="color: #f0e6d2; font-family: monospace;">{format!("{}%", knn_pct)}</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="1"
+                                    max="100"
+                                    value=knn_pct.to_string()
+                                    style="width: 100%; accent-color: var(--cyan);"
+                                    on:input=move |e| {
+                                        let val = event_target_value(&e).parse::<f64>().unwrap_or(15.0);
+                                        state.update(|s| {
+                                            s.model_weights.knn = val;
+                                            s.model_weights = s.model_weights.normalized();
+                                        });
+                                    }
+                                />
+                                <div style="font-size: 0.72rem; color: #888; margin-top: 0.25rem;">"Metric distance in attribute hyperspace; closest kit similarity."</div>
+                            </div>
+
+                            // Naive Bayes
+                            <div class="slider-group" style="background: rgba(1, 10, 19, 0.4); border: 1px solid var(--line); border-radius: 4px; padding: 0.75rem;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.35rem;">
+                                    <strong style="color: var(--cyan);">"Naive Bayes"</strong>
+                                    <span style="color: #f0e6d2; font-family: monospace;">{format!("{}%", nb_pct)}</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="1"
+                                    max="100"
+                                    value=nb_pct.to_string()
+                                    style="width: 100%; accent-color: var(--cyan);"
+                                    on:input=move |e| {
+                                        let val = event_target_value(&e).parse::<f64>().unwrap_or(15.0);
+                                        state.update(|s| {
+                                            s.model_weights.naive_bayes = val;
+                                            s.model_weights = s.model_weights.normalized();
+                                        });
+                                    }
+                                />
+                                <div style="font-size: 0.72rem; color: #888; margin-top: 0.25rem;">"Bayesian feature likelihood & conditional probability distribution."</div>
+                            </div>
+
+                            // Cosine Similarity
+                            <div class="slider-group" style="background: rgba(1, 10, 19, 0.4); border: 1px solid var(--line); border-radius: 4px; padding: 0.75rem;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.35rem;">
+                                    <strong style="color: #8ac0ff;">"Cosine Similarity"</strong>
+                                    <span style="color: #f0e6d2; font-family: monospace;">{format!("{}%", cos_pct)}</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="1"
+                                    max="100"
+                                    value=cos_pct.to_string()
+                                    style="width: 100%; accent-color: #8ac0ff;"
+                                    on:input=move |e| {
+                                        let val = event_target_value(&e).parse::<f64>().unwrap_or(15.0);
+                                        state.update(|s| {
+                                            s.model_weights.cosine_similarity = val;
+                                            s.model_weights = s.model_weights.normalized();
+                                        });
+                                    }
+                                />
+                                <div style="font-size: 0.72rem; color: #888; margin-top: 0.25rem;">"Normalized directional alignment, eliminating magnitude bias."</div>
+                            </div>
+
+                            // GBDT
+                            <div class="slider-group" style="background: rgba(1, 10, 19, 0.4); border: 1px solid var(--line); border-radius: 4px; padding: 0.75rem;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.35rem;">
+                                    <strong style="color: #e09aff;">"Gradient Boosted Trees"</strong>
+                                    <span style="color: #f0e6d2; font-family: monospace;">{format!("{}%", gbdt_pct)}</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="1"
+                                    max="100"
+                                    value=gbdt_pct.to_string()
+                                    style="width: 100%; accent-color: #e09aff;"
+                                    on:input=move |e| {
+                                        let val = event_target_value(&e).parse::<f64>().unwrap_or(15.0);
+                                        state.update(|s| {
+                                            s.model_weights.gbdt = val;
+                                            s.model_weights = s.model_weights.normalized();
+                                        });
+                                    }
+                                />
+                                <div style="font-size: 0.72rem; color: #888; margin-top: 0.25rem;">"Sequential pseudo-residual minimization for high-stakes accuracy."</div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            })}
+        </div>
+    }
+}
+
+fn view_tie_breaker_modal(
+    state: RwSignal<AppState>,
+    catalog: Arc<EffectiveCatalog>,
+    recommendation: RecommendationResult,
+) -> impl IntoView {
+    let engine_entries = catalog.to_engine_entries();
+    let current_weights = state.with(|s| s.model_weights);
+    let reweighted_top = recommender_core::aggregation::reweight_top10(
+        &recommendation.aggregated,
+        &engine_entries,
+        &current_weights,
+        true,
+    );
+    let session = recommender_core::tie_breaker::TieBreakerSession::generate(
+        &reweighted_top,
+        &engine_entries,
+    );
+
+    let Some(session) = session else {
+        return view! {
+            <Dialog on_close=close_modal_callback(state) label="Adaptive Tie-Breaker" class="inspector">
+                <header class="modal-head">
+                    <h2>"Adaptive Tie-Breaker"</h2>
+                </header>
+                <div class="modal-body">
+                    <p class="notice notice-info">"Not enough divergent candidates to formulate a tie-breaker dilemma."</p>
+                </div>
+            </Dialog>
+        }.into_any();
+    };
+
+    let user_choices = state.with(|s| s.tie_breaker_answers.clone());
+    let resolution = session.resolve(&user_choices, &current_weights);
+    let winning_champ = resolution.winning_champion.clone();
+    let conf = resolution.consensus_confidence;
+    let rec_weights = resolution.recommended_weights;
+
+    let champ_a = session.contender_a.clone();
+    let champ_b = session.contender_b.clone();
+    let score_a = session.score_a;
+    let score_b = session.score_b;
+    let models_a = session.models_preferring_a.join(", ");
+    let models_b = session.models_preferring_b.join(", ");
+
+    let dilemmas_view = session
+        .dilemmas
+        .into_iter()
+        .enumerate()
+        .map(|(idx, d)| {
+            let choice_is_a = user_choices.get(idx).copied().unwrap_or(true);
+            let opt_a = d.option_a;
+            let opt_b = d.option_b;
+            view! {
+                <div class="tie-breaker-dilemma-card" style="background: rgba(1, 10, 19, 0.6); border: 1px solid var(--gold-lo); border-radius: 6px; padding: 1rem 1.25rem; margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <span style="font-family: monospace; font-size: 0.72rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em;">
+                            {d.phase}
+                        </span>
+                        <span style="font-size: 0.75rem; color: #a09b8c;">{format!("Dilemma #{}", d.id)}</span>
+                    </div>
+                    <p style="font-size: 0.88rem; color: #f0e6d2; margin-bottom: 0.85rem; line-height: 1.4;">{d.scenario}</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <button
+                            type="button"
+                            class=if choice_is_a { "option selected" } else { "option" }
+                            style="text-align: left; padding: 0.75rem;"
+                            on:click=move |_| {
+                                state.update(|s| {
+                                    if s.tie_breaker_answers.len() <= idx {
+                                        s.tie_breaker_answers.resize(idx + 1, true);
+                                    }
+                                    s.tie_breaker_answers[idx] = true;
+                                });
+                            }
+                        >
+                            <div style="font-weight: 700; color: var(--gold); font-size: 0.85rem; margin-bottom: 0.25rem;">{opt_a.label}</div>
+                            <div style="font-size: 0.78rem; color: var(--text-3); line-height: 1.3;">{opt_a.description}</div>
+                        </button>
+                        <button
+                            type="button"
+                            class=if !choice_is_a { "option selected" } else { "option" }
+                            style="text-align: left; padding: 0.75rem;"
+                            on:click=move |_| {
+                                state.update(|s| {
+                                    if s.tie_breaker_answers.len() <= idx {
+                                        s.tie_breaker_answers.resize(idx + 1, false);
+                                    }
+                                    s.tie_breaker_answers[idx] = false;
+                                });
+                            }
+                        >
+                            <div style="font-weight: 700; color: var(--cyan); font-size: 0.85rem; margin-bottom: 0.25rem;">{opt_b.label}</div>
+                            <div style="font-size: 0.78rem; color: var(--text-3); line-height: 1.3;">{opt_b.description}</div>
+                        </button>
+                    </div>
+                </div>
+            }
+        })
+        .collect_view();
+
+    view! {
+        <Dialog on_close=close_modal_callback(state) label="Adaptive Tie-Breaker & Scenario Alignment" class="inspector">
+            <header class="modal-head">
+                <span class="eyebrow">"✦ CONSENSUS STEERING ENGINE ✦"</span>
+                <h2>"Resolve Divergent Recommendations"</h2>
+                <p class="muted">
+                    "When machine learning models disagree on champion priorities, tactical scenarios clarify your intrinsic playstyle preference."
+                </p>
+            </header>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding-right: 0.5rem; margin-top: 14px;">
+                // Contender Comparison Banner
+                <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: center; background: linear-gradient(135deg, rgba(200, 170, 110, 0.1), rgba(10, 200, 185, 0.1)); border: 1px solid var(--gold); border-radius: 6px; padding: 1rem 1.25rem; margin-bottom: 1.25rem;">
+                    <div>
+                        <div style="font-size: 0.75rem; color: #a09b8c;">"CONTENDER #1"</div>
+                        <div style="font-size: 1.15rem; font-weight: 700; color: var(--gold);">{champ_a}</div>
+                        <div style="font-size: 0.8rem; color: #f0e6d2;">{format!("Score: {:.1}%", score_a)}</div>
+                        <div style="font-size: 0.72rem; color: #888;">{format!("Favored by: {}", models_a)}</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <svg viewBox="0 0 100 60" style="width: 100px; height: 60px;">
+                            <path d="M 15 50 A 35 35 0 0 1 85 50" fill="none" stroke="rgba(200, 155, 60, 0.2)" stroke-width="8" stroke-linecap="round" />
+                            <path d="M 15 50 A 35 35 0 0 1 85 50" fill="none" stroke="var(--gold)" stroke-width="8" stroke-dasharray="110" stroke-dashoffset=format!("{:.1}", 110.0 - (conf / 100.0) * 110.0) stroke-linecap="round" />
+                            <text x="50" y="44" text-anchor="middle" font-family="monospace" font-size="12" font-weight="bold" fill="var(--gold)">
+                                {format!("{:.0}%", conf)}
+                            </text>
+                            <text x="50" y="55" text-anchor="middle" font-size="6" fill="#888">"AGREEMENT"</text>
+                        </svg>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.75rem; color: #a09b8c;">"CONTENDER #2"</div>
+                        <div style="font-size: 1.15rem; font-weight: 700; color: var(--cyan);">{champ_b}</div>
+                        <div style="font-size: 0.8rem; color: #f0e6d2;">{format!("Score: {:.1}%", score_b)}</div>
+                        <div style="font-size: 0.72rem; color: #888;">{format!("Favored by: {}", models_b)}</div>
+                    </div>
+                </div>
+
+                // Dilemmas List
+                <div class="dilemmas-container">
+                    {dilemmas_view}
+                </div>
+
+                // Consensus Dial & Alignment Recommendation Box
+                <div style="background: rgba(10, 200, 185, 0.08); border: 1px solid var(--cyan); border-radius: 6px; padding: 1rem 1.25rem; margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <span style="font-family: monospace; font-size: 0.72rem; color: var(--cyan); letter-spacing: 0.08em; text-transform: uppercase;">
+                            "● CONSENSUS ALIGNMENT VERDICT"
+                        </span>
+                        <div style="font-size: 0.95rem; color: #f0e6d2; margin-top: 0.2rem;">
+                            <span>"Steering Consensus to "</span>
+                            <strong style="color: var(--gold); font-size: 1.05rem;">{winning_champ}</strong>
+                            <span>{format!(" ({:.0}% Confidence)", conf)}</span>
+                        </div>
+                        <div style="font-size: 0.78rem; color: #a09b8c; margin-top: 0.2rem;">
+                            "Accepting auto-alignment will dynamically calibrate the 6 ML Trust Sliders."
+                        </div>
+                    </div>
+                    <Button
+                        variant=ButtonVariant::Primary
+                        on:click=move |_| {
+                            state.update(|s| {
+                                s.model_weights = rec_weights;
+                                s.close_modal();
+                            });
+                        }
+                    >
+                        "Accept Alignment & Apply Sliders"
+                    </Button>
+                </div>
+            </div>
+            <footer class="modal-footer" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+                <Button
+                    variant=ButtonVariant::Ghost
+                    on:click=move |_| state.update(AppState::close_modal)
+                >
+                    "Close"
                 </Button>
             </footer>
         </Dialog>
