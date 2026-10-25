@@ -123,6 +123,77 @@ pub fn view_lol_icon(kind: &'static str) -> impl IntoView {
             </svg>
         }
         .into_any(),
+        "hex-shield" => view! {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <path d="M12 2L20 5.5V11.5C20 16.8 16.5 21 12 22.5C7.5 21 4 16.8 4 11.5V5.5L12 2Z" stroke="#c8aa6e" stroke-width="1.6" fill="rgba(200,170,110,0.14)" />
+                <path d="M12 5.5L17.5 8V11.5C17.5 15.2 15 18.2 12 19.5C9 18.2 6.5 15.2 6.5 11.5V8L12 5.5Z" stroke="#0ac8b9" stroke-width="1.3" fill="rgba(10,200,185,0.22)" />
+                <polygon points="12,8.5 14,11.5 12,14.5 10,11.5" fill="#c8aa6e" />
+            </svg>
+        }
+        .into_any(),
+        "hex-blades" => view! {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <path d="M4 20L9 15M20 4L11 13" stroke="#0ac8b9" stroke-width="1.8" stroke-linecap="round" />
+                <path d="M20 20L15 15M4 4L13 13" stroke="#c8aa6e" stroke-width="1.8" stroke-linecap="round" />
+                <circle cx="12" cy="12" r="2.5" fill="#091428" stroke="#c8aa6e" stroke-width="1.2" />
+                <circle cx="12" cy="12" r="1.2" fill="#0ac8b9" />
+            </svg>
+        }
+        .into_any(),
+        "hex-stopwatch" => view! {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <circle cx="12" cy="13" r="8" stroke="#c8aa6e" stroke-width="1.6" fill="rgba(200,170,110,0.12)" />
+                <path d="M12 2V5M10 2H14M12 9V13L15 15" stroke="#0ac8b9" stroke-width="1.5" stroke-linecap="round" />
+                <circle cx="12" cy="13" r="1.5" fill="#c8aa6e" />
+            </svg>
+        }
+        .into_any(),
+        "hex-curves" => view! {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <rect x="3" y="3" width="18" height="18" stroke="#c8aa6e" stroke-width="1.5" fill="rgba(9,20,40,0.6)" />
+                <path d="M4 17L8 12L12 15L16 7L20 9" stroke="#0ac8b9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                <circle cx="16" cy="7" r="1.8" fill="#c8aa6e" />
+            </svg>
+        }
+        .into_any(),
+        "hex-rune" => view! {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <polygon points="12,2 20,12 12,22 4,12" stroke="#c8aa6e" stroke-width="1.6" fill="rgba(200,170,110,0.15)" />
+                <polygon points="12,6 16.5,12 12,18 7.5,12" stroke="#0ac8b9" stroke-width="1.3" fill="rgba(10,200,185,0.22)" />
+                <line x1="12" y1="2" x2="12" y2="22" stroke="#c8aa6e" stroke-width="1" />
+            </svg>
+        }
+        .into_any(),
+        "hex-crosshair" => view! {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <circle cx="12" cy="12" r="8" stroke="#c8aa6e" stroke-width="1.5" fill="rgba(9,20,40,0.4)" />
+                <circle cx="12" cy="12" r="4" stroke="#0ac8b9" stroke-width="1.2" />
+                <line x1="12" y1="2" x2="12" y2="7" stroke="#c8aa6e" stroke-width="1.5" />
+                <line x1="12" y1="17" x2="12" y2="22" stroke="#c8aa6e" stroke-width="1.5" />
+                <line x1="2" y1="12" x2="7" y2="12" stroke="#c8aa6e" stroke-width="1.5" />
+                <line x1="17" y1="12" x2="22" y2="12" stroke="#c8aa6e" stroke-width="1.5" />
+                <circle cx="12" cy="12" r="1.5" fill="#0ac8b9" />
+            </svg>
+        }
+        .into_any(),
+        "hex-trophy" => view! {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <path d="M6 4H18V9C18 12.3 15.3 15 12 15C8.7 15 6 12.3 6 9V4Z" stroke="#c8aa6e" stroke-width="1.6" fill="rgba(200,170,110,0.18)" />
+                <path d="M6 6H3V9C3 10.7 4.3 12 6 12V6Z" stroke="#c8aa6e" stroke-width="1.3" />
+                <path d="M18 6H21V9C21 10.7 19.7 12 18 12V6Z" stroke="#c8aa6e" stroke-width="1.3" />
+                <line x1="12" y1="15" x2="12" y2="19" stroke="#c8aa6e" stroke-width="2" />
+                <line x1="8" y1="20" x2="16" y2="20" stroke="#0ac8b9" stroke-width="2" stroke-linecap="round" />
+                <polygon points="12,7 13.5,9.5 12,11.5 10.5,9.5" fill="#0ac8b9" />
+            </svg>
+        }
+        .into_any(),
+        "hex-check" => view! {
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" style="flex-shrink: 0; vertical-align: middle;">
+                <circle cx="10" cy="10" r="8" stroke="#c8aa6e" stroke-width="1.4" fill="rgba(200,170,110,0.12)" />
+                <path d="M6 10L9 13L14 7" stroke="#0ac8b9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        }
+        .into_any(),
         _ => view! {
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="flex-shrink: 0; vertical-align: middle;">
                 <polygon points="8,1 15,8 8,15 1,8" fill="#c8aa6e" stroke="#0ac8b9" stroke-width="1" />
@@ -160,6 +231,8 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
     let selected_match_id = RwSignal::new(initial_match_id);
     // Selected match ID for single-game Champion Curve & ML Telemetry Lab
     let selected_curve_match_id = RwSignal::new(initial_curve_id);
+    // Active sub-tab inside the unified match inspection drawer ("autopsy" vs "team")
+    let inspector_sub_tab = RwSignal::new("autopsy".to_string());
     // Per-champion refresh pulse indicator
     let refreshing_champion = RwSignal::new(Option::<String>::None);
 
@@ -419,7 +492,7 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                 let rep = report();
                 match active_tab.get().as_str() {
                     "ml_lab" => view_page_no_quiz_ml_lab(rep, active_tab, selected_tracked_champion, toggle_pin_champion).into_any(),
-                    "game_logs" => view_page_complete_game_logs(rep, state, visible_games_count, selected_match_id, selected_curve_match_id, log_role_filter, log_outcome_filter, log_champ_filter, log_queue_filter).into_any(),
+                    "game_logs" => view_page_complete_game_logs(rep, state, visible_games_count, selected_match_id, inspector_sub_tab, log_role_filter, log_outcome_filter, log_champ_filter, log_queue_filter).into_any(),
                     "champions_pool" => view_page_champions_pool(rep, pinned_champions, refreshing_champion, active_tab, selected_tracked_champion, toggle_pin_champion, trigger_riot_sync).into_any(),
                     "pinned_tracker" => view_page_pinned_champion_tracker(rep, pinned_champions, refreshing_champion, selected_tracked_champion, toggle_pin_champion, trigger_riot_sync).into_any(),
                     _ => view_page_overview_and_radar(rep, active_tab, selected_tracked_champion).into_any(),
@@ -1557,7 +1630,7 @@ fn view_page_overview_and_radar(
             // GLOBAL PRO & PEAK ELO BENCHMARK & 1V1 RIVALRY CONTROL BAR
             // ================================================================
             <div style="background: linear-gradient(135deg, rgba(5, 15, 30, 0.98) 0%, rgba(2, 6, 14, 0.99) 100%); border: 2px solid var(--gold); border-left: 6px solid var(--gold); padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 6px 24px rgba(0,0,0,0.65);">
-                // Top Mode Toggle Bar: [🏆 RANK PEAK BENCHMARK] vs [⚔️ 1v1 SUMMONER RIVALRY]
+                // Top Mode Toggle Bar: [RANK PEAK BENCHMARK] vs [1v1 SUMMONER RIVALRY]
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(200, 170, 110, 0.25); padding-bottom: 0.9rem; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
                     <div style="display: flex; align-items: center; gap: 8px;">
                         {view_lol_icon("crown")}
@@ -1572,27 +1645,29 @@ fn view_page_overview_and_radar(
                             type="button"
                             style=move || {
                                 if !rivalry_mode_active.get() {
-                                    "background: linear-gradient(135deg, rgba(200,170,110,0.35) 0%, rgba(200,170,110,0.15) 100%); border: 1px solid var(--gold); color: #fff; font-family: monospace; font-size: 0.76rem; font-weight: bold; padding: 0.4rem 0.85rem; cursor: pointer; text-transform: uppercase;"
+                                    "background: linear-gradient(135deg, rgba(200,170,110,0.35) 0%, rgba(200,170,110,0.15) 100%); border: 1px solid var(--gold); color: #fff; font-family: monospace; font-size: 0.76rem; font-weight: bold; padding: 0.4rem 0.85rem; cursor: pointer; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px;"
                                 } else {
-                                    "background: transparent; border: 1px solid transparent; color: #94a3b8; font-family: monospace; font-size: 0.76rem; padding: 0.4rem 0.85rem; cursor: pointer; text-transform: uppercase;"
+                                    "background: transparent; border: 1px solid transparent; color: #94a3b8; font-family: monospace; font-size: 0.76rem; padding: 0.4rem 0.85rem; cursor: pointer; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px;"
                                 }
                             }
                             on:click=move |_| rivalry_mode_active.set(false)
                         >
-                            "🏆 RANK TIER BENCHMARK"
+                            {view_lol_icon("hex-trophy")}
+                            <span>"RANK TIER BENCHMARK"</span>
                         </button>
                         <button
                             type="button"
                             style=move || {
                                 if rivalry_mode_active.get() {
-                                    "background: linear-gradient(135deg, rgba(232,64,87,0.4) 0%, rgba(232,64,87,0.2) 100%); border: 1px solid #e84057; color: #fff; font-family: monospace; font-size: 0.76rem; font-weight: bold; padding: 0.4rem 0.85rem; cursor: pointer; text-transform: uppercase;"
+                                    "background: linear-gradient(135deg, rgba(232,64,87,0.4) 0%, rgba(232,64,87,0.2) 100%); border: 1px solid #e84057; color: #fff; font-family: monospace; font-size: 0.76rem; font-weight: bold; padding: 0.4rem 0.85rem; cursor: pointer; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px;"
                                 } else {
-                                    "background: transparent; border: 1px solid transparent; color: #94a3b8; font-family: monospace; font-size: 0.76rem; padding: 0.4rem 0.85rem; cursor: pointer; text-transform: uppercase;"
+                                    "background: transparent; border: 1px solid transparent; color: #94a3b8; font-family: monospace; font-size: 0.76rem; padding: 0.4rem 0.85rem; cursor: pointer; text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px;"
                                 }
                             }
                             on:click=move |_| rivalry_mode_active.set(true)
                         >
-                            "⚔️ 1v1 SUMMONER RIVALRY"
+                            {view_lol_icon("hex-blades")}
+                            <span>"1v1 SUMMONER RIVALRY"</span>
                         </button>
                     </div>
                 </div>
@@ -1729,7 +1804,7 @@ fn view_page_overview_and_radar(
                                 />
                                 <button
                                     type="button"
-                                    style="background: #e84057; border: none; color: #fff; font-family: monospace; font-size: 0.72rem; font-weight: bold; padding: 0.35rem 0.65rem; cursor: pointer;"
+                                    style="background: #e84057; border: none; color: #fff; font-family: monospace; font-size: 0.72rem; font-weight: bold; padding: 0.35rem 0.65rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;"
                                     on:click=move |_| {
                                         let s = rival_search_input.get();
                                         if !s.trim().is_empty() {
@@ -1738,7 +1813,8 @@ fn view_page_overview_and_radar(
                                         }
                                     }
                                 >
-                                    "⚔️ DUEL"
+                                    {view_lol_icon("hex-blades")}
+                                    <span>"DUEL"</span>
                                 </button>
                             </div>
 
@@ -2188,7 +2264,7 @@ fn view_page_overview_and_radar(
                             {move || {
                                 if rivalry_mode_active.get() {
                                     let r = get_pro_rival_profile(&active_rival_id.get());
-                                    format!("⚔️ 1v1 DUEL TARGET: {}", r.display_name.to_uppercase())
+                                    format!("1v1 DUEL TARGET: {}", r.display_name.to_uppercase())
                                 } else {
                                     format!("TARGET: {} · {}", benchmark_rank_filter.get().to_uppercase(), selected_role_filter.get().to_uppercase())
                                 }
@@ -3710,7 +3786,7 @@ fn view_page_complete_game_logs(
     state: RwSignal<AppState>,
     visible_games_count: RwSignal<usize>,
     selected_match_id: RwSignal<Option<String>>,
-    selected_curve_match_id: RwSignal<Option<String>>,
+    inspector_sub_tab: RwSignal<String>,
     log_role_filter: RwSignal<String>,
     log_outcome_filter: RwSignal<String>,
     log_champ_filter: RwSignal<String>,
@@ -3879,7 +3955,7 @@ fn view_page_complete_game_logs(
                                         m,
                                         s_user,
                                         selected_match_id,
-                                        selected_curve_match_id,
+                                        inspector_sub_tab,
                                     )
                                 }).collect::<Vec<_>>()}
 
@@ -3924,23 +4000,21 @@ fn view_page_complete_game_logs(
     }
 }
 
-/// Renders a single match row AND its two expandable inspectors:
-/// 1. `Analyze Match & 5v5 ▼` (Single-Match 5v5 Allied vs. Enemy Team Scoreboard & Objectives)
-/// 2. `Champ Curve (This Game) ▼` (Single-Game Exact Champion Curves, 24+ Stats, 4 Validated ML Models & Timestamped Coaching)
+/// Renders a single match row AND its unified expandable inspector with dual Hextech tabs:
+/// 1. `Champion Autopsy & Telemetry` (Single-Game Exact Champion Curves, 24+ Stats, Support Quest Stopwatch, ML Models & Timestamped Coaching)
+/// 2. `5v5 Team Stats` (Single-Match 5v5 Allied vs. Enemy Team Scoreboard, Gold Lead & Objectives)
 #[cfg(target_arch = "wasm32")]
 fn view_rich_match_row_with_inspector(
     m: AdoptedMatch,
     summoner_name: String,
     selected_match_id: RwSignal<Option<String>>,
-    selected_curve_match_id: RwSignal<Option<String>>,
+    inspector_sub_tab: RwSignal<String>,
 ) -> impl IntoView {
     let deep = m.build_deep_analysis(&summoner_name);
     let curve_analysis = m.build_champion_curve_analysis(&summoner_name);
     let m_id = m.match_id.clone();
     let m_id_check = m.match_id.clone();
     let m_id_toggle = m.match_id.clone();
-    let m_id_curve_check = m.match_id.clone();
-    let m_id_curve_toggle = m.match_id.clone();
     let outcome_color = if m.win { "#0ac8b9" } else { "#e84057" };
     let outcome_label = if m.win { "VICTORY" } else { "DEFEAT" };
     let gold_diff_label = if m.gold_diff_15 >= 0 {
@@ -4043,78 +4117,151 @@ fn view_rich_match_row_with_inspector(
                         {format!("ML {} · {:.1} OP", deep.ml_grade, curve_analysis.ai_op_score)}
                     </span>
 
-                    // Button 1: Analyze THIS Specific Match & 5v5 Teams
-                    <button
-                        type="button"
-                        style="background: linear-gradient(135deg, rgba(10, 200, 185, 0.22), rgba(200, 170, 110, 0.18)); border: 1px solid var(--cyan); color: #fff; padding: 0.32rem 0.75rem; font-family: monospace; font-size: 0.74rem; font-weight: bold; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;"
-                        on:click=move |_| {
-                            selected_match_id.update(|cur| {
-                                if cur.as_deref() == Some(m_id_toggle.as_str()) {
-                                    *cur = None;
-                                } else {
-                                    *cur = Some(m_id_toggle.clone());
+                    // Button 1: Primary Gold Action - Inspect Game Autopsy, Stopwatch & ML Telemetry
+                    {
+                        let m_id_auto = m_id_toggle.clone();
+                        let m_id_auto_chk = m_id_check.clone();
+                        let champ_btn = champ_btn_label.clone();
+                        view! {
+                            <button
+                                type="button"
+                                style="background: linear-gradient(135deg, rgba(200, 170, 110, 0.28), rgba(16, 185, 129, 0.2)); border: 1px solid var(--gold); color: #fff; padding: 0.35rem 0.85rem; font-family: monospace; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.4);"
+                                title="Inspect Exact Role Autopsy, Support Quest Stopwatch, Dynamic Curves & ML Models for this game"
+                                on:click=move |_| {
+                                    let is_open = selected_match_id.get().as_deref() == Some(m_id_auto.as_str());
+                                    let is_autopsy = inspector_sub_tab.get() == "autopsy";
+                                    if is_open && is_autopsy {
+                                        selected_match_id.set(None);
+                                    } else {
+                                        selected_match_id.set(Some(m_id_auto.clone()));
+                                        inspector_sub_tab.set("autopsy".to_string());
+                                    }
                                 }
-                            });
+                            >
+                                {view_lol_icon("hex-shield")}
+                                <span>
+                                    {
+                                        let c_l = champ_btn.clone();
+                                        let m_chk = m_id_auto_chk.clone();
+                                        move || {
+                                            let is_open = selected_match_id.get().as_deref() == Some(m_chk.as_str());
+                                            let is_autopsy = inspector_sub_tab.get() == "autopsy";
+                                            if is_open && is_autopsy {
+                                                format!("Hide {} Autopsy ▲", c_l)
+                                            } else {
+                                                format!("{} Autopsy & Telemetry ▼", c_l)
+                                            }
+                                        }
+                                    }
+                                </span>
+                            </button>
                         }
-                    >
-                        {view_lol_icon("match-blades")}
-                        <span>
-                            {move || if selected_match_id.get().as_deref() == Some(m_id_check.as_str()) {
-                                "Hide 5v5 Match ▲"
-                            } else {
-                                "Analyze Match & 5v5 ▼"
-                            }}
-                        </span>
-                    </button>
+                    }
 
-                    // Button 2: Single-Game Exact Champion Curve & Validated ML Telemetry Lab for THIS Match
-                    <button
-                        type="button"
-                        style="background: linear-gradient(135deg, rgba(200, 170, 110, 0.24), rgba(16, 185, 129, 0.18)); border: 1px solid var(--gold); color: var(--gold); padding: 0.32rem 0.75rem; font-family: monospace; font-size: 0.74rem; font-weight: bold; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;"
-                        title="Inspect Exact Champion Curves, 24+ Game Stats, Validated ML Models & Coaching for This Specific Match"
-                        on:click=move |_| {
-                            selected_curve_match_id.update(|cur| {
-                                if cur.as_deref() == Some(m_id_curve_toggle.as_str()) {
-                                    *cur = None;
-                                } else {
-                                    *cur = Some(m_id_curve_toggle.clone());
+                    // Button 2: Secondary Cyan Action - 5v5 Allied vs Enemy Team Stats
+                    {
+                        let m_id_team = m_id_toggle.clone();
+                        let m_id_team_chk = m_id_check.clone();
+                        view! {
+                            <button
+                                type="button"
+                                style="background: linear-gradient(135deg, rgba(10, 200, 185, 0.2), rgba(9, 24, 48, 0.6)); border: 1px solid var(--cyan); color: var(--cyan); padding: 0.35rem 0.8rem; font-family: monospace; font-size: 0.74rem; font-weight: bold; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;"
+                                title="View 5v5 Allied vs Enemy Team Scoreboard, Gold Lead and Objective Timeline"
+                                on:click=move |_| {
+                                    let is_open = selected_match_id.get().as_deref() == Some(m_id_team.as_str());
+                                    let is_team = inspector_sub_tab.get() == "team";
+                                    if is_open && is_team {
+                                        selected_match_id.set(None);
+                                    } else {
+                                        selected_match_id.set(Some(m_id_team.clone()));
+                                        inspector_sub_tab.set("team".to_string());
+                                    }
                                 }
-                            });
+                            >
+                                {view_lol_icon("hex-blades")}
+                                <span>
+                                    {
+                                        let m_chk = m_id_team_chk.clone();
+                                        move || {
+                                            let is_open = selected_match_id.get().as_deref() == Some(m_chk.as_str());
+                                            let is_team = inspector_sub_tab.get() == "team";
+                                            if is_open && is_team {
+                                                "Hide 5v5 Team ▲"
+                                            } else {
+                                                "5v5 Team Stats ▼"
+                                            }
+                                        }
+                                    }
+                                </span>
+                            </button>
                         }
-                    >
-                        {view_lol_icon("warden-sigil")}
-                        <span>
-                            {
-                                let c_lbl = champ_btn_label.clone();
-                                move || if selected_curve_match_id.get().as_deref() == Some(m_id_curve_check.as_str()) {
-                                    format!("Hide {} Curve ▲", c_lbl)
-                                } else {
-                                    format!("{} Curve (This Game) ▼", c_lbl)
-                                }
-                            }
-                        </span>
-                    </button>
+                    }
                 </div>
             </div>
 
-            // Expandable 1: Single-Match Deep Post-Game & 5v5 Allied vs. Enemy Team Analysis
+            // Single Unified Match Inspection Drawer with Hextech Navigation Tabs
             {
                 let m_id_panel = m.match_id.clone();
+                let champ_nav_name = m.champion_name.clone();
+                let deep_panel = deep.clone();
+                let curve_panel = curve_analysis.clone();
                 move || {
                     if selected_match_id.get().as_deref() == Some(m_id_panel.as_str()) {
-                        view_single_match_deep_panel(deep.clone()).into_any()
-                    } else {
-                        ().into_view().into_any()
-                    }
-                }
-            }
+                        let cur_tab = inspector_sub_tab.get();
+                        let is_autopsy = cur_tab != "team";
+                        let deep_c = deep_panel.clone();
+                        let curve_c = curve_panel.clone();
+                        let c_nav = champ_nav_name.clone();
+                        view! {
+                            <div style="border-top: 2px solid var(--gold); background: rgba(3, 9, 18, 0.98); box-shadow: 0 8px 30px rgba(0,0,0,0.75);">
+                                // Top Hextech Sub-Navigation Bar
+                                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(5, 14, 28, 0.96); border-bottom: 1px solid rgba(200, 170, 110, 0.35); padding: 0.55rem 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+                                    <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+                                        <button
+                                            type="button"
+                                            style=if is_autopsy {
+                                                "background: linear-gradient(135deg, rgba(200,170,110,0.32), rgba(10,200,185,0.2)); border: 1px solid var(--gold); color: #fff; font-family: monospace; font-size: 0.76rem; font-weight: bold; padding: 0.42rem 0.95rem; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.04em;"
+                                            } else {
+                                                "background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; font-family: monospace; font-size: 0.76rem; font-weight: bold; padding: 0.42rem 0.95rem; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.04em;"
+                                            }
+                                            on:click=move |_| inspector_sub_tab.set("autopsy".to_string())
+                                        >
+                                            {view_lol_icon("hex-shield")}
+                                            <span>{format!("{} Autopsy, Curves & ML Telemetry", c_nav)}</span>
+                                        </button>
 
-            // Expandable 2: Single-Game Champion Curve, 24+ Telemetry Stats & Validated ML Lab for THIS Match
-            {
-                let m_id_curve_panel = m.match_id.clone();
-                move || {
-                    if selected_curve_match_id.get().as_deref() == Some(m_id_curve_panel.as_str()) {
-                        view_single_game_champion_curve_panel(curve_analysis.clone()).into_any()
+                                        <button
+                                            type="button"
+                                            style=if !is_autopsy {
+                                                "background: linear-gradient(135deg, rgba(10,200,185,0.28), rgba(200,170,110,0.16)); border: 1px solid var(--cyan); color: #fff; font-family: monospace; font-size: 0.76rem; font-weight: bold; padding: 0.42rem 0.95rem; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.04em;"
+                                            } else {
+                                                "background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; font-family: monospace; font-size: 0.76rem; font-weight: bold; padding: 0.42rem 0.95rem; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.04em;"
+                                            }
+                                            on:click=move |_| inspector_sub_tab.set("team".to_string())
+                                        >
+                                            {view_lol_icon("hex-blades")}
+                                            <span>"5v5 Team Scoreboard & Momentum"</span>
+                                        </button>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        style="background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #94a3b8; font-family: monospace; font-size: 0.72rem; padding: 0.35rem 0.75rem; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;"
+                                        on:click=move |_| selected_match_id.set(None)
+                                    >
+                                        {view_lol_icon("hex-core")}
+                                        <span>"Collapse Match ▲"</span>
+                                    </button>
+                                </div>
+
+                                // Active Content Panel
+                                {if is_autopsy {
+                                    view_single_game_champion_curve_panel(curve_c, inspector_sub_tab).into_any()
+                                } else {
+                                    view_single_match_deep_panel(deep_c, inspector_sub_tab).into_any()
+                                }}
+                            </div>
+                        }.into_any()
                     } else {
                         ().into_view().into_any()
                     }
@@ -4124,21 +4271,43 @@ fn view_rich_match_row_with_inspector(
     }
 }
 
-/// Renders the complete Single-Match Post-Game Autopsy, Minute-by-Minute Win-Prob Timeline SVG,
-/// and 5v5 Allied vs. Enemy Team Scoreboard for a specific game.
+/// Renders the complete Single-Match Post-Game 5v5 Allied vs. Enemy Team Scoreboard,
+/// Minute-by-Minute Win-Prob Timeline SVG, and Objective Timeline for a specific game.
 #[cfg(target_arch = "wasm32")]
-fn view_single_match_deep_panel(deep: SingleMatchDeepAnalysis) -> impl IntoView {
+fn view_single_match_deep_panel(
+    deep: SingleMatchDeepAnalysis,
+    sub_tab: RwSignal<String>,
+) -> impl IntoView {
     let a_obj = &deep.allied_objectives;
     let e_obj = &deep.enemy_objectives;
+    let champ_switch_name = deep.champion_name.clone();
 
     view! {
         <div style="border-top: 1px solid var(--cyan); background: rgba(4, 11, 22, 0.96); padding: 1.5rem;">
+            // Quick-Switch Hextech Banner to Champion Autopsy & Telemetry
+            <div style="background: linear-gradient(135deg, rgba(200, 170, 110, 0.16) 0%, rgba(10, 200, 185, 0.12) 100%); border: 1px solid var(--gold); padding: 0.65rem 1rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    {view_lol_icon("hex-shield")}
+                    <span style="font-family: monospace; font-size: 0.78rem; color: #fff;">
+                        {format!("Looking for {} Stopwatch, 4 Dynamic Curves, Item Spikes & ML Telemetry?", champ_switch_name)}
+                    </span>
+                </div>
+                <button
+                    type="button"
+                    style="background: linear-gradient(135deg, rgba(200, 170, 110, 0.38), rgba(16, 185, 129, 0.25)); border: 1px solid var(--gold); color: #fff; padding: 0.38rem 0.85rem; font-family: monospace; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;"
+                    on:click=move |_| sub_tab.set("autopsy".to_string())
+                >
+                    {view_lol_icon("hex-shield")}
+                    <span>{format!("Open {} Game Autopsy & Curves →", champ_switch_name)}</span>
+                </button>
+            </div>
+
             // Header + Personal Match KPIs
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(200, 170, 110, 0.2); padding-bottom: 0.75rem;">
                 <div>
                     <div style="font-family: monospace; font-size: 0.74rem; color: var(--cyan); text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
-                        {view_lol_icon("match-blades")}
-                        <span>{format!("SINGLE-MATCH DEEP TELEMETRY & 5v5 TEAM AUTOPSY · {}", deep.match_id)}</span>
+                        {view_lol_icon("hex-blades")}
+                        <span>{format!("5v5 ALLIED VS ENEMY TEAM SCOREBOARD & MOMENTUM · {}", deep.match_id)}</span>
                     </div>
                     <h3 style="font-family: serif; text-transform: uppercase; color: var(--gold); font-size: 1.2rem; margin: 0.2rem 0 0 0;">
                         {format!("{} ({}) vs {} · {} ({}m)", deep.champion_name, deep.role, deep.lane_opponent_champion, deep.queue_label, deep.duration_mins)}
@@ -4334,7 +4503,10 @@ fn view_match_win_prob_timeline_svg(pts: &[(u32, f64)]) -> impl IntoView {
 /// 4 Validated ML Models, SHAP Attribution, Item/Rune Timeline & Timestamped Mistake Coaching
 /// for THAT EXACT GAME (`match_id`) and THAT EXACT CHAMPION (`champion_name`).
 #[cfg(target_arch = "wasm32")]
-fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> impl IntoView {
+fn view_single_game_champion_curve_panel(
+    c: SingleGameChampionCurveAnalysis,
+    sub_tab: RwSignal<String>,
+) -> impl IntoView {
     let champ_img = crate::champion_image_url(&c.champion_name, None);
     let opp_img = crate::champion_image_url(&c.lane_opponent, None);
     let outcome_col = if c.win { "#10b981" } else { "#e84057" };
@@ -5055,6 +5227,21 @@ fn view_single_game_champion_curve_panel(c: SingleGameChampionCurveAnalysis) -> 
                     </div>
                 }
             }
+
+            // Footer Quick Switch to 5v5 Team Scoreboard
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(200, 170, 110, 0.25); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                <div style="font-family: monospace; font-size: 0.74rem; color: #94a3b8;">
+                    "Want to inspect the 5v5 team scoreboard, team gold shares and objective conversion?"
+                </div>
+                <button
+                    type="button"
+                    style="background: linear-gradient(135deg, rgba(10, 200, 185, 0.25), rgba(9, 24, 48, 0.6)); border: 1px solid var(--cyan); color: var(--cyan); padding: 0.4rem 0.95rem; font-family: monospace; font-size: 0.76rem; font-weight: bold; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;"
+                    on:click=move |_| sub_tab.set("team".to_string())
+                >
+                    {view_lol_icon("hex-blades")}
+                    <span>"View 5v5 Team Scoreboard & Momentum →"</span>
+                </button>
+            </div>
         </div>
     }
 }
@@ -5639,7 +5826,7 @@ where
                                         {view_lol_icon("nexus-pulse")}
                                         <span>
                                             {move || if refreshing_champion.get().as_deref() == Some(c_sync_chk.as_str()) {
-                                                "Stats Refreshed ✓"
+                                                "Stats Refreshed"
                                             } else {
                                                 "Refresh Champion Stats"
                                             }}
