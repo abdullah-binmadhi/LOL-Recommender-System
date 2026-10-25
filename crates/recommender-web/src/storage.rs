@@ -302,10 +302,12 @@ pub fn supabase_update_riot_profile(_riot_id: &str, _riot_region: &str) {}
 
 #[cfg(target_arch = "wasm32")]
 pub fn supabase_fetch_riot_telemetry(riot_id: &str, riot_region: &str) {
+    let api_key = get_local_storage_item("lol_riot_api_key").unwrap_or_default();
     let code = format!(
-        "window.supabaseAuth && window.supabaseAuth.fetchRiotTelemetry({}, {})",
+        "window.supabaseAuth && window.supabaseAuth.fetchRiotTelemetry({}, {}, {})",
         serde_json::to_string(riot_id).unwrap_or_default(),
-        serde_json::to_string(riot_region).unwrap_or_default()
+        serde_json::to_string(riot_region).unwrap_or_default(),
+        serde_json::to_string(&api_key).unwrap_or_default()
     );
     let _ = js_sys::eval(&code);
 }

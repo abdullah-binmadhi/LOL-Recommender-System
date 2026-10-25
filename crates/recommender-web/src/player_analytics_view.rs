@@ -343,6 +343,16 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
     let quick_key_input = RwSignal::new(crate::storage::get_local_storage_item("lol_riot_api_key").unwrap_or_default());
     let last_sync_click = StoredValue::new(0.0);
 
+    let key_paste_listener = window_event_listener(
+        leptos::ev::Custom::new("riot-key-pasted"),
+        move |ev: web_sys::CustomEvent| {
+            if let Some(s) = ev.detail().as_string() {
+                quick_key_input.set(s);
+            }
+        },
+    );
+    on_cleanup(move || key_paste_listener.remove());
+
     let trigger_riot_sync = move |champ_opt: Option<String>| {
         let now = js_sys::Date::now();
         if now - last_sync_click.get_value() < 4000.0 {
@@ -355,12 +365,15 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
         }
         state.update(|c| {
             c.set_syncing_riot(true);
-            c.sync_feedback_message = None;
+            c.sync_feedback_message = Some("Connecting to Riot telemetry pipeline...".to_string());
         });
         let rep = report();
         let r_id = rep.riot_id.unwrap_or_else(|| "SHENTRICK#SHEN".into());
         let reg = rep.region.unwrap_or_else(|| "ME".into());
         crate::storage::supabase_fetch_riot_telemetry(&r_id, &reg);
+
+        // 7.5-second client-side watchdog: guarantees button state never gets stuck indefinitely
+        let _ = js_sys::eval("setTimeout(() => { if (window.SupabaseBridge) window.dispatchEvent(new CustomEvent('riot-telemetry-synced', { detail: { status: 'timeout' } })); }, 7500);");
     };
 
     // Safely load cached matches on mount without triggering an infinite reactive network loop
@@ -523,14 +536,32 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                                                 "Get free key from developer.riotgames.com ↗"
                                             </a>
                                         </div>
-                                        <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
+                                        <div style="display: flex; gap: 0.65rem; flex-wrap: wrap; align-items: center;">
                                             <input
-                                                type="password"
+                                                type="text"
+                                                autocomplete="off"
+                                                spellcheck="false"
                                                 placeholder="RGAPI-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                                                style="flex: 1; min-width: 280px; background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.4); color: #fff; padding: 0.5rem 0.75rem; font-family: monospace; font-size: 0.82rem;"
+                                                style="flex: 1; min-width: 280px; background: rgba(9, 20, 40, 0.9); border: 1px solid rgba(200, 170, 110, 0.4); color: #fff; padding: 0.5rem 0.75rem; font-family: monospace; font-size: 0.82rem; user-select: text !important; -webkit-user-select: text !important;"
                                                 prop:value=move || quick_key_input.get()
-                                                on:input=move |ev| quick_key_input.set(event_target_value(&ev))
+                                                on:input=move |ev| {
+                                                    let val = event_target_value(&ev);
+                                                    quick_key_input.set(val.clone());
+                                                    if !val.trim().is_empty() {
+                                                        crate::storage::set_local_storage_item("lol_riot_api_key", val.trim());
+                                                    }
+                                                }
                                             />
+                                            <button
+                                                type="button"
+                                                title="Paste API Key directly from your system clipboard"
+                                                style="background: rgba(200, 170, 110, 0.2); border: 1px solid var(--gold); color: var(--gold); padding: 0.5rem 0.85rem; cursor: pointer; font-family: monospace; font-size: 0.82rem; font-weight: bold; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px;"
+                                                on:click=move |_| {
+                                                    let _ = js_sys::eval("window.SupabaseBridge && window.SupabaseBridge.readClipboardKey && window.SupabaseBridge.readClipboardKey()");
+                                                }
+                                            >
+                                                "📋 Paste"
+                                            </button>
                                             <button
                                                 type="button"
                                                 style="background: var(--cyan); border: none; color: #010a13; padding: 0.5rem 1.2rem; cursor: pointer; font-family: monospace; font-size: 0.82rem; font-weight: bold; text-transform: uppercase;"

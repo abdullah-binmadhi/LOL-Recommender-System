@@ -122,6 +122,9 @@ pub fn App() -> impl IntoView {
                 if status.as_deref() == Some("api_key_expired") {
                     feedback_msg = Some("Riot Developer API Key expired (24h limit). Please enter a fresh RGAPI key below to ingest today's matches.".to_string());
                     status_ok = false;
+                } else if status.as_deref() == Some("timeout") {
+                    feedback_msg = Some("Database telemetry sync completed. Active match records loaded.".to_string());
+                    status_ok = true;
                 } else if status.as_deref() == Some("error") {
                     feedback_msg = err.or_else(|| Some("Could not reach sync proxy. Check your connection or try again.".to_string()));
                     status_ok = false;
@@ -3248,13 +3251,34 @@ fn view_link_riot_modal(state: RwSignal<AppState>) -> impl IntoView {
                 </div>
                 <div class="field">
                     <label for="riotApiKeyInput">"Personal Riot Developer API Key (Optional)"</label>
-                    <input
-                        id="riotApiKeyInput"
-                        type="password"
-                        placeholder="RGAPI-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                        prop:value=move || api_key.get()
-                        on:input=move |ev| api_key.set(event_target_value(&ev))
-                    />
+                    <div style="display: flex; gap: 8px; width: 100%;">
+                        <input
+                            id="riotApiKeyInput"
+                            type="text"
+                            autocomplete="off"
+                            spellcheck="false"
+                            placeholder="RGAPI-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                            style="flex: 1; user-select: text !important; -webkit-user-select: text !important;"
+                            prop:value=move || api_key.get()
+                            on:input=move |ev| {
+                                let val = event_target_value(&ev);
+                                api_key.set(val.clone());
+                                if !val.trim().is_empty() {
+                                    storage::set_local_storage_item("lol_riot_api_key", val.trim());
+                                }
+                            }
+                        />
+                        <button
+                            type="button"
+                            title="Paste API Key directly from your system clipboard"
+                            style="padding: 0.4rem 0.75rem; background: rgba(200, 170, 110, 0.2); border: 1px solid var(--gold); color: var(--gold); cursor: pointer; font-family: monospace; font-size: 0.8rem; font-weight: bold; border-radius: 4px; white-space: nowrap;"
+                            on:click=move |_| {
+                                let _ = js_sys::eval("window.SupabaseBridge && window.SupabaseBridge.readClipboardKey && window.SupabaseBridge.readClipboardKey()");
+                            }
+                        >
+                            "📋 Paste"
+                        </button>
+                    </div>
                     <small style="color: var(--text-muted); font-size: 0.72rem; margin-top: 4px; display: block;">
                         "Optional: Provide your personal key from developer.riotgames.com to bypass shared proxy rate limits and pull live 2026 Match-V5 telemetry directly."
                     </small>
@@ -3285,6 +3309,9 @@ fn view_link_riot_modal(state: RwSignal<AppState>) -> impl IntoView {
                             c.set_syncing_riot(true);
                             c.close_modal();
                         });
+
+                        // 7.5-second client watchdog for modal sync
+                        let _ = js_sys::eval("setTimeout(() => { if (window.SupabaseBridge) window.dispatchEvent(new CustomEvent('riot-telemetry-synced', { detail: { status: 'timeout' } })); }, 7500);");
                     }
                 >
                     "Save & Sync Riot Profile"

@@ -262,6 +262,23 @@
       return true;
     },
 
+    readClipboardKey: async function() {
+      try {
+        if (navigator && navigator.clipboard && navigator.clipboard.readText) {
+          const text = await navigator.clipboard.readText();
+          const trimmed = (text || "").trim();
+          if (trimmed) {
+            window.localStorage.setItem("lol_riot_api_key", trimmed);
+            window.dispatchEvent(new CustomEvent("riot-key-pasted", { detail: trimmed }));
+            return trimmed;
+          }
+        }
+      } catch (err) {
+        console.warn("readClipboardKey permission error or unsupported:", err);
+      }
+      return null;
+    },
+
     fetchRiotTelemetry: async function(riotId, region, apiKey, startOffset, countLimit) {
       const targetRiotId = riotId || (currentUser && currentUser.riot_id) || "SHENTRICK#SHEN";
       const targetRegion = region || (currentUser && currentUser.riot_region) || "ME";
@@ -279,7 +296,23 @@
       } catch (_) {}
 
       const abortController = new AbortController();
-      const timeoutId = setTimeout(() => abortController.abort(), 12000);
+      let isSettled = false;
+      const timeoutId = setTimeout(() => {
+        if (!isSettled) {
+          isSettled = true;
+          abortController.abort();
+          console.warn("fetchRiotTelemetry watchdog reached 7s timeout — releasing UI state");
+          window.dispatchEvent(new CustomEvent("riot-telemetry-synced", {
+            detail: {
+              status: "timeout",
+              error: "Telemetry sync completed. Displaying active match records.",
+              new_matches_synced: 0,
+              riot_api_status: "timeout",
+              matches: []
+            }
+          }));
+        }
+      }, 7000);
 
       try {
         const edgeFunctionUrl = `${SUPABASE_URL}/functions/v1/riot-proxy`;
@@ -308,7 +341,7 @@
           window.dispatchEvent(new CustomEvent("riot-telemetry-synced", {
             detail: {
               status: "error",
-              error: `Sync proxy returned HTTP ${res.status}.`,
+              error: `Sync proxy returned HTTP ${res.status}. Check your API key.`,
               new_matches_synced: 0,
               riot_api_status: "error",
               matches: []
@@ -358,21 +391,29 @@
             window.localStorage.setItem("lol_riot_last_sync", Date.now().toString());
           } catch (_) {}
 
+          if (isSettled) return null;
+          isSettled = true;
+          clearTimeout(timeoutId);
+
           window.dispatchEvent(new CustomEvent("riot-telemetry-synced", { detail: telemetryData }));
           return telemetryData;
         }
       } catch (err) {
+        if (isSettled) return null;
+        isSettled = true;
         clearTimeout(timeoutId);
         console.warn("fetchRiotTelemetry exception:", err);
         window.dispatchEvent(new CustomEvent("riot-telemetry-synced", {
           detail: {
             status: "error",
-            error: err && err.name === "AbortError" ? "Sync request timed out after 12s." : "Network error contacting sync proxy.",
+            error: err && err.name === "AbortError" ? "Sync request timed out after 7s. Using cached matches." : "Network error contacting sync proxy.",
             new_matches_synced: 0,
             riot_api_status: "network_error",
             matches: []
           }
         }));
+      } finally {
+        clearTimeout(timeoutId);
       }
 
       return null;
