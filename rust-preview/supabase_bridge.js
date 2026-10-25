@@ -288,6 +288,7 @@
         if (!res.ok) {
           const errText = await res.text();
           console.warn("Riot proxy returned non-200:", res.status, errText);
+          window.dispatchEvent(new CustomEvent("riot-telemetry-synced", { detail: null }));
         } else {
           const telemetryData = await res.json();
           try {
@@ -307,6 +308,18 @@
                   telemetryData.matches = prevObj.matches;
                 }
               }
+            } else {
+              // Fresh sync (startOffset == 0): Place fresh incoming matches at the top,
+              // preserving older historical matches below.
+              const prevRaw = window.localStorage.getItem("lol_riot_telemetry");
+              if (prevRaw) {
+                const prevObj = JSON.parse(prevRaw);
+                if (Array.isArray(prevObj.matches) && Array.isArray(telemetryData.matches)) {
+                  const newMatchIds = new Set(telemetryData.matches.map(m => m.match_id));
+                  const olderMatches = prevObj.matches.filter(m => !newMatchIds.has(m.match_id));
+                  telemetryData.matches = [...telemetryData.matches, ...olderMatches];
+                }
+              }
             }
             window.localStorage.setItem("lol_riot_telemetry", JSON.stringify(telemetryData));
           } catch (_) {}
@@ -316,6 +329,7 @@
         }
       } catch (err) {
         console.warn("fetchRiotTelemetry exception:", err);
+        window.dispatchEvent(new CustomEvent("riot-telemetry-synced", { detail: null }));
       }
 
       return null;

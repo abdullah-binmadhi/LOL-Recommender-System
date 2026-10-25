@@ -378,17 +378,17 @@ serve(async (req: Request) => {
             : 0;
 
           // Extract authentic lane opponent
-          const enemyOpponent = (matchData.info.participants || []).find(
+          const enemyOpponent = (mData.info.participants || []).find(
             (p: any) => p.teamId !== participant.teamId && p.teamPosition === participant.teamPosition
           );
           const laneOpponentChampion = enemyOpponent ? (enemyOpponent.championName || null) : null;
-          const durationMins = Math.round((matchData.info.gameDuration || 1800) / 60);
+          const durationMins = Math.round((mData.info.gameDuration || 1800) / 60);
           const items = [
             participant.item0, participant.item1, participant.item2,
             participant.item3, participant.item4, participant.item5, participant.item6
           ].filter((id: number) => id && id > 0);
 
-          const alliedTeam = (matchData.info.participants || [])
+          const alliedTeam = (mData.info.participants || [])
             .filter((p: any) => p.teamId === participant.teamId)
             .map((p: any) => ({
               champion_name: p.championName || "Unknown",
@@ -401,7 +401,7 @@ serve(async (req: Request) => {
               is_player: p.puuid === puuid,
             }));
 
-          const enemyTeam = (matchData.info.participants || [])
+          const enemyTeam = (mData.info.participants || [])
             .filter((p: any) => p.teamId !== participant.teamId)
             .map((p: any) => ({
               champion_name: p.championName || "Unknown",

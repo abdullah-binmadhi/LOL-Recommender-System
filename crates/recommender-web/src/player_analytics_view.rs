@@ -224,10 +224,6 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
         let r_id = rep.riot_id.unwrap_or_else(|| "SHENTRICK#SHEN".into());
         let reg = rep.region.unwrap_or_else(|| "ME".into());
         crate::storage::supabase_fetch_riot_telemetry(&r_id, &reg);
-        if let Some(matches) = crate::storage::load_cached_riot_matches() {
-            let src = crate::storage::load_cached_riot_data_source();
-            state.update(|c| c.set_live_matches(Some(matches), src));
-        }
     };
 
     view! {
@@ -317,7 +313,7 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                             <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
                                 <button
                                     type="button"
-                                    style="background: rgba(10, 200, 185, 0.2); border: 1px solid var(--cyan); color: #fff; padding: 0.55rem 1.05rem; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; font-family: monospace; font-weight: bold; display: inline-flex; align-items: center; gap: 7px;"
+                                    style="background: rgba(10, 200, 185, 0.2); border: 1px solid var(--cyan); color: #fff; padding: 0.55rem 1.05rem; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; font-family: monospace; font-weight: bold; display: inline-flex; align-items: center; gap: 7px; transition: all 0.2s ease;"
                                     disabled=move || state.with(|c| c.is_syncing_riot)
                                     on:click=move |_| trigger_riot_sync(None)
                                 >
@@ -330,14 +326,21 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                                         }}
                                     </span>
                                 </button>
-                                <button
-                                    type="button"
-                                    style="background: rgba(200, 170, 110, 0.12); border: 1px solid var(--gold); color: var(--gold); padding: 0.55rem 1.05rem; cursor: pointer; font-size: 0.8rem; text-transform: uppercase; font-family: monospace; font-weight: bold; display: inline-flex; align-items: center; gap: 7px;"
-                                    on:click=move |_| state.update(|c| c.open_modal(Modal::LinkRiotAccount))
-                                >
-                                    {view_lol_icon("soul-link")}
-                                    <span>"Link / Change Riot ID"</span>
-                                </button>
+                                {move || {
+                                    let src = state.with(|c| c.riot_data_source.clone());
+                                    let is_live = src.as_deref() == Some("live");
+                                    let (bg, border, col, icon, text) = if is_live {
+                                        ("rgba(16, 185, 129, 0.18)", "#10b981", "#10b981", "diamond", "LIVE MATCH-V5 TELEMETRY ACTIVE")
+                                    } else {
+                                        ("rgba(200, 170, 110, 0.12)", "rgba(200, 170, 110, 0.4)", "var(--gold)", "hex-compass", "VERIFIED TELEMETRY STANDARDS")
+                                    };
+                                    view! {
+                                        <span style=format!("background: {}; border: 1px solid {}; color: {}; font-size: 0.72rem; padding: 0.45rem 0.75rem; text-transform: uppercase; font-family: monospace; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.04em;", bg, border, col)>
+                                            {view_lol_icon(icon)}
+                                            <span>{text}</span>
+                                        </span>
+                                    }
+                                }}
                             </div>
                         </div>
 
