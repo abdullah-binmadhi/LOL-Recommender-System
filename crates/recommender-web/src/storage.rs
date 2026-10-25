@@ -319,7 +319,10 @@ pub fn load_cached_riot_matches() -> Option<Vec<recommender_core::player_analyti
     let json_str = storage.get_item("lol_riot_telemetry").ok()??;
     let val: serde_json::Value = serde_json::from_str(&json_str).ok()?;
     let matches_val = val.get("matches")?;
-    serde_json::from_value(matches_val.clone()).ok()
+    let mut matches: Vec<recommender_core::player_analytics::AdoptedMatch> = serde_json::from_value(matches_val.clone()).ok()?;
+    // Strictly filter out any legacy simulated fake matches
+    matches.retain(|m| !m.match_id.contains("-104") && !m.match_id.contains("-103") && !m.match_id.contains("104928"));
+    Some(matches)
 }
 
 #[cfg(not(target_arch = "wasm32"))]

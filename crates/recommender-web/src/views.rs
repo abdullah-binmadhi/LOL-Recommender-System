@@ -81,6 +81,20 @@ pub fn App() -> impl IntoView {
         state.update(|c| c.set_live_matches(Some(matches), src));
     }
 
+    // Proactively auto-fetch authentic telemetry from Supabase Postgres on application boot
+    let (boot_riot_id, boot_region) = {
+        let u_opt = storage::supabase_get_current_user();
+        if let Some(u) = u_opt {
+            (
+                u.riot_id.unwrap_or_else(|| "SHENTRICK#SHEN".to_string()),
+                u.riot_region.unwrap_or_else(|| "ME".to_string()),
+            )
+        } else {
+            ("SHENTRICK#SHEN".to_string(), "ME".to_string())
+        }
+    };
+    storage::supabase_fetch_riot_telemetry(&boot_riot_id, &boot_region);
+
     let auth_listener = window_event_listener(
         leptos::ev::Custom::new("supabase-auth-changed"),
         move |_: web_sys::CustomEvent| {

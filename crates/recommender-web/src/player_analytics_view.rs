@@ -227,6 +227,15 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
         crate::storage::supabase_fetch_riot_telemetry(&r_id, &reg);
     };
 
+    // Auto-trigger sync on mount if matches are not yet loaded in state
+    Effect::new(move |_| {
+        let has_matches = state.with(|c| c.live_player_matches.as_ref().map(|m| !m.is_empty()).unwrap_or(false));
+        let is_syncing = state.with(|c| c.is_syncing_riot);
+        if !has_matches && !is_syncing {
+            trigger_riot_sync(None);
+        }
+    });
+
     view! {
         <section id="player-analytics-dashboard" class="analytics-dashboard active" style="max-width: 1260px; margin: 0 auto; padding: 2rem 1rem;">
             // Top Global Navigation Bar
@@ -3801,10 +3810,22 @@ fn view_page_complete_game_logs(
                     let r_id_pg = riot_id_for_page.clone();
                     let reg_pg = region_for_page.clone();
 
-                    if visible_slice.is_empty() {
+                    if all_matches.is_empty() {
+                        view! {
+                            <div style="background: rgba(9, 20, 40, 0.7); border: 1px solid var(--cyan); padding: 2.5rem 1.5rem; text-align: center; font-family: monospace;">
+                                <div style="display: flex; justify-content: center; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; color: var(--cyan);">
+                                    {view_lol_icon("nexus-pulse")}
+                                    <strong style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">"Syncing Authentic Riot Match History from Supabase PostgreSQL..."</strong>
+                                </div>
+                                <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">
+                                    "Connecting to Supabase PostgreSQL match store. Verified games will display in a moment."
+                                </p>
+                            </div>
+                        }.into_any()
+                    } else if visible_slice.is_empty() {
                         view! {
                             <div style="background: rgba(9, 20, 40, 0.7); border: 1px solid rgba(200, 170, 110, 0.25); padding: 2rem; text-align: center; font-family: monospace; color: var(--text-muted);">
-                                "No matches match the selected filters. Try resetting Role or Champion filters to 'All'."
+                                "No matches match the selected filters. Try resetting Game Mode, Role or Champion filters to 'All'."
                             </div>
                         }.into_any()
                     } else {

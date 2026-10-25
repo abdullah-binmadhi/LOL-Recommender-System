@@ -12,6 +12,12 @@
   let savedRiotId = null;
   let savedRiotRegion = null;
   try {
+    // Proactively purge any legacy simulated telemetry from browser localStorage
+    const raw = window.localStorage.getItem("lol_riot_telemetry");
+    if (raw && (raw.includes("ME1-104") || raw.includes("simulated_telemetry") || raw.includes("ME1-103") || raw.includes("104928"))) {
+      window.localStorage.removeItem("lol_riot_telemetry");
+      console.log("Purged legacy simulated telemetry cache from localStorage.");
+    }
     savedRiotId = window.localStorage.getItem("lol_riot_id");
     savedRiotRegion = window.localStorage.getItem("lol_riot_region");
   } catch (_) {}
@@ -292,31 +298,39 @@
         } else {
           const telemetryData = await res.json();
           try {
+            // Discard any simulated/fake legacy matches
+            const isMockId = id => !id || id.includes("-104") || id.includes("-103") || id.includes("104928");
+            if (Array.isArray(telemetryData.matches)) {
+              telemetryData.matches = telemetryData.matches.filter(m => m && !isMockId(m.match_id));
+            }
+
             // If paginating (startOffset > 0), merge new matches into existing cached matches
             if (typeof startOffset === "number" && startOffset > 0) {
               const prevRaw = window.localStorage.getItem("lol_riot_telemetry");
               if (prevRaw) {
                 const prevObj = JSON.parse(prevRaw);
                 if (Array.isArray(prevObj.matches) && Array.isArray(telemetryData.matches)) {
-                  const seen = new Set(prevObj.matches.map(m => m.match_id));
+                  const validPrev = prevObj.matches.filter(m => m && !isMockId(m.match_id));
+                  const seen = new Set(validPrev.map(m => m.match_id));
                   for (const nm of telemetryData.matches) {
                     if (!seen.has(nm.match_id)) {
-                      prevObj.matches.push(nm);
+                      validPrev.push(nm);
                       seen.add(nm.match_id);
                     }
                   }
-                  telemetryData.matches = prevObj.matches;
+                  telemetryData.matches = validPrev;
                 }
               }
             } else {
               // Fresh sync (startOffset == 0): Place fresh incoming matches at the top,
-              // preserving older historical matches below.
+              // preserving older historical matches below, filtering out any mock data.
               const prevRaw = window.localStorage.getItem("lol_riot_telemetry");
               if (prevRaw) {
                 const prevObj = JSON.parse(prevRaw);
                 if (Array.isArray(prevObj.matches) && Array.isArray(telemetryData.matches)) {
+                  const validPrev = prevObj.matches.filter(m => m && !isMockId(m.match_id));
                   const newMatchIds = new Set(telemetryData.matches.map(m => m.match_id));
-                  const olderMatches = prevObj.matches.filter(m => !newMatchIds.has(m.match_id));
+                  const olderMatches = validPrev.filter(m => !newMatchIds.has(m.match_id));
                   telemetryData.matches = [...telemetryData.matches, ...olderMatches];
                 }
               }

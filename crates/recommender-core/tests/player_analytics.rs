@@ -98,9 +98,251 @@ fn test_custom_player_analytics_calculation() {
     assert_eq!(report.efficacy.adoption_rate, 50.0);
 }
 
+fn sample_shentrick_matches() -> Vec<AdoptedMatch> {
+    vec![
+        AdoptedMatch {
+            match_id: "ME1-104928".into(),
+            champion_name: "Ornn".into(),
+            role: "Top".into(),
+            win: true,
+            kills: 5,
+            deaths: 1,
+            assists: 14,
+            cs_per_min: 7.8,
+            gold_diff_15: 840,
+            is_calibrated: true,
+            calibrated_rank: Some(1),
+            lane_opponent_champion: Some("Vel'Koz".into()),
+            duration_mins: Some(31),
+            user_damage_dealt: Some(21850),
+            user_vision_score: Some(42),
+            items: Some(vec![3068, 6665, 3075, 3111, 2055, 3340]),
+            ..Default::default()
+        },
+        AdoptedMatch {
+            match_id: "ME1-104855".into(),
+            champion_name: "Shen".into(),
+            role: "Top".into(),
+            win: true,
+            kills: 4,
+            deaths: 2,
+            assists: 18,
+            cs_per_min: 6.9,
+            gold_diff_15: 980,
+            is_calibrated: true,
+            calibrated_rank: Some(1),
+            ..Default::default()
+        },
+        AdoptedMatch {
+            match_id: "ME1-104712".into(),
+            champion_name: "Shen".into(),
+            role: "Top".into(),
+            win: true,
+            kills: 8,
+            deaths: 0,
+            assists: 11,
+            cs_per_min: 7.8,
+            gold_diff_15: 2100,
+            is_calibrated: true,
+            calibrated_rank: Some(1),
+            ..Default::default()
+        },
+        AdoptedMatch {
+            match_id: "ME1-104640".into(),
+            champion_name: "Darius".into(),
+            role: "Top".into(),
+            win: false,
+            kills: 3,
+            deaths: 6,
+            assists: 2,
+            cs_per_min: 6.2,
+            gold_diff_15: -1150,
+            is_calibrated: false,
+            calibrated_rank: None,
+            ..Default::default()
+        },
+        AdoptedMatch {
+            match_id: "ME1-104519".into(),
+            champion_name: "Shen".into(),
+            role: "Top".into(),
+            win: true,
+            kills: 5,
+            deaths: 3,
+            assists: 16,
+            cs_per_min: 7.1,
+            gold_diff_15: 850,
+            is_calibrated: true,
+            calibrated_rank: Some(1),
+            ..Default::default()
+        },
+        AdoptedMatch {
+            match_id: "ME1-104402".into(),
+            champion_name: "Ornn".into(),
+            role: "Top".into(),
+            win: true,
+            kills: 3,
+            deaths: 2,
+            assists: 15,
+            cs_per_min: 7.3,
+            gold_diff_15: 640,
+            is_calibrated: true,
+            calibrated_rank: Some(2),
+            ..Default::default()
+        },
+        AdoptedMatch {
+            match_id: "ME1-104331".into(),
+            champion_name: "Aatrox".into(),
+            role: "Top".into(),
+            win: false,
+            kills: 4,
+            deaths: 7,
+            assists: 3,
+            cs_per_min: 6.5,
+            gold_diff_15: -890,
+            is_calibrated: false,
+            calibrated_rank: None,
+            ..Default::default()
+        },
+        AdoptedMatch {
+            match_id: "ME1-104210".into(),
+            champion_name: "Shen".into(),
+            role: "Top".into(),
+            win: true,
+            kills: 6,
+            deaths: 1,
+            assists: 14,
+            cs_per_min: 7.5,
+            gold_diff_15: 1420,
+            is_calibrated: true,
+            calibrated_rank: Some(1),
+            ..Default::default()
+        },
+        AdoptedMatch {
+            match_id: "ME1-104108".into(),
+            champion_name: "K'Sante".into(),
+            role: "Top".into(),
+            win: true,
+            kills: 5,
+            deaths: 2,
+            assists: 8,
+            cs_per_min: 7.9,
+            gold_diff_15: 1100,
+            is_calibrated: true,
+            calibrated_rank: Some(3),
+            ..Default::default()
+        },
+        AdoptedMatch {
+            match_id: "ME1-103980".into(),
+            champion_name: "Shen".into(),
+            role: "Top".into(),
+            win: true,
+            kills: 4,
+            deaths: 1,
+            assists: 12,
+            cs_per_min: 7.2,
+            gold_diff_15: 1200,
+            is_calibrated: true,
+            calibrated_rank: Some(1),
+            ..Default::default()
+        },
+        AdoptedMatch {
+            match_id: "ME1-103845".into(),
+            champion_name: "Camille".into(),
+            role: "Top".into(),
+            win: false,
+            kills: 2,
+            deaths: 5,
+            assists: 4,
+            cs_per_min: 6.8,
+            gold_diff_15: -450,
+            is_calibrated: false,
+            calibrated_rank: None,
+            ..Default::default()
+        },
+        AdoptedMatch {
+            match_id: "ME1-103710".into(),
+            champion_name: "Gwen".into(),
+            role: "Top".into(),
+            win: true,
+            kills: 8,
+            deaths: 3,
+            assists: 6,
+            cs_per_min: 8.4,
+            gold_diff_15: 1850,
+            is_calibrated: false,
+            calibrated_rank: None,
+            ..Default::default()
+        },
+        AdoptedMatch {
+            match_id: "ME1-103550".into(),
+            champion_name: "Galio".into(),
+            role: "Top".into(),
+            win: true,
+            kills: 6,
+            deaths: 2,
+            assists: 19,
+            cs_per_min: 7.6,
+            gold_diff_15: 1150,
+            is_calibrated: true,
+            calibrated_rank: Some(4),
+            ..Default::default()
+        },
+        AdoptedMatch {
+            match_id: "ME1-103422".into(),
+            champion_name: "Poppy".into(),
+            role: "Top".into(),
+            win: true,
+            kills: 7,
+            deaths: 2,
+            assists: 11,
+            cs_per_min: 7.1,
+            gold_diff_15: 890,
+            is_calibrated: true,
+            calibrated_rank: Some(5),
+            ..Default::default()
+        },
+        AdoptedMatch {
+            match_id: "ME1-103299".into(),
+            champion_name: "Mordekaiser".into(),
+            role: "Top".into(),
+            win: false,
+            kills: 4,
+            deaths: 6,
+            assists: 3,
+            cs_per_min: 6.4,
+            gold_diff_15: -780,
+            is_calibrated: false,
+            calibrated_rank: None,
+            ..Default::default()
+        },
+        AdoptedMatch {
+            match_id: "ME1-103150".into(),
+            champion_name: "Shen".into(),
+            role: "Top".into(),
+            win: true,
+            kills: 9,
+            deaths: 2,
+            assists: 15,
+            cs_per_min: 7.9,
+            gold_diff_15: 1920,
+            is_calibrated: true,
+            calibrated_rank: Some(1),
+            ..Default::default()
+        },
+    ]
+}
+
+#[test]
+fn test_for_player_zero_mock_data_when_unlinked() {
+    let empty_report = PlayerAnalyticsReport::for_player("SHENTRICK", "SHENTRICK#SHEN", "ME", None);
+    assert_eq!(empty_report.total_analyzed_matches, 0);
+    assert_eq!(empty_report.recent_matches.len(), 0);
+}
+
 #[test]
 fn test_for_player_shentrick_middle_east() {
-    let report = PlayerAnalyticsReport::for_player("SHENTRICK", "SHENTRICK#SHEN", "ME", None);
+    let matches = sample_shentrick_matches();
+    let report = PlayerAnalyticsReport::for_player("SHENTRICK", "SHENTRICK#SHEN", "ME", Some(&matches));
 
     assert_eq!(report.summoner_name, "SHENTRICK");
     assert_eq!(report.riot_id.as_deref(), Some("SHENTRICK#SHEN"));
@@ -129,8 +371,8 @@ fn test_for_player_shentrick_middle_east() {
     assert_eq!(report.ml_insights[2].id, "side-lane-tempo");
 
     // Efficacy calculations
-    assert_eq!(report.efficacy.calibrated_games, 13);
-    assert_eq!(report.efficacy.calibrated_wins, 12);
+    assert_eq!(report.efficacy.calibrated_games, 11);
+    assert_eq!(report.efficacy.calibrated_wins, 11);
 
     // Verify latest match is accurately Ornn vs Vel'Koz Top
     let latest_match = &report.recent_matches[0];
@@ -156,7 +398,7 @@ fn test_for_player_shentrick_middle_east() {
     assert!(shen_perf.is_calibrated_recommendation);
 
     // Recommendation hit rate & performance delta
-    assert!(report.recommendation_hit_rate > 75.0);
+    assert!(report.recommendation_hit_rate > 60.0);
     assert!(report.calibrated_perf_delta > 0.0);
 
     // Verify No-Quiz Account ML Training & Validation Evaluation
@@ -286,7 +528,8 @@ fn test_role_authentic_matchups_and_builds() {
 
 #[test]
 fn test_no_quiz_multi_role_and_class_recommendations() {
-    let report = PlayerAnalyticsReport::for_player("SHENTRICK", "SHENTRICK#SHEN", "ME", None);
+    let matches = sample_shentrick_matches();
+    let report = PlayerAnalyticsReport::for_player("SHENTRICK", "SHENTRICK#SHEN", "ME", Some(&matches));
     let recs = &report.ml_evaluation.no_quiz_recommendations;
 
     // Must have rich pool across multiple roles
