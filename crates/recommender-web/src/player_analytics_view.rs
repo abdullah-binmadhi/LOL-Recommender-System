@@ -337,6 +337,23 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                                     </span>
                                 </button>
                                 {move || {
+                                    let ts = crate::storage::get_last_sync_timestamp();
+                                    let label = crate::storage::format_last_sync_label(ts);
+                                    let is_syncing = state.with(|c| c.is_syncing_riot);
+                                    view! {
+                                        <span style="font-family: monospace; font-size: 0.76rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: 6px; padding: 0.4rem 0.65rem; background: rgba(9, 20, 40, 0.8); border: 1px solid rgba(200, 170, 110, 0.25);">
+                                            <span style=format!("width: 7px; height: 7px; border-radius: 50%; display: inline-block; background: {};", if is_syncing { "var(--cyan)" } else { "#10b981" })></span>
+                                            <span>
+                                                {if is_syncing {
+                                                    "Checking live games...".to_string()
+                                                } else {
+                                                    format!("Updated {} · Auto-Sync on Tab Focus", label)
+                                                }}
+                                            </span>
+                                        </span>
+                                    }
+                                }}
+                                {move || {
                                     let src = state.with(|c| c.riot_data_source.clone());
                                     let is_live = src.as_deref().map(|s| s.starts_with("live")).unwrap_or(false);
                                     let (bg, border, col, icon, text) = if is_live {
@@ -402,7 +419,7 @@ pub fn view_player_analytics(state: RwSignal<AppState>) -> impl IntoView {
                 let rep = report();
                 match active_tab.get().as_str() {
                     "ml_lab" => view_page_no_quiz_ml_lab(rep, active_tab, selected_tracked_champion, toggle_pin_champion).into_any(),
-                    "game_logs" => view_page_complete_game_logs(rep, visible_games_count, selected_match_id, selected_curve_match_id, log_role_filter, log_outcome_filter, log_champ_filter, log_queue_filter).into_any(),
+                    "game_logs" => view_page_complete_game_logs(rep, state, visible_games_count, selected_match_id, selected_curve_match_id, log_role_filter, log_outcome_filter, log_champ_filter, log_queue_filter).into_any(),
                     "champions_pool" => view_page_champions_pool(rep, pinned_champions, refreshing_champion, active_tab, selected_tracked_champion, toggle_pin_champion, trigger_riot_sync).into_any(),
                     "pinned_tracker" => view_page_pinned_champion_tracker(rep, pinned_champions, refreshing_champion, selected_tracked_champion, toggle_pin_champion, trigger_riot_sync).into_any(),
                     _ => view_page_overview_and_radar(rep, active_tab, selected_tracked_champion).into_any(),
@@ -3690,6 +3707,7 @@ where
 #[allow(clippy::too_many_arguments)]
 fn view_page_complete_game_logs(
     rep: PlayerAnalyticsReport,
+    state: RwSignal<AppState>,
     visible_games_count: RwSignal<usize>,
     selected_match_id: RwSignal<Option<String>>,
     selected_curve_match_id: RwSignal<Option<String>>,
@@ -3809,19 +3827,33 @@ fn view_page_complete_game_logs(
                     let s_name = summoner_name.clone();
                     let r_id_pg = riot_id_for_page.clone();
                     let reg_pg = region_for_page.clone();
+                    let is_syncing = state.with(|c| c.is_syncing_riot);
 
                     if all_matches.is_empty() {
-                        view! {
-                            <div style="background: rgba(9, 20, 40, 0.7); border: 1px solid var(--cyan); padding: 2.5rem 1.5rem; text-align: center; font-family: monospace;">
-                                <div style="display: flex; justify-content: center; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; color: var(--cyan);">
-                                    {view_lol_icon("nexus-pulse")}
-                                    <strong style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">"Syncing Authentic Riot Match History from Supabase PostgreSQL..."</strong>
+                        if is_syncing {
+                            view! {
+                                <div style="background: rgba(9, 20, 40, 0.7); border: 1px solid var(--cyan); padding: 2.5rem 1.5rem; text-align: center; font-family: monospace;">
+                                    <div style="display: flex; justify-content: center; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; color: var(--cyan);">
+                                        {view_lol_icon("nexus-pulse")}
+                                        <strong style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">"Syncing Authentic Riot Match History..."</strong>
+                                    </div>
+                                    <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">
+                                        "Connecting to Supabase PostgreSQL & Riot Match-V5. Verified games will display in a moment."
+                                    </p>
                                 </div>
-                                <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">
-                                    "Connecting to Supabase PostgreSQL match store. Verified games will display in a moment."
-                                </p>
-                            </div>
-                        }.into_any()
+                            }.into_any()
+                        } else {
+                            view! {
+                                <div style="background: rgba(9, 20, 40, 0.7); border: 1px solid rgba(200, 170, 110, 0.3); padding: 2.5rem 1.5rem; text-align: center; font-family: monospace;">
+                                    <div style="color: var(--gold); font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; font-weight: bold;">
+                                        "No Riot Match History Indexed Yet"
+                                    </div>
+                                    <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">
+                                        "Click 'Sync Live Games' above to index your recent match history from Riot Games."
+                                    </p>
+                                </div>
+                            }.into_any()
+                        }
                     } else if visible_slice.is_empty() {
                         view! {
                             <div style="background: rgba(9, 20, 40, 0.7); border: 1px solid rgba(200, 170, 110, 0.25); padding: 2rem; text-align: center; font-family: monospace; color: var(--text-muted);">
@@ -3831,6 +3863,16 @@ fn view_page_complete_game_logs(
                     } else {
                         view! {
                             <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                                {if is_syncing {
+                                    view! {
+                                        <div style="background: rgba(10, 200, 185, 0.12); border: 1px solid var(--cyan); padding: 0.55rem 1rem; font-family: monospace; font-size: 0.78rem; color: var(--cyan); display: flex; align-items: center; gap: 8px;">
+                                            {view_lol_icon("nexus-pulse")}
+                                            <span>"Auto-sync active: Checking for newly completed games in background..."</span>
+                                        </div>
+                                    }.into_any()
+                                } else {
+                                    view! { <span style="display: none;"></span> }.into_any()
+                                }}
                                 {visible_slice.into_iter().map(|m| {
                                     let s_user = s_name.clone();
                                     view_rich_match_row_with_inspector(

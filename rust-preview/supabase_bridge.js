@@ -336,6 +336,7 @@
               }
             }
             window.localStorage.setItem("lol_riot_telemetry", JSON.stringify(telemetryData));
+            window.localStorage.setItem("lol_riot_last_sync", Date.now().toString());
           } catch (_) {}
 
           window.dispatchEvent(new CustomEvent("riot-telemetry-synced", { detail: telemetryData }));
@@ -347,6 +348,48 @@
       }
 
       return null;
+    },
+
+    getLastSyncTime: function() {
+      try {
+        const val = window.localStorage.getItem("lol_riot_last_sync");
+        return val ? parseInt(val, 10) : 0;
+      } catch (_) {
+        return 0;
+      }
+    },
+
+    triggerAutoSync: function(force) {
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+        return; // Tab is inactive/hidden, don't waste bandwidth
+      }
+      const now = Date.now();
+      const last = window.SupabaseBridge.getLastSyncTime();
+      const minInterval = force ? 10000 : 45000; // 45s cooldown unless force (10s)
+      if (now - last < minInterval) {
+        return;
+      }
+      console.log("[Auto-Sync] Tab active or periodic tick — checking for newly completed games...");
+      return window.SupabaseBridge.fetchRiotTelemetry(null, null, null, 0, 5);
     }
   };
+
+  // OP.GG-style auto-update listeners:
+  // Detects when the player finishes their 30-min match and tabs back into the recommender
+  if (typeof document !== "undefined" && typeof window !== "undefined") {
+    document.addEventListener("visibilitychange", function() {
+      if (document.visibilityState === "visible") {
+        window.SupabaseBridge.triggerAutoSync(false);
+      }
+    });
+
+    window.addEventListener("focus", function() {
+      window.SupabaseBridge.triggerAutoSync(false);
+    });
+
+    // Periodic auto-sync every 90 seconds while tab remains open
+    setInterval(function() {
+      window.SupabaseBridge.triggerAutoSync(false);
+    }, 90000);
+  }
 })();

@@ -252,7 +252,7 @@ serve(async (req: Request) => {
 
     const puuid = accountData.puuid;
     const safeStart = Math.max(0, Number(start) || 0);
-    const safeCount = Math.min(30, Math.max(10, Number(count) || 20));
+    const safeCount = Math.min(30, Math.max(1, Number(count) || 20));
 
     // 2. Fetch match IDs from Riot Match-V5
     const matchesUrl = `https://${cluster}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=${safeStart}&count=${safeCount}`;
@@ -327,31 +327,60 @@ serve(async (req: Request) => {
             participant.item3, participant.item4, participant.item5, participant.item6
           ].filter((id: number) => id && id > 0);
 
+          const teamDamageTotal = (mData.info.participants || [])
+            .filter((p: any) => p.teamId === participant.teamId)
+            .reduce((sum: number, p: any) => sum + (p.totalDamageDealtToChampions || 0), 0) || 1;
+          const enemyDamageTotal = (mData.info.participants || [])
+            .filter((p: any) => p.teamId !== participant.teamId)
+            .reduce((sum: number, p: any) => sum + (p.totalDamageDealtToChampions || 0), 0) || 1;
+
           const alliedTeam = (mData.info.participants || [])
             .filter((p: any) => p.teamId === participant.teamId)
-            .map((p: any) => ({
-              champion_name: p.championName || "Unknown",
-              role: p.teamPosition || "Unknown",
-              kills: p.kills || 0,
-              deaths: p.deaths || 0,
-              assists: p.assists || 0,
-              damage_dealt: p.totalDamageDealtToChampions || 0,
-              cs: (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0),
-              is_player: p.puuid === puuid,
-            }));
+            .map((p: any) => {
+              const pCs = (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0);
+              const pDamage = p.totalDamageDealtToChampions || 0;
+              const pName = p.riotIdGameName ? `${p.riotIdGameName}#${p.riotIdTagline || ""}` : (p.summonerName || p.championName || "Summoner");
+              return {
+                champion_name: p.championName || "Unknown",
+                role: p.teamPosition || "Unknown",
+                summoner_name: pName,
+                kills: p.kills || 0,
+                deaths: p.deaths || 0,
+                assists: p.assists || 0,
+                damage_dealt: pDamage,
+                cs: pCs,
+                cs_per_min: durationMin > 0 ? Math.round((pCs / durationMin) * 10) / 10 : 0,
+                gold_earned: p.goldEarned || 0,
+                damage_share_pct: Math.round((pDamage / teamDamageTotal) * 1000) / 10,
+                vision_score: p.visionScore || 0,
+                is_user: p.puuid === puuid,
+                is_player: p.puuid === puuid,
+              };
+            });
 
           const enemyTeam = (mData.info.participants || [])
             .filter((p: any) => p.teamId !== participant.teamId)
-            .map((p: any) => ({
-              champion_name: p.championName || "Unknown",
-              role: p.teamPosition || "Unknown",
-              kills: p.kills || 0,
-              deaths: p.deaths || 0,
-              assists: p.assists || 0,
-              damage_dealt: p.totalDamageDealtToChampions || 0,
-              cs: (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0),
-              is_player: false,
-            }));
+            .map((p: any) => {
+              const pCs = (p.totalMinionsKilled || 0) + (p.neutralMinionsKilled || 0);
+              const pDamage = p.totalDamageDealtToChampions || 0;
+              const pName = p.riotIdGameName ? `${p.riotIdGameName}#${p.riotIdTagline || ""}` : (p.summonerName || p.championName || "Summoner");
+              return {
+                champion_name: p.championName || "Unknown",
+                role: p.teamPosition || "Unknown",
+                summoner_name: pName,
+                kills: p.kills || 0,
+                deaths: p.deaths || 0,
+                assists: p.assists || 0,
+                damage_dealt: pDamage,
+                cs: pCs,
+                cs_per_min: durationMin > 0 ? Math.round((pCs / durationMin) * 10) / 10 : 0,
+                gold_earned: p.goldEarned || 0,
+                damage_share_pct: Math.round((pDamage / enemyDamageTotal) * 1000) / 10,
+                vision_score: p.visionScore || 0,
+                is_user: false,
+                is_player: false,
+              };
+            });
 
           const queueId = Number(mData.info.queueId) || 0;
           const queueName = resolveQueueName(queueId);
@@ -446,7 +475,7 @@ serve(async (req: Request) => {
            WHERE puuid = $1
            ORDER BY game_creation DESC
            LIMIT $2 OFFSET $3`,
-          [puuid, safeCount, safeStart]
+          [puuid, Math.max(20, safeCount), safeStart]
         );
         rawMatches = queryRes.rows;
       } catch (e) {

@@ -207,8 +207,9 @@ pub struct PlaystyleDnaSummary {
 }
 
 /// Individual participant row in a 5v5 Allied vs. Enemy post-game scoreboard.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct MatchParticipantSummary {
+    #[serde(default)]
     pub summoner_name: String,
     pub champion_name: String,
     pub role: String,
@@ -216,12 +217,18 @@ pub struct MatchParticipantSummary {
     pub deaths: u32,
     pub assists: u32,
     pub cs: u32,
+    #[serde(default)]
     pub cs_per_min: f64,
+    #[serde(default)]
     pub gold_earned: u32,
     pub damage_dealt: u32,
+    #[serde(default)]
     pub damage_share_pct: f64,
+    #[serde(default)]
     pub vision_score: u32,
+    #[serde(default)]
     pub badge: Option<String>,
+    #[serde(default, alias = "is_player")]
     pub is_user: bool,
 }
 

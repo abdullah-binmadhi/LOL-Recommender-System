@@ -595,3 +595,113 @@ fn test_all_100_cataloged_recurring_mistakes() {
     assert!(economy >= 15, "Economy category under-represented: {}", economy);
 }
 
+#[test]
+fn test_deserialize_supabase_edge_function_matches() {
+    // 1. Test legacy/minimal format where participant summary only had basic stats and is_player
+    let minimal_json = r#"{
+        "match_id": "ME1_387921",
+        "champion_name": "Braum",
+        "role": "Support",
+        "win": true,
+        "kills": 2,
+        "deaths": 4,
+        "assists": 18,
+        "cs_per_min": 1.2,
+        "gold_diff_15": 200,
+        "is_calibrated": false,
+        "calibrated_rank": null,
+        "lane_opponent_champion": "Nautilus",
+        "duration_mins": 28,
+        "user_damage_dealt": 8500,
+        "user_vision_score": 52,
+        "items": [3865, 3109, 3190],
+        "allied_team": [
+            {
+                "champion_name": "Braum",
+                "role": "Support",
+                "kills": 2,
+                "deaths": 4,
+                "assists": 18,
+                "damage_dealt": 8500,
+                "cs": 34,
+                "is_player": true
+            }
+        ],
+        "enemy_team": [
+            {
+                "champion_name": "Nautilus",
+                "role": "Support",
+                "kills": 1,
+                "deaths": 6,
+                "assists": 9,
+                "damage_dealt": 7200,
+                "cs": 28,
+                "is_player": false
+            }
+        ],
+        "game_creation_timestamp": 1729860000000,
+        "queue_id": 420,
+        "queue_name": "Ranked Solo/Duo",
+        "played_ago_label": "Yesterday"
+    }"#;
+
+    let match_res: Result<AdoptedMatch, _> = serde_json::from_str(minimal_json);
+    assert!(match_res.is_ok(), "Failed to deserialize minimal match JSON: {:?}", match_res.err());
+    let m = match_res.unwrap();
+    assert_eq!(m.champion_name, "Braum");
+    let allied = m.allied_team.as_ref().expect("allied_team should be present");
+    assert_eq!(allied.len(), 1);
+    assert!(allied[0].is_user, "is_player alias should populate is_user");
+    assert_eq!(allied[0].summoner_name, "", "summoner_name defaults to empty string");
+
+    // 2. Test enriched format
+    let enriched_json = r#"{
+        "match_id": "ME1_387922",
+        "champion_name": "Shen",
+        "role": "Top",
+        "win": true,
+        "kills": 5,
+        "deaths": 1,
+        "assists": 12,
+        "cs_per_min": 7.8,
+        "gold_diff_15": 850,
+        "is_calibrated": true,
+        "calibrated_rank": 1,
+        "lane_opponent_champion": "Aatrox",
+        "duration_mins": 25,
+        "user_damage_dealt": 19400,
+        "user_vision_score": 38,
+        "items": [3068, 3075],
+        "allied_team": [
+            {
+                "champion_name": "Shen",
+                "role": "Top",
+                "summoner_name": "SHENTRICK#SHEN",
+                "kills": 5,
+                "deaths": 1,
+                "assists": 12,
+                "damage_dealt": 19400,
+                "cs": 195,
+                "cs_per_min": 7.8,
+                "gold_earned": 11200,
+                "damage_share_pct": 24.5,
+                "vision_score": 38,
+                "is_user": true
+            }
+        ],
+        "enemy_team": [],
+        "game_creation_timestamp": 1729864000000,
+        "queue_id": 420,
+        "queue_name": "Ranked Solo/Duo",
+        "played_ago_label": "2 hours ago"
+    }"#;
+
+    let match_res2: Result<AdoptedMatch, _> = serde_json::from_str(enriched_json);
+    assert!(match_res2.is_ok(), "Failed to deserialize enriched match JSON: {:?}", match_res2.err());
+    let m2 = match_res2.unwrap();
+    let allied2 = m2.allied_team.as_ref().expect("allied_team should be present");
+    assert_eq!(allied2[0].summoner_name, "SHENTRICK#SHEN");
+    assert_eq!(allied2[0].gold_earned, 11200);
+}
+
+

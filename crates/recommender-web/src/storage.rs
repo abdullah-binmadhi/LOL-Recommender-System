@@ -344,3 +344,45 @@ pub fn load_cached_riot_data_source() -> Option<String> {
 pub fn load_cached_riot_data_source() -> Option<String> {
     None
 }
+
+#[cfg(target_arch = "wasm32")]
+pub fn get_last_sync_timestamp() -> u64 {
+    if let Some(storage) = get_storage() {
+        if let Ok(Some(s)) = storage.get_item("lol_riot_last_sync") {
+            if let Ok(ts) = s.parse::<u64>() {
+                return ts;
+            }
+        }
+    }
+    0
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn get_last_sync_timestamp() -> u64 {
+    0
+}
+
+pub fn format_last_sync_label(ts: u64) -> String {
+    if ts == 0 {
+        return "Not synced yet".to_string();
+    }
+    #[cfg(target_arch = "wasm32")]
+    let now = js_sys::Date::now() as u64;
+    #[cfg(not(target_arch = "wasm32"))]
+    let now = 0u64;
+
+    if now <= ts {
+        return "Just now".to_string();
+    }
+    let diff_sec = (now - ts) / 1000;
+    if diff_sec < 60 {
+        "Just now".to_string()
+    } else if diff_sec < 3600 {
+        format!("{}m ago", diff_sec / 60)
+    } else if diff_sec < 86400 {
+        format!("{}h ago", diff_sec / 3600)
+    } else {
+        format!("{}d ago", diff_sec / 86400)
+    }
+}
+
